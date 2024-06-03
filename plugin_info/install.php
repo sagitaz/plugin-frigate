@@ -20,11 +20,21 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 // Fonction exécutée automatiquement après l'installation du plugin
 function frigate_install()
 {
+    Log::add(__CLASS__, 'info', 'Start Install');
+    $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
+    DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
+
+    Log::add(__CLASS__, 'info', 'Finish Install');
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function frigate_update()
 {
+    Log::add(__CLASS__, 'info', 'Start Update');
+    $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
+    DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
+
+    Log::add(__CLASS__, 'info', 'Finish Update');
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin

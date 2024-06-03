@@ -1,0 +1,20 @@
+CREATE TABLE IF NOT EXISTS `frigate_events` (
+    `id` int(11) NOT NULL AUTO_INCREMENT,
+    `box` int(11) DEFAULT NULL,
+    `camera` int(11) DEFAULT NULL,
+    `data` int(11) DEFAULT NULL,
+    `start_time` datetime,
+    `end_time` datetime,
+    `false_positive` int(11) DEFAULT NULL,
+    `has_clip` tinyint(1) DEFAULT NULL,
+    `has_snapshot` tinyint(1) DEFAULT NULL,
+    `event_id` int(11) DEFAULT NULL,
+    `label` int(11) DEFAULT NULL,
+    `plus_id` int(11) DEFAULT NULL,
+    `retain` tinyint(1) DEFAULT NULL,
+    `sub_label` text DEFAULT NULL,
+    `thumbnail` int(11) DEFAULT NULL,
+    `top_score` text DEFAULT NULL,
+    `zones` text DEFAULT NULL,
+    PRIMARY KEY (`id`)
+) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
