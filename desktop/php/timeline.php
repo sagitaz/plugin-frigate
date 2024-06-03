@@ -1,6 +1,7 @@
 <?php
 
 use frigate;
+use log;
 
 if (!isConnect('admin')) {
 	throw new Exception('{{401 - Accès non autorisé}}');
@@ -9,37 +10,34 @@ if (!isConnect('admin')) {
 ?>
 <br>
 <div class="col-lg-12">
-	<div class="input-group" style="display:inline-flex">
-		<span class="input-group-btn">
-			<a class="btn btn-sm roundedLeft notifAction" data-action="exit"><i class="fa fa-arrow-circle-left"></i> </a>
-			<a class="btn btn-sm roundedRight btn-success notifAction " data-action="new"><i class="fas fa-plus-circle"></i> {{Nouvelle Notification}}</a>
-		</span>
-	</div>
-	<br>
 	<div class="col-lg-12">
-				<table id="timelineTable" class="table">
-					<thead>
-						<tr>
-							<th width="10%">{{Caméra}}</th>
-							<th width="15%">{{Type}}</th>
-							<th width="25%">{{Source}}</th>
-							<th width="35%">{{Options}}</th>
-							<th width="15%">{{Date}}</th>
-						</tr>
-					</thead>
+		<table id="timelineTable" class="table">
+			<thead>
+				<tr>
+					<th width="20%">{{Caméra}}</th>
+					<th width="20%">{{Type}}</th>
+					<th width="20%">{{Source}}</th>
+					<th width="20%">{{Options}}</th>
+					<th width="20%">{{Date}}</th>
+				</tr>
+			</thead>
 
-					<?php
-					$timelines = frigate::getTimeline();
+			<?php
+			$timelines = frigate::getTimeline();
+			$timelines = array_reverse($timelines);
 
-					foreach ($timelines as $timeline) {
-						echo '<tr><th>' . $timeline['camera'] . '</th></tr>';
-						echo '<tr><th> ' . $timeline['class_type '] . '</th></tr>';
-						echo '<tr><th>' . $timeline['source'] . '</th></tr>';
-						echo '<tr><th> ' . $timeline['source_id'] . '</th></tr>';
-						echo '<tr><th>' . $timeline['timestamp'] . '</th></tr>';
-					}
-					?>
-				</table>
+			foreach ($timelines as $timeline) {
+				// Conversion du timestamp en un format de date lisible
+				$date_time = date("d-m-Y H:i:s", $timeline['timestamp']);
+
+				echo '<tr><th>' . $timeline['camera'] . '</th>';
+				echo '<th>' . $timeline['source'] . '</th>';
+				echo '<th>' . $timeline['data']['label'] . '</th>';
+				echo '<th>' . $timeline['source_id'] . '</th>';
+				echo '<th>' . $date_time . '</th></tr>';
+			}
+			?>
+		</table>
 		</br>
 	</div>
 </div>

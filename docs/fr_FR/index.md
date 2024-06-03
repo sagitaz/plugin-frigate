@@ -1,1 +1,6 @@
-/var/www/html/plugins/frigate/docs/fr_FR/index.md
+# Plugin frigate
+
+
+# Support
+- Community Jeedom
+- Discord JeeMate

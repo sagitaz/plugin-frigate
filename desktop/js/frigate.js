@@ -92,30 +92,10 @@ document.getElementById('gotoTimeline').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=timeline");
 });
 
-document.getElementById('gotoEvents').addEventListener('click', function (event) {
-    domUtils.ajax({
-        type: "POST",
-        url: "plugins/frigate/core/ajax/frigate.ajax.php",
-        data: {
-            action: "getEvents"
-        },
-        dataType: 'json',
-        global: false,
-        error: function (error) {
-            jeedomUtils.showAlert({
-                message: error.message,
-                level: 'danger'
-            })
-        },
-        success: function (data) {
-            //Do stuff
-            jeedomUtils.showAlert({
-                message: 'Events récupérés !',
-                level: 'success'
-            })
-        }
-    })
-})
+document.getElementById('gotoEvents').addEventListener('click', function () {
+    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
+});
+
 
 document.getElementById('gotoStats').addEventListener('click', function (event) {
     domUtils.ajax({
