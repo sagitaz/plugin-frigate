@@ -1,0 +1,1 @@
+/var/www/html/plugins/frigate/docs/fr_FR/index.md
