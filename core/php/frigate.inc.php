@@ -22,4 +22,4 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 *
 */
 
-include_file('core', 'db/DBEvents', 'class', 'frigate');
+include_file('core', 'DBEvents', 'class', 'frigate');

@@ -3,22 +3,18 @@
 /**
  * Class Database Event
  *
- * @filesource   DBevents.class.php
+ * @filesource   frigate_events.class.php
  * @created      06.06.2024
  * @package      sagitaz\plugin-frigate
  * @author       sagitaz
  * @copyright    2024 sagitaz
  * @license      GNU General Public License v3.0 and later; see license.txt
  */
-
-namespace frigate\DB;
-
 /* * ***************************Includes********************************* */
 
 use DB;
 use Exception;
 use PDO;
-use utils;
 
 class DBEvents
 {

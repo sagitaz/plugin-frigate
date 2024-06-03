@@ -19,7 +19,7 @@
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
 use Log;
-use frigate\DB\DBEvents;
+use frigate\DBEvents;
 
 class frigate extends eqLogic
 {
