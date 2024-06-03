@@ -3,7 +3,7 @@
 /**
  * Class Database Event
  *
- * @filesource   DBevent.class.php
+ * @filesource   DBevents.class.php
  * @created      06.06.2024
  * @package      sagitaz\plugin-frigate
  * @author       sagitaz
