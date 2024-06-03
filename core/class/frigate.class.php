@@ -19,7 +19,7 @@
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
 use Log;
-use frigate\DBEvents;
+use frigate_events;
 
 class frigate extends eqLogic
 {
@@ -217,10 +217,10 @@ class frigate extends eqLogic
     $events = self::getcURL("Events", $resultURL);
 
     foreach ($events as $event) {
-      $frigate = DBEvents::byEventId($event['id']);
+      $frigate = frigate_events::byEventId($event['id']);
     }
     if (!is_object($frigate)) {
-      $frigate = new DBEvents();
+      $frigate = new frigate_events();
     }
     $frigate->setBox($event['box']);
     $frigate->setCamera($event['camera']);

@@ -16,7 +16,7 @@ use DB;
 use Exception;
 use PDO;
 
-class DBEvents
+class frigate_events
 {
 	/*     * *************************Attributs****************************** */
 
