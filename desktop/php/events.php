@@ -11,7 +11,7 @@ if (!isConnect('admin')) {
 <br>
 <div class="col-lg-12">
 	<?php
-	$events = frigate::getEvents();
+	$events = frigate::getEvents2();
 	$events = array_reverse($events);
 
 	foreach ($events as $event) {

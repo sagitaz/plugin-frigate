@@ -34,7 +34,7 @@ try {
         ajax::success();
     }
     if (init('action') == 'getEvents') {
-        frigate::getEvents();
+        frigate::getEvents2();
         ajax::success();
     }
     if (init('action') == 'getStats') {

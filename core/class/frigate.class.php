@@ -19,6 +19,7 @@
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 
 use Log;
+use frigate\DB\DBEvents;
 
 class frigate extends eqLogic
 {
@@ -43,10 +44,12 @@ class frigate extends eqLogic
   public static function cron() {}
   */
 
-  /*
-  * Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
-  public static function cron5() {}
-  */
+  
+  // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
+  public static function cron5() {
+    frigate::getEvents();
+  }
+  
 
   /*
   * Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
@@ -204,8 +207,40 @@ class frigate extends eqLogic
 
     return $result;
   }
-
   public static function getEvents()
+  {
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
+
+    $resultURL = $url . ":" . $port . "/api/events";
+
+    $events = self::getcURL("Events", $resultURL);
+
+    foreach ($events as $event) {
+      $frigate = DBEvents::byEventId($event['id']);
+    }
+    if (!is_object($frigate)) {
+      $frigate = new DBEvents();
+    }
+    $frigate->setBox($event['box']);
+    $frigate->setCamera($event['camera']);
+    $frigate->setData($event['data']);
+    $frigate->setStartTime($event['start_time']);
+    $frigate->setEndTime($event['end_time']);
+    $frigate->setFalsePositive($event['false_positive']);
+    $frigate->setHasClip($event['has_clip']);
+    $frigate->setHasSnapshot($event['has_snapshot']);
+    $frigate->setEventId($event['id']);
+    $frigate->setLabel($event['label']);
+    $frigate->setPlusId($event['plus_id']);
+    $frigate->setRetain($event['retain_indefinitely']);
+    $frigate->setSubLabel($event['sub_label']);
+    $frigate->setThumbnail($event['thumbnail']);
+    $frigate->setTopScore($event['top_score']);
+    $frigate->setZones($event['zones']);
+    $frigate->save();
+  }
+  public static function getEvents2()
   {
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
