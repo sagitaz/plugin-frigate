@@ -20,6 +20,8 @@ require_once __DIR__  . '/../../../../core/php/core.inc.php';
 require_once __DIR__ . '/frigate_events.class.php';
 
 use Log;
+use eqLogic;
+use cmd;
 
 class frigate extends eqLogic
 {
@@ -338,7 +340,50 @@ return $result;
         return $cmd;
     }
   
-  	private static function majEventsCmds
+  	public static function majEventsCmds($event) {
+
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $eqlogicId = $frigate->getId();
+
+    if  (!$event['camera']) {
+      $cmd = self::createCmd($eqlogicId, "caméra", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['camera']);
+    }
+    if (!$event['label']) {
+      $cmd = self::createCmd($eqlogicId, "label", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['label']);
+    }
+    if (!$event['hasClip']) {
+      $cmd = self::createCmd($eqlogicId, "clips", "binary", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['hasClip']);
+    }
+    if (!$event['hasSnapshot']) {
+      $cmd = self::createCmd($eqlogicId, "snapshot", "binary", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['hasSnapshot']);
+    }
+    if (!$event['data']['top_score']) {
+      $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $value = round($event['data']['top_score']*100,0);
+      $cmd->event($value);
+    }
+    if (!$event['data']['score']) {
+      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $value = round($event['data']['score'] * 100, 0);
+      $cmd->event($value);
+    }
+    if (!$event['id']) {
+      $cmd = self::createCmd($eqlogicId, "id", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['id']);
+    }
+    if (!$event['start_time']) {
+      $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "eqFrigateEvents", "GENERIC_INFO", 0);
+      $cmd->event($event['start_time']);
+      $value = $event['end_time'] - $event['start_time'];
+      $cmd2->event($value);
+    }
+  }
+    
   
 }
 
