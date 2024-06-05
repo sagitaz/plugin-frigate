@@ -348,39 +348,48 @@ return $result;
     if  (!$event['camera']) {
       $cmd = self::createCmd($eqlogicId, "caméra", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['camera']);
+      $cmd->save();
     }
     if (!$event['label']) {
       $cmd = self::createCmd($eqlogicId, "label", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['label']);
+      $cmd->save();
     }
     if (!$event['hasClip']) {
       $cmd = self::createCmd($eqlogicId, "clips", "binary", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['hasClip']);
+      $cmd->save();
     }
     if (!$event['hasSnapshot']) {
       $cmd = self::createCmd($eqlogicId, "snapshot", "binary", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['hasSnapshot']);
+      $cmd->save();
     }
     if (!$event['data']['top_score']) {
       $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "eqFrigateEvents", "GENERIC_INFO", 0);
       $value = round($event['data']['top_score']*100,0);
       $cmd->event($value);
+      $cmd->save();
     }
     if (!$event['data']['score']) {
       $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "eqFrigateEvents", "GENERIC_INFO", 0);
       $value = round($event['data']['score'] * 100, 0);
       $cmd->event($value);
+      $cmd->save();
     }
     if (!$event['id']) {
       $cmd = self::createCmd($eqlogicId, "id", "other", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['id']);
+      $cmd->save();
     }
     if (!$event['start_time']) {
       $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "eqFrigateEvents", "GENERIC_INFO", 0);
       $cmd->event($event['start_time']);
+      $cmd->save();
       $value = $event['end_time'] - $event['start_time'];
       $cmd2->event($value);
+      $cmd2->save();
     }
   }
     
