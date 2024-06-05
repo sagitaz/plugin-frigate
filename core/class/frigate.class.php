@@ -17,9 +17,9 @@
 
 /* * ***************************Includes********************************* */
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
+require_once __DIR__ . '/frigate_events.class.php';
 
 use Log;
-use frigate_events;
 
 class frigate extends eqLogic
 {
@@ -120,7 +120,8 @@ class frigate extends eqLogic
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
   public function postUpdate()
-  {
+  {				
+
   }
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
@@ -146,7 +147,7 @@ class frigate extends eqLogic
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
   public function postSave()
-  {
+  {		
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
@@ -190,8 +191,6 @@ class frigate extends eqLogic
     }
     curl_close($ch);
     $response = json_decode($data, true);
-
-    log::add(__CLASS__, 'debug', $function . " = " . json_encode($response));
     return $response;
   }
 
@@ -215,18 +214,19 @@ class frigate extends eqLogic
     $resultURL = $url . ":" . $port . "/api/events";
 
     $events = self::getcURL("Events", $resultURL);
-
+    
     foreach ($events as $event) {
       $frigate = frigate_events::byEventId($event['id']);
-    }
-    if (!is_object($frigate)) {
+      
+    if (!$frigate) {
+     
       $frigate = new frigate_events();
-    }
+     
     $frigate->setBox($event['box']);
     $frigate->setCamera($event['camera']);
     $frigate->setData($event['data']);
-    $frigate->setStartTime($event['start_time']);
-    $frigate->setEndTime($event['end_time']);
+ 	$frigate->setStartTime($event['start_time']);
+  	$frigate->setEndTime($event['end_time']);
     $frigate->setFalsePositive($event['false_positive']);
     $frigate->setHasClip($event['has_clip']);
     $frigate->setHasSnapshot($event['has_snapshot']);
@@ -236,38 +236,62 @@ class frigate extends eqLogic
     $frigate->setRetain($event['retain_indefinitely']);
     $frigate->setSubLabel($event['sub_label']);
     $frigate->setThumbnail($event['thumbnail']);
-    $frigate->setTopScore($event['top_score']);
+    $frigate->setTopScore($event['data']['top_score']);
     $frigate->setZones($event['zones']);
     $frigate->save();
+      
+    self::majEventsCmds($event);
+    }
+  }
   }
   public static function getEvents2()
   {
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
-
-    $resultURL = $url . ":" . $port . "/api/events";
-
-    $events = self::getcURL("Events", $resultURL);
-    $events = array_reverse($events);
-    $result = [];
+    $events = frigate_events::all();
 
     foreach ($events as $event) {
-      $img = "http://" . $url . ":" . $port . "/api/events/" . $event["id"] . "/thumbnail.jpg";
-      $date = date("d-m-Y H:i:s", $event['start_time']);
-      $duree = round($event['end_time'] - $event['start_time'], 0);
+		$img = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/thumbnail.jpg";
+      $clip = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/clip.mp4";
+      $snapshot = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/snapshot.jpg";
+            $date = date("d-m-Y H:i:s", $event->getStartTime());
+      $duree = round($event->getEndTime() - $event->getStartTime(), 0);
+
       $result[] = array(
         "img" => $img,
-        "camera" => $event["camera"],
-        "label" => $event["label"],
+        "camera" => $event->getCamera(),
+        "label" => $event->getLabel(),
         "date" => $date,
         "duree" => $duree,
-      );
+        "snapshot" => $snapshot,
+        "clip" => $clip,
+        "hasSnapshot" => $event->getHasSnapshot(),
+        "hasClip" => $event->getHasClip(),
+        "id" => $event->getEventId(),
+        "top_score" => round($event->getTopScore()*100,0)
+      ); 
     }
+   
 
-    log::add(__CLASS__, 'debug', "Result = " . json_encode($result));
-    return $result;
+usort($result, 'frigate::orderByDate');
+
+//usort($result, 'frigate::orderByScore');
+    
+    
+return $result;
+    
   }
 
+    private static function orderByDate($a, $b) {
+    $dateA = new DateTime($a['date']);
+    $dateB = new DateTime($b['date']);
+    return $dateB <=> $dateA;
+}
+  
+  private static function orderByScore($a, $b) {
+    return $b['top_score'] <=> $a['top_score'];
+}
+  
   public static function getStats()
   {
     $url = config::byKey('URL', 'frigate');
@@ -279,6 +303,43 @@ class frigate extends eqLogic
 
     return $result;
   }
+  
+  	public static function generateEqEvents()
+	{
+
+		$frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+		if (!is_object($frigate)) {
+			$frigate = new frigate();
+			$frigate->setName('Events');
+			$frigate->setEqType_name("frigate");
+			$frigate->setLogicalId("eqFrigateEvents");
+			$frigate->save();
+		}
+	}
+  
+      private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1)
+    {
+        $eqlogic = eqLogic::byId($eqLogicId);
+        $cmd = $eqlogic->getCmd(NULL, $logicalId);
+
+        if (!is_object($cmd)) {
+            $cmd = new jeemateCmd();
+            $cmd->setIsVisible(1);
+            $cmd->setIsHistorized($historized);
+            $cmd->setEqLogic_id($eqlogic->getId());
+            $cmd->setName($name);
+            $cmd->setType("info");
+            $cmd->setSubType($subType);
+            $cmd->setUnite($unite);
+            $cmd->setLogicalId($logicalId);
+            $cmd->setGeneric_type($genericType);
+			$cmd->save();
+        }
+        return $cmd;
+    }
+  
+  	private static function majEventsCmds
+  
 }
 
 class frigateCmd extends cmd

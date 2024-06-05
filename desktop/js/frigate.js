@@ -122,7 +122,6 @@ document.getElementById('gotoStats').addEventListener('click', function (event) 
     })
 })
 
-
 function updateImage() {
     var imgUrl = document.getElementById('cameraUrlInput').value;
     var imgElement = document.getElementById('imgFrigate');
@@ -148,3 +147,25 @@ document.addEventListener('DOMContentLoaded', function () {
         clearInterval(imageUpdateInterval);
     });
 });
+
+function addOrRemoveClass(element, className, isAdd) {
+    const tabs = document.getElementsByClassName(element);
+    for (const tab of tabs) {
+        if (isAdd) {
+            tab.classList.add(className);
+        } else {
+            tab.classList.remove(className);
+        }
+    }
+}
+
+function printEqLogic(_eqLogic) {
+    addOrRemoveClass('eqFrigate', 'jeedisable', true);
+
+    if (isset(_eqLogic.logicalId)) {
+        if (_eqLogic.logicalId !== "eqFrigateEvents") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        }
+    }
+
+}

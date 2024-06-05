@@ -7,7 +7,11 @@ $plugin = plugin::byId('frigate');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
 ?>
-
+<style type="text/css">
+    .jeedisable {
+        display: none !important;
+    }
+</style>
 <div class="row row-overflow">
     <!-- Page d'accueil du plugin -->
     <div class="col-xs-12 eqLogicThumbnailDisplay">
@@ -141,8 +145,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 </div>
                             </div>
 
-                            <legend><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
-                            <div class="form-group">
+                            <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{Nom de la caméra}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le nom de la caméra}}"></i></sup>
                                 </label>
@@ -152,7 +156,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                             </div>
                             <!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
                             <!-- La fonction cron de la classe du plugin doit contenir le code prévu pour que ce champ soit fonctionnel -->
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{Auto-actualisation}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{Fréquence de rafraîchissement des commandes infos de l'équipement}}"></i></sup>
                                 </label>
@@ -167,43 +171,43 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     </div>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{bbox}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{timestamp}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{zones}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{mask}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="mask">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{motion}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="motion">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{regions}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{qualité}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{jpeg qualité 0-100}}"></i></sup>
                                 </label>
@@ -211,7 +215,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="quality" placeholder="{{Qualité 0-100}}">
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{hauteur}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{jpeg qualité 0-100}}"></i></sup>
                                 </label>
@@ -223,7 +227,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
                         <!-- Partie droite de l'onglet "Équipement" -->
                         <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
-                        <div class="col-lg-6">
+                        <div class="col-lg-6 eqFrigate">
                             <legend><i class="fas fa-info"></i> {{Visualisation}}</legend>
 
                             <div class="form-group">
@@ -240,6 +244,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     </fieldset>
                 </form>
             </div><!-- /.tabpanel #eqlogictab-->
+
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">

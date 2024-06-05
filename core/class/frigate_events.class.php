@@ -15,6 +15,7 @@
 use DB;
 use Exception;
 use PDO;
+use Log;
 
 class frigate_events
 {
@@ -47,9 +48,6 @@ class frigate_events
 	{
 		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
 		FROM frigate_events';
-		if ($_onlyEnable) {
-			$sql .= ' WHERE status=1';
-		}
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
 
@@ -118,163 +116,162 @@ class frigate_events
 	public function getEventId()
 	{
 		return $this->event_id;
-	}	
+	}
 
 	public function setEventId($event_id)
 	{
 		$this->event_id = $event_id;
-	}	
+	}
 
 	public function getBox()
 	{
-		return $this->box;	
-	}	
+		return $this->box;
+	}
 
 	public function setBox($box)
-	{	
+	{
 		$this->box = $box;
-	}	
+	}
 
 	public function getCamera()
 	{
-		return $this->camera;	
-	}	
+		return $this->camera;
+	}
 
-	public function setCamera($camera)	
+	public function setCamera($camera)
 	{
 		$this->camera = $camera;
-	}	
+	}
 
 	public function getData()
 	{
-		return $this->data;	
+		return $this->data;
 	}
 
 	public function setData($data)
 	{
-		$this->data = $data;	
-	}	
+		$this->data = $data;
+	}
 
 	public function getStartTime()
 	{
-		return $this->startTime;	
-	}	
+		return $this->startTime;
+	}
 
 	public function setStartTime($startTime)
-	{	
-		$this->startTime = $startTime;	
+	{
+		$this->startTime = $startTime;
 	}
 
 	public function getEndTime()
 	{
-		return $this->endTime;	
+		return $this->endTime;
 	}
 
 	public function setEndTime($endTime)
-	{	
-		$this->endTime = $endTime;	
-	}	
+	{
+		$this->endTime = $endTime;
+	}
 
 	public function getFalsePositive()
 	{
-		return $this->false_positive;	
+		return $this->false_positive;
 	}
 
 	public function setFalsePositive($false_positive)
-	{	
-		$this->false_positive = $false_positive;	
+	{
+		$this->false_positive = $false_positive;
 	}
 
 	public function getHasClip()
 	{
-		return $this->hasClip;	
+		return $this->hasClip;
 	}
 
 	public function setHasClip($hasClip)
-	{	
-		$this->hasClip = $hasClip;	
+	{
+		$hasClip = ($hasClip == "true") ? 1 : 0;
+		$this->hasClip = $hasClip;
 	}
 
 	public function getHasSnapshot()
 	{
-		return $this->hasSnapshot;	
+		return $this->hasSnapshot;
 	}
 
 	public function setHasSnapshot($hasSnapshot)
-	{	
-		$this->hasSnapshot = $hasSnapshot;	
+	{
+		$hasSnapshot = ($hasSnapshot == "true") ? 1 : 0;
+		$this->hasSnapshot = $hasSnapshot;
 	}
 
 	public function getLabel()
 	{
-		return $this->label;	
-	}	
+		return $this->label;
+	}
 
 	public function setLabel($label)
-	{	
+	{
 		$this->label = $label;
-	}	
+	}
 
 	public function getPlusId()
 	{
-		return $this->plusId;	
+		return $this->plusId;
 	}
 
 	public function setPlusId($plusId)
-	{	
-		$this->plusId = $plusId;	
-	}	
+	{
+		$this->plusId = $plusId;
+	}
 
 	public function getRetain()
 	{
-		return $this->retain;	
-	}	
+		return $this->retain;
+	}
 
 	public function setRetain($retain)
-	{	
-		$this->retain = $retain;	
-	}	
+	{
+		$this->retain = $retain;
+	}
 
 	public function getSubLabel()
 	{
-		return $this->subLabel;	
+		return $this->subLabel;
 	}
 
 	public function setSubLabel($subLabel)
-	{	
-		$this->subLabel = $subLabel;	
+	{
+		$this->subLabel = $subLabel;
 	}
 
 	public function getThumbnail()
 	{
-		return $this->thumbnail;	
+		return $this->thumbnail;
 	}
 
 	public function setThumbnail($thumbnail)
-	{	
-		$this->thumbnail = $thumbnail;	
+	{
+		$this->thumbnail = $thumbnail;
 	}
 
 	public function getTopScore()
 	{
-		return $this->topScore;	
+		return $this->topScore;
 	}
 
 	public function setTopScore($topScore)
-	{	
-		$this->topScore = $topScore;	
-	}		
+	{
+		$this->topScore = $topScore;
+	}
 
 	public function getZones()
 	{
-		return $this->zones;	
-	}		
-
-	public function setZones($zones)
-	{	
-		$this->zones = $zones;	
+		return $this->zones;
 	}
 
-
-
+	public function setZones($zones)
+	{
+		$this->zones = $zones;
+	}
 }

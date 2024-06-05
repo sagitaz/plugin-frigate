@@ -14,6 +14,7 @@
 * You should have received a copy of the GNU General Public License
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
+
 use Log;
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
@@ -24,7 +25,7 @@ function frigate_install()
     Log::add(__CLASS__, 'info', 'Start Install');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
-
+    frigate::generateEqEvents();
     Log::add(__CLASS__, 'info', 'Finish Install');
 }
 
@@ -34,7 +35,7 @@ function frigate_update()
     Log::add(__CLASS__, 'info', 'Start Update');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
-
+    frigate::generateEqEvents();
     Log::add(__CLASS__, 'info', 'Finish Update');
 }
 
