@@ -134,15 +134,13 @@ function addOrRemoveClass(element, className, isAdd) {
 }
 
 function printEqLogic(_eqLogic) {
-    addOrRemoveClass('eqFrigate', 'jeedisable', true);
-
-    if (isset(_eqLogic.logicalId)) {
-        if (_eqLogic.logicalId !== "eqFrigateEvents") {
+    if (_eqLogic && _eqLogic.logicalId) {
+        if (_eqLogic.logicalId === "eqFrigateEvents" || _eqLogic.logicalId === "eqFrigateStats") {
             addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        } else {
+            addOrRemoveClass('eqFrigate', 'jeedisable', true);
         }
-        if (_eqLogic.logicalId !== "eqFrigateStats") {
-            addOrRemoveClass('eqFrigate', 'jeedisable', false);
-        }
+    } else {
+        addOrRemoveClass('eqFrigate', 'jeedisable', true);
     }
-
 }
