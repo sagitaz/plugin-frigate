@@ -22,6 +22,7 @@ require_once __DIR__ . '/frigate_events.class.php';
 use Log;
 use eqLogic;
 use cmd;
+use event;
 
 class frigate extends eqLogic
 {
@@ -51,6 +52,7 @@ class frigate extends eqLogic
   public static function cron5()
   {
     frigate::getEvents();
+    frigate::getStats();
   }
 
 
@@ -195,7 +197,21 @@ class frigate extends eqLogic
     $response = json_decode($data, true);
     return $response;
   }
+  public static function getStats()
+  {
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
 
+    $resultURL = $url . ":" . $port . "/api/stats";
+
+    $stats = self::getcURL("Stats", $resultURL);
+
+    foreach ($stats as $stat) {
+
+        self::majStatsCmds($stat);
+      
+    }
+  }
 
   public static function getTimeline()
   {
@@ -243,6 +259,7 @@ class frigate extends eqLogic
         $frigate->save();
 
         self::majEventsCmds($event);
+        event::add("frigate::alert", $event);
       }
     }
   }
@@ -274,11 +291,7 @@ class frigate extends eqLogic
       );
     }
 
-
     usort($result, 'frigate::orderByDate');
-
-    //usort($result, 'frigate::orderByScore');
-
 
     return $result;
   }
@@ -295,21 +308,9 @@ class frigate extends eqLogic
     return $b['top_score'] <=> $a['top_score'];
   }
 
-  public static function getStats()
-  {
-    $url = config::byKey('URL', 'frigate');
-    $port = config::byKey('port', 'frigate');
-
-    $resultURL = $url . ":" . $port . "/api/stats";
-
-    $result = self::getcURL("Stats", $resultURL);
-
-    return $result;
-  }
 
   public static function generateEqEvents()
   {
-
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!is_object($frigate)) {
       $frigate = new frigate();
@@ -320,6 +321,17 @@ class frigate extends eqLogic
     }
   }
 
+  public static function generateEqStats()
+  {
+    $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
+    if (!is_object($frigate)) {
+      $frigate = new frigate();
+      $frigate->setName('Statistiques');
+      $frigate->setEqType_name("frigate");
+      $frigate->setLogicalId("eqFrigateStats");
+      $frigate->save();
+    }
+  }
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1)
   {
     $eqlogic = eqLogic::byId($eqLogicId);
@@ -358,12 +370,16 @@ class frigate extends eqLogic
     $cmd->save();
 
     $cmd = self::createCmd($eqlogicId, "clips", "binary", "", "info_clips", "GENERIC_INFO", 0);
-    $hasClip = ($event['hasClip'] == "true") ? 1 : 0;
+    log::add(__CLASS__, 'debug', "has-clip: " . $event['has_clip']);
+    $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
+    log::add(__CLASS__, 'debug', "hasClip: " . $hasClip);
     $cmd->event($hasClip);
     $cmd->save();
 
     $cmd = self::createCmd($eqlogicId, "snapshot", "binary", "", "info_snapshot", "GENERIC_INFO", 0);
-    $hasSnapshot = ($event['hasSnapshot'] == "true") ? 1 : 0;
+    log::add(__CLASS__, 'debug', "has-snapshot: " . $event['has_snapshot']);
+    $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
+    log::add(__CLASS__, 'debug', "hasSnapshot: " . $hasSnapshot);
     $cmd->event($hasSnapshot);
     $cmd->save();
 
@@ -385,12 +401,32 @@ class frigate extends eqLogic
     $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO", 0);
     $cmd->event($event['start_time']);
     $cmd->save();
-    $value = round($event['end_time'] - $event['start_time'],0);
+    $value = round($event['end_time'] - $event['start_time'], 0);
     $cmd2->event($value);
     $cmd2->save();
   }
-}
 
+
+  public static function majStatsCmds($stats)
+  {
+    $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
+    $eqlogicId = $frigate->getId();
+
+    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+      foreach ($cameraStats as $key => $value) {
+        // Créez un nom de commande en combinant le nom de la caméra et la clé
+        $cmdName = $cameraName . '_' . $key;
+        // Créez ou récupérez la commande
+        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "info_" . $key, "GENERIC_INFO", 0);
+        // Enregistrez la valeur de l'événement
+        $cmd->event($value);
+        $cmd->save();
+      }
+    }
+  }
+
+
+}
 class frigateCmd extends cmd
 {
   /*     * *************************Attributs****************************** */

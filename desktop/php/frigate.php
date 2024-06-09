@@ -28,11 +28,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <br>
                 <span>{{Timeline}}</span>
             </div>
-            <div class="cursor eqLogicAction logoSecondary" id="gotoStats">
-                <i class="fas fa-wrench"></i>
-                <br>
-                <span>{{Statistiques}}</span>
-            </div>
             <div class="cursor eqLogicAction logoSecondary" id="gotoEvents">
                 <i class="fas fa-wrench"></i>
                 <br>

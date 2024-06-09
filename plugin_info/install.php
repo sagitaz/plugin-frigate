@@ -26,6 +26,7 @@ function frigate_install()
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
+    frigate::generateEqStats();
     Log::add(__CLASS__, 'info', 'Finish Install');
 }
 
@@ -36,6 +37,7 @@ function frigate_update()
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
+    frigate::generateEqStats();
     Log::add(__CLASS__, 'info', 'Finish Update');
 }
 

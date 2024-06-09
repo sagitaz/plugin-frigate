@@ -96,32 +96,6 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-
-document.getElementById('gotoStats').addEventListener('click', function (event) {
-    domUtils.ajax({
-        type: "POST",
-        url: "plugins/frigate/core/ajax/frigate.ajax.php",
-        data: {
-            action: "getStats"
-        },
-        dataType: 'json',
-        global: false,
-        error: function (error) {
-            jeedomUtils.showAlert({
-                message: error.message,
-                level: 'danger'
-            })
-        },
-        success: function (data) {
-            //Do stuff
-            jeedomUtils.showAlert({
-                message: 'Stats récupérées !',
-                level: 'success'
-            })
-        }
-    })
-})
-
 function updateImage() {
     var imgUrl = document.getElementById('cameraUrlInput').value;
     var imgElement = document.getElementById('imgFrigate');
@@ -164,6 +138,9 @@ function printEqLogic(_eqLogic) {
 
     if (isset(_eqLogic.logicalId)) {
         if (_eqLogic.logicalId !== "eqFrigateEvents") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        }
+        if (_eqLogic.logicalId !== "eqFrigateStats") {
             addOrRemoveClass('eqFrigate', 'jeedisable', false);
         }
     }

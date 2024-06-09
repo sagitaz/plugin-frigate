@@ -37,10 +37,6 @@ try {
         frigate::getEvents2();
         ajax::success();
     }
-    if (init('action') == 'getStats') {
-        frigate::getStats();
-        ajax::success();
-    }
 
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
