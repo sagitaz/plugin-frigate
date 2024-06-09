@@ -417,7 +417,7 @@ class frigate extends eqLogic
         // Créez un nom de commande en combinant le nom de la caméra et la clé
         $cmdName = $cameraName . '_' . $key;
         // Créez ou récupérez la commande
-        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "info_" . $key, "GENERIC_INFO", 0);
+        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
         // Enregistrez la valeur de l'événement
         $cmd->event($value);
         $cmd->save();
