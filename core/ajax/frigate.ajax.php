@@ -29,15 +29,6 @@ try {
   */
     ajax::init();
 
-    if (init('action') == 'getTimeline') {
-        frigate::getTimeline();
-        ajax::success();
-    }
-    if (init('action') == 'getEvents') {
-        frigate::getEvents2();
-        ajax::success();
-    }
-
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */

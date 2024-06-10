@@ -23,13 +23,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <br>
                 <span>{{Ajouter}}</span>
             </div>
-            <div class="cursor eqLogicAction logoSecondary" id="gotoTimeline">
-                <i class="fas fa-wrench"></i>
-                <br>
-                <span>{{Timeline}}</span>
-            </div>
             <div class="cursor eqLogicAction logoSecondary" id="gotoEvents">
-                <i class="fas fa-wrench"></i>
+                <i class="fas fa-calendar"></i>
                 <br>
                 <span>{{Events}}</span>
             </div>

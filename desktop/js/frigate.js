@@ -181,10 +181,6 @@ function saveEqLogic(_eqLogic) {
     return _eqLogic
 }
 
-document.getElementById('gotoTimeline').addEventListener('click', function () {
-    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=timeline");
-});
-
 document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
