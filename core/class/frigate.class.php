@@ -255,7 +255,7 @@ class frigate extends eqLogic
         $frigate->save();
 
         self::majEventsCmds($event);
-        event::add("frigate::alert", $event);
+     //   event::add("frigate::alert", $event);
       }
     }
   }
@@ -358,6 +358,7 @@ class frigate extends eqLogic
     $eqCameras = eqLogic::byTypeAndSearchConfiguration("frigate", $event['camera']);
     foreach ($eqCameras as $eqCamera) {
       $eqlogicIds[] = $eqCamera->getId();
+      self::executeActionNewEvent($eqlogicIds[0], $event);
     }
 
     foreach ($eqlogicIds as $eqlogicId) {
@@ -468,7 +469,14 @@ class frigate extends eqLogic
     }
   }
 
-  
+  private static function executeActionNewEvent($eqLogicId, $event) {
+    $eqLogic = eqLogic::byId($eqLogicId);
+    $actions = $eqLogic->getConfiguration('actions', array());
+    foreach ($actions as $action) {
+      $action->execCmd();
+    }
+  }
+
 }
 class frigateCmd extends cmd
 {

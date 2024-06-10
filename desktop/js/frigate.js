@@ -100,10 +100,7 @@ function addAction(_action, _type) {
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="enable" checked title="{{Décocher la case pour désactiver l\'action}}">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
     div += '</div>'
-    div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdEventName" data-type="' + _type + '" />'
-    div += '</div>'
-    div += '<div class="col-sm-4">'
+    div += '<div class="col-sm-5">'
     div += '<div class="input-group input-group-sm">'
     div += '<span class="input-group-btn">'
     div += '<a class="btn btn-default btn-sm bt_removeAction roundedLeft" data-type="' + _type + '"><i class="fas fa-minus-circle"></i></a>'
@@ -129,7 +126,7 @@ function addAction(_action, _type) {
         })
     }
 }
-$("#div_action").sortable({ axis: "y", cursor: "move", items: ".start", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true })
+$("#div_action").sortable({ axis: "y", cursor: "move", items: ".action", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true })
 
 $('.bt_addAction').off('click').on('click', function () {
     addAction({}, 'action')
@@ -178,11 +175,12 @@ function saveEqLogic(_eqLogic) {
     _eqLogic.configuration.actions = []
     $('#div_action').each(function () {
         let actions = $(this).getValues('.actionAttr')
-        actions = $(this).find('.start').getValues('.expressionAttr')
+        actions = $(this).find('.action').getValues('.expressionAttr')
         _eqLogic.configuration.actions.push(actions)
     })
     return _eqLogic
 }
+
 document.getElementById('gotoTimeline').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=timeline");
 });
@@ -245,7 +243,7 @@ function printEqLogic(_eqLogic) {
         actionOptions = []
         console.log(_eqLogic.configuration.actions);
         for (var i in _eqLogic.configuration.actions[0]) {
-            addAction(_eqLogic.configuration.actions[0][i], "start")
+            addAction(_eqLogic.configuration.actions[0][i], "action")
         }
         ACTIONS_LIST = null
         jeedom.cmd.displayActionsOption({
