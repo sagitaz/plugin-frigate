@@ -424,7 +424,7 @@ class frigate extends eqLogic
         $cmd->save();
       }
     }
-    }
+    
 
     // Statistiques pour eqLogic statistiques générales
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -467,6 +467,8 @@ class frigate extends eqLogic
       }
     }
   }
+
+  
 }
 class frigateCmd extends cmd
 {
