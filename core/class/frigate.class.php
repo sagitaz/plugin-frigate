@@ -262,23 +262,35 @@ class frigate extends eqLogic
     self::cleanDbEvents($events);
   }
 
-  public static function cleanDbEvents($events) {
+  public static function cleanDbEvents($events)
+  {
+    foreach ($events as $event) {
+      $ids[] = $event['id'];
+    }
+
     $inDbEvents = frigate_events::all();
+
     foreach ($inDbEvents as $inDbEvent) {
-      if (!in_array($inDbEvent->getEventId(), $events)) {
+      if (!in_array($inDbEvent->getEventId(), $ids)) {
+        log::add(__CLASS__, 'debug', "delete in DB : " . $inDbEvent->getEventId());
         $inDbEvent->remove();
+        log::add(__CLASS__, 'debug', "EVents delete in DB");
         // recherche si clip et snapshot existe dans le dossier de sauvegarde
-        $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvents->getCamera() . "/" . $inDbEvent->getEventId() . "_clips.mp4";
-        $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvents->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
+        $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_clip.mp4";
+        $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
         if (file_exists($clip)) {
           unlink($clip);
+          log::add(__CLASS__, 'debug', "MP4 clip delete");
         }
         if (file_exists($snapshot)) {
           unlink($snapshot);
+          log::add(__CLASS__, 'debug', "JPG snapshot delete");
         }
       }
     }
   }
+
+
   public static function getEvents2()
   {
     $url = config::byKey('URL', 'frigate');
@@ -576,7 +588,6 @@ class frigate extends eqLogic
 
     // Vérifiez si le fichier existe déjà
     if (file_exists($path)) {
-      log::add(__CLASS__, 'debug', "Le fichier existe déjà : " . $path);
       return $urlJeedom . str_replace("/var/www/html", "", $path);
     }
 

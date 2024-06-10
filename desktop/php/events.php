@@ -9,42 +9,13 @@ if (!isConnect('admin')) {
 
 ?>
 
+<br>
+<br>
 <div class="input-group" style="display:inline-flex">
 	<span class="input-group-btn">
-		<a class="btn geoAction roundedLeft" data-action="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
+		<a class="btn geoAction rounded" data-action="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
 	</span>
 </div>
-<br>
-<br>
-<div class="col-lg-12 input-group">
-
-	<div class="col-lg-2">
-		<select>
-			<option>Café</option>
-			<option>Thé</option>
-			<option>Jus</option>
-			<option selected>Cameras</option>
-		</select>
-	</div>
-	<div class="col-lg-2">
-		<select>
-			<option>Café</option>
-			<option>Thé</option>
-			<option>Jus</option>
-			<option selected>Labels</option>
-		</select>
-	</div>
-	<div class="col-lg-2">
-		<select>
-			<option>Café</option>
-			<option>Thé</option>
-			<option>Jus</option>
-			<option selected>Zones</option>
-		</select>
-	</div>
-</div>
-<br>
-
 <br>
 <br>
 <div class="col-lg-12">
