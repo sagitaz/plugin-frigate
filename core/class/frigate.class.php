@@ -195,7 +195,7 @@ class frigate extends eqLogic
     }
     curl_close($ch);
     $response = json_decode($data, true);
-      log::add(__CLASS__, 'debug', $function . " : " . json_encode($response));
+    log::add(__CLASS__, 'debug', $function . " : " . json_encode($response));
     return $response;
   }
   public static function getStats()
@@ -350,119 +350,121 @@ class frigate extends eqLogic
 
   public static function majEventsCmds($event)
   {
-     $eqlogicIds = [];
+    $eqlogicIds = [];
     // maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $eqlogicIds[] = $frigate->getId();
-    // recjerche equipement caméra
-    $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $event['camera']);
-    $eqlogicIds[] = $eqCamera->getId();
-    
+    // recherche equipement caméra
+    $eqCameras = eqLogic::byTypeAndSearchConfiguration("frigate", $event['camera']);
+    foreach ($eqCameras as $eqCamera) {
+      $eqlogicIds[] = $eqCamera->getId();
+    }
+
     foreach ($eqlogicIds as $eqlogicId) {
-    // creation des commandes
-    $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0);
-    $cmd->event($event['camera']);
-    $cmd->save();
+      // creation des commandes
+      $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0);
+      $cmd->event($event['camera']);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "GENERIC_INFO", 0);
-    $cmd->event($event['label']);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "GENERIC_INFO", 0);
+      $cmd->event($event['label']);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "GENERIC_INFO", 0);
-    $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
-    $cmd->event($hasClip);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "GENERIC_INFO", 0);
+      $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
+      $cmd->event($hasClip);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "GENERIC_INFO", 0);
-    $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
-    $cmd->event($hasSnapshot);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "GENERIC_INFO", 0);
+      $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
+      $cmd->event($hasSnapshot);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "info_topscore", "GENERIC_INFO", 0);
-    $value = round($event['data']['top_score'] * 100, 0);
-    $cmd->event($value);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "info_topscore", "GENERIC_INFO", 0);
+      $value = round($event['data']['top_score'] * 100, 0);
+      $cmd->event($value);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "GENERIC_INFO", 0);
-    $value = round($event['data']['score'] * 100, 0);
-    $cmd->event($value);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "GENERIC_INFO", 0);
+      $value = round($event['data']['score'] * 100, 0);
+      $cmd->event($value);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO", 0);
-    $cmd->event($event['id']);
-    $cmd->save();
+      $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO", 0);
+      $cmd->event($event['id']);
+      $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO", 0);
-    $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO", 0);
-    $cmd->event($event['start_time']);
-    $cmd->save();
-    $value = round($event['end_time'] - $event['start_time'], 0);
-    $cmd2->event($value);
-    $cmd2->save();
+      $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO", 0);
+      $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO", 0);
+      $cmd->event($event['start_time']);
+      $cmd->save();
+      $value = round($event['end_time'] - $event['start_time'], 0);
+      $cmd2->event($value);
+      $cmd2->save();
+    }
   }
-}
 
 
-public static function majStatsCmds($stats)
-{
+  public static function majStatsCmds($stats)
+  {
+    // Statistiques pour chaque eqLogic caméras
+    // Mise à jour des statistiques des caméras
+    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+      log::add(__CLASS__, 'debug', "cameraStats" . " : " . json_encode($cameraStats));    
+      // recherche equipement caméra
+      $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
+      $eqlogicCameraId = $eqCamera[0]->getId();
+      
+      foreach ($cameraStats as $key => $value) {
+        // Créez ou récupérez la commande
+        $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
+        // Enregistrez la valeur de l'événement
+        $cmd->event($value);
+        $cmd->save();
+      }
+    }
+
+    // Statistiques pour eqLogic statistiques générales
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $eqlogicId = $frigate->getId();
 
-    // Mise à jour des statistiques des caméras
-    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-    log::add(__CLASS__, 'debug', "cameraStats" . " : " . json_encode($cameraStats));
-        foreach ($cameraStats as $key => $value) {
-            // Créez un nom de commande en combinant le nom de la caméra et la clé
-            $cmdName = $cameraName . '_' . $key;
-            // Créez ou récupérez la commande
-            $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
-            // Enregistrez la valeur de l'événement
-            $cmd->event($value);
-            $cmd->save();
-        }
-    }
-
     // Mise à jour des statistiques des détecteurs
-   foreach ($stats['detectors'] as $detectorName => $detectorStats) {
-    log::add(__CLASS__, 'debug', "detectorStats" . " : " . json_encode($detectorStats));
-        foreach ($detectorStats as $key => $value) {
-            // Créez un nom de commande en combinant le nom du détecteur et la clé
-            $cmdName = $detectorName . '_' . $key;
-            // Créez ou récupérez la commande
-            $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO", 0);
-            // Enregistrez la valeur de l'événement
-            $cmd->event($value);
-            $cmd->save();
-          
-          	if ($detectorName === "pid") {
-            	$cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "", "detectors_cpu", "GENERIC_INFO", 0);
-            $cmdCpu->event($stats['cpu_usages'][$value]['cpu']);
-            $cmdCpu->save();
-            	$cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "", "detectors_memory", "GENERIC_INFO", 0);
-            $cmdMem->event($stats['cpu_usages'][$value]['mem']);
-            $cmdMem->save();
-              
-            }
+    foreach ($stats['detectors'] as $detectorName => $detectorStats) {
+      log::add(__CLASS__, 'debug', "detectorStats" . " : " . json_encode($detectorStats));
+      foreach ($detectorStats as $key => $value) {
+        // Créez un nom de commande en combinant le nom du détecteur et la clé
+        $cmdName = $detectorName . '_' . $key;
+        // Créez ou récupérez la commande
+        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO", 0);
+        // Enregistrez la valeur de l'événement
+        $cmd->event($value);
+        $cmd->save();
+
+        if ($detectorName === "pid") {
+          $cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "", "detectors_cpu", "GENERIC_INFO", 0);
+          $cmdCpu->event($stats['cpu_usages'][$value]['cpu']);
+          $cmdCpu->save();
+          $cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "", "detectors_memory", "GENERIC_INFO", 0);
+          $cmdMem->event($stats['cpu_usages'][$value]['mem']);
+          $cmdMem->save();
         }
+      }
     }
 
     // Mise à jour des usages GPU
     foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
-    log::add(__CLASS__, 'debug', "gpuStats" . " : " . json_encode($gpuStats));
-        foreach ($gpuStats as $key => $value) {
-            // Créez un nom de commande en combinant le nom du GPU et la clé
-            $cmdName = $gpuName . '_' . $key;
-            // Créez ou récupérez la commande
-            $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "gpu_" . $key, "GENERIC_INFO", 0);
-            // Enregistrez la valeur de l'événement
-            $cmd->event($value);
-            $cmd->save();
-        }
+      log::add(__CLASS__, 'debug', "gpuStats" . " : " . json_encode($gpuStats));
+      foreach ($gpuStats as $key => $value) {
+        // Créez un nom de commande en combinant le nom du GPU et la clé
+        $cmdName = $gpuName . '_' . $key;
+        // Créez ou récupérez la commande
+        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "gpu_" . $key, "GENERIC_INFO", 0);
+        // Enregistrez la valeur de l'événement
+        $cmd->event($value);
+        $cmd->save();
+      }
     }
-}
-
-
-
+  }
 }
 class frigateCmd extends cmd
 {
