@@ -29,6 +29,11 @@ try {
   */
     ajax::init();
 
+    if (init('action') == 'deleteEvent') {
+        // Suppression d'un event
+        frigate::deleteEvent(init('eventId'));
+        ajax::success();
+    }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */

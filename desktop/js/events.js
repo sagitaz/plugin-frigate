@@ -27,3 +27,29 @@ function openSnapshot(url) {
 document.getElementById('gotoHome').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
 });
+
+function deleteEvent(url) {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "deleteEvent",
+            eventId : url.id
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            if (data.state != 'ok') {
+                $('#div_alert').showAlert({ message: data.result, level: 'danger' });
+                return;
+            } else {
+                $('#div_alert').showAlert({
+                    message: '{{Suppression de l\'évènement réussi.}}',
+                    level: 'success'
+                });
+            }
+        }
+    })
+};

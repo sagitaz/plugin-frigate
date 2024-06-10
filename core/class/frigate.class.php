@@ -198,6 +198,26 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', $function . " : " . json_encode($response));
     return $response;
   }
+
+  private static function deletecURL($url)
+  {
+    $ch = curl_init();
+    curl_setopt($ch, CURLOPT_URL, $url);
+    curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_CUSTOMREQUEST, "DELETE");
+    $data = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+      log::add(__CLASS__, 'debug', "Error:" . curl_error($ch));
+      die();
+    }
+    curl_close($ch);
+    $response = json_decode($data, true);
+    log::add(__CLASS__, 'debug', "Delete : " . json_encode($response));
+    return $response;
+  }
+
   public static function getStats()
   {
     $url = config::byKey('URL', 'frigate');
@@ -290,7 +310,20 @@ class frigate extends eqLogic
     }
   }
 
+  public static function deleteEvent($id)
+  {
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
 
+    $resultURL = $url . ":" . $port . "/api/events/" . $id;
+
+    $remove = self::deletecURL($resultURL);
+
+    $event = frigate_events::byEventId($id);
+    $event->remove();
+
+
+  }
   public static function getEvents2()
   {
     $url = config::byKey('URL', 'frigate');
