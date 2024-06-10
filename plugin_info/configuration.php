@@ -42,7 +42,7 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Récupération des évènements}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}" placeholder="7 jours par default"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="recovery_days" />
@@ -50,7 +50,7 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Suppréssion des évènements}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}" placeholder="7 jours par default"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="remove_days" />

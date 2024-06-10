@@ -9,16 +9,16 @@ if (!isConnect('admin')) {
 
 ?>
 
-<br>
-<br>
-<div class="input-group" style="display:inline-flex">
-	<span class="input-group-btn">
-		<a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
-	</span>
-</div>
-<br>
-<br>
-<div class="col-lg-12">
+
+<div class="col-lg-12"><br>
+	<br>
+	<div class="input-group" style="display:inline-flex">
+		<span class="input-group-btn">
+			<a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
+		</span>
+	</div>
+	<br>
+	<br>
 	<?php
 	$events = frigate::getEvents2();
 	foreach ($events as $event) {
@@ -48,7 +48,7 @@ if (!isConnect('admin')) {
 			echo '<i class="fas fa-camera"></i>';
 			echo '</button>';
 		}
-		echo '<button class="hover-button" onclick="deleteEvent(this)" id="' . $event['clip'] . '" title="Supprimer l\'event sur votre serveur frigate">';
+		echo '<button class="hover-button" onclick="deleteEvent(this)" id="' . $event['id'] . '" title="Supprimer l\'event sur votre serveur frigate">';
 		echo '<i class="fas fa-trash"></i>';
 		echo '</button>';
 		echo '</div>';

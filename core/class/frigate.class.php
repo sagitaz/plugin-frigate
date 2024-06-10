@@ -244,14 +244,22 @@ class frigate extends eqLogic
   {
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
-
     $resultURL = $url . ":" . $port . "/api/events";
-
     $events = self::getcURL("Events", $resultURL);
     // traiter les evenemnts du plus ancien au plus recent
     $events = array_reverse($events);
 
-    foreach ($events as $event) {
+    $recoveryDays = config::byKey('recovery_days', 'frigate');
+    if (empty($recoveryDays)) {
+      $recoveryDays = 7;
+    }
+
+    $filteredEvents = array_filter($events, function ($event) use ($recoveryDays) {
+      return $event['start_time'] >= time() - $recoveryDays * 86400;
+    });
+    $filteredEvents = array_values($filteredEvents);
+
+    foreach ($filteredEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
       if (!$frigate) {
@@ -312,15 +320,18 @@ class frigate extends eqLogic
 
   public static function deleteEvent($id)
   {
+    log::add(__CLASS__, 'debug', "Delete ID : " . $id);
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
 
     $resultURL = $url . ":" . $port . "/api/events/" . $id;
 
-    $remove = self::deletecURL($resultURL);
+    self::deletecURL($resultURL);
 
-    $event = frigate_events::byEventId($id);
-    $event->remove();
+    $events = frigate_events::byEventId($id);
+    foreach ($events as $event) {
+      $event->remove();
+    }
 
 
   }
