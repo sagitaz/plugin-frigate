@@ -249,6 +249,8 @@ class frigate extends eqLogic
     // traiter les evenemnts du plus ancien au plus recent
     $events = array_reverse($events);
 
+
+    // Nombre de jours a filtrer et enregistrer en DB
     $recoveryDays = config::byKey('recovery_days', 'frigate');
     if (empty($recoveryDays)) {
       $recoveryDays = 7;
@@ -286,8 +288,17 @@ class frigate extends eqLogic
         event::add("frigate::alert", $event);
       }
     }
+    // Nombre de jours a garder en DB
+    $removeDays = config::byKey('remove_days', 'frigate');
+    if (empty($removeDays)) {
+      $removeDays = 7;
+    }
 
-    self::cleanDbEvents($events);
+    $filteredEvents = array_filter($events, function ($event) use ($removeDays) {
+      return $event['start_time'] >= time() - $removeDays * 86400;
+    });
+    $filteredEvents = array_values($filteredEvents);
+    self::cleanDbEvents($filteredEvents);
   }
 
   public static function cleanDbEvents($events)
