@@ -136,11 +136,11 @@ function addOrRemoveClass(element, className, isAdd) {
 function printEqLogic(_eqLogic) {
     if (_eqLogic && _eqLogic.logicalId) {
         if (_eqLogic.logicalId === "eqFrigateEvents" || _eqLogic.logicalId === "eqFrigateStats") {
-            addOrRemoveClass('eqFrigate', 'jeedisable', false);
-        } else {
             addOrRemoveClass('eqFrigate', 'jeedisable', true);
+        } else {
+            addOrRemoveClass('eqFrigate', 'jeedisable', false);
         }
     } else {
-        addOrRemoveClass('eqFrigate', 'jeedisable', true);
+        addOrRemoveClass('eqFrigate', 'jeedisable', false);
     }
 }
