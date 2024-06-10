@@ -25,5 +25,5 @@ function openSnapshot(url) {
 }
 
 document.getElementById('gotoHome').addEventListener('click', function () {
-    jeedomUtils.loadPage("index.php?v=d&m=frigate");
+    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
 });

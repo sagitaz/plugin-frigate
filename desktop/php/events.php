@@ -13,7 +13,7 @@ if (!isConnect('admin')) {
 <br>
 <div class="input-group" style="display:inline-flex">
 	<span class="input-group-btn">
-		<a class="btn geoAction rounded" data-action="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
+		<a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
 	</span>
 </div>
 <br>
