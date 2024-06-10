@@ -262,8 +262,8 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
                     <div class="alert alert-success bt_addAction" role="alert" style="cursor:pointer !important;">
-                        {{Ajouter une action}}.
-                        {{Vous pouvez utiliser les variables suivantes}} :
+                        {{Ajouter une action}}.<br>
+                        {{Vous pouvez utiliser les variables suivantes}} :<br>
                         #camera#, #score#, #img#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #label', #start#, #end#, #duree#
                     </div>
                     <form class="form-horizontal">

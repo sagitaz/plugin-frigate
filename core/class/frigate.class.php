@@ -354,8 +354,7 @@ class frigate extends eqLogic
 
     foreach ($events as $event) {
       $img = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/thumbnail.jpg";
-      $clip = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/clip.mp4";
-      $snapshot = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/snapshot.jpg";
+      
       if ($event->getHasSnapshot() == 1) {
         $snapshot = self::saveURL($event->getEventId(), "snapshot", $event->getCamera());
       } else {
