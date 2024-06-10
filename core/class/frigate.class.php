@@ -228,14 +228,14 @@ class frigate extends eqLogic
     $resultURL = $url . ":" . $port . "/api/events";
 
     $events = self::getcURL("Events", $resultURL);
+    // traiter les evenemnts du plus ancien au plus recent
+    $events = array_reverse($events);
 
     foreach ($events as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
       if (!$frigate) {
-
         $frigate = new frigate_events();
-
         $frigate->setBox($event['box']);
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
@@ -255,7 +255,27 @@ class frigate extends eqLogic
         $frigate->save();
 
         self::majEventsCmds($event);
-        //   event::add("frigate::alert", $event);
+        event::add("frigate::alert", $event);
+      }
+    }
+
+    self::cleanDbEvents($events);
+  }
+
+  public static function cleanDbEvents($events) {
+    $inDbEvents = frigate_events::all();
+    foreach ($inDbEvents as $inDbEvent) {
+      if (!in_array($inDbEvent->getEventId(), $events)) {
+        $inDbEvent->remove();
+        // recherche si clip et snapshot existe dans le dossier de sauvegarde
+        $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvents->getCamera() . "/" . $inDbEvent->getEventId() . "_clips.mp4";
+        $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvents->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
+        if (file_exists($clip)) {
+          unlink($clip);
+        }
+        if (file_exists($snapshot)) {
+          unlink($snapshot);
+        }
       }
     }
   }
@@ -269,6 +289,17 @@ class frigate extends eqLogic
       $img = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/thumbnail.jpg";
       $clip = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/clip.mp4";
       $snapshot = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/snapshot.jpg";
+      if ($event->getHasSnapshot() == 1) {
+        $snapshot = self::saveURL($event->getEventId(), "snapshot", $event->getCamera());
+      } else {
+        $snapshot = "null";
+      }
+      if ($event->getHasClip() == 1) {
+        $clip = self::saveURL($event->getEventId(), "clip", $event->getCamera());
+      } else {
+        $clip = "null";
+      }
+
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
@@ -489,23 +520,94 @@ class frigate extends eqLogic
     $start = date("d-m-Y H:i:s", $event['start_time']);
     $end = date("d-m-Y H:i:s", $event['end_time']);
     $duree = round($event['end_time'] - $event['start_time'], 0);
-    $img = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/thumbnail.jpg";
-    $clip = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/clip.mp4";
-    $snapshot = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/snapshot.jpg";
+    if ($hasSnapshot == 1) {
+      $snapshot = self::saveURL($event['id'], "snapshot", $camera);
+    } else {
+      $snapshot = "null";
+    }
+    if ($hasClip == 1) {
+      $clip = self::saveURL($event['id'], "clip", $camera);
+    } else {
+      $clip = "null";
+    }
 
     $eqLogic = eqLogic::byId($eqLogicId);
     $actions = $eqLogic->getConfiguration('actions');
-    log::add(__CLASS__, 'debug', "executeActionNewEvent" . " : " . json_encode($actions[0]));
     foreach ($actions[0] as $action) {
       $id = str_replace("#", "", $action['cmd']);
       $cmd = cmd::byId($id);
       $options = $action['options'];
-      log::add(__CLASS__, 'debug', "options entrée" . " : " . json_encode($options));
-      $options = str_replace(['#camera#', '#score#', '#img#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $img, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
-      log::add(__CLASS__, 'debug', "options converties" . " : " . json_encode($options));
+      $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
+      // executer l'action que si $start est compris entre l'heure actuelle et -3h.
+      if ($event['start_time'] > time() - 30800) {
+        if (strpos(json_encode($action['options']), '#clip#') !== false) {
+          log::add(__CLASS__, 'debug', "ACTION CLIP");
+          if ($hasClip == 1) {
+            log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+            $cmd->execCmd($options);
+          }
+        } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
+          log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
+          if ($hasSnapshot == 1) {
+            log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
+            $cmd->execCmd($options);
+          }
+        } else {
+          log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
+          $cmd->execCmd($options);
+        }
+      } else {
 
-      $cmd->execCmd($options);
+        log::add(__CLASS__, 'debug', "Heure dépassée : " . $start);
+      }
     }
+  }
+
+  public static function saveURL($eventId, $type, $camera)
+  {
+    $result = "";
+    $urlJeedom = network::getNetworkAccess('external');
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
+    $format = ($type == "snapshot") ? "jpg" : "mp4";
+    $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
+
+    $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
+
+    // Vérifiez si le fichier existe déjà
+    if (file_exists($path)) {
+      log::add(__CLASS__, 'debug', "Le fichier existe déjà : " . $path);
+      return $urlJeedom . str_replace("/var/www/html", "", $path);
+    }
+
+    // Obtenez le répertoire du chemin de destination
+    $destinationDir = dirname($path);
+
+    // Vérifiez si le répertoire existe, sinon créez-le
+    if (!is_dir($destinationDir)) {
+      if (!mkdir($destinationDir, 0755, true)) {
+        log::add(__CLASS__, 'debug', "Échec de la création du répertoire.");
+        return $result;
+      }
+    }
+
+    // Téléchargez l'image ou la vidéo
+    $content = file_get_contents($lien);
+
+    if ($content !== false) {
+      // Enregistrez l'image ou la vidéo dans le dossier spécifié
+      $file = file_put_contents($path, $content);
+      if ($file !== false) {
+        log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
+        $result = $urlJeedom . str_replace("/var/www/html", "", $path);
+      } else {
+        log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier.");
+      }
+    } else {
+      log::add(__CLASS__, 'debug', "Échec du téléchargement du fichier.");
+    }
+
+    return $result;
   }
 }
 class frigateCmd extends cmd
