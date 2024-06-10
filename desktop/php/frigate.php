@@ -83,7 +83,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
-            <li role="presentation"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
+            <li role="presentation" class="eqFrigate"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
         </ul>
         <div class="tab-content">
             <!-- Onglet de configuration de l'équipement -->
@@ -145,23 +145,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="name" placeholder="{{Nom}}">
                                 </div>
                             </div>
-                            <!-- Exemple de champ de saisie du cron d'auto-actualisation avec assistant -->
-                            <!-- La fonction cron de la classe du plugin doit contenir le code prévu pour que ce champ soit fonctionnel -->
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{Auto-actualisation}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{Fréquence de rafraîchissement des commandes infos de l'équipement}}"></i></sup>
-                                </label>
-                                <div class="col-sm-6">
-                                    <div class="input-group">
-                                        <input type="text" class="eqLogicAttr form-control roundedLeft" data-l1key="configuration" data-l2key="autorefresh" placeholder="{{Cliquer sur ? pour afficher l'assistant cron}}">
-                                        <span class="input-group-btn">
-                                            <a class="btn btn-default cursor jeeHelper roundedRight" data-helper="cron" title="Assistant cron">
-                                                <i class="fas fa-question-circle"></i>
-                                            </a>
-                                        </span>
-                                    </div>
-                                </div>
-                            </div>
                             <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{bbox}}</label>
                                 <div class="col-sm-8">
@@ -204,14 +187,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 </label>
                                 <div class="col-sm-6">
                                     <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="quality" placeholder="{{Qualité 0-100}}">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{hauteur}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{jpeg qualité 0-100}}"></i></sup>
-                                </label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="height">
                                 </div>
                             </div>
                         </div>
@@ -258,13 +233,13 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     </table>
                 </div>
             </div><!-- /.tabpanel #commandtab-->
-            <div role="tabpanel" class="tab-pane" id="actionsTab">
+            <div role="tabpanel" class="tab-pane eqFrigate" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
                     <div class="alert alert-success bt_addAction" role="alert" style="cursor:pointer !important;">
                         {{Ajouter une action}}.<br>
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #camera#, #score#, #img#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #label', #start#, #end#, #duree#
+                        #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #label#, #start#, #end#, #duree#
                     </div>
                     <form class="form-horizontal">
                         <fieldset>

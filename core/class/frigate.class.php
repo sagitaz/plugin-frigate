@@ -134,7 +134,6 @@ class frigate extends eqLogic
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
     $name = $this->getConfiguration('name');
-    $height = $this->getConfiguration('height', 500);
     $bbox = $this->getConfiguration('bbox', 0);
     $timestamp = $this->getConfiguration('timestamp', 1);
     $zones = $this->getConfiguration('zones', 0);
@@ -354,7 +353,7 @@ class frigate extends eqLogic
 
     foreach ($events as $event) {
       $img = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/thumbnail.jpg";
-      
+
       if ($event->getHasSnapshot() == 1) {
         $snapshot = self::saveURL($event->getEventId(), "snapshot", $event->getCamera());
       } else {
@@ -401,7 +400,21 @@ class frigate extends eqLogic
     return $b['top_score'] <=> $a['top_score'];
   }
 
-
+  public static function generateEqCameras($event)
+  {
+    $cameraName = $event["camera"];
+    $frigate = frigate::byTypeAndSearhConfiguration('frigate', $cameraName);
+    $frigate = $frigate[0];
+      if (!is_object($frigate)) {
+        $frigate = new frigate();
+        $frigate->setName($cameraName);
+        $frigate->setEqType_name("frigate");
+        $frigate->setLogicalId("eqFrigateCameras");
+        $frigate->setConfiguration("name", $cameraName);
+        $frigate->save();
+      }
+     return $frigate; 
+  }
   public static function generateEqEvents()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -451,12 +464,11 @@ class frigate extends eqLogic
     // maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $eqlogicIds[] = $frigate->getId();
-    // recherche equipement caméra
-    $eqCameras = eqLogic::byTypeAndSearchConfiguration("frigate", $event['camera']);
-    foreach ($eqCameras as $eqCamera) {
-      $eqlogicIds[] = $eqCamera->getId();
-      self::executeActionNewEvent($eqCamera->getId(), $event);
-    }
+    // recherche et création equipement caméra
+    $eqCamera= self::generateEqCameras($event);
+    $eqlogicIds[] = $eqCamera->getId();
+    self::executeActionNewEvent($eqCamera->getId(), $event);
+    
 
     foreach ($eqlogicIds as $eqlogicId) {
       // creation des commandes
