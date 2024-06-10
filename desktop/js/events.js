@@ -23,3 +23,7 @@ function openClip(url) {
 function openSnapshot(url) {
     window.open(url.id);
 }
+
+document.getElementById('gotoHome').addEventListener('click', function () {
+    jeedomUtils.loadPage("index.php?v=d&m=frigate");
+});

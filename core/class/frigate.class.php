@@ -413,6 +413,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "cameraStats" . " : " . json_encode($cameraStats));    
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
+      if (!is_object($eqCamera[0])) {}
       $eqlogicCameraId = $eqCamera[0]->getId();
       
       foreach ($cameraStats as $key => $value) {
@@ -422,6 +423,7 @@ class frigate extends eqLogic
         $cmd->event($value);
         $cmd->save();
       }
+    }
     }
 
     // Statistiques pour eqLogic statistiques générales

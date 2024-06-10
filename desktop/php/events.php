@@ -9,6 +9,11 @@ if (!isConnect('admin')) {
 
 ?>
 
+<div class="input-group" style="display:inline-flex">
+	<span class="input-group-btn">
+		<a class="btn geoAction roundedLeft" data-action="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
+	</span>
+</div>
 <br>
 <br>
 <div class="col-lg-12 input-group">

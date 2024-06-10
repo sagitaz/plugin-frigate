@@ -87,7 +87,102 @@ function addCmdToTable(_cmd) {
 
 }
 
+function addAction(_action, _type) {
+    if (!isset(_action)) {
+        _action = {}
+    }
+    if (!isset(_action.options)) {
+        _action.options = {}
+    }
+    var div = '<div class="' + _type + '">'
+    div += '<div class="form-group ">'
+    div += '<div class="col-sm-1">'
+    div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="enable" checked title="{{Décocher la case pour désactiver l\'action}}">'
+    div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
+    div += '</div>'
+    div += '<div class="col-sm-1">'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdEventName" data-type="' + _type + '" />'
+    div += '</div>'
+    div += '<div class="col-sm-4">'
+    div += '<div class="input-group input-group-sm">'
+    div += '<span class="input-group-btn">'
+    div += '<a class="btn btn-default btn-sm bt_removeAction roundedLeft" data-type="' + _type + '"><i class="fas fa-minus-circle"></i></a>'
+    div += '</span>'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmd" data-type="' + _type + '" />'
+    div += '<span class="input-group-btn">'
+    div += '<a class="btn btn-default btn-sm listAction" data-type="' + _type + '" title="{{Sélectionner un mot-clé}}"><i class="fas fa-tasks"></i></a>'
+    div += '<a class="btn btn-default btn-sm listCmdAction roundedRight" data-type="' + _type + '" title="{{Sélectionner la commande}}"><i class="fas fa-list-alt"></i></a>'
+    div += '</span>'
+    div += '</div>'
+    div += '</div>'
+    var actionOption_id = jeedomUtils.uniqId()
+    div += '<div class="col-sm-6 actionOptions" id="' + actionOption_id + '"></div>'
 
+    $('#div_' + _type).append(div)
+    $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
+
+    if (is_array(actionOptions)) {
+        actionOptions.push({
+            expression: init(_action.cmd),
+            options: _action.options,
+            id: actionOption_id
+        })
+    }
+}
+$("#div_action").sortable({ axis: "y", cursor: "move", items: ".start", placeholder: "ui-state-highlight", tolerance: "intersect", forcePlaceholderSize: true })
+
+$('.bt_addAction').off('click').on('click', function () {
+    addAction({}, 'action')
+})
+
+
+$("body").off('click', ".listAction").on('click', ".listAction", function () {
+    var type = $(this).attr('data-type')
+    var el = $(this).closest('.' + type).find('.expressionAttr[data-l1key=cmd]')
+    jeedom.getSelectActionModal({}, function (result) {
+        el.value(result.human)
+        jeedom.cmd.displayActionOption(el.value(), '', function (html) {
+            el.closest('.' + type).find('.actionOptions').html(html)
+            jeedomUtils.taAutosize()
+        })
+    })
+})
+
+$("body").off('click', ".listCmdAction").on('click', ".listCmdAction", function () {
+    var type = $(this).attr('data-type')
+    var el = $(this).closest('.' + type).find('.expressionAttr[data-l1key=cmd]')
+    jeedom.cmd.getSelectModal({
+        cmd: {
+            type: 'action'
+        }
+    }, function (result) {
+        el.value(result.human)
+        jeedom.cmd.displayActionOption(el.value(), '', function (html) {
+            el.closest('.' + type).find('.actionOptions').html(html)
+            jeedomUtils.taAutosize()
+        })
+    })
+})
+
+$("body").off('click', '.bt_removeAction').on('click', '.bt_removeAction', function () {
+    var type = $(this).attr('data-type')
+    $(this).closest('.' + type).remove()
+})
+
+
+function saveEqLogic(_eqLogic) {
+    if (!isset(_eqLogic.configuration)) {
+        _eqLogic.configuration = {}
+    }
+
+    _eqLogic.configuration.actions = []
+    $('#div_action').each(function () {
+        let actions = $(this).getValues('.actionAttr')
+        actions = $(this).find('.start').getValues('.expressionAttr')
+        _eqLogic.configuration.actions.push(actions)
+    })
+    return _eqLogic
+}
 document.getElementById('gotoTimeline').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=timeline");
 });
@@ -142,5 +237,29 @@ function printEqLogic(_eqLogic) {
         }
     } else {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
+    }
+
+    $('#div_action').empty()
+    ACTIONS_LIST = []
+    if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
+        actionOptions = []
+        console.log(_eqLogic.configuration.actions);
+        for (var i in _eqLogic.configuration.actions[0]) {
+            addAction(_eqLogic.configuration.actions[0][i], "start")
+        }
+        ACTIONS_LIST = null
+        jeedom.cmd.displayActionsOption({
+            params: actionOptions,
+            async: false,
+            error: function (error) {
+                $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+            },
+            success: function (data) {
+                for (var i in data) {
+                    $('#' + data[i].id).append(data[i].html.html)
+                }
+                jeedomUtils.taAutosize()
+            }
+        })
     }
 }

@@ -88,6 +88,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
+            <li role="presentation"><a href="#actiontab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
         </ul>
         <div class="tab-content">
             <!-- Onglet de configuration de l'équipement -->
@@ -262,6 +263,23 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     </table>
                 </div>
             </div><!-- /.tabpanel #commandtab-->
+            <div role="tabpanel" class="tab-pane" id="actiontab">
+                <div class="alert alert-info" role="alert">
+                    {{Attention, ne pas modifier les actions depuis le plugin agenda}}.<br>
+                </div>
+                <div class="actionAttr form-group" id="actionTab">
+                    <br>
+                    <div class="alert alert-success bt_addAction" role="alert" style="cursor:pointer !important;">
+                        {{Ajouter une action}}.
+                    </div>
+                    <form class="form-horizontal">
+                        <fieldset>
+                            <div id="div_action" class="col-xs-12" style="padding:10px;margin-bottom:15px;">
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div><!-- /.tabpanel  #actiontab-->
 
         </div><!-- /.tab-content -->
     </div><!-- /.eqLogic -->
