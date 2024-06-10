@@ -551,7 +551,7 @@ class frigate extends eqLogic
       $options = $action['options'];
       $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
       // executer l'action que si $start est compris entre l'heure actuelle et -3h.
-      if ($event['start_time'] > time() - 30800) {
+      if ($event['start_time'] > time() - 10800) {
         if (strpos(json_encode($action['options']), '#clip#') !== false) {
           log::add(__CLASS__, 'debug', "ACTION CLIP");
           if ($hasClip == 1) {

@@ -40,5 +40,21 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="port" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Récupération des évènements}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="recovery_days" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Suppréssion des évènements}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="remove_days" />
+            </div>
+        </div>
     </fieldset>
 </form>
