@@ -255,7 +255,7 @@ class frigate extends eqLogic
         $frigate->save();
 
         self::majEventsCmds($event);
-     //   event::add("frigate::alert", $event);
+        //   event::add("frigate::alert", $event);
       }
     }
   }
@@ -358,7 +358,7 @@ class frigate extends eqLogic
     $eqCameras = eqLogic::byTypeAndSearchConfiguration("frigate", $event['camera']);
     foreach ($eqCameras as $eqCamera) {
       $eqlogicIds[] = $eqCamera->getId();
-      self::executeActionNewEvent($eqlogicIds[0], $event);
+      self::executeActionNewEvent($eqCamera->getId(), $event);
     }
 
     foreach ($eqlogicIds as $eqlogicId) {
@@ -411,21 +411,26 @@ class frigate extends eqLogic
     // Statistiques pour chaque eqLogic caméras
     // Mise à jour des statistiques des caméras
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-      log::add(__CLASS__, 'debug', "cameraStats" . " : " . json_encode($cameraStats));    
+      log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
+      log::add(__CLASS__, 'debug', "Stats" . " : " . json_encode($cameraStats));
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
-      if (!is_object($eqCamera[0])) {}
-      $eqlogicCameraId = $eqCamera[0]->getId();
-      
-      foreach ($cameraStats as $key => $value) {
-        // Créez ou récupérez la commande
-        $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
-        // Enregistrez la valeur de l'événement
-        $cmd->event($value);
-        $cmd->save();
+      if (is_object($eqCamera[0])) {
+        log::add(__CLASS__, 'debug', "L'équipement camera existe.");
+        $eqlogicCameraId = $eqCamera[0]->getId();
+        foreach ($cameraStats as $key => $value) {
+          // Créez ou récupérez la commande
+          log::add(__CLASS__, 'debug', "Création et maj de la commande : " . $key);
+          $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
+          // Enregistrez la valeur de l'événement
+          $cmd->event($value);
+          $cmd->save();
+        }
+      } else {
+        log::add(__CLASS__, 'debug', "L'équipement camera n'existe pas.");
       }
     }
-    
+
 
     // Statistiques pour eqLogic statistiques générales
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -469,14 +474,39 @@ class frigate extends eqLogic
     }
   }
 
-  private static function executeActionNewEvent($eqLogicId, $event) {
+  private static function executeActionNewEvent($eqLogicId, $event)
+  {
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
+    // liste des events et de leurs variables
+    $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
+    $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
+    $topScore = round($event['data']['top_score'] * 100, 0);
+    $zones = $event['zones'];
+    $camera = $event['camera'];
+    $score = $event['score'];
+    $label = $event['label'];
+    $start = date("d-m-Y H:i:s", $event['start_time']);
+    $end = date("d-m-Y H:i:s", $event['end_time']);
+    $duree = round($event['end_time'] - $event['start_time'], 0);
+    $img = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/thumbnail.jpg";
+    $clip = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/clip.mp4";
+    $snapshot = "http://" . $url . ":" . $port . "/api/events/" . $event['id'] . "/snapshot.jpg";
+
     $eqLogic = eqLogic::byId($eqLogicId);
-    $actions = $eqLogic->getConfiguration('actions', array());
-    foreach ($actions as $action) {
-      $action->execCmd();
+    $actions = $eqLogic->getConfiguration('actions');
+    log::add(__CLASS__, 'debug', "executeActionNewEvent" . " : " . json_encode($actions[0]));
+    foreach ($actions[0] as $action) {
+      $id = str_replace("#", "", $action['cmd']);
+      $cmd = cmd::byId($id);
+      $options = $action['options'];
+      log::add(__CLASS__, 'debug', "options entrée" . " : " . json_encode($options));
+      $options = str_replace(['#camera#', '#score#', '#img#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $img, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
+      log::add(__CLASS__, 'debug', "options converties" . " : " . json_encode($options));
+
+      $cmd->execCmd($options);
     }
   }
-
 }
 class frigateCmd extends cmd
 {
