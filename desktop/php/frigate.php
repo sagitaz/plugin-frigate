@@ -18,10 +18,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <legend><i class="fas fa-cog"></i> {{Gestion}}</legend>
         <!-- Boutons de gestion du plugin -->
         <div class="eqLogicThumbnailContainer">
-            <div class="cursor eqLogicAction logoPrimary" data-action="add">
-                <i class="fas fa-plus-circle"></i>
+            <div class="cursor eqLogicAction logoPrimary" id="searchAndCreate">
+                <i class="fas fa-plus-search"></i>
                 <br>
-                <span>{{Ajouter}}</span>
+                <span>{{Rechercher caméras}}</span>
             </div>
             <div class="cursor eqLogicAction logoSecondary" id="gotoEvents">
                 <i class="fas fa-calendar"></i>

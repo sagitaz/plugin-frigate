@@ -342,8 +342,6 @@ class frigate extends eqLogic
     foreach ($events as $event) {
       $event->remove();
     }
-
-
   }
   public static function getEvents2()
   {
@@ -400,20 +398,28 @@ class frigate extends eqLogic
     return $b['top_score'] <=> $a['top_score'];
   }
 
-  public static function generateEqCameras($event)
+  public static function generateEqCameras()
   {
-    $cameraName = $event["camera"];
-    $frigate = frigate::byTypeAndSearhConfiguration('frigate', $cameraName);
-    $frigate = $frigate[0];
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
+    $resultURL = $url . ":" . $port . "/api/stats";
+    $stats = self::getcURL("create eqCameras", $resultURL);
+    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+      // recherche equipement caméra
+      $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
+      $frigate = $eqCamera[0];
       if (!is_object($frigate)) {
+        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "est créé.");
         $frigate = new frigate();
         $frigate->setName($cameraName);
         $frigate->setEqType_name("frigate");
         $frigate->setLogicalId("eqFrigateCameras");
         $frigate->setConfiguration("name", $cameraName);
+        $frigate->setIsEnable(1);
+        $frigate->setIsVisible(1);
         $frigate->save();
       }
-     return $frigate; 
+    }
   }
   public static function generateEqEvents()
   {
@@ -423,6 +429,8 @@ class frigate extends eqLogic
       $frigate->setName('Events');
       $frigate->setEqType_name("frigate");
       $frigate->setLogicalId("eqFrigateEvents");
+      $frigate->setIsEnable(1);
+      $frigate->setIsVisible(1);
       $frigate->save();
     }
   }
@@ -435,6 +443,8 @@ class frigate extends eqLogic
       $frigate->setName('Statistiques');
       $frigate->setEqType_name("frigate");
       $frigate->setLogicalId("eqFrigateStats");
+      $frigate->setIsEnable(1);
+      $frigate->setIsVisible(1);
       $frigate->save();
     }
   }
@@ -464,11 +474,13 @@ class frigate extends eqLogic
     // maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $eqlogicIds[] = $frigate->getId();
-    // recherche et création equipement caméra
-    $eqCamera= self::generateEqCameras($event);
+    // recherche et création equipement caméra    
+    $cameraName = $event["camera"];
+    $frigate = frigate::byTypeAndSearhConfiguration('frigate', $cameraName);
+    $eqCamera = $frigate[0];
     $eqlogicIds[] = $eqCamera->getId();
     self::executeActionNewEvent($eqCamera->getId(), $event);
-    
+
 
     foreach ($eqlogicIds as $eqlogicId) {
       // creation des commandes
@@ -585,8 +597,6 @@ class frigate extends eqLogic
 
   private static function executeActionNewEvent($eqLogicId, $event)
   {
-    $url = config::byKey('URL', 'frigate');
-    $port = config::byKey('port', 'frigate');
     // liste des events et de leurs variables
     $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
     $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;

@@ -257,3 +257,28 @@ function printEqLogic(_eqLogic) {
         })
     }
 }
+
+document.getElementById('searchAndCreate').addEventListener('click', function () {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "searchAndCreate"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            if (data.state != 'ok') {
+                $('#div_alert').showAlert({ message: data.result, level: 'danger' });
+                return;
+            } else {
+                $('#div_alert').showAlert({
+                    message: '{{Création des équipementsréussi.}}',
+                    level: 'success'
+                });
+            }
+        }
+    })
+});
