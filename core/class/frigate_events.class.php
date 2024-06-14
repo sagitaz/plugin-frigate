@@ -26,11 +26,14 @@ class frigate_events
 	private $box;
 	private $camera;
 	private $data;
+	private $lasted;
 	private $startTime;
 	private $endTime;
 	private $false_positive;
 	private $hasClip;
+	private $clip;
 	private $hasSnapshot;
+	private $snapshot;
 	private $label;
 	private $plusId;
 	private $retain;
@@ -153,6 +156,16 @@ class frigate_events
 		$this->data = $data;
 	}
 
+	public function getLasted()
+	{
+		return $this->lasted;
+	}
+
+	public function setLasted($lasted)
+	{
+		$this->lasted = $lasted;
+	}
+
 	public function getStartTime()
 	{
 		return $this->startTime;
@@ -193,7 +206,15 @@ class frigate_events
 		$hasClip = ($hasClip == "true") ? 1 : 0;
 		$this->hasClip = $hasClip;
 	}
+	public function getClip()
+	{
+		return $this->clip;
+	}
 
+	public function setClip($clip)
+	{
+		$this->clip = $clip;
+	}
 	public function getHasSnapshot()
 	{
 		return $this->hasSnapshot;
@@ -203,6 +224,15 @@ class frigate_events
 	{
 		$hasSnapshot = ($hasSnapshot == "true") ? 1 : 0;
 		$this->hasSnapshot = $hasSnapshot;
+	}
+	public function getSnapshot()
+	{
+		return $this->snapshot;
+	}
+
+	public function setSnapshot($snapshot)
+	{
+		$this->snapshot = $snapshot;
 	}
 
 	public function getLabel()

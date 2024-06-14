@@ -185,31 +185,9 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-function updateImage() {
-    var imgUrl = document.getElementById('cameraUrlInput').value;
-    var imgElement = document.getElementById('imgFrigate');
 
-    if (imgUrl) {
-        // Add a query parameter to force image reload
-        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-    }
-}
 
-// Update the image immediately when the input value changes
-document.getElementById('cameraUrlInput').addEventListener('input', updateImage);
 
-var imageUpdateInterval;
-// Update the image immediately when the page loads
-document.addEventListener('DOMContentLoaded', function () {
-    updateImage();
-
-    // Set an interval to update the image every 0 seconds
-    imageUpdateInterval = setInterval(updateImage, 2000);
-    // Clear the interval when the page is being unloaded
-    window.addEventListener('beforeunload', function () {
-        clearInterval(imageUpdateInterval);
-    });
-});
 
 function addOrRemoveClass(element, className, isAdd) {
     const tabs = document.getElementsByClassName(element);
@@ -221,6 +199,17 @@ function addOrRemoveClass(element, className, isAdd) {
         }
     }
 }
+
+function updateImage() {
+    var imgUrl = document.getElementById('cameraUrlInput').value;
+    var imgElement = document.getElementById('imgFrigate');
+
+    if (imgUrl) {
+        // Add a query parameter to force image reload
+        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+    }
+}
+
 
 function printEqLogic(_eqLogic) {
     if (_eqLogic && _eqLogic.logicalId) {
@@ -256,6 +245,26 @@ function printEqLogic(_eqLogic) {
             }
         })
     }
+
+   // var cameraUrl = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').value();
+   // $('#imgFrigate').attr("src", cameraUrl);
+
+
+    // Update the image immediately when the input value changes
+    document.getElementById('cameraUrlInput').addEventListener('input', updateImage);
+
+    var imageUpdateInterval;
+    // Update the image immediately when the page loads
+    document.addEventListener('DOMContentLoaded', function () {
+        updateImage();
+
+        // Set an interval to update the image every 0 seconds
+        imageUpdateInterval = setInterval(updateImage, 2000);
+        // Clear the interval when the page is being unloaded
+        window.addEventListener('beforeunload', function () {
+            clearInterval(imageUpdateInterval);
+        });
+    });
 }
 
 document.getElementById('searchAndCreate').addEventListener('click', function () {

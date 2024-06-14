@@ -19,9 +19,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
         <!-- Boutons de gestion du plugin -->
         <div class="eqLogicThumbnailContainer">
             <div class="cursor eqLogicAction logoPrimary" id="searchAndCreate">
-                <i class="fas fa-plus-search"></i>
+                <i class="fas fa-video"></i>
                 <br>
-                <span>{{Rechercher caméras}}</span>
+                <span>{{Rechercher}}</span>
             </div>
             <div class="cursor eqLogicAction logoSecondary" id="gotoEvents">
                 <i class="fas fa-calendar"></i>

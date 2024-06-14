@@ -263,11 +263,27 @@ class frigate extends eqLogic
     foreach ($filteredEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
+      $img = self::saveURL($event['id'], "snapshot", $event['camera'], 1);
+
+      if ($event->getHasSnapshot() == 1) {
+        $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
+      } else {
+        $snapshot = "null";
+      }
+      if ($event->getHasClip() == 1) {
+        $clip = self::saveURL($event['id'], "clip", $event['camera']);
+      } else {
+        $clip = "null";
+      }
+
       if (!$frigate) {
         $frigate = new frigate_events();
         $frigate->setBox($event['box']);
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
+        $frigate->setLasted($img);
+        $frigate->setClip($clip);
+        $frigate->setSnapshot($snapshot);
         $frigate->setStartTime($event['start_time']);
         $frigate->setEndTime($event['end_time']);
         $frigate->setFalsePositive($event['false_positive']);
@@ -278,7 +294,7 @@ class frigate extends eqLogic
         $frigate->setPlusId($event['plus_id']);
         $frigate->setRetain($event['retain_indefinitely']);
         $frigate->setSubLabel($event['sub_label']);
-        $frigate->setThumbnail($event['thumbnail']);
+        $frigate->setThumbnail($img);
         $frigate->setTopScore($event['data']['top_score']);
         $frigate->setZones($event['zones']);
         $frigate->save();
@@ -316,6 +332,8 @@ class frigate extends eqLogic
         // recherche si clip et snapshot existe dans le dossier de sauvegarde
         $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_clip.mp4";
         $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
+        $thumbnail = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_thumbnail.jpg";
+
         if (file_exists($clip)) {
           unlink($clip);
           log::add(__CLASS__, 'debug', "MP4 clip delete");
@@ -323,6 +341,10 @@ class frigate extends eqLogic
         if (file_exists($snapshot)) {
           unlink($snapshot);
           log::add(__CLASS__, 'debug', "JPG snapshot delete");
+        }
+        if (file_exists($thumbnail)) {
+          unlink($thumbnail);
+          log::add(__CLASS__, 'debug', "JPG thumbnail delete");
         }
       }
     }
@@ -350,30 +372,17 @@ class frigate extends eqLogic
     $events = frigate_events::all();
 
     foreach ($events as $event) {
-      $img = "http://" . $url . ":" . $port . "/api/events/" . $event->getEventId() . "/thumbnail.jpg";
-
-      if ($event->getHasSnapshot() == 1) {
-        $snapshot = self::saveURL($event->getEventId(), "snapshot", $event->getCamera());
-      } else {
-        $snapshot = "null";
-      }
-      if ($event->getHasClip() == 1) {
-        $clip = self::saveURL($event->getEventId(), "clip", $event->getCamera());
-      } else {
-        $clip = "null";
-      }
-
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
       $result[] = array(
-        "img" => $img,
+        "img" => $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
         "date" => $date,
         "duree" => $duree,
-        "snapshot" => $snapshot,
-        "clip" => $clip,
+        "snapshot" => $event->getSnapshot(),
+        "clip" => $event->getClip(),
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
         "id" => $event->getEventId(),
@@ -651,7 +660,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId, $type, $camera)
+  public static function saveURL($eventId, $type, $camera, $thumbnail = 0)
   {
     $result = "";
     $urlJeedom = network::getNetworkAccess('external');
@@ -659,8 +668,13 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
     $format = ($type == "snapshot") ? "jpg" : "mp4";
     $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
-
     $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
+    if ($thumbnail == 1) {
+      $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
+      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
+    }
+
+
 
     // Vérifiez si le fichier existe déjà
     if (file_exists($path)) {
