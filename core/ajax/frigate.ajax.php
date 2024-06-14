@@ -36,8 +36,8 @@ try {
     }
     if (init('action') == 'searchAndCreate') {
         // Suppression d'un event
-        frigate::generateEqCameras();
-        ajax::success();
+        $result = frigate::generateEqCameras();
+        ajax::success($result);
     }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));

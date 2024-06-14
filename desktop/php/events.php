@@ -20,7 +20,7 @@ if (!isConnect('admin')) {
 	<br>
 	<br>
 	<?php
-	$events = frigate::getEvents2();
+	$events = frigate::showEvents();
 	foreach ($events as $event) {
 		//div globale start
 		echo '<div class="col-lg-4 ">';

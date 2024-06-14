@@ -22,7 +22,7 @@ require_once __DIR__ . '/frigate_events.class.php';
 use Log;
 use eqLogic;
 use cmd;
-use event;
+use message;
 
 class frigate extends eqLogic
 {
@@ -220,29 +220,33 @@ class frigate extends eqLogic
   public static function getStats()
   {
     $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      return;
+    }
     $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      return;
+    }
 
     $resultURL = $url . ":" . $port . "/api/stats";
 
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
   }
-
-  public static function getTimeline()
-  {
-    $url = config::byKey('URL', 'frigate');
-    $port = config::byKey('port', 'frigate');
-
-    $resultURL = $url . ":" . $port . "/api/timeline";
-
-    $result = self::getcURL("Timeline", $resultURL);
-
-    return $result;
-  }
   public static function getEvents()
   {
     $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      return;
+    }
     $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      return;
+    }
     $resultURL = $url . ":" . $port . "/api/events";
     $events = self::getcURL("Events", $resultURL);
     // traiter les evenemnts du plus ancien au plus recent
@@ -300,13 +304,15 @@ class frigate extends eqLogic
         $frigate->save();
 
         self::majEventsCmds($event);
-        event::add("frigate::alert", $event);
       }
     }
     // Nombre de jours a garder en DB
     $removeDays = config::byKey('remove_days', 'frigate');
     if (empty($removeDays)) {
       $removeDays = 7;
+    } else if ($removeDays < $recoveryDays) {
+      $removeDays = $recoveryDays;
+      log::add(__CLASS__, 'warning', "le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. removeDays est donc égale à recoveryDays.");
     }
 
     $filteredEvents = array_filter($events, function ($event) use ($removeDays) {
@@ -354,7 +360,15 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "Delete ID : " . $id);
     $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      return;
+    }
     $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      return;
+    }
 
     $resultURL = $url . ":" . $port . "/api/events/" . $id;
 
@@ -365,10 +379,8 @@ class frigate extends eqLogic
       $event->remove();
     }
   }
-  public static function getEvents2()
+  public static function showEvents()
   {
-    $url = config::byKey('URL', 'frigate');
-    $port = config::byKey('port', 'frigate');
     $events = frigate_events::all();
 
     foreach ($events as $event) {
@@ -410,10 +422,20 @@ class frigate extends eqLogic
   public static function generateEqCameras()
   {
     $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      $result = "URL";
+      return $result;
+    }
     $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      $result = "PORT";
+      return $result;
+    }
     $resultURL = $url . ":" . $port . "/api/stats";
     $stats = self::getcURL("create eqCameras", $resultURL);
+    $n = 0;
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+      $n++;
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
       $frigate = $eqCamera[0];
@@ -429,6 +451,7 @@ class frigate extends eqLogic
         $frigate->save();
       }
     }
+    return $n;
   }
   public static function generateEqEvents()
   {
@@ -542,15 +565,12 @@ class frigate extends eqLogic
     // Mise à jour des statistiques des caméras
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
-      log::add(__CLASS__, 'debug', "Stats" . " : " . json_encode($cameraStats));
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
       if (is_object($eqCamera[0])) {
-        log::add(__CLASS__, 'debug', "L'équipement camera existe.");
         $eqlogicCameraId = $eqCamera[0]->getId();
         foreach ($cameraStats as $key => $value) {
           // Créez ou récupérez la commande
-          log::add(__CLASS__, 'debug', "Création et maj de la commande : " . $key);
           $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
           // Enregistrez la valeur de l'événement
           $cmd->event($value);
@@ -602,6 +622,18 @@ class frigate extends eqLogic
         $cmd->save();
       }
     }
+
+    // Créez ou récupérez la commande version Frigate
+    $version = strstr($stats['service']['version'], '-', true);
+    $latestVersion = $stats['service']['latest_version'];
+    if ($version < $latestVersion) {
+      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
+    }
+    $cmd = self::createCmd($eqlogicId, "version", "numeric", "", "info_version", "GENERIC_INFO", 0);
+    // Enregistrez la valeur de l'événement
+    $cmd->event($version);
+    $cmd->save();
+
   }
 
   private static function executeActionNewEvent($eqLogicId, $event)
@@ -664,8 +696,19 @@ class frigate extends eqLogic
   {
     $result = "";
     $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
+    }
     $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      return;
+    }
     $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      return;
+    }
     $format = ($type == "snapshot") ? "jpg" : "mp4";
     $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
     $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
@@ -673,8 +716,6 @@ class frigate extends eqLogic
       $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
       $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
     }
-
-
 
     // Vérifiez si le fichier existe déjà
     if (file_exists($path)) {

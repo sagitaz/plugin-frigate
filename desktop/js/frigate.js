@@ -279,15 +279,29 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-            if (data.state != 'ok') {
-                $('#div_alert').showAlert({ message: data.result, level: 'danger' });
-                return;
-            } else {
+            if (data.state == 'URL') {
                 $('#div_alert').showAlert({
-                    message: '{{Création des équipementsréussi.}}',
+                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    level: 'warning'
+                });
+                return;
+            } else if (data.state == 'PORT') {
+                $('#div_alert').showAlert({
+                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    level: 'warning'
+                });
+                return;
+            } else if (data.state == '0') {
+                $('#div_alert').showAlert({
+                    message: '{{Aucune nouvelle caméra trouvée}}',
                     level: 'success'
                 });
                 window.location.reload(true);
+            } else {
+                $('#div_alert').showAlert({
+                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    level: 'success'
+                });
             }
         }
     })
