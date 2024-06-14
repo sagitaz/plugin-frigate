@@ -287,6 +287,7 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     message: '{{Création des équipementsréussi.}}',
                     level: 'success'
                 });
+                window.location.reload(true);
             }
         }
     })

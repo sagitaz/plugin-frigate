@@ -265,12 +265,12 @@ class frigate extends eqLogic
 
       $img = self::saveURL($event['id'], "snapshot", $event['camera'], 1);
 
-      if ($event->getHasSnapshot() == 1) {
+      if ($event['has_snapshot'] == 1) {
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
       } else {
         $snapshot = "null";
       }
-      if ($event->getHasClip() == 1) {
+      if ($event['has_clip'] == 1) {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
       } else {
         $clip = "null";
