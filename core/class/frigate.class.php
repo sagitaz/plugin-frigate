@@ -626,10 +626,10 @@ class frigate extends eqLogic
     // Créez ou récupérez la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
-    if ($version < $latestVersion) {
+    if (str_replace('.', '', $version) < str_replace('.', '', $latestVersion)) {
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
     }
-    $cmd = self::createCmd($eqlogicId, "version", "numeric", "", "info_version", "GENERIC_INFO", 0);
+    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO", 0);
     // Enregistrez la valeur de l'événement
     $cmd->event($version);
     $cmd->save();
