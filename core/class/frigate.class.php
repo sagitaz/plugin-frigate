@@ -519,7 +519,7 @@ class frigate extends eqLogic
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
     if (!is_object($cmd)) {
-      $cmd = new jeemateCmd();
+      $cmd = new frigateCmd();
       $cmd->setIsVisible(1);
       $cmd->setIsHistorized($historized);
       $cmd->setEqLogic_id($eqLogicId);
