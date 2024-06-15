@@ -54,3 +54,66 @@ function deleteEvent(url) {
         }
     })
 };
+
+function filterEvents() {
+	console.log('filterEvents');
+    var selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function(checkbox) {
+      return checkbox.value;
+    });
+    var selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function(checkbox) {
+      return checkbox.value;
+    });
+    var events = document.querySelectorAll('.frigateEventContainer');
+
+    events.forEach(function(event) {
+      var camera = event.getAttribute('data-camera');
+      var label = event.getAttribute('data-label');
+
+      var matchesCamera = selectedCameras.includes(camera);
+      var matchesLabel = selectedLabels.includes(label);
+
+      if (matchesCamera && matchesLabel) {
+        event.classList.remove('eventHidden');
+      } else {
+        event.classList.add('eventHidden');
+      }
+    });
+
+    if (selectedCameras.length === 0 && selectedLabels.length === 0) {
+      events.forEach(function(event) {
+        event.classList.add('eventHidden');
+      });
+    }
+}
+
+document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
+  checkbox.addEventListener('change', filterEvents);
+});
+
+document.getElementById('selectAllCameras').addEventListener('click', function () {
+  document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
+    checkbox.checked = true;
+  });
+  filterEvents();
+});
+
+document.getElementById('deselectAllCameras').addEventListener('click', function () {
+  document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
+    checkbox.checked = false;
+  });
+  filterEvents();
+});
+
+document.getElementById('selectAllLabels').addEventListener('click', function () {
+  document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
+    checkbox.checked = true;
+  });
+  filterEvents();
+});
+
+document.getElementById('deselectAllLabels').addEventListener('click', function () {
+  document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
+    checkbox.checked = false;
+  });
+  filterEvents();
+});
