@@ -461,7 +461,7 @@ class frigate extends eqLogic
 
     $resultURL = $url . ":" . $port . "/api/stats";
     $stats = self::getcURL("create eqCameras", $resultURL);
-    $defaultRoom = intval(config::byKey('parentObject', 'jeemate', '', true));
+    $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       $n++;
@@ -486,7 +486,7 @@ class frigate extends eqLogic
   public static function generateEqEvents()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $defaultRoom = intval(config::byKey('parentObject', 'jeemate', '', true));
+    $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     if (!is_object($frigate)) {
       $frigate = new frigate();
       $frigate->setName('Events');
@@ -502,7 +502,7 @@ class frigate extends eqLogic
   public static function generateEqStats()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
-    $defaultRoom = intval(config::byKey('parentObject', 'jeemate', '', true));
+    $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     if (!is_object($frigate)) {
       $frigate = new frigate();
       $frigate->setName('Statistiques');

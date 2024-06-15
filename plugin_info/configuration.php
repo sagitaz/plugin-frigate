@@ -25,8 +25,8 @@ if (!isConnect()) {
 <form class="form-horizontal">
     <fieldset>
         <div class="form-group">
-            <label class="col-lg-2 control-label">{{Pièce par défault pour les équipements}}</label>
-            <div class="col-lg-3">
+            <label class="col-md-4 control-label">{{Pièce par défault pour les équipements}}</label>
+            <div class="col-md-4">
                 <select id="sel_object" class="configKey form-control" data-l1key="parentObject">
                     <option value="">{{Aucune}}</option>
                     <?php
