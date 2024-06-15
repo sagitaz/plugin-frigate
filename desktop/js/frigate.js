@@ -265,29 +265,30 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-            if (data.state == 'URL') {
+            if (data.result == 'URL') {
                 $('#div_alert').showAlert({
                     message: '{{L\'URL n\'est pas configurée.}}',
                     level: 'warning'
                 });
                 return;
-            } else if (data.state == 'PORT') {
+            } else if (data.result == 'PORT') {
                 $('#div_alert').showAlert({
                     message: '{{Le port n\'est pas configuré.}}',
                     level: 'warning'
                 });
                 return;
-            } else if (data.state == '0') {
+            } else if (data.result == '0') {
                 $('#div_alert').showAlert({
                     message: '{{Aucune nouvelle caméra trouvée}}',
                     level: 'success'
                 });
             } else {
+                window.location.reload(true);
+                // Ici le message ne reste pas affiché assez longtemps a cause du reload
                 $('#div_alert').showAlert({
                     message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
                     level: 'success'
                 });
-                window.location.reload(true);
             }
         }
     })
