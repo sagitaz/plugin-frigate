@@ -12,19 +12,37 @@ if (!isConnect('admin')) {
 
 <div class="col-lg-12"><br>
 	<br>
-	<div class="input-group" style="display:inline-flex">
+	<div class="input-group" style="margin-bottom:20px">
 		<span class="input-group-btn">
 			<a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
 		</span>
 	</div>
-	<br>
-	<br>
 	<?php
 	$events = frigate::showEvents();
+
+	echo '<div class="col-sm-9" style="margin-bottom:5px">';
+  	echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+    echo '<a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+	$cameras = array_unique(array_column($events, 'camera'));
+    foreach ($cameras as $camera) {
+        echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" checked> ' . ucfirst($camera) . '</label>';
+    }
+	echo '</div>';
+
+	echo '<div class="col-sm-9" style="margin-bottom:20px">';
+  	echo '<a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+    echo '<a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+	$labels = array_unique(array_column($events, 'label'));
+    foreach ($labels as $label) {
+        echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" checked> ' . ucfirst($label) . '</label>';
+    }
+	echo '</div>';
+
+	echo '<div>';
 	foreach ($events as $event) {
 		//div globale start
-		echo '<div class="col-lg-4 ">';
-		echo '<div class="col-lg-12 frigateEvent">';
+		echo '<div data-camera="' . $event['camera'] .  '" data-label="' . $event['label'] .  '" class="frigateEventContainer col-lg-4 ">';
+      	echo '<div class="col-lg-12 frigateEvent">';
 		// div img
 		echo '<div>';
 		echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
@@ -56,6 +74,8 @@ if (!isConnect('admin')) {
 		echo '</div>';
 		echo '</div>';
 	}
+	echo '</div>';
+
 	?>
 
 </div>
@@ -113,6 +133,11 @@ if (!isConnect('admin')) {
 		align-items: flex-end;
 		/* Align buttons to the right */
 	}
+
+    .eventHidden {
+      display: none;
+    }
+
 </style>
 
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
