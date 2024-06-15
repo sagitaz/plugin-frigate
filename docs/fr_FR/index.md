@@ -5,7 +5,7 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
 # <u>Configuration</u>
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
-- **Port** : le port du serveur Frigate (5000 par default)
+- **Port** : le port du serveur Frigate (5000 par défaut)
 - **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquer ici le nombre de jours souhaité.
 - **Suppression des évènements** : Les évènement plus anciens que le nombre de jours indiqué seront supprimés de la database Jeedom (pas du serveur Frigate).
 - **Cron** : Le délai entre 2 mises à jour des évènements, de 1 minute à 60 minutes, par défaut 5 minutes. Les stats sont elles mises à jour toutes les 5 minutes, aucun réglage.

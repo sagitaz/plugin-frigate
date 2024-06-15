@@ -25,7 +25,7 @@ if (!isConnect()) {
 <form class="form-horizontal">
     <fieldset>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{Pièce par défault pour les équipements}}</label>
+            <label class="col-md-4 control-label">{{Pièce par défaut pour les équipements}}</label>
             <div class="col-md-4">
                 <select id="sel_object" class="configKey form-control" data-l1key="parentObject">
                     <option value="">{{Aucune}}</option>
@@ -47,7 +47,7 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Port}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{port (5000 par default)}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{port (5000 par défaut)}}"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="port" />
@@ -58,7 +58,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="recovery_days" placeholder="7 jours par default" />
+                <input class="configKey form-control" data-l1key="recovery_days" placeholder="7 jours par défaut" />
             </div>
         </div>
         <div class="form-group">
@@ -66,7 +66,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="remove_days" placeholder="7 jours par default" />
+                <input class="configKey form-control" data-l1key="remove_days" placeholder="7 jours par défaut" />
             </div>
         </div>
         <div class="form-group">
