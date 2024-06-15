@@ -44,7 +44,7 @@ Une liste de variable est disponible afin de personnaliser les notifications.
 - **#label#** : texte
 - **#start#** : heure de début
 - **#end#** : heure de fin
-- **#duree#** : duée de l'évènement
+- **#duree#** : durée de l'évènement
 
 # <u>Page Events</u>
 Sont regroupés ici tous les évènements reçus, vous pouvez :
