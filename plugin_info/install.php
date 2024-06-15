@@ -46,8 +46,7 @@ function frigate_update()
 function frigate_remove()
 {
     Log::add(__CLASS__, "info", "==> Début de la suppression de la database Frigate");
-    $sql = "DROP TABLE IF EXISTS `jeemate_ask`; 
-			DROP TABLE IF EXISTS `frigate_events`;";
+    $sql = "DROP TABLE IF EXISTS `frigate_events`;";
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
     Log::add(__CLASS__, "info", "==> Fin de la suppression de la database Frigate");
 }
