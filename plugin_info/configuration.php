@@ -57,7 +57,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{TTS Pitch}}
+            <label class="col-md-4 control-label">{{Cron}}
             </label>
             <div class="col-md-4">
                 <select class="configKey" data-l1key="cron">

@@ -200,17 +200,6 @@ function addOrRemoveClass(element, className, isAdd) {
     }
 }
 
-function updateImage() {
-    var imgUrl = document.getElementById('cameraUrlInput').value;
-    var imgElement = document.getElementById('imgFrigate');
-
-    if (imgUrl) {
-        // Add a query parameter to force image reload
-        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-    }
-}
-
-
 function printEqLogic(_eqLogic) {
     if (_eqLogic && _eqLogic.logicalId) {
         if (_eqLogic.logicalId === "eqFrigateEvents" || _eqLogic.logicalId === "eqFrigateStats") {
@@ -246,25 +235,22 @@ function printEqLogic(_eqLogic) {
         })
     }
 
-   // var cameraUrl = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').value();
-   // $('#imgFrigate').attr("src", cameraUrl);
+    function refreshImage() {
+        var imgUrl = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+        var imgElement = document.getElementById('imgFrigate');
 
+        if (imgUrl) {
+            // Add a query parameter to force image reload
+            imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+        }
+    }
 
-    // Update the image immediately when the input value changes
-    document.getElementById('cameraUrlInput').addEventListener('input', updateImage);
+    // Refresh the image immediately
+    refreshImage();
 
-    var imageUpdateInterval;
-    // Update the image immediately when the page loads
-    document.addEventListener('DOMContentLoaded', function () {
-        updateImage();
+    // Set interval to refresh the image every 2 seconds (2000 milliseconds)
+    setInterval(refreshImage, 2000);
 
-        // Set an interval to update the image every 0 seconds
-        imageUpdateInterval = setInterval(updateImage, 2000);
-        // Clear the interval when the page is being unloaded
-        window.addEventListener('beforeunload', function () {
-            clearInterval(imageUpdateInterval);
-        });
-    });
 }
 
 document.getElementById('searchAndCreate').addEventListener('click', function () {

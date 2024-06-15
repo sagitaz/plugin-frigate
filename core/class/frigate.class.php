@@ -221,7 +221,7 @@ class frigate extends eqLogic
     }
     curl_close($ch);
     $response = json_decode($data, true);
-    log::add(__CLASS__, 'debug', $function . " : " . json_encode($response));
+    log::add(__CLASS__, 'debug', $function . " : mise à jour.");
     return $response;
   }
 
@@ -361,7 +361,7 @@ class frigate extends eqLogic
       if (!in_array($inDbEvent->getEventId(), $ids)) {
         log::add(__CLASS__, 'debug', "delete in DB : " . $inDbEvent->getEventId());
         $inDbEvent->remove();
-        log::add(__CLASS__, 'debug', "EVents delete in DB");
+        log::add(__CLASS__, 'debug', "Events delete in DB");
         // recherche si clip et snapshot existe dans le dossier de sauvegarde
         $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_clip.mp4";
         $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
@@ -615,7 +615,6 @@ class frigate extends eqLogic
 
     // Mise à jour des statistiques des détecteurs
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
-      log::add(__CLASS__, 'debug', "detectorStats" . " : " . json_encode($detectorStats));
       foreach ($detectorStats as $key => $value) {
         // Créez un nom de commande en combinant le nom du détecteur et la clé
         $cmdName = $detectorName . '_' . $key;
@@ -638,7 +637,6 @@ class frigate extends eqLogic
 
     // Mise à jour des usages GPU
     foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
-      log::add(__CLASS__, 'debug', "gpuStats" . " : " . json_encode($gpuStats));
       foreach ($gpuStats as $key => $value) {
         // Créez un nom de commande en combinant le nom du GPU et la clé
         $cmdName = $gpuName . '_' . $key;

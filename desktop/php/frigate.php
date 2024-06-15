@@ -138,14 +138,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{Nom de la caméra}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{Renseignez le nom de la caméra}}"></i></sup>
-                                </label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="name" placeholder="{{Nom}}">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{bbox}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox">
@@ -179,14 +171,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 <label class="col-sm-4 control-label">{{regions}}</label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="regions">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{qualité}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{jpeg qualité 0-100}}"></i></sup>
-                                </label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="quality" placeholder="{{Qualité 0-100}}">
                                 </div>
                             </div>
                         </div>
