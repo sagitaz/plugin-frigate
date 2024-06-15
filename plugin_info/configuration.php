@@ -49,7 +49,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{Suppréssion des évènements}}
+            <label class="col-md-4 control-label">{{Suppression des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
             </label>
             <div class="col-md-4">
