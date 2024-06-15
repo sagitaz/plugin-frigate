@@ -464,12 +464,12 @@ class frigate extends eqLogic
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-      $n++;
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
       $frigate = $eqCamera[0];
       if (!is_object($frigate)) {
         log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "est créé.");
+        $n++;
         $frigate = new frigate();
         $frigate->setName($cameraName);
         $frigate->setEqType_name("frigate");
