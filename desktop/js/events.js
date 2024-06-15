@@ -49,6 +49,7 @@ function deleteEvent(url) {
                     message: '{{Suppression de l\'évènement réussi.}}',
                     level: 'success'
                 });
+                window.location.reload(true);
             }
         }
     })
