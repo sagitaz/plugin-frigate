@@ -284,7 +284,7 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                 });
             } else {
                 $('#div_alert').showAlert({
-                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
                     level: 'success'
                 });
                 window.location.reload(true);

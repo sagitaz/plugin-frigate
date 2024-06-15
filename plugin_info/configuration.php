@@ -25,6 +25,19 @@ if (!isConnect()) {
 <form class="form-horizontal">
     <fieldset>
         <div class="form-group">
+            <label class="col-md-4 control-label">{{Pièce par défaut pour les équipements}}</label>
+            <div class="col-md-4">
+                <select id="sel_object" class="configKey form-control" data-l1key="parentObject">
+                    <option value="">{{Aucune}}</option>
+                    <?php
+                    foreach (jeeObject::all() as $object) {
+                        echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+                    }
+                    ?>
+                </select>
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-md-4 control-label">{{URL Frigate}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'URL de frigate}}"></i></sup>
             </label>
@@ -34,7 +47,7 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Port}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{port (5000 par default)}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{port (5000 par défaut)}}"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="port" />
@@ -45,7 +58,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="recovery_days" placeholder="7 jours par default" />
+                <input class="configKey form-control" data-l1key="recovery_days" placeholder="7 jours par défaut" />
             </div>
         </div>
         <div class="form-group">
@@ -53,7 +66,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="remove_days" placeholder="7 jours par default" />
+                <input class="configKey form-control" data-l1key="remove_days" placeholder="7 jours par défaut" />
             </div>
         </div>
         <div class="form-group">
