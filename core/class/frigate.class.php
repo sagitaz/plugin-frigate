@@ -42,39 +42,66 @@ class frigate extends eqLogic
 
   /*     * ***********************Methode static*************************** */
 
-  /*
-  * Fonction exécutée automatiquement toutes les minutes par Jeedom
-  public static function cron() {}
-  */
+  // Fonction exécuté à l'installation du plugin
+  public static function setConfig() {
+    // Configuration par défaut
+    config::save('URL', '', 'frigate');
+    config::save('port', '5000', 'frigate');
+    config::save('recovery_days', '7', 'frigate');
+    config::save('remove_days', '7', 'frigate');
+    config::save('cron', '5', 'frigate');
+  }
 
-
+  // Fonction exécutée automatiquement toutes les minutes par Jeedom
+  public static function cron()
+  {
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "1") {
+      self::getEvents();
+    }
+  }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
-    self::getEvents();
     self::getStats();
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "5") {
+      self::getEvents();
+    }
+  }
+  // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
+  public static function cron10()
+  {
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "10") {
+      self::getEvents();
+    }
+  }
+  // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
+  public static function cron15()
+  {
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "15") {
+      self::getEvents();
+    }
+  }
+  // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
+  public static function cron30()
+  {
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "30") {
+      self::getEvents();
+    }
+  }
+  // Fonction exécutée automatiquement toutes les heures par Jeedom
+  public static function cronHourly()
+  {
+    $cron = config::byKey('cron', 'frigate');
+    if ($cron == "60") {
+      self::getEvents();
+    }
   }
 
-
-  /*
-  * Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
-  public static function cron10() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
-  public static function cron15() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
-  public static function cron30() {}
-  */
-
-  /*
-  * Fonction exécutée automatiquement toutes les heures par Jeedom
-  public static function cronHourly() {}
-  */
 
   /*
   * Fonction exécutée automatiquement tous les jours par Jeedom
@@ -633,7 +660,6 @@ class frigate extends eqLogic
     // Enregistrez la valeur de l'événement
     $cmd->event($version);
     $cmd->save();
-
   }
 
   private static function executeActionNewEvent($eqLogicId, $event)

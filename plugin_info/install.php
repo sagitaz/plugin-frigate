@@ -27,6 +27,7 @@ function frigate_install()
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
     frigate::generateEqStats();
+    frigate::setConfig();
     Log::add(__CLASS__, 'info', 'Finish Install');
 }
 
@@ -44,4 +45,9 @@ function frigate_update()
 // Fonction exécutée automatiquement après la suppression du plugin
 function frigate_remove()
 {
+    Log::add(__CLASS__, "info", "==> Début de la suppression de la database Frigate");
+    $sql = "DROP TABLE IF EXISTS `jeemate_ask`; 
+			DROP TABLE IF EXISTS `frigate_events`;";
+    DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
+    Log::add(__CLASS__, "info", "==> Fin de la suppression de la database Frigate");
 }
