@@ -35,7 +35,7 @@ try {
         ajax::success();
     }
     if (init('action') == 'searchAndCreate') {
-        // Suppression d'un event
+        // Recherche et creation de cameras
         $result = frigate::generateEqCameras();
         ajax::success($result);
     }
