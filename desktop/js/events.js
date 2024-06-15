@@ -16,25 +16,96 @@
 
 /* Permet la réorganisation des commandes dans l'équipement */
 
-function openClip(url) {
-    window.open(url.id);
+function showMedia(mediaType, src, hasVideo, hasSnapshot) {
+  var mediaModal = document.getElementById('mediaModal');
+  var videoContainer = document.querySelector('.video-container');
+  var imageContainer = document.querySelector('.image-container');
+  var videoPlayer = document.getElementById('videoPlayer');
+  var videoSource = document.getElementById('videoSource');
+  var snapshotImage = document.getElementById('snapshotImage');
+  var showVideoBtn = document.getElementById('showVideo');
+  var showImageBtn = document.getElementById('showImage');
+
+  if (mediaType === 'video') {
+    videoSource.src = src;
+    videoPlayer.load();
+    videoContainer.classList.add('active');
+    imageContainer.classList.remove('active');
+  } 
+  else if (mediaType === 'snapshot') {
+    snapshotImage.src = src;
+    imageContainer.classList.add('active');
+    videoContainer.classList.remove('active');
+  }
+
+  showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
+  showImageBtn.classList.toggle('hidden-btn', !hasSnapshot);
+
+  mediaModal.style.display = 'block';
 }
 
-function openSnapshot(url) {
-    window.open(url.id);
-}
+document.querySelectorAll('.snapshot-btn').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var eventBtns = this.parentElement;
+    var snapshotSrc = eventBtns.getAttribute('data-snapshot');
+    var videoSrc = eventBtns.getAttribute('data-video');
+    var hasVideo = !!videoSrc;
+    var hasSnapshot = !!snapshotSrc;
+
+    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+
+    document.getElementById('showVideo').onclick = function() {
+      showMedia('video', videoSrc, hasVideo, hasSnapshot);
+    };
+    document.getElementById('showImage').onclick = function() {
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+    };
+  });
+});
+
+document.querySelectorAll('.video-btn').forEach(function(button) {
+  button.addEventListener('click', function() {
+    var eventBtns = this.parentElement;
+    var videoSrc = eventBtns.getAttribute('data-video');
+    var snapshotSrc = eventBtns.getAttribute('data-snapshot');
+    var hasVideo = !!videoSrc;
+    var hasSnapshot = !!snapshotSrc;
+
+    showMedia('video', videoSrc, hasVideo, hasSnapshot);
+
+    document.getElementById('showVideo').onclick = function() {
+      showMedia('video', videoSrc, hasVideo, hasSnapshot);
+    };
+    document.getElementById('showImage').onclick = function() {
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+    };
+  });
+});
+
+
+document.querySelector('.close').addEventListener('click', function() {
+  var mediaModal = document.getElementById('mediaModal');
+  mediaModal.style.display = 'none';
+});
+
+window.addEventListener('click', function(event) {
+  var mediaModal = document.getElementById('mediaModal');
+  if (event.target == mediaModal) {
+    mediaModal.style.display = 'none';
+  }
+});
 
 document.getElementById('gotoHome').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
 });
 
-function deleteEvent(url) {
-    $.ajax({
+function deleteEvent(eventId) {
+  	$.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
             action: "deleteEvent",
-            eventId : url.id
+            eventId : eventId
         },
         dataType: 'json',
         error: function (request, status, error) {
@@ -57,29 +128,65 @@ function deleteEvent(url) {
 
 function filterEvents() {
 	console.log('filterEvents');
-    var selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function(checkbox) {
+    const selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function(checkbox) {
       return checkbox.value;
     });
-    var selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function(checkbox) {
+    const selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function(checkbox) {
       return checkbox.value;
     });
-    var events = document.querySelectorAll('.frigateEventContainer');
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const timeFilter = document.querySelector('input[name="timeFilter"]:checked').value;
+    const now = new Date();
+    let timeLimit;
+
+    switch (timeFilter) {
+      case '1h':
+        timeLimit = new Date(now.getTime() - (1 * 60 * 60 * 1000));
+        break;
+      case '2h':
+        timeLimit = new Date(now.getTime() - (2 * 60 * 60 * 1000));
+        break;
+      case '6h':
+        timeLimit = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+        break;
+      case '12h':
+        timeLimit = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+        break;
+      case '1d':
+        timeLimit = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        break;
+      case '2d':
+        timeLimit = new Date(now.getTime() - (2 * 24 * 60 * 60 * 1000));
+        break;
+      case '1w':
+        timeLimit = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+        break;
+      default:
+        timeLimit = null;
+        break;
+    }
+    const events = document.querySelectorAll('.frigateEventContainer');
 
     events.forEach(function(event) {
-      var camera = event.getAttribute('data-camera');
-      var label = event.getAttribute('data-label');
+      const camera = event.getAttribute('data-camera');
+      const label = event.getAttribute('data-label');
+      const date = moment(event.getAttribute('data-date'), 'DD-MM-YYYY HH:mm:ss').toDate();
+      
+      const matchesCamera = selectedCameras.includes(camera);
+      const matchesLabel = selectedLabels.includes(label);
+      const matchesDate = (!startDate || date >= new Date(startDate)) && (!endDate || date <= new Date(endDate));
+      const matchesTime = !timeLimit || date >= timeLimit;
 
-      var matchesCamera = selectedCameras.includes(camera);
-      var matchesLabel = selectedLabels.includes(label);
-
-      if (matchesCamera && matchesLabel) {
+      if (matchesCamera && matchesLabel && matchesDate && matchesTime) {
         event.classList.remove('eventHidden');
-      } else {
+      } 
+      else {
         event.classList.add('eventHidden');
       }
     });
 
-    if (selectedCameras.length === 0 && selectedLabels.length === 0) {
+    if (selectedCameras.length === 0 && selectedLabels.length === 0 && !startDate && !endDate && !timeFilter) {
       events.forEach(function(event) {
         event.classList.add('eventHidden');
       });
@@ -116,4 +223,10 @@ document.getElementById('deselectAllLabels').addEventListener('click', function 
     checkbox.checked = false;
   });
   filterEvents();
+});
+
+document.getElementById('startDate').addEventListener('change', filterEvents);
+document.getElementById('endDate').addEventListener('change', filterEvents);
+document.querySelectorAll('input[name="timeFilter"]').forEach(function(radio) {
+  radio.addEventListener('change', filterEvents);
 });
