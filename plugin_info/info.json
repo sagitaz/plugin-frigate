@@ -1,0 +1,29 @@
+{
+    "id": "frigate",
+    "name": "frigate",
+    "pluginVersion": "0.5",
+    "description": {
+        "fr_FR": "Plugin Frigate pour jeedom."
+    },
+    "licence": "AGPL",
+    "author": "Sagitaz",
+    "require": "4.4",
+    "category": "security",
+    "hasDependency": false,
+    "hasOwnDeamon": false,
+    "maxDependancyInstallTime": 0,
+    "changelog_beta": "https:\/\/doc.jeedom.com\/#language#\/plugins\/security\/frigate\/beta\/changelog",
+    "changelog": "https:\/\/doc.jeedom.com\/#language#\/plugins\/security\/frigate\/changelog",
+    "documentation_beta": "https:\/\/doc.jeedom.com\/#language#\/plugins\/security\/frigate\/beta",
+    "documentation": "https:\/\/doc.jeedom.com\/#language#\/plugins\/security\/frigate",
+    "language": [
+        "fr_FR"
+    ],
+    "compatibility": [
+        "luna",
+        "atlas",
+        "rpi",
+        "docker",
+        "diy"
+    ]
+}
