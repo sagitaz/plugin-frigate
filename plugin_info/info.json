@@ -7,7 +7,7 @@
     },
     "licence": "AGPL",
     "author": "Sagitaz",
-    "require": "4.4",
+    "require": "4.3",
     "category": "security",
     "hasDependency": false,
     "hasOwnDeamon": false,
