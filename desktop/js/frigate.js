@@ -267,13 +267,13 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
         success: function (data) {
             if (data.state == 'URL') {
                 $('#div_alert').showAlert({
-                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    message: '{{L\'URL n\'est pas configurée.}}',
                     level: 'warning'
                 });
                 return;
             } else if (data.state == 'PORT') {
                 $('#div_alert').showAlert({
-                    message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
+                    message: '{{Le port n\'est pas configuré.}}',
                     level: 'warning'
                 });
                 return;
@@ -282,12 +282,12 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     message: '{{Aucune nouvelle caméra trouvée}}',
                     level: 'success'
                 });
-                window.location.reload(true);
             } else {
                 $('#div_alert').showAlert({
                     message: '{{Création de }}' + data.state + ' équipement(s) caméra réussi.',
                     level: 'success'
                 });
+                window.location.reload(true);
             }
         }
     })
