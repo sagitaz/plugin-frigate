@@ -223,10 +223,10 @@ document.getElementById('deselectAllLabels').addEventListener('click', function 
     checkbox.checked = false;
   });
   filterEvents();
-});
 
 document.getElementById('startDate').addEventListener('change', filterEvents);
 document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function(radio) {
-  radio.addEventListener('change', filterEvents);
+radio.addEventListener('change', filterEvents);
+
 });
