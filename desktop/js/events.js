@@ -128,29 +128,65 @@ function deleteEvent(eventId) {
 
 function filterEvents() {
 	console.log('filterEvents');
-    var selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function(checkbox) {
+    const selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function(checkbox) {
       return checkbox.value;
     });
-    var selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function(checkbox) {
+    const selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function(checkbox) {
       return checkbox.value;
     });
-    var events = document.querySelectorAll('.frigateEventContainer');
+    const startDate = document.getElementById('startDate').value;
+    const endDate = document.getElementById('endDate').value;
+    const timeFilter = document.querySelector('input[name="timeFilter"]:checked').value;
+    const now = new Date();
+    let timeLimit;
+
+    switch (timeFilter) {
+      case '1h':
+        timeLimit = new Date(now.getTime() - (1 * 60 * 60 * 1000));
+        break;
+      case '2h':
+        timeLimit = new Date(now.getTime() - (2 * 60 * 60 * 1000));
+        break;
+      case '6h':
+        timeLimit = new Date(now.getTime() - (6 * 60 * 60 * 1000));
+        break;
+      case '12h':
+        timeLimit = new Date(now.getTime() - (12 * 60 * 60 * 1000));
+        break;
+      case '1d':
+        timeLimit = new Date(now.getTime() - (24 * 60 * 60 * 1000));
+        break;
+      case '2d':
+        timeLimit = new Date(now.getTime() - (2 * 24 * 60 * 60 * 1000));
+        break;
+      case '1w':
+        timeLimit = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
+        break;
+      default:
+        timeLimit = null;
+        break;
+    }
+    const events = document.querySelectorAll('.frigateEventContainer');
 
     events.forEach(function(event) {
-      var camera = event.getAttribute('data-camera');
-      var label = event.getAttribute('data-label');
+      const camera = event.getAttribute('data-camera');
+      const label = event.getAttribute('data-label');
+      const date = moment(event.getAttribute('data-date'), 'DD-MM-YYYY HH:mm:ss').toDate();
+      
+      const matchesCamera = selectedCameras.includes(camera);
+      const matchesLabel = selectedLabels.includes(label);
+      const matchesDate = (!startDate || date >= new Date(startDate)) && (!endDate || date <= new Date(endDate));
+      const matchesTime = !timeLimit || date >= timeLimit;
 
-      var matchesCamera = selectedCameras.includes(camera);
-      var matchesLabel = selectedLabels.includes(label);
-
-      if (matchesCamera && matchesLabel) {
+      if (matchesCamera && matchesLabel && matchesDate && matchesTime) {
         event.classList.remove('eventHidden');
-      } else {
+      } 
+      else {
         event.classList.add('eventHidden');
       }
     });
 
-    if (selectedCameras.length === 0 && selectedLabels.length === 0) {
+    if (selectedCameras.length === 0 && selectedLabels.length === 0 && !startDate && !endDate && !timeFilter) {
       events.forEach(function(event) {
         event.classList.add('eventHidden');
       });
@@ -187,4 +223,10 @@ document.getElementById('deselectAllLabels').addEventListener('click', function 
     checkbox.checked = false;
   });
   filterEvents();
+
+document.getElementById('startDate').addEventListener('change', filterEvents);
+document.getElementById('endDate').addEventListener('change', filterEvents);
+document.querySelectorAll('input[name="timeFilter"]').forEach(function(radio) {
+radio.addEventListener('change', filterEvents);
+
 });

@@ -38,10 +38,27 @@ if (!isConnect('admin')) {
     }
 	echo '</div>';
 
+	echo '<div class="col-sm-9" style="margin-bottom:5px">
+        <label>Entre <input type="datetime-local" id="startDate"></label>
+        <label>et <input type="datetime-local" id="endDate"></label>
+    </div>
+
+    <div class="col-sm-10" style="margin-bottom:5px">
+        Date de 
+        <label><input type="radio" name="timeFilter" value="" checked> Tous</label>
+        <label><input type="radio" name="timeFilter" value="1h"> Moins d\'une heure</label>
+        <label><input type="radio" name="timeFilter" value="2h"> Moins de deux heures</label>
+        <label><input type="radio" name="timeFilter" value="6h"> Moins de six heures</label>
+        <label><input type="radio" name="timeFilter" value="12h"> Moins de douze heures</label>
+        <label><input type="radio" name="timeFilter" value="1d"> Moins d\'un jour</label>
+        <label><input type="radio" name="timeFilter" value="2d"> Moins de deux jours</label>
+        <label><input type="radio" name="timeFilter" value="1w"> Moins d\'une semaine</label>
+    </div>';
+    
 	echo '<div>';
 	foreach ($events as $event) {
 		//div globale start
-		echo '<div data-camera="' . $event['camera'] .  '" data-label="' . $event['label'] .  '" class="frigateEventContainer col-lg-4 ">';
+		echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] .  '" data-label="' . $event['label'] .  '" class="frigateEventContainer col-lg-4 ">';
       	echo '<div class="col-lg-12 frigateEvent">';
 		// div img
 		echo '<div>';
@@ -161,14 +178,13 @@ if (!isConnect('admin')) {
     .modal {
       display: none;
       position: fixed;
-      z-index: 1;
+      z-index: 2;
       left: 0;
       top: 0;
       width: 100%;
       height: 100%;
       overflow: auto;
-      background-color: rgb(0,0,0);
-      background-color: rgba(0,0,0,0.4);
+      background-color: rgba(0,0,0,0.7);
       padding-top: 60px;
     }
     .modal-content {
