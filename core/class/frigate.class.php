@@ -514,7 +514,7 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1, $type = "info")
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $infoCmd = "", $historized = 1, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
@@ -529,6 +529,9 @@ class frigate extends eqLogic
       $cmd->setUnite($unite);
       $cmd->setLogicalId($logicalId);
       $cmd->setGeneric_type($genericType);
+      if (is_object($infoCmd) && $type == 'action') {
+        $cmd->setValue($infoCmd->getId());
+      }
       $cmd->save();
     }
     return $cmd;
@@ -539,12 +542,12 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
     // commande infos
-    $cmd = self::createCmd($frigate->getId(), "Etat cron", "default", "", "info_Cron", "GENERIC_INFO", 0);
-    $cmd->save();
+    $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "GENERIC_INFO", 0);
+    $infoCmd->save();
     // commandes actions
-    $cmd = self::createCmd($frigate->getId(), "Stop cron", "default", "", "action_stopCron", "GENERIC_INFO", 0, "action");
+    $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "GENERIC_INFO", $infoCmd, 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($frigate->getId(), "Start cron", "default", "", "action_startCron", "GENERIC_INFO", 0, "action");
+    $cmd = self::createCmd($frigate->getId(), "Start cron", "other", "", "action_startCron", "GENERIC_INFO",$infoCmd, 0, "action");
     $cmd->save();
   }
 
