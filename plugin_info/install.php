@@ -28,6 +28,7 @@ function frigate_install()
     frigate::generateEqEvents();
     frigate::generateEqStats();
     frigate::setConfig();
+    frigate::setCmdsCron();
     Log::add(__CLASS__, 'info', 'Finish Install');
 }
 
@@ -39,6 +40,7 @@ function frigate_update()
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
     frigate::generateEqStats();
+    frigate::setCmdsCron();
     Log::add(__CLASS__, 'info', 'Finish Update');
 }
 

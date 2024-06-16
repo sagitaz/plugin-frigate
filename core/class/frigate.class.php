@@ -514,7 +514,7 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1)
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
@@ -524,7 +524,7 @@ class frigate extends eqLogic
       $cmd->setIsHistorized($historized);
       $cmd->setEqLogic_id($eqLogicId);
       $cmd->setName($name);
-      $cmd->setType("info");
+      $cmd->setType($type);
       $cmd->setSubType($subType);
       $cmd->setUnite($unite);
       $cmd->setLogicalId($logicalId);
@@ -534,7 +534,21 @@ class frigate extends eqLogic
     return $cmd;
   }
 
-  public static function majEventsCmds($event)
+  public static function setCmdsCron()
+  {
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    // Création des commandes Crons pour l'equipement général
+    // commande infos
+    $cmd = self::createCmd($frigate->getId(), "Etat cron", "default", "", "info_Cron", "GENERIC_INFO", 0);
+    $cmd->save();
+    // commandes actions
+    $cmd = self::createCmd($frigate->getId(), "Stop cron", "default", "", "action_stopCron", "GENERIC_INFO", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($frigate->getId(), "Start cron", "default", "", "action_startCron", "GENERIC_INFO", 0, "action");
+    $cmd->save();
+  }
+
+public static function majEventsCmds($event)
   {
     $eqlogicIds = [];
     // maj des commandes de l'équipement events général
@@ -549,7 +563,7 @@ class frigate extends eqLogic
 
 
     foreach ($eqlogicIds as $eqlogicId) {
-      // creation des commandes
+      // creation des commandes infos
       $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0);
       $cmd->event($event['camera']);
       $cmd->save();
