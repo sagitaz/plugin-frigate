@@ -230,3 +230,5 @@ document.querySelectorAll('input[name="timeFilter"]').forEach(function(radio) {
 radio.addEventListener('change', filterEvents);
 
 });
+
+})

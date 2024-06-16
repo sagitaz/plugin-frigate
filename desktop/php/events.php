@@ -127,9 +127,9 @@ if (!isConnect('admin')) {
 	}
 
 	.imgSnap {
-		display: flex: 0 0 auto;
+		display: flex= 0 0 auto;
 		position: relative;
-		//   background-color: rgb(var(--defaultBkg-color));
+		background-color: rgb(var(--defaultBkg-color));
 		margin-left: -15px;
 		height: 125px;
 		border-bottom-left-radius: 10px;
@@ -138,7 +138,7 @@ if (!isConnect('admin')) {
 	}
 
 	.eventText {
-		display: flex: 1 1 auto;
+		display: flex= 1 1 auto;
 		position: relative;
 		margin-left: 20px;
 
