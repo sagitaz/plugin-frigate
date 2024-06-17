@@ -23,6 +23,7 @@ use Log;
 use eqLogic;
 use cmd;
 use message;
+use config;
 
 class frigate extends eqLogic
 {
@@ -43,7 +44,8 @@ class frigate extends eqLogic
   /*     * ***********************Methode static*************************** */
 
   // Fonction exécuté à l'installation du plugin
-  public static function setConfig() {
+  public static function setConfig()
+  {
     // Configuration par défaut
     config::save('URL', '', 'frigate');
     config::save('port', '5000', 'frigate');
@@ -51,54 +53,99 @@ class frigate extends eqLogic
     config::save('remove_days', '7', 'frigate');
     config::save('cron', '5', 'frigate');
   }
-
+  // configuration par defaut des crons
+  public static function setConfigCron()
+  {
+    // cron par défaut
+    if (!config::byKey('functionality::cron::enable', 'frigate')) {
+      config::save('functionality::cron::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron5::enable', 'frigate')) {
+      config::save('functionality::cron5::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron10::enable', 'frigate')) {
+      config::save('functionality::cron10::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron15::enable', 'frigate')) {
+      config::save('functionality::cron15::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron30::enable', 'frigate')) {
+      config::save('functionality::cron30::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cronHourly::enable', 'frigate')) {
+      config::save('functionality::cronHourly::enable', 0, 'frigate');
+    }
+  }
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "1") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cron::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
-    self::getStats();
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "5") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cron5::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "10") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cron10::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "15") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cron15::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
   {
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "30") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cron30::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
-    $cron = config::byKey('cron', 'frigate');
-    if ($cron == "60") {
-      self::getEvents();
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if (config::byKey('functionality::cronHourly::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
     }
   }
 
@@ -170,8 +217,6 @@ class frigate extends eqLogic
     $quality = $this->getConfiguration('quality', 70);
 
     $img = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
-    log::add(__CLASS__, 'debug', "URL = " . json_encode($img));
-
     $this->setConfiguration('img', $img);
   }
 
@@ -295,16 +340,32 @@ class frigate extends eqLogic
       $frigate = frigate_events::byEventId($event['id']);
 
       $img = self::saveURL($event['id'], "snapshot", $event['camera'], 1);
+      if ($img = "error") {
+        $img = "null";
+      }
 
       if ($event['has_snapshot'] == 1) {
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
+        $hasSnapshot = 1;
+        if ($snapshot == "error") {
+          $snapshot = "null";
+          $hasSnapshot = 0;
+        }
       } else {
         $snapshot = "null";
+        $hasSnapshot = 0;
       }
+
       if ($event['has_clip'] == 1) {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
+        $hasClip = 1;
+        if ($clip == "error") {
+          $clip = "null";
+          $hasClip = 0;
+        }
       } else {
         $clip = "null";
+        $hasClip = 0;
       }
 
       if (!$frigate) {
@@ -313,24 +374,24 @@ class frigate extends eqLogic
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
         $frigate->setLasted($img);
+        $frigate->setHasClip($hasClip);
         $frigate->setClip($clip);
+        $frigate->setHasSnapshot($hasSnapshot);
         $frigate->setSnapshot($snapshot);
         $frigate->setStartTime($event['start_time']);
         $frigate->setEndTime($event['end_time']);
         $frigate->setFalsePositive($event['false_positive']);
-        $frigate->setHasClip($event['has_clip']);
-        $frigate->setHasSnapshot($event['has_snapshot']);
         $frigate->setEventId($event['id']);
         $frigate->setLabel($event['label']);
         $frigate->setPlusId($event['plus_id']);
         $frigate->setRetain($event['retain_indefinitely']);
         $frigate->setSubLabel($event['sub_label']);
         $frigate->setThumbnail($img);
-        $frigate->setTopScore($event['data']['top_score']);
+        $frigate->setTopScore(round($event['data']['top_score'] * 100, 0));
+        $frigate->setScore(round($event['data']['score'] * 100, 0));
         $frigate->setZones($event['zones']);
         $frigate->save();
-
-        self::majEventsCmds($event);
+        self::majEventsCmds($frigate);
       }
     }
     // Nombre de jours a garder en DB
@@ -425,7 +486,7 @@ class frigate extends eqLogic
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
         "id" => $event->getEventId(),
-        "top_score" => round($event->getTopScore() * 100, 0)
+        "top_score" => $event->getTopScore()
       );
     }
 
@@ -463,6 +524,7 @@ class frigate extends eqLogic
     $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
+    log::add(__CLASS__, 'debug', "Liste de cameras : " . json_encode($stats['cameras']));
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
@@ -514,24 +576,41 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $historized = 1)
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $infoCmd = null, $historized = 1, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
     if (!is_object($cmd)) {
       $cmd = new frigateCmd();
-      $cmd->setIsVisible(1);
-      $cmd->setIsHistorized($historized);
+      $cmd->setLogicalId($logicalId);
       $cmd->setEqLogic_id($eqLogicId);
       $cmd->setName($name);
-      $cmd->setType("info");
+      $cmd->setType($type);
       $cmd->setSubType($subType);
-      $cmd->setUnite($unite);
-      $cmd->setLogicalId($logicalId);
       $cmd->setGeneric_type($genericType);
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized($historized);
+      $cmd->setUnite($unite);
+      if (is_object($infoCmd) && $type == 'action') {
+        $cmd->setValue($infoCmd->getId());
+      }
       $cmd->save();
     }
     return $cmd;
+  }
+
+  public static function setCmdsCron()
+  {
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    // Création des commandes Crons pour l'equipement général
+    // commande infos
+    $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "LIGHT_STATE", 0);
+    $infoCmd->save();
+    // commandes actions
+    $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "LIGHT_ON", $infoCmd, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($frigate->getId(), "Start cron", "other", "", "action_startCron", "LIGHT_OFF", $infoCmd, 0, "action");
+    $cmd->save();
   }
 
   public static function majEventsCmds($event)
@@ -541,7 +620,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $eqlogicIds[] = $frigate->getId();
     // recherche et création equipement caméra    
-    $cameraName = $event["camera"];
+    $cameraName = $event->getCamera();
     $frigate = frigate::byTypeAndSearhConfiguration('frigate', $cameraName);
     $eqCamera = $frigate[0];
     $eqlogicIds[] = $eqCamera->getId();
@@ -549,44 +628,40 @@ class frigate extends eqLogic
 
 
     foreach ($eqlogicIds as $eqlogicId) {
-      // creation des commandes
+      // creation des commandes infos
       $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0);
-      $cmd->event($event['camera']);
+      $cmd->event($event->getCamera());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "GENERIC_INFO", 0);
-      $cmd->event($event['label']);
+      $cmd->event($event->getLabel());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "GENERIC_INFO", 0);
-      $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
-      $cmd->event($hasClip);
+      $cmd->event($event->getHasClip());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "GENERIC_INFO", 0);
-      $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
-      $cmd->event($hasSnapshot);
+      $cmd->event($event->getHasSnapshot());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "info_topscore", "GENERIC_INFO", 0);
-      $value = round($event['data']['top_score'] * 100, 0);
-      $cmd->event($value);
+      $cmd->event($event->getTopScore());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "GENERIC_INFO", 0);
-      $value = round($event['data']['score'] * 100, 0);
-      $cmd->event($value);
+      $cmd->event($event->getScore());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO", 0);
-      $cmd->event($event['id']);
+      $cmd->event($event->getEventId());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO", 0);
       $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO", 0);
-      $cmd->event($event['start_time']);
+      $cmd->event($event->getStartTime());
       $cmd->save();
-      $value = round($event['end_time'] - $event['start_time'], 0);
+      $value = round($event->getEndTime() - $event->getStartTime(), 0);
       $cmd2->event($value);
       $cmd2->save();
     }
@@ -598,7 +673,7 @@ class frigate extends eqLogic
     // Statistiques pour chaque eqLogic caméras
     // Mise à jour des statistiques des caméras
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-      log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
+      //log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
       if (is_object($eqCamera[0])) {
@@ -611,7 +686,7 @@ class frigate extends eqLogic
           $cmd->save();
         }
       } else {
-        log::add(__CLASS__, 'debug', "L'équipement camera n'existe pas.");
+        log::add(__CLASS__, 'debug', "L'équipement camera" . $cameraName . " n'existe pas.");
       }
     }
 
@@ -670,26 +745,18 @@ class frigate extends eqLogic
   private static function executeActionNewEvent($eqLogicId, $event)
   {
     // liste des events et de leurs variables
-    $hasClip = ($event['has_clip'] == 1) ? 1 : 0;
-    $hasSnapshot = ($event['has_snapshot'] == 1) ? 1 : 0;
-    $topScore = round($event['data']['top_score'] * 100, 0);
-    $zones = $event['zones'];
-    $camera = $event['camera'];
-    $score = $event['score'];
-    $label = $event['label'];
-    $start = date("d-m-Y H:i:s", $event['start_time']);
-    $end = date("d-m-Y H:i:s", $event['end_time']);
-    $duree = round($event['end_time'] - $event['start_time'], 0);
-    if ($hasSnapshot == 1) {
-      $snapshot = self::saveURL($event['id'], "snapshot", $camera);
-    } else {
-      $snapshot = "null";
-    }
-    if ($hasClip == 1) {
-      $clip = self::saveURL($event['id'], "clip", $camera);
-    } else {
-      $clip = "null";
-    }
+    $hasClip = $event->getHasClip();
+    $hasSnapshot = $event->getHasSnapshot();
+    $topScore = $event->getTopScore();
+    $clip = $event->getClip();
+    $snapshot = $event->getSnapshot();
+    $camera = $event->getCamera();
+    $label = $event->getLabel();
+    $duree = round($event->getEndTime() - $event->getStartTime(), 0);
+    $zones = $event->getZones();
+    $score = $event->getScore();
+    $start = date("d-m-Y H:i:s", $event->getStartTime());
+    $end = date("d-m-Y H:i:s", $event->getEndTime());
 
     $eqLogic = eqLogic::byId($eqLogicId);
     $actions = $eqLogic->getConfiguration('actions');
@@ -699,7 +766,7 @@ class frigate extends eqLogic
       $options = $action['options'];
       $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
       // executer l'action que si $start est compris entre l'heure actuelle et -3h.
-      if ($event['start_time'] > time() - 10800) {
+      if ($event->getStartTime > time() - 10800) {
         if (strpos(json_encode($action['options']), '#clip#') !== false) {
           log::add(__CLASS__, 'debug', "ACTION CLIP");
           if ($hasClip == 1) {
@@ -723,7 +790,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId, $type, $camera, $thumbnail = 0)
+  public static function saveURL($eventId = null, $type = null, $camera, $thumbnail = 0, $latest = 0, $img = null)
   {
     $result = "";
     $urlJeedom = network::getNetworkAccess('external');
@@ -747,9 +814,13 @@ class frigate extends eqLogic
       $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
       $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
     }
+    if ($latest == 1) {
+      $lien = $img;
+      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/latest.jpg";
+    }
 
     // Vérifiez si le fichier existe déjà
-    if (file_exists($path)) {
+    if (file_exists($path) && $latest == 0) {
       return $urlJeedom . str_replace("/var/www/html", "", $path);
     }
 
@@ -771,13 +842,15 @@ class frigate extends eqLogic
       // Enregistrez l'image ou la vidéo dans le dossier spécifié
       $file = file_put_contents($path, $content);
       if ($file !== false) {
-        log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
+        // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
         $result = $urlJeedom . str_replace("/var/www/html", "", $path);
       } else {
-        log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier.");
+        log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);
+        $result = "error";
       }
     } else {
-      log::add(__CLASS__, 'debug', "Échec du téléchargement du fichier.");
+      log::add(__CLASS__, 'debug', "Échec du téléchargement du fichier : " . $lien);
+      $result = "error";
     }
 
     return $result;
@@ -806,6 +879,14 @@ class frigateCmd extends cmd
   // Exécution d'une commande
   public function execute($_options = array())
   {
+    $frigate = $this->getEqLogic();
+    if ($this->getLogicalId() == 'action_startCron') {
+      $frigate->getCmd(null, 'info_Cron')->event(1);
+      log::add(__CLASS__, 'debug', "Cron activé");
+    } else if ($this->getLogicalId() == 'action_stopCron') {
+      $frigate->getCmd(null, 'info_Cron')->event(0);
+      log::add(__CLASS__, 'debug', "Cron désactivé");
+    }
   }
 
   /*     * **********************Getteur Setteur*************************** */

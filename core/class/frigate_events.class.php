@@ -40,6 +40,7 @@ class frigate_events
 	private $subLabel;
 	private $thumbnail;
 	private $topScore;
+	private $score;
 	private $zones;
 
 	/*     * ***********************Methode static*************************** */
@@ -294,7 +295,15 @@ class frigate_events
 	{
 		$this->topScore = $topScore;
 	}
+	public function getScore()
+	{
+		return $this->score;
+	}
 
+	public function setScore($score)
+	{
+		$this->score = $score;
+	}
 	public function getZones()
 	{
 		return $this->zones;

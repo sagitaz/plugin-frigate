@@ -39,26 +39,26 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{URL Frigate}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Renseignez l'URL de frigate}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{URL de Frigate}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="URL" />
+                <input class="configKey form-control" data-l1key="URL" placeholder="Exemple: 192.168.1.20" />
             </div>
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Port}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{port (5000 par défaut)}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{port de Frigate (5000 par défaut)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="port" />
+                <input class="configKey form-control" data-l1key="port" type="number" placeholder="5000 par défaut" />
             </div>
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Récupération des évènements}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupèrer}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="recovery_days" placeholder="7 jours par défaut" />
+                <input class="configKey form-control" data-l1key="recovery_days" type="number" placeholder="7 jours par défaut" />
             </div>
         </div>
         <div class="form-group">
@@ -66,20 +66,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="remove_days" placeholder="7 jours par défaut" />
-            </div>
-        </div>
-        <div class="form-group">
-            <label class="col-md-4 control-label">{{Cron}}
-            </label>
-            <div class="col-md-4">
-                <select class="configKey" data-l1key="cron">
-                    <option value="1">{{1 minute}}</option>
-                    <option value="5" selected>{{5 minutes}}</option>
-                    <option value="15">{{15 minutes}}</option>
-                    <option value="30">{{30 minutes}}</option>
-                    <option value="60">{{60 minutes}}</option>
-                </select>
+                <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
             </div>
         </div>
     </fieldset>

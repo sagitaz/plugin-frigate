@@ -17,7 +17,8 @@ CREATE TABLE IF NOT EXISTS `frigate_events` (
     `retain` text DEFAULT NULL,
     `subLabel` text DEFAULT NULL,
     `thumbnail` text DEFAULT NULL,
-    `topScore` text DEFAULT NULL,
+    `score` int(11) NULL,
+    `topScore` int(11) NULL,
     `zones` text DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

@@ -8,7 +8,7 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 - **Port** : le port du serveur Frigate (5000 par défaut)
 - **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquer ici le nombre de jours souhaité.
 - **Suppression des évènements** : Les évènement plus anciens que le nombre de jours indiqué seront supprimés de la database Jeedom (pas du serveur Frigate).
-- **Cron** : Le délai entre 2 mises à jour des évènements, de 1 minute à 60 minutes, par défaut 5 minutes. Les stats sont elles mises à jour toutes les 5 minutes, aucun réglage.
+- **Cron** : Choisir dans la partie fonctionnalités, le cron souhaité.
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire alors ce sera le nombre de jours de récupération qui sera utilisé.
 
@@ -16,6 +16,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 ## Equipement Events
 L'équipement est créé de manière automatique à l'installation du plugin.
 Celui-ci comporte des commandes infos avec la valeur du dernier event reçu.
+Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveau évènement.
 J'en ajouterai suivant les demandes et besoin de chacun.
 
 
