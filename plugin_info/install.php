@@ -38,16 +38,20 @@ function frigate_install()
 function frigate_update()
 {
     Log::add("frigate", 'info', 'Start Update');
-    $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
-    DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
-    Log::add("frigate", 'debug', '==> Update DB');
+    Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
+    $sql = "DROP TABLE IF EXISTS `frigate_events`;";
+    DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
+    Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
+    $sql1 = file_get_contents(dirname(__FILE__) . '/install.sql');
+    DB::Prepare($sql1, array(), DB::FETCH_TYPE_ALL);
+ /*   Log::add("frigate", 'debug', '==> Update DB');
     Log::add("frigate", 'debug', '===> Modify le champ topScore et créé le champ score dans frigate_events');
     // Modification de la colonne topScore
     $sql1 = "ALTER TABLE `jeedom`.`frigate_events` MODIFY `topScore` int(11) NULL;";
     DB::Prepare($sql1, array(), DB::FETCH_TYPE_ROW);
     // Création de la nouvelle colonne score
     $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `score` int(11) NULL;";
-    DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+    DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW); */
     frigate::generateEqEvents();
     frigate::generateEqStats();
     frigate::setConfigCron();
