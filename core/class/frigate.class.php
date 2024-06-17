@@ -61,7 +61,7 @@ class frigate extends eqLogic
       config::save('functionality::cron::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 0, 'frigate');
+      config::save('functionality::cron5::enable', 1, 'frigate');
     }
     if (!config::byKey('functionality::cron10::enable', 'frigate')) {
       config::save('functionality::cron10::enable', 0, 'frigate');
@@ -89,48 +89,48 @@ class frigate extends eqLogic
         }
       }
     }
-
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron5::enable', 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron5::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
-  } }
+  }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron10::enable', 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron10::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
-  }
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron15::enable', 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron15::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
-  }
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
@@ -138,28 +138,28 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
 
     if (!empty($frigate)) {
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron30::enable', 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron30::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
-  }
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cronHourly::enable', 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cronHourly::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
-  }
   }
 
 
@@ -483,19 +483,23 @@ class frigate extends eqLogic
   public static function showEvents()
   {
     $events = frigate_events::all();
+    $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
+    }
 
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
       $result[] = array(
-        "img" => $event->getLasted(),
+        "img" => $urlJeedom . $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
         "date" => $date,
         "duree" => $duree,
-        "snapshot" => $event->getSnapshot(),
-        "clip" => $event->getClip(),
+        "snapshot" => $urlJeedom . $event->getSnapshot(),
+        "clip" => $urlJeedom . $event->getClip(),
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
         "id" => $event->getEventId(),
@@ -503,7 +507,9 @@ class frigate extends eqLogic
       );
     }
 
+    if (!isset($result)) {
     usort($result, 'frigate::orderByDate');
+    }
 
     return $result;
   }
@@ -618,6 +624,9 @@ class frigate extends eqLogic
     // Création des commandes Crons pour l'equipement général
     // commande infos
     $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "LIGHT_STATE", 0);
+    if ($infoCmd->execCmd() == "" || $infoCmd->execCmd() == null) {
+      $infoCmd->event(1);
+    }
     $infoCmd->save();
     // commandes actions
     $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "LIGHT_ON", $infoCmd, 0, "action");
@@ -856,7 +865,7 @@ class frigate extends eqLogic
       $file = file_put_contents($path, $content);
       if ($file !== false) {
         // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
-        $result = $urlJeedom . str_replace("/var/www/html", "", $path);
+        $result = str_replace("/var/www/html", "", $path);
       } else {
         log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);
         $result = "error";
