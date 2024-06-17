@@ -178,7 +178,38 @@ $eqLogics = eqLogic::byType($plugin->getId());
                         <!-- Partie droite de l'onglet "Équipement" -->
                         <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
                         <div class="col-lg-6 eqFrigate">
-                            <legend><i class="fas fa-info"></i> {{Visualisation}}</legend>
+                            <div>
+                                <div class="pull-left">
+                                    <legend><i class="fas fa-info"></i> {{Visualisation}}</legend>
+                                </div>
+                                <?php
+
+                                $name = '';
+                                try {        
+                                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                                    $eqLogicId = intval($_GET['id']);
+                                    $equipment = eqLogic::byId($eqLogicId);
+
+                                    if ($equipment) {
+                                        $configuration = $equipment->getConfiguration();
+                                        if (isset($configuration['name'])) {
+                                            $name = $configuration['name'];
+                                        }
+                                    }
+                                }            
+                                } catch (Exception $e) {
+                                    //echo "Erreur : " . $e->getMessage();
+                                }
+
+                                if ($name !== '') {
+                                    echo '<div class="pull-right">
+                                        <a class="btn btn-success eqLogicAction" onclick="gotoCameraEvents(\'' . $name . '\')" title="{{Afficher les évènements de la caméra}}">
+                                        <i class="fas fa-window-restore"></i>&nbsp;Evènements</a>
+                                    </div>';
+                                }
+
+                                ?>
+                            </div>  
 
                             <div class="form-group">
                                 <div class="col-sm-12" style="display: none;">
