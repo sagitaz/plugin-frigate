@@ -270,7 +270,7 @@ function printEqLogic(_eqLogic) {
     }
 
     refreshImage();
-    setInterval(refreshImage, 5000);
+    setInterval(refreshImage, 10000);
 
 }
 
