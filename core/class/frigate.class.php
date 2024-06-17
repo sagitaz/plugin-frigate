@@ -483,23 +483,19 @@ class frigate extends eqLogic
   public static function showEvents()
   {
     $events = frigate_events::all();
-    $urlJeedom = network::getNetworkAccess('external');
-    if ($urlJeedom == "") {
-      $urlJeedom = network::getNetworkAccess('internal');
-    }
 
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
       $result[] = array(
-        "img" => $urlJeedom . $event->getLasted(),
+        "img" => $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
         "date" => $date,
         "duree" => $duree,
-        "snapshot" => $urlJeedom . $event->getSnapshot(),
-        "clip" => $urlJeedom . $event->getClip(),
+        "snapshot" => $event->getSnapshot(),
+        "clip" => $event->getClip(),
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
         "id" => $event->getEventId(),
@@ -508,7 +504,7 @@ class frigate extends eqLogic
     }
 
     if (!isset($result)) {
-    usort($result, 'frigate::orderByDate');
+      usort($result, 'frigate::orderByDate');
     }
 
     return $result;
