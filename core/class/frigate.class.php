@@ -340,16 +340,31 @@ class frigate extends eqLogic
       $frigate = frigate_events::byEventId($event['id']);
 
       $img = self::saveURL($event['id'], "snapshot", $event['camera'], 1);
+      if ($img = "error") {
+        $img = "null";
+      }
 
       if ($event['has_snapshot'] == 1) {
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
+        $hasSnapshot = 1;
+        if ($snapshot == "error") {
+          $snapshot = "null";
+          $hasSnapshot = 0;
+        }
       } else {
         $snapshot = "null";
+        $hasSnapshot = 0;
       }
       if ($event['has_clip'] == 1) {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
+        $hasclip = 1;
+        if ($clip == "error") {
+          $clip = "null";
+          $hasclip = 0;
+        }
       } else {
-        $clip = "null";
+        $clip = "null"; 
+        $hasclip = 0;
       }
 
       if (!$frigate) {
@@ -363,8 +378,8 @@ class frigate extends eqLogic
         $frigate->setStartTime($event['start_time']);
         $frigate->setEndTime($event['end_time']);
         $frigate->setFalsePositive($event['false_positive']);
-        $frigate->setHasClip($event['has_clip']);
-        $frigate->setHasSnapshot($event['has_snapshot']);
+        $frigate->setHasClip($hasclip);
+        $frigate->setHasSnapshot($hasSnapshot);
         $frigate->setEventId($event['id']);
         $frigate->setLabel($event['label']);
         $frigate->setPlusId($event['plus_id']);
@@ -658,7 +673,7 @@ class frigate extends eqLogic
     // Statistiques pour chaque eqLogic caméras
     // Mise à jour des statistiques des caméras
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-      log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
+      //log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
       // recherche equipement caméra
       $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
       if (is_object($eqCamera[0])) {
@@ -671,7 +686,7 @@ class frigate extends eqLogic
           $cmd->save();
         }
       } else {
-        log::add(__CLASS__, 'debug', "L'équipement camera n'existe pas.");
+        log::add(__CLASS__, 'debug', "L'équipement camera" . $cameraName . " n'existe pas.");
       }
     }
 
@@ -831,9 +846,11 @@ class frigate extends eqLogic
         $result = $urlJeedom . str_replace("/var/www/html", "", $path);
       } else {
         log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);
+        $result = "error";
       }
     } else {
       log::add(__CLASS__, 'debug', "Échec du téléchargement du fichier : " . $lien);
+      $result = "error";
     }
 
     return $result;
