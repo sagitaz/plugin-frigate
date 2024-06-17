@@ -56,12 +56,6 @@ class frigate extends eqLogic
   // configuration par defaut des crons
   public static function setConfigCron()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    log::add(__CLASS__, 'debug', "execute:" . $execute);
-    if (empty($execute)) {
-      $frigate->getCmd(null, 'info_Cron')->event(1);
-    }
     // cron par défaut
     if (!config::byKey('functionality::cron::enable', 'frigate')) {
       config::save('functionality::cron::enable', 0, 'frigate');
@@ -88,7 +82,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
       $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron::enable', 'frigate', '0 ') == 1) {
+      if (config::byKey('functionality::cron::enable', 'frigate', 0) == 1) {
         if ($execute == "1") {
           self::getEvents();
           self::getStats();
@@ -103,7 +97,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron5::enable', 'frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron5::enable', 'frigate', 0) == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -116,7 +110,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron10::enable', 'frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron10::enable', 'frigate', 0) == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -130,7 +124,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron15::enable', 'frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron15::enable', 'frigate', 0) == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -145,7 +139,7 @@ class frigate extends eqLogic
 
     if (!empty($frigate)) {
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron30::enable', 'frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron30::enable', 'frigate', 0) == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -159,7 +153,7 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate)) {
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cronHourly::enable', 'frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cronHourly::enable', 'frigate', 0) == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
