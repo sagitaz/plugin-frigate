@@ -170,9 +170,10 @@ class frigate extends eqLogic
     $quality = $this->getConfiguration('quality', 70);
 
     $img = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
+    $latestImg = self::saveURL(null,null,$name,0,1,$img);
     log::add(__CLASS__, 'debug', "URL = " . json_encode($img));
 
-    $this->setConfiguration('img', $img);
+    $this->setConfiguration('img', $latestImg);
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
@@ -514,21 +515,21 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $infoCmd = "", $historized = 1, $type = "info")
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $infoCmd = null, $historized = 1, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
     if (!is_object($cmd)) {
       $cmd = new frigateCmd();
-      $cmd->setIsVisible(1);
-      $cmd->setIsHistorized($historized);
+      $cmd->setLogicalId($logicalId);
       $cmd->setEqLogic_id($eqLogicId);
       $cmd->setName($name);
       $cmd->setType($type);
       $cmd->setSubType($subType);
-      $cmd->setUnite($unite);
-      $cmd->setLogicalId($logicalId);
       $cmd->setGeneric_type($genericType);
+      $cmd->setIsVisible(1);
+      $cmd->setIsHistorized($historized);
+      $cmd->setUnite($unite);
       if (is_object($infoCmd) && $type == 'action') {
         $cmd->setValue($infoCmd->getId());
       }
@@ -542,12 +543,12 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
     // commande infos
-    $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "GENERIC_INFO", 0);
+    $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "LIGHT_STATE", 0);
     $infoCmd->save();
     // commandes actions
-    $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "GENERIC_INFO", $infoCmd, 0, "action");
+    $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "LIGHT_ON", $infoCmd, 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($frigate->getId(), "Start cron", "other", "", "action_startCron", "GENERIC_INFO",$infoCmd, 0, "action");
+    $cmd = self::createCmd($frigate->getId(), "Start cron", "other", "", "action_startCron", "LIGHT_OFF",$infoCmd, 0, "action");
     $cmd->save();
   }
 
@@ -740,7 +741,7 @@ public static function majEventsCmds($event)
     }
   }
 
-  public static function saveURL($eventId, $type, $camera, $thumbnail = 0)
+  public static function saveURL($eventId = null, $type = null, $camera, $thumbnail = 0, $latest = 0, $img = null)
   {
     $result = "";
     $urlJeedom = network::getNetworkAccess('external');
@@ -763,6 +764,10 @@ public static function majEventsCmds($event)
     if ($thumbnail == 1) {
       $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
       $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
+    }
+    if ($latest == 1) {
+      $lien = $img;
+      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/latest.jpg";
     }
 
     // Vérifiez si le fichier existe déjà

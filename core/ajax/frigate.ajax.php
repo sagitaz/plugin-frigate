@@ -40,6 +40,14 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'refreshCameras') {
+        // Raffraichi la visualisation
+        $name = init('name');
+        $img = init('img');
+        $result = frigate::saveURL(null,null,$name,0,1,$img);
+        ajax::success($result);
+    }
+
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {

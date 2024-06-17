@@ -236,13 +236,38 @@ function printEqLogic(_eqLogic) {
     }
 
     function refreshImage() {
-        var imgUrl = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
-        var imgElement = document.getElementById('imgFrigate');
+        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+        const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
+        const imgElement = document.getElementById('imgFrigate');
 
-        if (imgUrl) {
-            // Add a query parameter to force image reload
-            imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-        }
+        $.ajax({
+            type: "POST",
+            url: "plugins/frigate/core/ajax/frigate.ajax.php",
+            data: {
+                action: "refreshCameras",
+                img: img,
+                name: name
+            },
+            dataType: 'json',
+            error: function (request, status, error) {
+                handleAjaxError(request, status, error);
+            },
+            success: function (data) {
+                if (data.result == 'KO') {
+                    $('#div_alert').showAlert({
+                        message: '{{L\'image n\'est pas disponible.}}',
+                        level: 'warning'
+                    });
+                    return;
+                } else {
+                    imgUrl = data.result
+                    if (imgUrl) {
+                        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+                    }
+                }
+            }
+        })
+
     }
 
     // Refresh the image immediately
