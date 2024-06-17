@@ -80,7 +80,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
         </div>
         <!-- Onglets -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
+            <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
             <li role="presentation" class="eqFrigate"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
@@ -185,18 +185,18 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 <?php
 
                                 $name = '';
-                                try {        
-                                if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-                                    $eqLogicId = intval($_GET['id']);
-                                    $equipment = eqLogic::byId($eqLogicId);
+                                try {
+                                    if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                                        $eqLogicId = intval($_GET['id']);
+                                        $equipment = eqLogic::byId($eqLogicId);
 
-                                    if ($equipment) {
-                                        $configuration = $equipment->getConfiguration();
-                                        if (isset($configuration['name'])) {
-                                            $name = $configuration['name'];
+                                        if ($equipment) {
+                                            $configuration = $equipment->getConfiguration();
+                                            if (isset($configuration['name'])) {
+                                                $name = $configuration['name'];
+                                            }
                                         }
                                     }
-                                }            
                                 } catch (Exception $e) {
                                     //echo "Erreur : " . $e->getMessage();
                                 }
@@ -209,7 +209,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 }
 
                                 ?>
-                            </div>  
+                            </div>
 
                             <div class="form-group">
                                 <div class="col-sm-12" style="display: none;">

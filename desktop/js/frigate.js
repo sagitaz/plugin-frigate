@@ -185,7 +185,12 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-function gotoCameraEvents (cameraName) {
+document.getElementById('gotoHome').addEventListener('click', function () {
+    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
+    window.location.reload(true);
+});
+
+function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }
 
