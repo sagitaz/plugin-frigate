@@ -16,15 +16,18 @@
 
 /* Permet la réorganisation des commandes dans l'équipement */
 
-function showMedia(mediaType, src, hasVideo, hasSnapshot) {
-  var mediaModal = document.getElementById('mediaModal');
-  var videoContainer = document.querySelector('.video-container');
-  var imageContainer = document.querySelector('.image-container');
-  var videoPlayer = document.getElementById('videoPlayer');
-  var videoSource = document.getElementById('videoSource');
-  var snapshotImage = document.getElementById('snapshotImage');
-  var showVideoBtn = document.getElementById('showVideo');
-  var showImageBtn = document.getElementById('showImage');
+function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
+  const mediaModal = document.getElementById('mediaModal');
+  const videoContainer = document.querySelector('.video-container');
+  const imageContainer = document.querySelector('.image-container');
+  const videoPlayer = document.getElementById('videoPlayer');
+  const videoSource = document.getElementById('videoSource');
+  const snapshotImage = document.getElementById('snapshotImage');
+  const showVideoBtn = document.getElementById('showVideo');
+  const showImageBtn = document.getElementById('showImage');
+  const mediaTitle = document.getElementById('mediaTitle');
+  
+  mediaTitle.textContent = title;
 
   if (mediaType === 'video') {
     videoSource.src = src;
@@ -46,38 +49,40 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot) {
 
 document.querySelectorAll('.snapshot-btn').forEach(function(button) {
   button.addEventListener('click', function() {
-    var eventBtns = this.parentElement;
-    var snapshotSrc = eventBtns.getAttribute('data-snapshot');
-    var videoSrc = eventBtns.getAttribute('data-video');
-    var hasVideo = !!videoSrc;
-    var hasSnapshot = !!snapshotSrc;
+    const eventBtns = this.parentElement;
+    const snapshotSrc = eventBtns.getAttribute('data-snapshot');
+    const videoSrc = eventBtns.getAttribute('data-video');
+    const title = eventBtns.getAttribute('data-title');
+    const hasVideo = !!videoSrc;
+    const hasSnapshot = !!snapshotSrc;
 
-    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
 
     document.getElementById('showVideo').onclick = function() {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot);
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
     };
     document.getElementById('showImage').onclick = function() {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
     };
   });
 });
 
 document.querySelectorAll('.video-btn').forEach(function(button) {
   button.addEventListener('click', function() {
-    var eventBtns = this.parentElement;
-    var videoSrc = eventBtns.getAttribute('data-video');
-    var snapshotSrc = eventBtns.getAttribute('data-snapshot');
-    var hasVideo = !!videoSrc;
-    var hasSnapshot = !!snapshotSrc;
+    const eventBtns = this.parentElement;
+    const videoSrc = eventBtns.getAttribute('data-video');
+    const snapshotSrc = eventBtns.getAttribute('data-snapshot');
+    const title = eventBtns.getAttribute('data-title');
+    const hasVideo = !!videoSrc;
+    const hasSnapshot = !!snapshotSrc;
 
-    showMedia('video', videoSrc, hasVideo, hasSnapshot);
+    showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
 
     document.getElementById('showVideo').onclick = function() {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot);
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
     };
     document.getElementById('showImage').onclick = function() {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot);
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
     };
   });
 });
@@ -197,6 +202,9 @@ function gotoCamera (cameraId) {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
 }
 
+window.addEventListener('load', function() {
+  filterEvents();
+});
 document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
   checkbox.addEventListener('change', filterEvents);
 });

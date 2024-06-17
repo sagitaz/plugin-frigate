@@ -18,6 +18,26 @@ if (!isConnect('admin')) {
 		</span>
 	</div>
 	<?php
+  
+    function formatDuration($seconds) {
+      $hours = floor($seconds / 3600);
+      $minutes = floor(($seconds % 3600) / 60);
+      $remainingSeconds = $seconds % 60;
+
+      $formattedDuration = '';
+      if ($hours > 0) {
+        $formattedDuration .= $hours . 'h';
+      }
+      if ($minutes > 0) {
+        $formattedDuration .= $minutes . 'mn';
+      }
+      if ($remainingSeconds > 0 || $seconds == 0) {
+        $formattedDuration .= $remainingSeconds . 's';
+      }
+             
+      return $formattedDuration;
+    }
+
 	$events = frigate::showEvents();
 
 	echo '<div class="col-sm-9" style="margin-bottom:5px">';
@@ -112,12 +132,15 @@ if (!isConnect('admin')) {
         }
         echo '<br>';
 
-		echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $event['duree'] . ' sc)</span>';
+		$formattedDuration = formatDuration($event['duree']);
+
+      	echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $formattedDuration . ')</span>';
 		echo '</div>';
 		// div buttons
 		echo '<div class="eventBtns"';
         if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
         if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
+      	echo ' data-title="' . $event['label'] . ' (' . $event['top_score'] . ' %) - ' . $event['camera'] . ' - ' . $event['date'] . ' (' . $formattedDuration . ')"';
         echo '>';
 		if ($event['hasSnapshot'] == 1) {
 			echo '<button class="hover-button snapshot-btn">';
@@ -144,16 +167,24 @@ if (!isConnect('admin')) {
     <div id="mediaModal" class="modal">
         <div class="modal-content">
             <span class="close">&times;</span>
-            <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
-            <button id="showImage" class="hidden-btn">Voir la snapshot</button>
-            <div class="video-container active">
-                <video id="videoPlayer" width="100%" controls autoplay>
-                    <source id="videoSource" src="" type="video/mp4">
-                    Votre navigateur ne supporte pas la balise vidéo.
-                </video>
-            </div>
-            <div class="image-container">
-                <img id="snapshotImage" src="" alt="Snapshot" width="100%">
+
+            <div class="modal-header">
+                <h2 id="mediaTitle"></h2>
+                <div class="button-container">
+                    <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
+                    <button id="showImage" class="hidden-btn">Voir la snapshot</button>
+                </div>
+            </div>              
+			<div class="media-container">
+              <div class="video-container active">
+                  <video id="videoPlayer" width="100%" controls autoplay>
+                      <source id="videoSource" src="" type="video/mp4">
+                      Votre navigateur ne supporte pas la balise vidéo.
+                  </video>
+              </div>
+              <div class="image-container">
+                  <img id="snapshotImage" src="" alt="Snapshot" width="100%">
+              </div>
             </div>
         </div>
     </div>
@@ -235,7 +266,27 @@ if (!isConnect('admin')) {
       margin: 5% auto;
       padding: 20px;
       border: 1px solid #888;
-        width: 80%;
+      width: 80%;
+      position: relative;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .modal-header h2 {
+        flex: 1;
+        margin: 0;
+    }
+    .button-container {
+        display: flex;
+        gap: 10px;
+    }
+    .media-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
     }
     .close {
       color: #aaa;
@@ -251,6 +302,14 @@ if (!isConnect('admin')) {
     }
     .video-container, .image-container {
       display: none;
+    }
+    .video-container, .image-container {
+        width: 100%;
+    }
+
+    .video-container video, .image-container img {
+        width: 100%;
+        display: block;
     }
     .active {
       display: block;
