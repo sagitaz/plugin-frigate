@@ -153,13 +153,13 @@ function filterEvents() {
       case '12h':
         timeLimit = new Date(now.getTime() - (12 * 60 * 60 * 1000));
         break;
-      case '1d':
+      case '1j':
         timeLimit = new Date(now.getTime() - (24 * 60 * 60 * 1000));
         break;
-      case '2d':
+      case '2j':
         timeLimit = new Date(now.getTime() - (2 * 24 * 60 * 60 * 1000));
         break;
-      case '1w':
+      case '1s':
         timeLimit = new Date(now.getTime() - (7 * 24 * 60 * 60 * 1000));
         break;
       default:
@@ -191,6 +191,10 @@ function filterEvents() {
         event.classList.add('eventHidden');
       });
     }
+}
+
+function gotoCamera (cameraId) {
+  jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
 }
 
 document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
@@ -228,6 +232,5 @@ document.getElementById('deselectAllLabels').addEventListener('click', function 
 document.getElementById('startDate').addEventListener('change', filterEvents);
 document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function(radio) {
-radio.addEventListener('change', filterEvents);
-
+  radio.addEventListener('change', filterEvents);
 });
