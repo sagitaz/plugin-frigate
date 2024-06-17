@@ -23,6 +23,7 @@ use Log;
 use eqLogic;
 use cmd;
 use message;
+use config;
 
 class frigate extends eqLogic
 {
@@ -52,29 +53,50 @@ class frigate extends eqLogic
     config::save('remove_days', '7', 'frigate');
     config::save('cron', '5', 'frigate');
   }
-
+  // configuration par defaut des crons
+  public static function setConfigCron()
+  {
+    // cron par défaut
+    if (!config::byKey('functionality::cron::enable', 'frigate')) {
+      config::save('functionality::cron::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron5::enable', 'frigate')) {
+      config::save('functionality::cron5::enable', 1, 'frigate');
+    }
+    if (!config::byKey('functionality::cron10::enable', 'frigate')) {
+      config::save('functionality::cron10::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron15::enable', 'frigate')) {
+      config::save('functionality::cron15::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cron30::enable', 'frigate')) {
+      config::save('functionality::cron30::enable', 0, 'frigate');
+    }
+    if (!config::byKey('functionality::cronHourly::enable', 'frigate')) {
+      config::save('functionality::cronHourly::enable', 0, 'frigate');
+    }
+  }
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "1") {
+    if (config::byKey('functionality::cron::enable', 'frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
-    } 
+    }
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      self::getStats();
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "5") {
+    if (config::byKey('functionality::cron5::enable','frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
     }
   }
@@ -83,10 +105,10 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "10") {
+    if (config::byKey('functionality::cron10::enable','frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
     }
   }
@@ -95,10 +117,10 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "15") {
+    if (config::byKey('functionality::cron15::enable','frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
     }
   }
@@ -107,10 +129,10 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "30") {
+    if (config::byKey('functionality::cron30::enable','frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
     }
   }
@@ -119,10 +141,10 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == "1") {
-      $cron = config::byKey('cron', 'frigate');
-      if ($cron == "60") {
+    if (config::byKey('functionality::cronHourly::enable','frigate', '0 ') == 1) {
+      if ($execute == "1") {
         self::getEvents();
+        self::getStats();
       }
     }
   }
@@ -805,7 +827,7 @@ class frigate extends eqLogic
       // Enregistrez l'image ou la vidéo dans le dossier spécifié
       $file = file_put_contents($path, $content);
       if ($file !== false) {
-       // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
+        // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
         $result = $urlJeedom . str_replace("/var/www/html", "", $path);
       } else {
         log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);

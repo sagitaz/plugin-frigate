@@ -22,33 +22,35 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 // Fonction exécutée automatiquement après l'installation du plugin
 function frigate_install()
 {
-    Log::add(__CLASS__, 'info', 'Start Install');
+    Log::add("frigate", 'info', 'Start Install');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
     frigate::generateEqStats();
     frigate::setConfig();
+    frigate::setConfigCron();
     frigate::setCmdsCron();
-    Log::add(__CLASS__, 'info', 'Finish Install');
+    Log::add("frigate", 'info', 'Finish Install');
 }
 
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function frigate_update()
 {
-    Log::add(__CLASS__, 'info', 'Start Update');
+    Log::add("frigate", 'info', 'Start Update');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
     frigate::generateEqStats();
+    frigate::setConfigCron();
     frigate::setCmdsCron();
-    Log::add(__CLASS__, 'info', 'Finish Update');
+    Log::add("frigate", 'info', 'Finish Update');
 }
 
 // Fonction exécutée automatiquement après la suppression du plugin
 function frigate_remove()
 {
-    Log::add(__CLASS__, "info", "==> Début de la suppression de la database Frigate");
+    Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
     $sql = "DROP TABLE IF EXISTS `frigate_events`;";
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
-    Log::add(__CLASS__, "info", "==> Fin de la suppression de la database Frigate");
+    Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
 }

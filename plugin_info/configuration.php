@@ -69,18 +69,5 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
             </div>
         </div>
-        <div class="form-group">
-            <label class="col-md-4 control-label">{{Cron}}
-            </label>
-            <div class="col-md-4">
-                <select class="configKey" data-l1key="cron">
-                    <option value="1">{{1 minute}}</option>
-                    <option value="5" selected>{{5 minutes}}</option>
-                    <option value="15">{{15 minutes}}</option>
-                    <option value="30">{{30 minutes}}</option>
-                    <option value="60">{{60 minutes}}</option>
-                </select>
-            </div>
-        </div>
     </fieldset>
 </form>
