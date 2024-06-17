@@ -211,66 +211,68 @@ function printEqLogic(_eqLogic) {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
     }
 
-    $('#div_action').empty()
-    ACTIONS_LIST = []
-    if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
-        actionOptions = []
-        console.log(_eqLogic.configuration.actions);
-        for (var i in _eqLogic.configuration.actions[0]) {
-            addAction(_eqLogic.configuration.actions[0][i], "action")
+    if (_eqLogic.logicalId === "eqFrigateCameras") {
+        $('#div_action').empty()
+        ACTIONS_LIST = []
+        if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
+            actionOptions = []
+            console.log(_eqLogic.configuration.actions);
+            for (var i in _eqLogic.configuration.actions[0]) {
+                addAction(_eqLogic.configuration.actions[0][i], "action")
+            }
+            ACTIONS_LIST = null
+            jeedom.cmd.displayActionsOption({
+                params: actionOptions,
+                async: false,
+                error: function (error) {
+                    $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+                },
+                success: function (data) {
+                    for (var i in data) {
+                        $('#' + data[i].id).append(data[i].html.html)
+                    }
+                    jeedomUtils.taAutosize()
+                }
+            })
         }
-        ACTIONS_LIST = null
-        jeedom.cmd.displayActionsOption({
-            params: actionOptions,
-            async: false,
-            error: function (error) {
-                $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-            },
-            success: function (data) {
-                for (var i in data) {
-                    $('#' + data[i].id).append(data[i].html.html)
+
+        function refreshImage() {
+            const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+            const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
+            const imgElement = document.getElementById('imgFrigate');
+
+            $.ajax({
+                type: "POST",
+                url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                data: {
+                    action: "refreshCameras",
+                    img: img,
+                    name: name
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    if (data.result == 'KO') {
+                        $('#div_alert').showAlert({
+                            message: '{{L\'image n\'est pas disponible.}}',
+                            level: 'warning'
+                        });
+                        return;
+                    } else {
+                        imgUrl = data.result
+                        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+
+                    }
                 }
-                jeedomUtils.taAutosize()
-            }
-        })
+            })
+
+        }
+
+        refreshImage();
+        setInterval(refreshImage, 10000);
     }
-
-    function refreshImage() {
-        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
-        const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
-        const imgElement = document.getElementById('imgFrigate');
-
-        $.ajax({
-            type: "POST",
-            url: "plugins/frigate/core/ajax/frigate.ajax.php",
-            data: {
-                action: "refreshCameras",
-                img: img,
-                name: name
-            },
-            dataType: 'json',
-            error: function (request, status, error) {
-                handleAjaxError(request, status, error);
-            },
-            success: function (data) {
-                if (data.result == 'KO') {
-                    $('#div_alert').showAlert({
-                        message: '{{L\'image n\'est pas disponible.}}',
-                        level: 'warning'
-                    });
-                    return;
-                } else {
-                    imgUrl = data.result
-                    imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                    
-                }
-            }
-        })
-
-    }
-
-    refreshImage();
-    setInterval(refreshImage, 10000);
 
 }
 
