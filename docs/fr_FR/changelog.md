@@ -7,9 +7,9 @@
 
 # 15/06/2024 Beta 0..0
 - Ajout de logs
-- Ajout dans l'équipement Event de commande pour activer le cron
+- Ajout dans l'équipement Events de commandes pour activer le cron
 - Modification de la configuration cron, utiliser les checkbox jeedom.
-- Ajout d'options page events (meri @noodom)
+- Ajout d'options page events (merci @noodom)
 - Configuration pièce par default
 
 # 15/06/2024 Beta 0.5.0
