@@ -56,17 +56,12 @@ class frigate extends eqLogic
   // configuration par defaut des crons
   public static function setConfigCron()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if ($execute == null) {
-      $frigate->getCmd(null, 'info_Cron')->event(1);
-    }
     // cron par défaut
     if (!config::byKey('functionality::cron::enable', 'frigate')) {
       config::save('functionality::cron::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 0, 'frigate');
+      config::save('functionality::cron5::enable', 1, 'frigate');
     }
     if (!config::byKey('functionality::cron10::enable', 'frigate')) {
       config::save('functionality::cron10::enable', 0, 'frigate');
@@ -85,11 +80,13 @@ class frigate extends eqLogic
   public static function cron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -97,11 +94,13 @@ class frigate extends eqLogic
   public static function cron5()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron5::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron5::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -109,11 +108,13 @@ class frigate extends eqLogic
   public static function cron10()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron10::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron10::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -121,11 +122,13 @@ class frigate extends eqLogic
   public static function cron15()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron15::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron15::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -133,11 +136,14 @@ class frigate extends eqLogic
   public static function cron30()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron30::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cron30::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -145,11 +151,13 @@ class frigate extends eqLogic
   public static function cronHourly()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cronHourly::enable', 'frigate', '0 ') == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+    if (!empty($frigate)) {
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey('functionality::cronHourly::enable', 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
   }
@@ -349,7 +357,7 @@ class frigate extends eqLogic
         $img = "null";
       }
 
-      if ($event['has_snapshot'] == 1) {
+      if ($event['has_snapshot'] == "true") {
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
         $hasSnapshot = 1;
         if ($snapshot == "error") {
@@ -361,7 +369,7 @@ class frigate extends eqLogic
         $hasSnapshot = 0;
       }
 
-      if ($event['has_clip'] == 1) {
+      if ($event['has_clip'] == "true") {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
         $hasClip = 1;
         if ($clip == "error") {
@@ -495,7 +503,9 @@ class frigate extends eqLogic
       );
     }
 
-    usort($result, 'frigate::orderByDate');
+    if (isset($result)) {
+      usort($result, 'frigate::orderByDate');
+    }
 
     return $result;
   }
@@ -610,6 +620,9 @@ class frigate extends eqLogic
     // Création des commandes Crons pour l'equipement général
     // commande infos
     $infoCmd = self::createCmd($frigate->getId(), "Etat cron", "binary", "", "info_Cron", "LIGHT_STATE", 0);
+    if ($infoCmd->execCmd() == "" || $infoCmd->execCmd() == null) {
+      $infoCmd->event(1);
+    }
     $infoCmd->save();
     // commandes actions
     $cmd = self::createCmd($frigate->getId(), "Stop cron", "other", "", "action_stopCron", "LIGHT_ON", $infoCmd, 0, "action");
@@ -795,7 +808,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId = null, $type = null, $camera, $thumbnail = 0, $latest = 0, $img = null)
+  public static function saveURL($eventId = null, $type = null, $camera, $thumbnail = 0, $latest = 0, $img = "")
   {
     $result = "";
     $urlJeedom = network::getNetworkAccess('external');
@@ -814,14 +827,14 @@ class frigate extends eqLogic
     }
     $format = ($type == "snapshot") ? "jpg" : "mp4";
     $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
-    $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
+    $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($thumbnail == 1) {
       $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
-      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
+      $path = "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
     }
     if ($latest == 1) {
       $lien = $img;
-      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/latest.jpg";
+      $path = "/data/" . $camera . "/latest.jpg";
     }
 
     // Vérifiez si le fichier existe déjà
@@ -830,7 +843,7 @@ class frigate extends eqLogic
     }
 
     // Obtenez le répertoire du chemin de destination
-    $destinationDir = dirname($path);
+    $destinationDir = dirname(dirname(__FILE__, 3) . $path);
 
     // Vérifiez si le répertoire existe, sinon créez-le
     if (!is_dir($destinationDir)) {
@@ -845,10 +858,9 @@ class frigate extends eqLogic
 
     if ($content !== false) {
       // Enregistrez l'image ou la vidéo dans le dossier spécifié
-      $file = file_put_contents($path, $content);
+      $file = file_put_contents(dirname(__FILE__, 3) . $path, $content);
       if ($file !== false) {
-        // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
-        $result = $urlJeedom . str_replace("/var/www/html", "", $path);
+        $result = "/plugins/frigate" . $path;
       } else {
         log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);
         $result = "error";

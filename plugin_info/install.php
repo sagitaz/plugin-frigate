@@ -27,10 +27,10 @@ function frigate_install()
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
+    frigate::setCmdsCron();
     frigate::generateEqStats();
     frigate::setConfig();
     frigate::setConfigCron();
-    frigate::setCmdsCron();
     Log::add("frigate", 'info', 'Finish Install');
 }
 
@@ -53,9 +53,9 @@ function frigate_update()
     $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `score` int(11) NULL;";
     DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW); */
     frigate::generateEqEvents();
+    frigate::setCmdsCron();
     frigate::generateEqStats();
     frigate::setConfigCron();
-    frigate::setCmdsCron();
     Log::add("frigate", 'info', 'Finish Update');
 }
 

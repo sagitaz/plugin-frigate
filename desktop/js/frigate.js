@@ -242,8 +242,43 @@ function printEqLogic(_eqLogic) {
             })
         }
 
+        const imgElement = document.getElementById('imgFrigate');
+      	let intervalId;
+
+        const observerOptions = {
+            root: null,
+            rootMargin: '0px',
+            threshold: 0.1 // image considérée visible si au moins 10% est visible
+        };
+
+        const observerCallback = (entries, observer) => {
+            entries.forEach(entry => {
+                if (entry.isIntersecting) {
+                    startImageFetchInterval();
+                } else {
+                    stopImageFetchInterval();
+                }
+            });
+        };
+
+        const observer = new IntersectionObserver(observerCallback, observerOptions);
+        observer.observe(imgElement);
+
+        function startImageFetchInterval() {
+            if (!intervalId) {
+                intervalId = setInterval(refreshImage, 10000);
+            }
+        }
+
+        function stopImageFetchInterval() {
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+        }
+      
         function refreshImage() {
-            const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+          	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
             const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
             const imgElement = document.getElementById('imgFrigate');
 
@@ -260,7 +295,7 @@ function printEqLogic(_eqLogic) {
                     handleAjaxError(request, status, error);
                 },
                 success: function (data) {
-                    if (data.result == 'KO') {
+                    if (data.result == 'KO' || data.result == 'error') {
                         $('#div_alert').showAlert({
                             message: '{{L\'image n\'est pas disponible.}}',
                             level: 'warning'
@@ -269,15 +304,12 @@ function printEqLogic(_eqLogic) {
                     } else {
                         imgUrl = data.result
                         imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-
                     }
                 }
             })
-
         }
 
         refreshImage();
-        setInterval(refreshImage, 10000);
     }
 
 }
