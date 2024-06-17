@@ -61,7 +61,7 @@ class frigate extends eqLogic
       config::save('functionality::cron::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 1, 'frigate');
+      config::save('functionality::cron5::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron10::enable', 'frigate')) {
       config::save('functionality::cron10::enable', 0, 'frigate');
@@ -355,6 +355,7 @@ class frigate extends eqLogic
         $snapshot = "null";
         $hasSnapshot = 0;
       }
+
       if ($event['has_clip'] == 1) {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
         $hasClip = 1;
@@ -391,15 +392,6 @@ class frigate extends eqLogic
         $frigate->setZones($event['zones']);
         $frigate->save();
         self::majEventsCmds($frigate);
-      } else {
-        if ($frigate->getHasClip != $hasClip) {
-          $frigate->setHasClip($hasClip);
-          $frigate->save();
-        }
-        if ($frigate->getHasSnapshot != $hasSnapshot) {
-          $frigate->setHasSnapshot($hasSnapshot);
-          $frigate->save();
-        }
       }
     }
     // Nombre de jours a garder en DB
