@@ -93,7 +93,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron5::enable','frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron5::enable', 'frigate', '0 ') == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -105,7 +105,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron10::enable','frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron10::enable', 'frigate', '0 ') == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -117,7 +117,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron15::enable','frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron15::enable', 'frigate', '0 ') == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -129,7 +129,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cron30::enable','frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cron30::enable', 'frigate', '0 ') == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -141,7 +141,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey('functionality::cronHourly::enable','frigate', '0 ') == 1) {
+    if (config::byKey('functionality::cronHourly::enable', 'frigate', '0 ') == 1) {
       if ($execute == "1") {
         self::getEvents();
         self::getStats();
@@ -357,14 +357,14 @@ class frigate extends eqLogic
       }
       if ($event['has_clip'] == 1) {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
-        $hasclip = 1;
+        $hasClip = 1;
         if ($clip == "error") {
           $clip = "null";
-          $hasclip = 0;
+          $hasClip = 0;
         }
       } else {
-        $clip = "null"; 
-        $hasclip = 0;
+        $clip = "null";
+        $hasClip = 0;
       }
 
       if (!$frigate) {
@@ -373,13 +373,13 @@ class frigate extends eqLogic
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
         $frigate->setLasted($img);
+        $frigate->setHasClip($hasClip);
         $frigate->setClip($clip);
+        $frigate->setHasSnapshot($hasSnapshot);
         $frigate->setSnapshot($snapshot);
         $frigate->setStartTime($event['start_time']);
         $frigate->setEndTime($event['end_time']);
         $frigate->setFalsePositive($event['false_positive']);
-        $frigate->setHasClip($hasclip);
-        $frigate->setHasSnapshot($hasSnapshot);
         $frigate->setEventId($event['id']);
         $frigate->setLabel($event['label']);
         $frigate->setPlusId($event['plus_id']);
@@ -390,8 +390,16 @@ class frigate extends eqLogic
         $frigate->setScore(round($event['data']['score'] * 100, 0));
         $frigate->setZones($event['zones']);
         $frigate->save();
-
         self::majEventsCmds($frigate);
+      } else {
+        if ($frigate->getHasClip != $hasClip) {
+          $frigate->setHasClip($hasClip);
+          $frigate->save();
+        }
+        if ($frigate->getHasSnapshot != $hasSnapshot) {
+          $frigate->setHasSnapshot($hasSnapshot);
+          $frigate->save();
+        }
       }
     }
     // Nombre de jours a garder en DB
