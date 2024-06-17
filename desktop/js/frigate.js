@@ -261,20 +261,16 @@ function printEqLogic(_eqLogic) {
                     return;
                 } else {
                     imgUrl = data.result
-                    if (imgUrl) {
-                        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                    }
+                    imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+                    
                 }
             }
         })
 
     }
 
-    // Refresh the image immediately
     refreshImage();
-
-    // Set interval to refresh the image every 2 seconds (2000 milliseconds)
-    setInterval(refreshImage, 2000);
+    setInterval(refreshImage, 5000);
 
 }
 

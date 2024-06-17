@@ -170,10 +170,7 @@ class frigate extends eqLogic
     $quality = $this->getConfiguration('quality', 70);
 
     $img = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
-    $latestImg = self::saveURL(null,null,$name,0,1,$img);
-    log::add(__CLASS__, 'debug', "URL = " . json_encode($img));
-
-    $this->setConfiguration('img', $latestImg);
+    $this->setConfiguration('img', $img);
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
@@ -771,7 +768,7 @@ public static function majEventsCmds($event)
     }
 
     // Vérifiez si le fichier existe déjà
-    if (file_exists($path)) {
+    if (file_exists($path) && $latest == 0) {
       return $urlJeedom . str_replace("/var/www/html", "", $path);
     }
 
