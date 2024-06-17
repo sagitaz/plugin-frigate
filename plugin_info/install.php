@@ -23,7 +23,6 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 function frigate_install()
 {
     Log::add(__CLASS__, 'info', 'Start Install');
-    self::frigate_remove();
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
@@ -37,7 +36,6 @@ function frigate_install()
 function frigate_update()
 {
     Log::add(__CLASS__, 'info', 'Start Update');
-    self::frigate_remove();
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
     frigate::generateEqEvents();
