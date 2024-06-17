@@ -204,7 +204,6 @@ class frigate_events
 
 	public function setHasClip($hasClip)
 	{
-		$hasClip = ($hasClip == "true") ? 1 : 0;
 		$this->hasClip = $hasClip;
 	}
 	public function getClip()
@@ -223,7 +222,6 @@ class frigate_events
 
 	public function setHasSnapshot($hasSnapshot)
 	{
-		$hasSnapshot = ($hasSnapshot == "true") ? 1 : 0;
 		$this->hasSnapshot = $hasSnapshot;
 	}
 	public function getSnapshot()

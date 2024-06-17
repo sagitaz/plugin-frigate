@@ -357,7 +357,7 @@ class frigate extends eqLogic
         $img = "null";
       }
 
-      if ($event['has_snapshot'] == 1) {
+      if ($event['has_snapshot'] == "true") {
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
         $hasSnapshot = 1;
         if ($snapshot == "error") {
@@ -369,7 +369,7 @@ class frigate extends eqLogic
         $hasSnapshot = 0;
       }
 
-      if ($event['has_clip'] == 1) {
+      if ($event['has_clip'] == "true") {
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
         $hasClip = 1;
         if ($clip == "error") {
@@ -503,7 +503,7 @@ class frigate extends eqLogic
       );
     }
 
-    if (!isset($result)) {
+    if (isset($result)) {
       usort($result, 'frigate::orderByDate');
     }
 
@@ -827,14 +827,14 @@ class frigate extends eqLogic
     }
     $format = ($type == "snapshot") ? "jpg" : "mp4";
     $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
-    $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
+    $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($thumbnail == 1) {
       $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
-      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
+      $path = "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
     }
     if ($latest == 1) {
       $lien = $img;
-      $path = dirname(__FILE__, 3) . "/data/" . $camera . "/latest.jpg";
+      $path = "/data/" . $camera . "/latest.jpg";
     }
 
     // Vérifiez si le fichier existe déjà
@@ -843,7 +843,7 @@ class frigate extends eqLogic
     }
 
     // Obtenez le répertoire du chemin de destination
-    $destinationDir = dirname($path);
+    $destinationDir = dirname(dirname(__FILE__, 3) . $path);
 
     // Vérifiez si le répertoire existe, sinon créez-le
     if (!is_dir($destinationDir)) {
@@ -858,10 +858,9 @@ class frigate extends eqLogic
 
     if ($content !== false) {
       // Enregistrez l'image ou la vidéo dans le dossier spécifié
-      $file = file_put_contents($path, $content);
+      $file = file_put_contents(dirname(__FILE__, 3) . $path, $content);
       if ($file !== false) {
-        // log::add(__CLASS__, 'debug', "Le fichier a été téléchargé et enregistré avec succès.");
-        $result = str_replace("/var/www/html", "", $path);
+        $result = "/plugins/frigate" . $path;
       } else {
         log::add(__CLASS__, 'debug', "Échec de l'enregistrement du fichier : " . $lien);
         $result = "error";
