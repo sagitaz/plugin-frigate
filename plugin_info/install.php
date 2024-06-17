@@ -39,6 +39,20 @@ function frigate_update()
     Log::add("frigate", 'info', 'Start Update');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
+    Log::add("update", 'debug', '==> Update DB');
+    try {
+        Log::add("update", 'debug', '===> Modify le champ topScore et créé le champ score dans frigate_events');
+        // Modification de la colonne topScore
+        $sql1 = "ALTER TABLE `jeedom`.`frigate_events` MODIFY `topScore` int(11) NULL;";
+        DB::Prepare($sql1, array(), DB::FETCH_TYPE_ROW);
+
+        // Création de la nouvelle colonne score
+        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `score` int(11) NULL;";
+        DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+    } catch (Exception $exception) {
+        Log::add("update", 'error', $exception);
+    }
+
     frigate::generateEqEvents();
     frigate::generateEqStats();
     frigate::setConfigCron();
