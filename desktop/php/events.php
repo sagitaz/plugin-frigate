@@ -23,42 +23,55 @@ if (!isConnect('admin')) {
 	echo '<div class="col-sm-9" style="margin-bottom:5px">';
   	echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
     echo '<a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+	$selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
 	$cameras = array_unique(array_column($events, 'camera'));
     foreach ($cameras as $camera) {
-        echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" checked> ' . ucfirst($camera) . '</label>';
+    	$isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras);
+      	echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($camera) . '</label>';
     }
 	echo '</div>';
 
 	echo '<div class="col-sm-9" style="margin-bottom:20px">';
   	echo '<a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
     echo '<a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+	$selectedLabels = isset($_GET['categories']) ? explode(',', $_GET['categories']) : [];
 	$labels = array_unique(array_column($events, 'label'));
     foreach ($labels as $label) {
-        echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" checked> ' . ucfirst($label) . '</label>';
+    	$isChecked = empty($selectedLabels) || in_array($label, $selectedLabels);
+        echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($label) . '</label>';
     }
 	echo '</div>';
 
 	echo '<div class="col-sm-9" style="margin-bottom:5px">
         <label>Entre <input type="datetime-local" id="startDate"></label>
         <label>et <input type="datetime-local" id="endDate"></label>
-    </div>
-
-    <div class="col-sm-10" style="margin-bottom:5px">
-        Date de 
-        <label><input type="radio" name="timeFilter" value="" checked> Tous</label>
-        <label><input type="radio" name="timeFilter" value="1h"> Moins d\'une heure</label>
-        <label><input type="radio" name="timeFilter" value="2h"> Moins de deux heures</label>
-        <label><input type="radio" name="timeFilter" value="6h"> Moins de six heures</label>
-        <label><input type="radio" name="timeFilter" value="12h"> Moins de douze heures</label>
-        <label><input type="radio" name="timeFilter" value="1d"> Moins d\'un jour</label>
-        <label><input type="radio" name="timeFilter" value="2d"> Moins de deux jours</label>
-        <label><input type="radio" name="timeFilter" value="1w"> Moins d\'une semaine</label>
     </div>';
-    
+      
+    $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
+
+    $timeFilters = [
+        ''    => 'Tous',
+        '1h'  => 'Moins d\'une heure',
+        '2h'  => 'Moins de deux heures',
+        '6h'  => 'Moins de six heures',
+        '12h' => 'Moins de douze heures',
+        '1j'  => 'Moins d\'un jour',
+        '2j'  => 'Moins de deux jours',
+        '1s'  => 'Moins d\'une semaine'
+    ];
+
+    echo '<div class="col-sm-10" style="margin-bottom:5px">';
+    echo 'Date de ';
+    foreach ($timeFilters as $value => $label) {
+        $isChecked = $value === $selectedTimeFilter;
+        echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '> ' . $label . '</label>';
+    }
+    echo '</div>';
+
 	echo '<div>';
 	foreach ($events as $event) {
 		//div globale start
-		echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] .  '" data-label="' . $event['label'] .  '" class="frigateEventContainer col-lg-4 ">';
+		echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" class="frigateEventContainer col-lg-4 ">';
       	echo '<div class="col-lg-12 frigateEvent">';
 		// div img
 		echo '<div>';
@@ -68,7 +81,37 @@ if (!isConnect('admin')) {
 		echo '<div class="eventText">';
 		echo '<h4>' . $event['label'] . '</h4><br>';
 		echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' (' . $event['top_score'] . ' %)</span><br>';
-		echo '<i class="fas fa-video"></i><span>  ' . $event['camera'] . '</span><br>';
+      
+        $cameraFound = false;
+      	$cameraId = 0;
+      	try {
+            $attribut = 'name';
+            $valeurRecherchee = $event['camera'];
+
+          	$frigateCameras = frigate::byLogicalId('eqFrigateCameras', 'frigate', true);
+
+            foreach ($frigateCameras as $frigateCamera) {
+                $configuration = $frigateCamera->getConfiguration();
+
+              	if (isset($configuration[$attribut]) && $configuration[$attribut] == $valeurRecherchee) {
+                    $cameraFound = true;
+                    $cameraId = $frigateCamera->getId();
+                    break;                
+                }
+            }
+        } catch (Exception $e) {
+            //echo "Erreur : " . $e->getMessage();
+        }
+
+      	if ($cameraFound) {
+          echo '<a onclick="gotoCamera(\'' . $cameraId . '\')" title="Afficher la page de la caméra">';
+        }
+		echo '<i class="fas fa-video"></i><span>  ' . $event['camera'] . '</span>';
+      	if ($cameraFound) {
+          echo '</a>';
+        }
+        echo '<br>';
+
 		echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $event['duree'] . ' sc)</span>';
 		echo '</div>';
 		// div buttons

@@ -185,8 +185,9 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-
-
+function gotoCameraEvents (cameraName) {
+    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
+}
 
 
 function addOrRemoveClass(element, className, isAdd) {
