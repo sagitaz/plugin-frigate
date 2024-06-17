@@ -56,6 +56,11 @@ class frigate extends eqLogic
   // configuration par defaut des crons
   public static function setConfigCron()
   {
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    if ($execute == null) {
+      $frigate->getCmd(null, 'info_Cron')->event(1);
+    }
     // cron par défaut
     if (!config::byKey('functionality::cron::enable', 'frigate')) {
       config::save('functionality::cron::enable', 0, 'frigate');
@@ -339,8 +344,8 @@ class frigate extends eqLogic
     foreach ($filteredEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
-      $img = self::saveURL($event['id'], "snapshot", $event['camera'], 1);
-      if ($img = "error") {
+      $img = self::saveURL($event['id'], null, $event['camera'], 1);
+      if ($img == "error") {
         $img = "null";
       }
 
