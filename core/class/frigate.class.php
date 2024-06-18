@@ -542,21 +542,20 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "Liste de cameras : " . json_encode($stats['cameras']));
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       // recherche equipement caméra
-      $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
-      $frigate = $eqCamera[0];
+      $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
       if (!is_object($frigate)) {
         log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "est créé.");
         $n++;
         $frigate = new frigate();
         $frigate->setName($cameraName);
         $frigate->setEqType_name("frigate");
-        $frigate->setLogicalId("eqFrigateCameras");
         $frigate->setConfiguration("name", $cameraName);
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
-        $frigate->save();
       }
+      $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
+      $frigate->save();
     }
     return $n;
   }
@@ -639,8 +638,7 @@ class frigate extends eqLogic
     $eqlogicIds[] = $frigate->getId();
     // recherche et création equipement caméra    
     $cameraName = $event->getCamera();
-    $frigate = frigate::byTypeAndSearhConfiguration('frigate', $cameraName);
-    $eqCamera = $frigate[0];
+    $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
     $eqlogicIds[] = $eqCamera->getId();
     self::executeActionNewEvent($eqCamera->getId(), $event);
 
@@ -693,9 +691,9 @@ class frigate extends eqLogic
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       //log::add(__CLASS__, 'debug', "Camera : " . json_encode($cameraName));
       // recherche equipement caméra
-      $eqCamera = eqLogic::byTypeAndSearchConfiguration("frigate", $cameraName);
-      if (is_object($eqCamera[0])) {
-        $eqlogicCameraId = $eqCamera[0]->getId();
+      $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
+      if (is_object($eqCamera)) {
+        $eqlogicCameraId = $eqCamera->getId();
         foreach ($cameraStats as $key => $value) {
           // Créez ou récupérez la commande
           $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO", 0);
@@ -704,7 +702,7 @@ class frigate extends eqLogic
           $cmd->save();
         }
       } else {
-        log::add(__CLASS__, 'debug', "L'équipement camera" . $cameraName . " n'existe pas.");
+        log::add(__CLASS__, 'debug', "L'équipement camera " . $cameraName . " n'existe pas.");
       }
     }
 

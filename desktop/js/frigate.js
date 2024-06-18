@@ -217,7 +217,7 @@ function printEqLogic(_eqLogic) {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
     }
 
-    if (_eqLogic.logicalId === "eqFrigateCameras") {
+    if (_eqLogic.logicalId === "eqFrigateCamera_"+_eqLogic.configuration.name) {
         $('#div_action').empty()
         ACTIONS_LIST = []
         if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
