@@ -27,7 +27,7 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   const showImageBtn = document.getElementById('showImage');
   const mediaTitle = document.getElementById('mediaTitle');
   
-  mediaTitle.textContent = title;
+  mediaTitle.innerHTML = title;
 
   if (mediaType === 'video') {
     videoSource.src = src;
