@@ -104,24 +104,17 @@ if (!isConnect('admin')) {
       
         $cameraFound = false;
       	$cameraId = 0;
-      	try {
-            $attribut = 'name';
-            $valeurRecherchee = $event['camera'];
-
-          	$frigateCameras = frigate::byLogicalId('eqFrigateCameras', 'frigate', true);
-
-            foreach ($frigateCameras as $frigateCamera) {
-                $configuration = $frigateCamera->getConfiguration();
-
-              	if (isset($configuration[$attribut]) && $configuration[$attribut] == $valeurRecherchee) {
-                    $cameraFound = true;
-                    $cameraId = $frigateCamera->getId();
-                    break;                
-                }
-            }
-        } catch (Exception $e) {
-            //echo "Erreur : " . $e->getMessage();
-        }
+    try {
+      $attribut = 'name';
+      $valeurRecherchee = $event['camera'];
+      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $valeurRecherchee, 'frigate', false);
+      if (isset($frigateCamera)) {
+        $cameraFound = true;
+        $cameraId = $frigateCamera->getId();
+      }
+    } catch (Exception $e) {
+      //echo "Erreur : " . $e->getMessage();
+    }
 
     if ($cameraFound) {
       echo '<a onclick="gotoCamera(\'' . $cameraId . '\')" title="Afficher la page de la caméra">';
