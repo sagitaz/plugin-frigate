@@ -11,14 +11,34 @@ if (!isConnect('admin')) {
 
 
 <div class="col-lg-12"><br>
-  <br>
-  <div class="input-group" style="margin-bottom:20px">
-    <span class="input-group-btn">
-      <a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
-    </span>
-  </div>
-  <?php
-  $events = frigate::showEvents();
+	<br>
+	<div class="input-group" style="margin-bottom:20px">
+		<span class="input-group-btn">
+			<a class="btn geoAction rounded" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
+		</span>
+	</div>
+	<?php
+  
+    function formatDuration($seconds) {
+      $hours = floor($seconds / 3600);
+      $minutes = floor(($seconds % 3600) / 60);
+      $remainingSeconds = $seconds % 60;
+
+      $formattedDuration = '';
+      if ($hours > 0) {
+        $formattedDuration .= $hours . 'h';
+      }
+      if ($minutes > 0) {
+        $formattedDuration .= $minutes . 'mn';
+      }
+      if ($remainingSeconds > 0 || $seconds == 0) {
+        $formattedDuration .= $remainingSeconds . 's';
+      }
+             
+      return $formattedDuration;
+    }
+
+	$events = frigate::showEvents();
 
   echo '<div class="col-sm-9" style="margin-bottom:5px">';
   echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
@@ -68,33 +88,40 @@ if (!isConnect('admin')) {
   }
   echo '</div>';
 
-  echo '<div>';
-  foreach ($events as $event) {
-    //div globale start
-    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" class="frigateEventContainer col-lg-4 ">';
-    echo '<div class="col-lg-12 frigateEvent">';
-    // div img
-    echo '<div>';
-    echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-    echo '</div>';
-    // div texte
-    echo '<div class="eventText">';
-    echo '<h4>' . $event['label'] . '</h4><br>';
-    echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' (' . $event['top_score'] . ' %)</span><br>';
+	echo '<div>';
+	foreach ($events as $event) {
+		//div globale start
+		echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" class="frigateEventContainer col-lg-4 ">';
+      	echo '<div class="col-lg-12 frigateEvent">';
+		// div img
+		echo '<div>';
+		echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
+		echo '</div>';
+		// div texte
+		echo '<div class="eventText">';
+		echo '<h4>' . $event['label'] . '</h4><br>';
+		echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' (' . $event['top_score'] . ' %)</span><br>';
+      
+        $cameraFound = false;
+      	$cameraId = 0;
+      	try {
+            $attribut = 'name';
+            $valeurRecherchee = $event['camera'];
 
-    $cameraFound = false;
-    $cameraId = 0;
-    try {
-      $attribut = 'name';
-      $valeurRecherchee = $event['camera'];
-      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $valeurRecherchee, 'frigate', false);
-      if (isset($frigateCamera)) {
-        $cameraFound = true;
-        $cameraId = $frigateCamera->getId();
-      }
-    } catch (Exception $e) {
-      //echo "Erreur : " . $e->getMessage();
-    }
+          	$frigateCameras = frigate::byLogicalId('eqFrigateCameras', 'frigate', true);
+
+            foreach ($frigateCameras as $frigateCamera) {
+                $configuration = $frigateCamera->getConfiguration();
+
+              	if (isset($configuration[$attribut]) && $configuration[$attribut] == $valeurRecherchee) {
+                    $cameraFound = true;
+                    $cameraId = $frigateCamera->getId();
+                    break;                
+                }
+            }
+        } catch (Exception $e) {
+            //echo "Erreur : " . $e->getMessage();
+        }
 
     if ($cameraFound) {
       echo '<a onclick="gotoCamera(\'' . $cameraId . '\')" title="Afficher la page de la caméra">';
@@ -105,51 +132,62 @@ if (!isConnect('admin')) {
     }
     echo '<br>';
 
-    echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $event['duree'] . ' sc)</span>';
-    echo '</div>';
-    // div buttons
-    echo '<div class="eventBtns"';
-    if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
-    if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
-    echo '>';
-    if ($event['hasSnapshot'] == 1) {
-      echo '<button class="hover-button snapshot-btn">';
-      echo '<i class="fas fa-image"></i>';
-      echo '</button>';
-    }
-    if ($event['hasClip'] == 1) {
-      echo '<button class="hover-button video-btn">';
-      echo '<i class="fas fa-camera"></i>';
-      echo '</button>';
-    }
-    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
-    echo '<i class="fas fa-trash"></i>';
-    echo '</button>';
-    echo '</div>';
-    // div globale end
-    echo '</div>';
-    echo '</div>';
-  }
-  echo '</div>';
+		$formattedDuration = formatDuration($event['duree']);
+
+      	echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $formattedDuration . ')</span>';
+		echo '</div>';
+		// div buttons
+		echo '<div class="eventBtns"';
+        if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
+        if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
+      	echo ' data-title="' . $event['label'] . ' (' . $event['top_score'] . ' %) - ' . $event['camera'] . ' - ' . $event['date'] . ' (' . $formattedDuration . ')"';
+        echo '>';
+		if ($event['hasSnapshot'] == 1) {
+			echo '<button class="hover-button snapshot-btn">';
+			echo '<i class="fas fa-image"></i>';
+			echo '</button>';
+		}
+		if ($event['hasClip'] == 1) {
+			echo '<button class="hover-button video-btn">';
+			echo '<i class="fas fa-camera"></i>';
+			echo '</button>';
+		}
+		echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
+		echo '<i class="fas fa-trash"></i>';
+		echo '</button>';
+		echo '</div>';
+		// div globale end
+		echo '</div>';
+		echo '</div>';
+	}
+	echo '</div>';
 
   ?>
 
-  <div id="mediaModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-      <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
-      <button id="showImage" class="hidden-btn">Voir la snapshot</button>
-      <div class="video-container active">
-        <video id="videoPlayer" width="100%" controls autoplay>
-          <source id="videoSource" src="" type="video/mp4">
-          Votre navigateur ne supporte pas la balise vidéo.
-        </video>
-      </div>
-      <div class="image-container">
-        <img id="snapshotImage" src="" alt="Snapshot" width="100%">
-      </div>
+    <div id="mediaModal" class="modal">
+        <div class="modal-content">
+            <span class="close">&times;</span>
+
+            <div class="modal-header">
+                <h2 id="mediaTitle"></h2>
+                <div class="button-container">
+                    <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
+                    <button id="showImage" class="hidden-btn">Voir la snapshot</button>
+                </div>
+            </div>              
+			<div class="media-container">
+              <div class="video-container active">
+                  <video id="videoPlayer" width="100%" controls autoplay>
+                      <source id="videoSource" src="" type="video/mp4">
+                      Votre navigateur ne supporte pas la balise vidéo.
+                  </video>
+              </div>
+              <div class="image-container">
+                  <img id="snapshotImage" src="" alt="Snapshot" width="100%">
+              </div>
+            </div>
+        </div>
     </div>
-  </div>
 
 </div>
 
@@ -211,53 +249,74 @@ if (!isConnect('admin')) {
     display: none;
   }
 
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 2;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding-top: 60px;
-  }
+    .modal {
+      display: none;
+      position: fixed;
+      z-index: 2;
+      left: 0;
+      top: 0;
+      width: 100%;
+      height: 100%;
+      overflow: auto;
+      background-color: rgba(0,0,0,0.7);
+      padding-top: 60px;
+    }
+    .modal-content {
+      background-color: #fefefe;
+      margin: 5% auto;
+      padding: 20px;
+      border: 1px solid #888;
+      width: 80%;
+      position: relative;
+    }
+    .modal-header {
+        display: flex;
+        justify-content: space-between;
+        align-items: center;
+        margin-bottom: 20px;
+    }
+    .modal-header h2 {
+        flex: 1;
+        margin: 0;
+    }
+    .button-container {
+        display: flex;
+        gap: 10px;
+    }
+    .media-container {
+        display: flex;
+        flex-direction: column;
+        align-items: flex-start;
+    }
+    .close {
+      color: #aaa;
+      float: right;
+      font-size: 28px;
+      font-weight: bold;
+    }
+    .close:hover,
+    .close:focus {
+      color: black;
+      text-decoration: none;
+      cursor: pointer;
+    }
+    .video-container, .image-container {
+      display: none;
+    }
+    .video-container, .image-container {
+        width: 100%;
+    }
 
-  .modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-  }
-
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .video-container,
-  .image-container {
-    display: none;
-  }
-
-  .active {
-    display: block;
-  }
-
-  .hidden-btn {
-    display: none;
-  }
+    .video-container video, .image-container img {
+        width: 100%;
+        display: block;
+    }
+    .active {
+      display: block;
+    }
+    .hidden-btn {
+      display: none;
+    }
 </style>
 
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
