@@ -130,6 +130,7 @@ if (!isConnect('admin')) {
     echo '</div>';
     // div texte
     echo '<div class="eventText">';
+    $timeElapsed = timeElapsedString($event['date']);
     echo '<span class="inline-title">' . $event['label'] . '</span><span class="inline-subtitle duration"> ' . $timeElapsed . '</span><br/><br/>';
     echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';      
 	
