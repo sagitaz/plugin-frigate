@@ -19,24 +19,25 @@ if (!isConnect('admin')) {
 	</div>
 	<?php
   
-    function formatDuration($seconds) {
-      $hours = floor($seconds / 3600);
-      $minutes = floor(($seconds % 3600) / 60);
-      $remainingSeconds = $seconds % 60;
+  function formatDuration($seconds) {
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    $remainingSeconds = $seconds % 60;
 
-      $formattedDuration = '';
-      if ($hours > 0) {
+    $formattedDuration = '';
+    if ($hours > 0) {
         $formattedDuration .= $hours . 'h';
-      }
-      if ($minutes > 0) {
+        $formattedDuration .= str_pad($minutes, 2, '0', STR_PAD_LEFT) . 'mn';
+        $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    } elseif ($minutes > 0) {
         $formattedDuration .= $minutes . 'mn';
-      }
-      if ($remainingSeconds > 0 || $seconds == 0) {
-        $formattedDuration .= $remainingSeconds . 's';
-      }
-             
-      return $formattedDuration;
+        $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    } else {
+        $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
     }
+
+    return $formattedDuration;
+  }
 
 	$events = frigate::showEvents();
 
@@ -100,8 +101,9 @@ if (!isConnect('admin')) {
 		// div texte
 		echo '<div class="eventText">';
 		echo '<h4>' . $event['label'] . '</h4><br>';
-		echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' (' . $event['top_score'] . ' %)</span><br>';
+		echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';
       
+
         $cameraFound = false;
       	$cameraId = 0;
     try {
@@ -125,15 +127,16 @@ if (!isConnect('admin')) {
     }
     echo '<br>';
 
-		$formattedDuration = formatDuration($event['duree']);
+		$formattedDuration = '<div class=\'duration\'>' . formatDuration($event['duree']) . '</div>';
+		$formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($event['duree']) . '</div>';
 
-      	echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' (' . $formattedDuration . ')</span>';
+    echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' ' . $formattedDuration . '</span>';
 		echo '</div>';
 		// div buttons
 		echo '<div class="eventBtns"';
         if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
         if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
-      	echo ' data-title="' . $event['label'] . ' (' . $event['top_score'] . ' %) - ' . $event['camera'] . ' - ' . $event['date'] . ' (' . $formattedDuration . ')"';
+      	echo ' data-title="' . $event['label'] . ' <div class=\'percentage percentageTitle\' data-percentage=\'' . $event['top_score'] . '\'>' . $event['top_score'] . ' %</div> - ' . $event['camera'] . ' - ' . $event['date'] . ' ' . $formattedDurationTitle . '"';
         echo '>';
 		if ($event['hasSnapshot'] == 1) {
 			echo '<button class="hover-button snapshot-btn">';
@@ -310,6 +313,57 @@ if (!isConnect('admin')) {
     .hidden-btn {
       display: none;
     }
+    .duration {
+        display: inline-block;
+        padding: 5px;
+        border-radius: 5px;
+        background-color: gray;
+      	color: black;
+        font-weight: bold;
+        margin-top: 5px;
+        height: 20px;
+        line-height: 10px;
+    }
+	.durationTitle {
+		height: 30px;
+    	line-height: 15px;
+    }
+	.percentage {
+        display: inline-block;
+        padding: 5px;
+        border-radius: 5px;
+        color: black;
+        font-weight: bold;
+        margin-top: 5px;
+        height: 20px;
+        line-height: 10px;
+    }
+	.percentageTitle {
+        height: 30px;
+        line-height: 20px;
+    }
+    .percentage[data-percentage="100"] {
+      background-color: #4caf50;
+    }
+    .percentage[data-percentage^="9"] {
+      background-color: #4caf50;
+    }
+    .percentage[data-percentage^="8"] {
+      background-color: #66bb6a;
+    }
+    .percentage[data-percentage^="7"],
+    .percentage[data-percentage^="6"] {
+      background-color: #ff9800;
+    }
+    .percentage[data-percentage^="5"] {
+      background-color: #f44336;
+    }
+    .percentage[data-percentage^="4"],
+    .percentage[data-percentage^="3"],
+    .percentage[data-percentage^="2"],
+    .percentage[data-percentage^="1"],
+    .percentage[data-percentage^="0"] {
+      background-color: #b71c1c;
 </style>
 
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
