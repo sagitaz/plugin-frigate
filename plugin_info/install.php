@@ -31,9 +31,6 @@ function frigate_install()
     frigate::generateEqStats();
     frigate::setConfig();
     frigate::setConfigCron();
-    frigate::generateEqCameras();
-    frigate::getEvents();
-    frigate::getStats();
     Log::add("frigate", 'info', 'Finish Install');
 }
 
