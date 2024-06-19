@@ -39,7 +39,37 @@ if (!isConnect('admin')) {
     return $formattedDuration;
   }
 
-	$events = frigate::showEvents();
+  function timeElapsedString($datetime, $full = false) {
+      $now = new DateTime;
+      $ago = new DateTime($datetime);
+      $diff = $now->diff($ago);
+
+      $diff->w = floor($diff->d / 7);
+      $diff->d -= $diff->w * 7;
+
+      $string = array(
+        'y' => 'année',
+        'm' => 'mois',
+        'w' => 'semaine',
+        'd' => 'jour',
+        'h' => 'heure',
+        'i' => 'minute',
+        's' => 'seconde',
+      );
+      
+      foreach ($string as $k => &$v) {
+        if ($diff->$k) {
+          $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        } else {
+          unset($string[$k]);
+        }
+      }
+
+      if (!$full) $string = array_slice($string, 0, 1);
+      return $string ? 'il y a ' . implode(', ', $string) : 'à l\'instant';
+  }
+  
+  $events = frigate::showEvents();
 
   echo '<div class="col-sm-9" style="margin-bottom:5px">';
   echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
@@ -89,23 +119,23 @@ if (!isConnect('admin')) {
   }
   echo '</div>';
 
-	echo '<div>';
-	foreach ($events as $event) {
-		//div globale start
-		echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" class="frigateEventContainer col-lg-4 ">';
-      	echo '<div class="col-lg-12 frigateEvent">';
-		// div img
-		echo '<div>';
-		echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-		echo '</div>';
-		// div texte
-		echo '<div class="eventText">';
-		echo '<h4>' . $event['label'] . '</h4><br>';
-		echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';
-      
-
-        $cameraFound = false;
-      	$cameraId = 0;
+    echo '<div>';
+    foreach ($events as $event) {
+    	//div globale start
+    	echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" class="frigateEventContainer col-lg-4 ">';
+    echo '<div class="col-lg-12 frigateEvent">';
+    // div img
+    echo '<div>';
+    echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
+    echo '</div>';
+    // div texte
+    echo '<div class="eventText">';
+    $timeElapsed = timeElapsedString($event['date']);
+    echo '<span class="inline-title">' . $event['label'] . '</span><span class="inline-subtitle duration"> ' . $timeElapsed . '</span><br/><br/>';
+    echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';      
+	
+    $cameraFound = false;
+    $cameraId = 0;
     try {
       $attribut = 'name';
       $valeurRecherchee = $event['camera'];
@@ -364,6 +394,16 @@ if (!isConnect('admin')) {
     .percentage[data-percentage^="1"],
     .percentage[data-percentage^="0"] {
       background-color: #b71c1c;
+    }
+    .inline-title {
+      font-size: 1.5em;
+      font-weight: bold;
+    }
+    .inline-subtitle {
+      font-size: 1em;
+      color: black;
+      margin-left: 5px;
+    }	
 </style>
 
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
