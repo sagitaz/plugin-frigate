@@ -140,7 +140,7 @@ if (!isConnect('admin')) {
       $attribut = 'name';
       $valeurRecherchee = $event['camera'];
       $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $valeurRecherchee, 'frigate', false);
-      if (isset($frigateCamera)) {
+      if ($frigateCamera != false) {
         $cameraFound = true;
         $cameraId = $frigateCamera->getId();
       }
