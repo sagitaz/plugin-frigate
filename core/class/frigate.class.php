@@ -482,6 +482,7 @@ class frigate extends eqLogic
   }
   public static function showEvents()
   {
+    $result = array();
     $events = frigate_events::all();
 
     foreach ($events as $event) {
