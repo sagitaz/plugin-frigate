@@ -47,6 +47,9 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#end#** : heure de fin
 - **#duree#** : durée de l'évènement
 
+Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
+Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
+
 # <u>Page Events</u>
 Sont regroupés ici tous les évènements reçus, vous pouvez :
 - Visualiser le snapshot (s'il existe)

@@ -802,25 +802,28 @@ class frigate extends eqLogic
     foreach ($actions[0] as $action) {
       $id = str_replace("#", "", $action['cmd']);
       $cmd = cmd::byId($id);
+      $cmdLabelName = $action['cmdLabelName'];
       $options = $action['options'];
       $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
       // executer l'action que si $start est compris entre l'heure actuelle et -3h.
-      if ($event->getStartTime > time() - 10800) {
-        if (strpos(json_encode($action['options']), '#clip#') !== false) {
-          log::add(__CLASS__, 'debug', "ACTION CLIP");
-          if ($hasClip == 1) {
-            log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+      if ($event->getStartTime() > time() - 10800) {
+        if ($cmdLabelName == "" || $cmdLabelName == "all" || $cmdLabelName == $label) {
+          if (strpos(json_encode($action['options']), '#clip#') !== false) {
+            log::add(__CLASS__, 'debug', "ACTION CLIP");
+            if ($hasClip == 1) {
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+              $cmd->execCmd($options);
+            }
+          } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
+            log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
+            if ($hasSnapshot == 1) {
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
+              $cmd->execCmd($options);
+            }
+          } else {
+            log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
             $cmd->execCmd($options);
           }
-        } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
-          log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
-          if ($hasSnapshot == 1) {
-            log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
-            $cmd->execCmd($options);
-          }
-        } else {
-          log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
-          $cmd->execCmd($options);
         }
       } else {
 
