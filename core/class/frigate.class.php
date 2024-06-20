@@ -482,6 +482,7 @@ class frigate extends eqLogic
   }
   public static function showEvents()
   {
+    $result = array();
     $events = frigate_events::all();
 
     foreach ($events as $event) {
@@ -535,24 +536,42 @@ class frigate extends eqLogic
       return $result;
     }
 
+    $exist = 0;
+    $addToName = "";
+    $create = 1;
     $resultURL = $url . ":" . $port . "/api/stats";
     $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
     log::add(__CLASS__, 'debug', "Liste de cameras : " . json_encode($stats['cameras']));
+
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+      $eqlogics = eqLogic::byObjectId("41");
+      foreach ($eqlogics as $eqlogic) {
+        $name = $eqlogic->getname();
+        if ($name === $cameraName) {
+          $exist = 1;
+          break;
+        }
+      }
+      if ($exist) {
+        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
+        $addToName = " by frigate plugin";
+      }
       // recherche equipement caméra
       $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
       if (!is_object($frigate)) {
-        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "est créé.");
         $n++;
         $frigate = new frigate();
-        $frigate->setName($cameraName);
+        $frigate->setName($cameraName . $addToName);
         $frigate->setEqType_name("frigate");
         $frigate->setConfiguration("name", $cameraName);
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
+        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName . $addToName) . " est créé.");
+      } else {
+        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
@@ -635,12 +654,16 @@ class frigate extends eqLogic
     $eqlogicIds = [];
     // maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    $eqlogicIds[] = $frigate->getId();
+    if (is_object($frigate)) {
+      $eqlogicIds[] = $frigate->getId();
+    }
     // recherche et création equipement caméra    
     $cameraName = $event->getCamera();
     $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
-    $eqlogicIds[] = $eqCamera->getId();
-    self::executeActionNewEvent($eqCamera->getId(), $event);
+    if (is_object($eqCamera)) {
+      $eqlogicIds[] = $eqCamera->getId();
+      self::executeActionNewEvent($eqCamera->getId(), $event);
+    }
 
 
     foreach ($eqlogicIds as $eqlogicId) {
@@ -779,25 +802,28 @@ class frigate extends eqLogic
     foreach ($actions[0] as $action) {
       $id = str_replace("#", "", $action['cmd']);
       $cmd = cmd::byId($id);
+      $cmdLabelName = $action['cmdLabelName'];
       $options = $action['options'];
       $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
       // executer l'action que si $start est compris entre l'heure actuelle et -3h.
-      if ($event->getStartTime > time() - 10800) {
-        if (strpos(json_encode($action['options']), '#clip#') !== false) {
-          log::add(__CLASS__, 'debug', "ACTION CLIP");
-          if ($hasClip == 1) {
-            log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+      if ($event->getStartTime() > time() - 10800) {
+        if ($cmdLabelName == "" || $cmdLabelName == "all" || $cmdLabelName == $label) {
+          if (strpos(json_encode($action['options']), '#clip#') !== false) {
+            log::add(__CLASS__, 'debug', "ACTION CLIP");
+            if ($hasClip == 1) {
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+              $cmd->execCmd($options);
+            }
+          } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
+            log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
+            if ($hasSnapshot == 1) {
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
+              $cmd->execCmd($options);
+            }
+          } else {
+            log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
             $cmd->execCmd($options);
           }
-        } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
-          log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
-          if ($hasSnapshot == 1) {
-            log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
-            $cmd->execCmd($options);
-          }
-        } else {
-          log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
-          $cmd->execCmd($options);
         }
       } else {
 
