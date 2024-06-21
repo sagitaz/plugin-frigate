@@ -380,7 +380,10 @@ class frigate extends eqLogic
         $clip = "null";
         $hasClip = 0;
       }
-
+      if (empty($event['end_time'])) {
+        log::add(__CLASS__, 'debug', "Event without end_time : " . json_encode($event));
+        break;
+      }
       if (!$frigate) {
         $frigate = new frigate_events();
         $frigate->setBox($event['box']);
@@ -425,6 +428,7 @@ class frigate extends eqLogic
 
   public static function cleanDbEvents($events)
   {
+    $ids = array();
     foreach ($events as $event) {
       $ids[] = $event['id'];
     }
@@ -783,12 +787,16 @@ class frigate extends eqLogic
 
   private static function executeActionNewEvent($eqLogicId, $event)
   {
+    $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
+    }
     // liste des events et de leurs variables
     $hasClip = $event->getHasClip();
     $hasSnapshot = $event->getHasSnapshot();
     $topScore = $event->getTopScore();
-    $clip = $event->getClip();
-    $snapshot = $event->getSnapshot();
+    $clip = $urlJeedom . $event->getClip();
+    $snapshot = $urlJeedom . $event->getSnapshot();
     $camera = $event->getCamera();
     $label = $event->getLabel();
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
@@ -811,13 +819,13 @@ class frigate extends eqLogic
           if (strpos(json_encode($action['options']), '#clip#') !== false) {
             log::add(__CLASS__, 'debug', "ACTION CLIP");
             if ($hasClip == 1) {
-              log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP");
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP : " . json_encode($options));
               $cmd->execCmd($options);
             }
           } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
             log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
             if ($hasSnapshot == 1) {
-              log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT");
+              log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT : " . json_encode($options));
               $cmd->execCmd($options);
             }
           } else {
