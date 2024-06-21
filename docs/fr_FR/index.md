@@ -2,6 +2,7 @@
 
 # <u>Installation</u>
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
+**Le plugin est compatible avec les versions de Frigate supérieure à 0.13.0**
 
 # <u>Configuration</u>
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
