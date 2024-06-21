@@ -827,7 +827,7 @@ class frigate extends eqLogic
         if ($event->getStartTime() > time() - 10800) {
           if ($cmdLabelName == "" || $cmdLabelName == "all" || $cmdLabelName == $label) {
             // Chercher les variables spécifiques dans les options
-            $optionsJson = json_encode($options);
+            $optionsJson = json_encode($action['options']);
             if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
               log::add(__CLASS__, 'debug', "ACTION CLIP");
               if ($hasClip == 1) {
