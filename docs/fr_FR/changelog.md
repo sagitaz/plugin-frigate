@@ -3,6 +3,10 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 22/06/2024 Beta 0.7.5
+- Ajout variable #time#, #event_id#, #snapshot_path# et #clip_path#
+- Ajout bouton de suppression de tous les évènements (voir doc)
+- Ajout popup de confirmation avant suppression
 
 # 20/06/2024 Beta 0.7.0
 - Correction bug sur création d'équipements

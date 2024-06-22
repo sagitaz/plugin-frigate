@@ -35,14 +35,21 @@ Sont présents ici les informations sur le dernier évènement de la caméra et 
 ### Actions
 Vous pouvez ici indiquer les actions à effectuer à chaque nouvel évènement.
 Une liste de variables est disponible afin de personnaliser les notifications.
-- **#camera#** : texte
-- **#score#** : texte numérique
+- **#time#** : l'heure actuelle au format 12:00
+- **#camera#** : le nom de la caméra
+- **#score#** : le score en pourcentage -> 82 %
 - **#has_clip#** : texte 0 ou 1
 - **#has_snapshot#** : texte 0 ou 1
-- **#top_score#** : texte numérique
+- **#top_score#** : le score maximum en pourcentage -> 92 %
 - **#zones#** : tableau
 - **#snapshot#** : liens vers fichier image
+`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
+- **#snapshot_path#** : path vers fichier image
+`/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#clip#** : liens vers fichier mp4
+`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
+- **#clip_path#** : path vers fichier mp4
+`/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
 - **#label#** : texte
 - **#start#** : heure de début
 - **#end#** : heure de fin
@@ -51,13 +58,36 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 
+### Exemple de notification :
+#### Plugin JeeMate
+- **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#``**
+- **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
+
+#### Plugin Telegram
+- **snapshot** : dans le champ titre : **``title=votre titre | snapshot=#snapshot#``**
+ou
+- **snapshot** : dans le champ titre : **``title=votre titre | file=#snapshot_path#``**
+- **clip** : dans le champ titre : **``title=votre titre | file=#clip_path#``**
+
+#### Plugin Mobile v2
+- **snapshot** : dans le champ message : **``votre message | file=#snapshot_path#``**
+- **clip** : aucune idée
+
+#### Plugin JeedomConnect
+- **snapshot** : aucune idée
+- **clip** : aucune idée
+
 # <u>Page Events</u>
 Sont regroupés ici tous les évènements reçus, vous pouvez :
 - Visualiser le snapshot (s'il existe)
 - Visualiser le clip (s'il existe)
 - Supprimer l'évènement
+- lien vers la caméra
 
-> **ATTENTION : le bouton supprimer supprime l'évènement sur Jeedom mais aussi sur votre serveur Frigate. En aucun cas je ne serai responsable de votre mauvaise utilisation de ce bouton.**
+> **ATTENTION : le bouton supprimer supprime l'évènement sur Jeedom mais aussi sur votre serveur Frigate. En aucun cas je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est présente.**
+
+De nombreux filtre sont disponible pour l'affichage de votre liste d'évènements.
+Le bouton "supprimer tous les évènements visibles" fera exactement ce qu'il annonce, donc appliquer bien les bon filtre avant de supprimer, aucun retour en arrière ne sera possible, ici aussi une popup de confirmation est présente.
 
 # <u>Support</u>
 - Community Jeedom
