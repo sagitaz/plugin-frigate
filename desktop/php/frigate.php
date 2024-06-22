@@ -251,10 +251,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <div role="tabpanel" class="tab-pane eqFrigate" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
-                    <div class="alert alert-success bt_addAction" role="alert" style="cursor:pointer !important;">
-                        {{Ajouter une action}}.<br>
+                    <div class="alert alert-info">
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #label#, #start#, #end#, #duree#
+                        #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#
+                        <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">
                         <fieldset>

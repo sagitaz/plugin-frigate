@@ -792,11 +792,14 @@ class frigate extends eqLogic
       $urlJeedom = network::getNetworkAccess('internal');
     }
     // liste des events et de leurs variables
+    $eventId = $event->getEventId();
     $hasClip = $event->getHasClip();
     $hasSnapshot = $event->getHasSnapshot();
     $topScore = $event->getTopScore();
     $clip = $urlJeedom . $event->getClip();
     $snapshot = $urlJeedom . $event->getSnapshot();
+    $clipPath = "/var/www/html" . $event->getClip();
+    $snapshotPath = "/var/www/html" . $event->getSnapshot();
     $camera = $event->getCamera();
     $label = $event->getLabel();
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
@@ -812,30 +815,41 @@ class frigate extends eqLogic
       $cmd = cmd::byId($id);
       $cmdLabelName = $action['cmdLabelName'];
       $options = $action['options'];
-      $options = str_replace(['#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#clip#', '#label#', '#start#', '#end#', '#duree#'], [$camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $clip, $label, $start, $end, $duree], $options);
-      // executer l'action que si $start est compris entre l'heure actuelle et -3h.
-      if ($event->getStartTime() > time() - 10800) {
-        if ($cmdLabelName == "" || $cmdLabelName == "all" || $cmdLabelName == $label) {
-          if (strpos(json_encode($action['options']), '#clip#') !== false) {
-            log::add(__CLASS__, 'debug', "ACTION CLIP");
-            if ($hasClip == 1) {
-              log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP : " . json_encode($options));
+      $enable = $action['options']['enable'];
+      if ($enable) {
+        $options = str_replace(
+          ['#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#label#', '#start#', '#end#', '#duree#'],
+          [$eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $label, $start, $end, $duree],
+          $options
+        );
+
+        // Exécuter l'action seulement si $start est compris entre l'heure actuelle et -3h
+        if ($event->getStartTime() > time() - 10800) {
+          if ($cmdLabelName == "" || $cmdLabelName == "all" || $cmdLabelName == $label) {
+            // Chercher les variables spécifiques dans les options
+            $optionsJson = json_encode($action['options']);
+            if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
+              log::add(__CLASS__, 'debug', "ACTION CLIP");
+              if ($hasClip == 1) {
+                log::add(__CLASS__, 'debug', "EXECUTE ACTION CLIP : " . $optionsJson);
+                $cmd->execCmd($options);
+              }
+            } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
+              log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
+              if ($hasSnapshot == 1) {
+                log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT : " . $optionsJson);
+                $cmd->execCmd($options);
+              }
+            } else {
+              log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
               $cmd->execCmd($options);
             }
-          } else if (strpos(json_encode($action['options']), '#snapshot#') !== false) {
-            log::add(__CLASS__, 'debug', "ACTION SNAPSHOT");
-            if ($hasSnapshot == 1) {
-              log::add(__CLASS__, 'debug', "EXECUTE ACTION SNAPSHOT : " . json_encode($options));
-              $cmd->execCmd($options);
-            }
-          } else {
-            log::add(__CLASS__, 'debug', "AUCUNE VARIABLE");
-            $cmd->execCmd($options);
           }
+        } else {
+          log::add(__CLASS__, 'debug', "Heure dépassée : " . $start);
         }
       } else {
-
-        log::add(__CLASS__, 'debug', "Heure dépassée : " . $start);
+        log::add(__CLASS__, 'debug', "Commande désactivée");
       }
     }
   }
