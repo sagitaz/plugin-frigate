@@ -253,7 +253,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     <br>
                     <div class="alert alert-info">
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#
+                        #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">

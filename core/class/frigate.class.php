@@ -807,6 +807,7 @@ class frigate extends eqLogic
     $score = $event->getScore();
     $start = date("d-m-Y H:i:s", $event->getStartTime());
     $end = date("d-m-Y H:i:s", $event->getEndTime());
+    $time = date("H:i");
 
     $eqLogic = eqLogic::byId($eqLogicId);
     $actions = $eqLogic->getConfiguration('actions');
@@ -818,8 +819,8 @@ class frigate extends eqLogic
       $enable = $action['options']['enable'];
       if ($enable) {
         $options = str_replace(
-          ['#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#label#', '#start#', '#end#', '#duree#'],
-          [$eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $label, $start, $end, $duree],
+          ['#time#','#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#label#', '#start#', '#end#', '#duree#'],
+          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $label, $start, $end, $duree],
           $options
         );
 

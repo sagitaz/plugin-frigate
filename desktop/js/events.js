@@ -105,7 +105,30 @@ document.getElementById('gotoHome').addEventListener('click', function () {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
 });
 
+
+document.getElementById('deleteAll').addEventListener('click', function () {
+  const visibleEvents = getVisibleEvents();
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+    if (result) {
+      visibleEvents.forEach(function (event) {
+        const eventId = event.getAttribute('data-id');
+        console.log("suppression de : " + eventId);
+        deleteAllEvents(eventId);
+      });
+    }
+  });
+});
+
 function deleteEvent(eventId) {
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+    if (result) {
+      console.log("suppression de : " + eventId);
+      deleteAllEvents(eventId);
+    }
+  });
+}
+
+function deleteAllEvents(eventId) {
   $.ajax({
     type: "POST",
     url: "plugins/frigate/core/ajax/frigate.ajax.php",
@@ -130,7 +153,7 @@ function deleteEvent(eventId) {
       }
     }
   })
-};
+}
 
 function filterEvents() {
   console.log('filterEvents');
@@ -197,6 +220,11 @@ function filterEvents() {
       event.classList.add('eventHidden');
     });
   }
+
+}
+
+function getVisibleEvents() {
+  return Array.from(document.querySelectorAll('.frigateEventContainer:not(.eventHidden)'));
 }
 
 function gotoCamera(cameraId) {
