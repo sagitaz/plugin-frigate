@@ -78,16 +78,18 @@ ou
 - **clip** : aucune idée
 
 # <u>Page Events</u>
-Sont regroupés ici tous les évènements reçus, vous pouvez :
+
+De nombreux filtre sont disponible pour l'affichage de votre liste d'évènements.
+
+Dans celle-ci seront regroupés tous les évènements visibles, vous pouvez pour chacun d'entre eux :
 - Visualiser le snapshot (s'il existe)
 - Visualiser le clip (s'il existe)
 - Supprimer l'évènement
 - lien vers la caméra
+> **ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquer bien les bons filtres avant de supprimer, aucun retour en arrière ne sera possible, une popup de confirmation est présente. la suppression est effectuée en database Jeedom mais aussi sur votre serveur frigate.
 
-> **ATTENTION : le bouton supprimer supprime l'évènement sur Jeedom mais aussi sur votre serveur Frigate. En aucun cas je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est présente.**
+> **ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
 
-De nombreux filtre sont disponible pour l'affichage de votre liste d'évènements.
-Le bouton "supprimer tous les évènements visibles" fera exactement ce qu'il annonce, donc appliquer bien les bon filtre avant de supprimer, aucun retour en arrière ne sera possible, ici aussi une popup de confirmation est présente.
 
 # <u>Support</u>
 - Community Jeedom
