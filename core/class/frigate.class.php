@@ -461,7 +461,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function deleteEvent($id)
+  public static function deleteEvent($id, $all = false)
   {
     log::add(__CLASS__, 'debug', "Delete ID : " . $id);
     $url = config::byKey('URL', 'frigate');
@@ -477,7 +477,9 @@ class frigate extends eqLogic
 
     $resultURL = $url . ":" . $port . "/api/events/" . $id;
 
-    self::deletecURL($resultURL);
+    if ($all) {
+      self::deletecURL($resultURL);
+    }
 
     $events = frigate_events::byEventId($id);
     foreach ($events as $event) {

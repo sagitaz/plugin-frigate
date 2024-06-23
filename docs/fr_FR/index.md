@@ -74,8 +74,8 @@ ou
 - **clip** : aucune idée
 
 #### Plugin JeedomConnect
-- **snapshot** : aucune idée
-- **clip** : aucune idée
+- **snapshot** : dans le champ titre : **``title=votre titre | files=#snapshot_path#``**
+- **clip** : dans le champ titre : **``title=votre titre | files=#clip_path#``**
 
 # <u>Page Events</u>
 

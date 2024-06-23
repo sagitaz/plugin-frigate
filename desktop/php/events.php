@@ -74,37 +74,45 @@ if (!isConnect('admin')) {
 
   $events = frigate::showEvents();
 
-  echo '<div class="col-sm-9" style="margin-bottom:5px">';
+  echo '<div class="col-sm-10 flex-container">';
   echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
   echo '<a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '<div class="checkbox-container">';
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
   $cameras = array_unique(array_column($events, 'camera'));
   foreach ($cameras as $camera) {
     $isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras);
-    echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($camera) . '</label>';
+    echo '<label><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '>';
+    echo '<span class="custom-checkbox"></span> ' . ucfirst($camera) . '</label>';
   }
   echo '</div>';
+  echo '</div>';
 
-  echo '<div class="col-sm-9" style="margin-bottom:20px">';
+  echo '<div class="col-sm-10 flex-container">';
   echo '<a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
   echo '<a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '<div class="checkbox-container">';
   $selectedLabels = isset($_GET['categories']) ? explode(',', $_GET['categories']) : [];
   $labels = array_unique(array_column($events, 'label'));
   foreach ($labels as $label) {
     $isChecked = empty($selectedLabels) || in_array($label, $selectedLabels);
-    echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($label) . '</label>';
+    echo '<label><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ';
+    echo '<span class="custom-checkbox"></span> ' . ucfirst($label) . '</label>';
   }
   echo '</div>';
+  echo '</div>';
 
-  echo '<div class="col-sm-9" style="margin-bottom:5px">
+  echo '<div class="col-sm-12" style="margin-bottom:10px">';
+  echo '<div class="col-sm-4 datetime-container">
         <label>Entre <input type="datetime-local" id="startDate"></label>
         <label>et <input type="datetime-local" id="endDate"></label>
+        <label>Ou de </label>
     </div>';
 
   $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
 
   $timeFilters = [
-    ''    => 'Tous',
+    ''    => 'Toutes les dates',
     '1h'  => 'Moins d\'une heure',
     '2h'  => 'Moins de deux heures',
     '6h'  => 'Moins de six heures',
@@ -114,12 +122,13 @@ if (!isConnect('admin')) {
     '1s'  => 'Moins d\'une semaine'
   ];
 
-  echo '<div class="col-sm-10" style="margin-bottom:5px">';
-  echo 'Date de ';
+  echo '<div class="col-sm-8 radio-container">';
   foreach ($timeFilters as $value => $label) {
     $isChecked = $value === $selectedTimeFilter;
-    echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '> ' . $label . '</label>';
+    echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '>';
+    echo '<span class="custom-radio"></span> ' . $label . '</label>';
   }
+  echo '</div>';
   echo '</div>';
 
   echo '<div>';
@@ -365,12 +374,13 @@ if (!isConnect('admin')) {
     display: inline-block;
     padding: 5px;
     border-radius: 5px;
-    background-color: gray;
+    background-color: #B9A9A7;
     color: black;
     font-weight: bold;
     margin-top: 5px;
     height: 20px;
     line-height: 10px;
+    margin-left: 10px;
   }
 
   .durationTitle {
@@ -387,6 +397,7 @@ if (!isConnect('admin')) {
     margin-top: 5px;
     height: 20px;
     line-height: 10px;
+    margin-left: 20px;
   }
 
   .percentageTitle {
@@ -431,7 +442,145 @@ if (!isConnect('admin')) {
   .inline-subtitle {
     font-size: 1em;
     color: black;
-    margin-left: 5px;
+    margin-left: 18px;
+  }
+
+  .datetime-container {
+    display: flex;
+    align-items: center;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  .datetime-container label {
+    font-size: 16px;
+    font-weight: bold;
+    color: #333;
+  }
+
+  .datetime-container input[type="datetime-local"] {
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    padding: 5px 10px;
+    font-size: 14px;
+    color: #333;
+    transition: border-color 0.3s;
+  }
+
+  .datetime-container input[type="datetime-local"]:focus {
+    border-color: #007BFF;
+    outline: none;
+  }
+
+  .radio-container {
+    display: grid;
+    grid-template-columns: repeat(4, 1fr);
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  .radio-container label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+  }
+
+  .radio-container input[type="radio"] {
+    display: none;
+  }
+
+  .custom-radio {
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 50%;
+    margin-right: 10px;
+    position: relative;
+    transition: border-color 0.3s;
+  }
+
+  .radio-container input[type="radio"]:checked+.custom-radio {
+    border-color: #fa8b09;
+  }
+
+  .radio-container input[type="radio"]:checked+.custom-radio::after {
+    content: "";
+    width: 10px;
+    height: 10px;
+    background-color: #fa8b09;
+    border-radius: 50%;
+    position: absolute;
+    top: 50%;
+    left: 50%;
+    transform: translate(-50%, -50%);
+  }
+
+  .flex-container {
+    display: flex;
+    align-items: center;
+    flex-wrap: wrap;
+    gap: 10px;
+    margin-bottom: 5px;
+  }
+
+  .checkbox-container {
+    display: grid;
+    grid-template-columns: repeat(8, 1fr);
+    gap: 10px;
+    flex: 1;
+  }
+
+  .checkbox-container label {
+    display: flex;
+    align-items: center;
+    font-size: 14px;
+    color: #333;
+    cursor: pointer;
+    position: relative;
+    padding-left: 30px;
+  }
+
+  .checkbox-container input[type="checkbox"] {
+    display: none;
+  }
+
+  .custom-checkbox {
+    position: absolute;
+    left: 0;
+    top: 0;
+    width: 20px;
+    height: 20px;
+    border: 2px solid #ccc;
+    border-radius: 4px;
+    transition: border-color 0.3s, background-color 0.3s;
+  }
+
+  .checkbox-container input[type="checkbox"]:checked+.custom-checkbox {
+    border-color: #fa8b09;
+    background-color: #fa8b09;
+  }
+
+  .custom-checkbox::after {
+    content: "";
+    position: absolute;
+    display: none;
+    left: 5px;
+    top: 2px;
+    width: 5px;
+    height: 10px;
+    border: solid white;
+    border-width: 0 2px 2px 0;
+    transform: rotate(45deg);
+  }
+
+  .checkbox-container input[type="checkbox"]:checked+.custom-checkbox::after {
+    display: block;
+  }
+
+  .btn {
+    margin-bottom: 10px;
   }
 </style>
 
