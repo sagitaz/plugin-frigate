@@ -75,31 +75,31 @@ if (!isConnect('admin')) {
   $events = frigate::showEvents();
 
   echo '<div class="col-sm-10 flex-container">';
-  echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '<a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
-  echo '<div class="checkbox-container">';
+  echo '  <a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+  echo '  <a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '  <div class="checkbox-container">';
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
   $cameras = array_unique(array_column($events, 'camera'));
   foreach ($cameras as $camera) {
     $isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras);
-    echo '<label><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '>';
-    echo '<span class="custom-checkbox"></span> ' . ucfirst($camera) . '</label>';
+    echo '    <label><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '>';
+    echo '    <span class="custom-checkbox"></span> ' . ucfirst($camera) . '</label>';
   }
-  echo '</div>';
+  echo '  </div>';
   echo '</div>';
 
   echo '<div class="col-sm-10 flex-container">';
-  echo '<a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '<a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
-  echo '<div class="checkbox-container">';
+  echo '  <a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+  echo '  <a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '  <div class="checkbox-container">';
   $selectedLabels = isset($_GET['categories']) ? explode(',', $_GET['categories']) : [];
   $labels = array_unique(array_column($events, 'label'));
   foreach ($labels as $label) {
     $isChecked = empty($selectedLabels) || in_array($label, $selectedLabels);
-    echo '<label><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ';
-    echo '<span class="custom-checkbox"></span> ' . ucfirst($label) . '</label>';
+    echo '    <label><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ';
+    echo '    <span class="custom-checkbox"></span> ' . ucfirst($label) . '</label>';
   }
-  echo '</div>';
+  echo '  </div>';
   echo '</div>';
 
   echo '<div class="col-sm-12" style="margin-bottom:10px">';
@@ -131,15 +131,13 @@ if (!isConnect('admin')) {
   echo '</div>';
   echo '</div>';
 
-  echo '<div>';
+  echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {
     //div globale start
-    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer col-lg-4 ">';
-    echo '<div class="col-lg-12 frigateEvent">';
+    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
+    echo '<div class="frigateEvent">';
     // div img
-    echo '<div>';
     echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-    echo '</div>';
     // div texte
     echo '<div class="eventText">';
     $timeElapsed = timeElapsedString($event['date']);
@@ -229,359 +227,5 @@ if (!isConnect('admin')) {
 
 </div>
 
-
-<style>
-  .frigateEvent {
-    display: flex;
-    background-color: rgb(var(--defaultBkg-color));
-    margin-bottom: 10px;
-    border-radius: 10px;
-  }
-
-  .imgSnap {
-    flex: 0 0 auto;
-    position: relative;
-    background-color: rgb(var(--defaultBkg-color));
-    margin-left: -15px;
-    height: 125px;
-    border-bottom-left-radius: 10px;
-    border-top-left-radius: 10px;
-
-  }
-
-  .eventText {
-    flex: 1 1 auto;
-    position: relative;
-    margin-left: 20px;
-
-  }
-
-  .eventBtns {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-
-  }
-
-  .hover-button {
-    background: none;
-    border: none;
-    color: rgb(var(--defaultText-color));
-    font-size: 20px;
-  }
-
-  .hover-button:hover~.hover-image {
-    display: block;
-  }
-
-  .hover-button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    /* Align buttons to the right */
-  }
-
-  .eventHidden {
-    display: none;
-  }
-
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 2;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding-top: 60px;
-  }
-
-  .modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    position: relative;
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-
-  .modal-header h2 {
-    flex: 1;
-    margin: 0;
-  }
-
-  .button-container {
-    display: flex;
-    gap: 10px;
-  }
-
-  .media-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .video-container,
-  .image-container {
-    display: none;
-  }
-
-  .video-container,
-  .image-container {
-    width: 100%;
-  }
-
-  .video-container video,
-  .image-container img {
-    width: 100%;
-    display: block;
-  }
-
-  .active {
-    display: block;
-  }
-
-  .hidden-btn {
-    display: none;
-  }
-
-  .duration {
-    display: inline-block;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: #B9A9A7;
-    color: black;
-    font-weight: bold;
-    margin-top: 5px;
-    height: 20px;
-    line-height: 10px;
-    margin-left: 10px;
-  }
-
-  .durationTitle {
-    height: 30px;
-    line-height: 15px;
-  }
-
-  .percentage {
-    display: inline-block;
-    padding: 5px;
-    border-radius: 5px;
-    color: black;
-    font-weight: bold;
-    margin-top: 5px;
-    height: 20px;
-    line-height: 10px;
-    margin-left: 20px;
-  }
-
-  .percentageTitle {
-    height: 30px;
-    line-height: 20px;
-  }
-
-  .percentage[data-percentage="100"] {
-    background-color: #4caf50;
-  }
-
-  .percentage[data-percentage^="9"] {
-    background-color: #4caf50;
-  }
-
-  .percentage[data-percentage^="8"] {
-    background-color: #66bb6a;
-  }
-
-  .percentage[data-percentage^="7"],
-  .percentage[data-percentage^="6"] {
-    background-color: #ff9800;
-  }
-
-  .percentage[data-percentage^="5"] {
-    background-color: #f44336;
-  }
-
-  .percentage[data-percentage^="4"],
-  .percentage[data-percentage^="3"],
-  .percentage[data-percentage^="2"],
-  .percentage[data-percentage^="1"],
-  .percentage[data-percentage^="0"] {
-    background-color: #b71c1c;
-  }
-
-  .inline-title {
-    font-size: 1.5em;
-    font-weight: bold;
-  }
-
-  .inline-subtitle {
-    font-size: 1em;
-    color: black;
-    margin-left: 18px;
-  }
-
-  .datetime-container {
-    display: flex;
-    align-items: center;
-    gap: 10px;
-    margin-bottom: 5px;
-  }
-
-  .datetime-container label {
-    font-size: 16px;
-    font-weight: bold;
-    color: #333;
-  }
-
-  .datetime-container input[type="datetime-local"] {
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    padding: 5px 10px;
-    font-size: 14px;
-    color: #333;
-    transition: border-color 0.3s;
-  }
-
-  .datetime-container input[type="datetime-local"]:focus {
-    border-color: #007BFF;
-    outline: none;
-  }
-
-  .radio-container {
-    display: grid;
-    grid-template-columns: repeat(4, 1fr);
-    gap: 10px;
-    margin-bottom: 5px;
-  }
-
-  .radio-container label {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-  }
-
-  .radio-container input[type="radio"] {
-    display: none;
-  }
-
-  .custom-radio {
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ccc;
-    border-radius: 50%;
-    margin-right: 10px;
-    position: relative;
-    transition: border-color 0.3s;
-  }
-
-  .radio-container input[type="radio"]:checked+.custom-radio {
-    border-color: #fa8b09;
-  }
-
-  .radio-container input[type="radio"]:checked+.custom-radio::after {
-    content: "";
-    width: 10px;
-    height: 10px;
-    background-color: #fa8b09;
-    border-radius: 50%;
-    position: absolute;
-    top: 50%;
-    left: 50%;
-    transform: translate(-50%, -50%);
-  }
-
-  .flex-container {
-    display: flex;
-    align-items: center;
-    flex-wrap: wrap;
-    gap: 10px;
-    margin-bottom: 5px;
-  }
-
-  .checkbox-container {
-    display: grid;
-    grid-template-columns: repeat(8, 1fr);
-    gap: 10px;
-    flex: 1;
-  }
-
-  .checkbox-container label {
-    display: flex;
-    align-items: center;
-    font-size: 14px;
-    color: #333;
-    cursor: pointer;
-    position: relative;
-    padding-left: 30px;
-  }
-
-  .checkbox-container input[type="checkbox"] {
-    display: none;
-  }
-
-  .custom-checkbox {
-    position: absolute;
-    left: 0;
-    top: 0;
-    width: 20px;
-    height: 20px;
-    border: 2px solid #ccc;
-    border-radius: 4px;
-    transition: border-color 0.3s, background-color 0.3s;
-  }
-
-  .checkbox-container input[type="checkbox"]:checked+.custom-checkbox {
-    border-color: #fa8b09;
-    background-color: #fa8b09;
-  }
-
-  .custom-checkbox::after {
-    content: "";
-    position: absolute;
-    display: none;
-    left: 5px;
-    top: 2px;
-    width: 5px;
-    height: 10px;
-    border: solid white;
-    border-width: 0 2px 2px 0;
-    transform: rotate(45deg);
-  }
-
-  .checkbox-container input[type="checkbox"]:checked+.custom-checkbox::after {
-    display: block;
-  }
-
-  .btn {
-    margin-bottom: 10px;
-  }
-</style>
-
+<?php include_file('desktop', 'events', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
