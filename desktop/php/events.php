@@ -181,13 +181,13 @@ if (!isConnect('admin')) {
     echo ' data-title="' . $event['label'] . ' <div class=\'percentage percentageTitle\' data-percentage=\'' . $event['top_score'] . '\'>' . $event['top_score'] . ' %</div> - ' . $event['camera'] . ' - ' . $event['date'] . ' ' . $formattedDurationTitle . '"';
     echo '>';
     if ($event['hasSnapshot'] == 1) {
-      echo '<button class="hover-button snapshot-btn">';
-      echo '<i class="fas fa-image"></i>';
+      echo '<button class="hover-button snapshot-btn" title="Voir le snapshot">';
+      echo '<i class="fas fa-camera"></i>';
       echo '</button>';
     }
     if ($event['hasClip'] == 1) {
-      echo '<button class="hover-button video-btn">';
-      echo '<i class="fas fa-camera"></i>';
+      echo '<button class="hover-button video-btn" title="Voir le clip">';
+      echo '<i class="fas fa-film"></i>';
       echo '</button>';
     }
     echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
