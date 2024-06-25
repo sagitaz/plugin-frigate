@@ -108,7 +108,7 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 
 document.getElementById('deleteAll').addEventListener('click', function () {
   const visibleEvents = getVisibleEvents();
-  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
     if (result) {
       visibleEvents.forEach(function (event) {
         const eventId = event.getAttribute('data-id');
@@ -120,7 +120,7 @@ document.getElementById('deleteAll').addEventListener('click', function () {
 });
 
 function deleteEvent(eventId) {
-  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
     if (result) {
       console.log("suppression de : " + eventId);
       deleteAllEvents(eventId);

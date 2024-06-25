@@ -74,37 +74,45 @@ if (!isConnect('admin')) {
 
   $events = frigate::showEvents();
 
-  echo '<div class="col-sm-9" style="margin-bottom:5px">';
-  echo '<a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '<a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '<div class="col-sm-10 flex-container">';
+  echo '  <a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+  echo '  <a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '  <div class="checkbox-container">';
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
   $cameras = array_unique(array_column($events, 'camera'));
   foreach ($cameras as $camera) {
     $isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras);
-    echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($camera) . '</label>';
+    echo '    <label><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '>';
+    echo '    <span class="custom-checkbox"></span> ' . ucfirst($camera) . '</label>';
   }
+  echo '  </div>';
   echo '</div>';
 
-  echo '<div class="col-sm-9" style="margin-bottom:20px">';
-  echo '<a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '<a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '<div class="col-sm-10 flex-container">';
+  echo '  <a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
+  echo '  <a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
+  echo '  <div class="checkbox-container">';
   $selectedLabels = isset($_GET['categories']) ? explode(',', $_GET['categories']) : [];
   $labels = array_unique(array_column($events, 'label'));
   foreach ($labels as $label) {
     $isChecked = empty($selectedLabels) || in_array($label, $selectedLabels);
-    echo '<label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ' . ucfirst($label) . '</label>';
+    echo '    <label><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ';
+    echo '    <span class="custom-checkbox"></span> ' . ucfirst($label) . '</label>';
   }
+  echo '  </div>';
   echo '</div>';
 
-  echo '<div class="col-sm-9" style="margin-bottom:5px">
+  echo '<div class="col-sm-12" style="margin-bottom:10px">';
+  echo '<div class="col-sm-4 datetime-container">
         <label>Entre <input type="datetime-local" id="startDate"></label>
         <label>et <input type="datetime-local" id="endDate"></label>
+        <label>Ou de </label>
     </div>';
 
   $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
 
   $timeFilters = [
-    ''    => 'Tous',
+    ''    => 'Toutes les dates',
     '1h'  => 'Moins d\'une heure',
     '2h'  => 'Moins de deux heures',
     '6h'  => 'Moins de six heures',
@@ -114,23 +122,22 @@ if (!isConnect('admin')) {
     '1s'  => 'Moins d\'une semaine'
   ];
 
-  echo '<div class="col-sm-10" style="margin-bottom:5px">';
-  echo 'Date de ';
+  echo '<div class="col-sm-8 radio-container">';
   foreach ($timeFilters as $value => $label) {
     $isChecked = $value === $selectedTimeFilter;
-    echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '> ' . $label . '</label>';
+    echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '>';
+    echo '<span class="custom-radio"></span> ' . $label . '</label>';
   }
   echo '</div>';
+  echo '</div>';
 
-  echo '<div>';
+  echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {
     //div globale start
-    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer col-lg-4 ">';
-    echo '<div class="col-lg-12 frigateEvent">';
+    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
+    echo '<div class="frigateEvent">';
     // div img
-    echo '<div>';
     echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-    echo '</div>';
     // div texte
     echo '<div class="eventText">';
     $timeElapsed = timeElapsedString($event['date']);
@@ -172,13 +179,13 @@ if (!isConnect('admin')) {
     echo ' data-title="' . $event['label'] . ' <div class=\'percentage percentageTitle\' data-percentage=\'' . $event['top_score'] . '\'>' . $event['top_score'] . ' %</div> - ' . $event['camera'] . ' - ' . $event['date'] . ' ' . $formattedDurationTitle . '"';
     echo '>';
     if ($event['hasSnapshot'] == 1) {
-      echo '<button class="hover-button snapshot-btn">';
-      echo '<i class="fas fa-image"></i>';
+      echo '<button class="hover-button snapshot-btn" title="Voir le snapshot">';
+      echo '<i class="fas fa-camera"></i>';
       echo '</button>';
     }
     if ($event['hasClip'] == 1) {
-      echo '<button class="hover-button video-btn">';
-      echo '<i class="fas fa-camera"></i>';
+      echo '<button class="hover-button video-btn" title="Voir le clip">';
+      echo '<i class="fas fa-film"></i>';
       echo '</button>';
     }
     echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
@@ -220,219 +227,5 @@ if (!isConnect('admin')) {
 
 </div>
 
-
-<style>
-  .frigateEvent {
-    display: flex;
-    background-color: rgb(var(--defaultBkg-color));
-    margin-bottom: 10px;
-    border-radius: 10px;
-  }
-
-  .imgSnap {
-    flex: 0 0 auto;
-    position: relative;
-    background-color: rgb(var(--defaultBkg-color));
-    margin-left: -15px;
-    height: 125px;
-    border-bottom-left-radius: 10px;
-    border-top-left-radius: 10px;
-
-  }
-
-  .eventText {
-    flex: 1 1 auto;
-    position: relative;
-    margin-left: 20px;
-
-  }
-
-  .eventBtns {
-    display: flex;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    margin-left: auto;
-
-  }
-
-  .hover-button {
-    background: none;
-    border: none;
-    color: rgb(var(--defaultText-color));
-    font-size: 20px;
-  }
-
-  .hover-button:hover~.hover-image {
-    display: block;
-  }
-
-  .hover-button-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-end;
-    /* Align buttons to the right */
-  }
-
-  .eventHidden {
-    display: none;
-  }
-
-  .modal {
-    display: none;
-    position: fixed;
-    z-index: 2;
-    left: 0;
-    top: 0;
-    width: 100%;
-    height: 100%;
-    overflow: auto;
-    background-color: rgba(0, 0, 0, 0.7);
-    padding-top: 60px;
-  }
-
-  .modal-content {
-    background-color: #fefefe;
-    margin: 5% auto;
-    padding: 20px;
-    border: 1px solid #888;
-    width: 80%;
-    position: relative;
-  }
-
-  .modal-header {
-    display: flex;
-    justify-content: space-between;
-    align-items: center;
-    margin-bottom: 20px;
-  }
-
-  .modal-header h2 {
-    flex: 1;
-    margin: 0;
-  }
-
-  .button-container {
-    display: flex;
-    gap: 10px;
-  }
-
-  .media-container {
-    display: flex;
-    flex-direction: column;
-    align-items: flex-start;
-  }
-
-  .close {
-    color: #aaa;
-    float: right;
-    font-size: 28px;
-    font-weight: bold;
-  }
-
-  .close:hover,
-  .close:focus {
-    color: black;
-    text-decoration: none;
-    cursor: pointer;
-  }
-
-  .video-container,
-  .image-container {
-    display: none;
-  }
-
-  .video-container,
-  .image-container {
-    width: 100%;
-  }
-
-  .video-container video,
-  .image-container img {
-    width: 100%;
-    display: block;
-  }
-
-  .active {
-    display: block;
-  }
-
-  .hidden-btn {
-    display: none;
-  }
-
-  .duration {
-    display: inline-block;
-    padding: 5px;
-    border-radius: 5px;
-    background-color: gray;
-    color: black;
-    font-weight: bold;
-    margin-top: 5px;
-    height: 20px;
-    line-height: 10px;
-  }
-
-  .durationTitle {
-    height: 30px;
-    line-height: 15px;
-  }
-
-  .percentage {
-    display: inline-block;
-    padding: 5px;
-    border-radius: 5px;
-    color: black;
-    font-weight: bold;
-    margin-top: 5px;
-    height: 20px;
-    line-height: 10px;
-  }
-
-  .percentageTitle {
-    height: 30px;
-    line-height: 20px;
-  }
-
-  .percentage[data-percentage="100"] {
-    background-color: #4caf50;
-  }
-
-  .percentage[data-percentage^="9"] {
-    background-color: #4caf50;
-  }
-
-  .percentage[data-percentage^="8"] {
-    background-color: #66bb6a;
-  }
-
-  .percentage[data-percentage^="7"],
-  .percentage[data-percentage^="6"] {
-    background-color: #ff9800;
-  }
-
-  .percentage[data-percentage^="5"] {
-    background-color: #f44336;
-  }
-
-  .percentage[data-percentage^="4"],
-  .percentage[data-percentage^="3"],
-  .percentage[data-percentage^="2"],
-  .percentage[data-percentage^="1"],
-  .percentage[data-percentage^="0"] {
-    background-color: #b71c1c;
-  }
-
-  .inline-title {
-    font-size: 1.5em;
-    font-weight: bold;
-  }
-
-  .inline-subtitle {
-    font-size: 1em;
-    color: black;
-    margin-left: 5px;
-  }
-</style>
-
+<?php include_file('desktop', 'events', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>

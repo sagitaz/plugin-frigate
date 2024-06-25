@@ -31,7 +31,7 @@ try {
 
     if (init('action') == 'deleteEvent') {
         // Suppression d'un event
-        frigate::deleteEvent(init('eventId'));
+        frigate::deleteEvent(init('eventId'), true);
         ajax::success();
     }
     if (init('action') == 'searchAndCreate') {
