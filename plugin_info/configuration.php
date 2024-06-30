@@ -54,6 +54,14 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
+            <label class="col-md-4 control-label">{{MQTT Topic}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{MQTT Frigate Topic}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-md-4 control-label">{{Récupération des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>

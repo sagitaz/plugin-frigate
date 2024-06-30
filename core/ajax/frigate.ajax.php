@@ -39,6 +39,12 @@ try {
         $result = frigate::generateEqCameras();
         ajax::success($result);
     }
+    
+    if (init('action') == 'restartFrigate') {
+        // Redémarrage Frigate
+        frigate::restartFrigate();
+        ajax::success();
+    }
 
     if (init('action') == 'refreshCameras') {
         // Raffraichi la visualisation
