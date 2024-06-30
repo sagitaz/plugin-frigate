@@ -57,4 +57,7 @@ function frigate_remove()
     $sql = "DROP TABLE IF EXISTS `frigate_events`;";
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
+
+    Log::add("frigate", "info", "==> Désenregistrement du topic Frigate de MQTT2");
+    frigate::removeMQTTTopicRegistration()
 }
