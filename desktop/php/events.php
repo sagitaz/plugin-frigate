@@ -188,7 +188,7 @@ if (!isConnect('admin')) {
       echo '<i class="fas fa-film"></i>';
       echo '</button>';
     }
-    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
+    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur Frigate">';
     echo '<i class="fas fa-trash"></i>';
     echo '</button>';
     echo '</div>';

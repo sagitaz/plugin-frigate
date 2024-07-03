@@ -308,6 +308,8 @@ function printEqLogic(_eqLogic) {
                         imgUrl = data.result
                         imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
                     }
+
+                    // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
                 }
             })
         }
@@ -354,6 +356,26 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     level: 'success'
                 });
             }
+        }
+    })
+});
+
+document.getElementById('restartFrigate').addEventListener('click', function () {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "restartFrigate"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+          $('#div_alert').showAlert({
+            message: '{{Le redémarrage de Frigate est en cours.}}',
+            level: 'info'
+          });
         }
     })
 });
