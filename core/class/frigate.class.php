@@ -1124,7 +1124,7 @@ class frigate extends eqLogic
           self::getEvents(true, $event, $value['type']);
         } elseif ($key == 'stats') {
           log::add(__CLASS__, 'info', ' => Traitement mqtt stats');
-          self::majStatsCmds($value);
+          self::majStatsCmds($value, TRUE);
         } else {
           $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $key, "frigate");
           if (is_object($eqCamera)) {
