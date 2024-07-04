@@ -43,7 +43,10 @@ function frigate_update()
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate"); */
     $sql1 = file_get_contents(dirname(__FILE__) . '/install.sql');
-    DB::Prepare($sql1, array(), DB::FETCH_TYPE_ALL);
+    DB::Prepare($sql1, array(), DB::FETCH_TYPE_ALL);    
+    // Création de la nouvelle colonne type
+    $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `type` text DEFAULT NULL;";
+    DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     frigate::generateEqEvents();
     frigate::setCmdsCron();
     frigate::generateEqStats();
@@ -59,5 +62,5 @@ function frigate_remove()
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
 
     Log::add("frigate", "info", "==> Désenregistrement du topic Frigate de MQTT2");
-    frigate::removeMQTTTopicRegistration()
+    frigate::removeMQTTTopicRegistration();
 }

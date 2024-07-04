@@ -103,6 +103,9 @@ function addAction(_action, _type) {
     div += '<div class="col-sm-1">'
     div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" data-type="' + _type + '" />'
     div += '</div>'
+    div += '<div class="col-sm-1">'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" data-type="' + _type + '" />'
+    div += '</div>'
     div += '<div class="col-sm-4">'
     div += '<div class="input-group input-group-sm">'
     div += '<span class="input-group-btn">'
@@ -116,7 +119,7 @@ function addAction(_action, _type) {
     div += '</div>'
     div += '</div>'
     var actionOption_id = jeedomUtils.uniqId()
-    div += '<div class="col-sm-6 actionOptions" id="' + actionOption_id + '"></div>'
+    div += '<div class="col-sm-5 actionOptions" id="' + actionOption_id + '"></div>'
 
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')

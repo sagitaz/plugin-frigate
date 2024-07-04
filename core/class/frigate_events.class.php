@@ -42,6 +42,7 @@ class frigate_events
 	private $topScore;
 	private $score;
 	private $zones;
+	private $type;
 
 	/*     * ***********************Methode static*************************** */
 
@@ -310,5 +311,15 @@ class frigate_events
 	public function setZones($zones)
 	{
 		$this->zones = $zones;
+	}
+
+	public function getType()
+	{
+		return $this->type;
+	}
+
+	public function setType($type)
+	{
+		$this->type = $type;
 	}
 }
