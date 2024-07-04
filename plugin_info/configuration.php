@@ -77,5 +77,13 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">
+                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des datas (en MB)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="100MB par défaut et par caméra" />
+            </div>
+        </div>
     </fieldset>
 </form>

@@ -53,6 +53,7 @@ class frigate extends eqLogic
     config::save('topic', 'frigate', 'frigate');
     config::save('recovery_days', '7', 'frigate');
     config::save('remove_days', '7', 'frigate');
+    config::save('datas_weight', '100', 'frigate');
     config::save('cron', '5', 'frigate');
   }
   // configuration par defaut des crons
@@ -1124,7 +1125,7 @@ class frigate extends eqLogic
           self::getEvents(true, $event, $value['type']);
         } elseif ($key == 'stats') {
           log::add(__CLASS__, 'info', ' => Traitement mqtt stats');
-          self::majStatsCmds($value, TRUE);
+       //   self::majStatsCmds($value, TRUE);
         } else {
           $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $key, "frigate");
           if (is_object($eqCamera)) {
@@ -1134,17 +1135,40 @@ class frigate extends eqLogic
                 case 'motion':
                   // A venir
                 case 'audio':
-                  $cmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
+                  // commande info
+                  $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $cmd->event($value);
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  // commande action
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "LIGHT_OFF", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "LIGHT_ON", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "LIGHT_TOGGLE", $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'birdeye':
                   // A venir
                 case 'detect':
-                  $cmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
+                  $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $cmd->event($value);
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  // commande action
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "LIGHT_OFF", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "LIGHT_ON", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "LIGHT_TOGGLE", $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'improve_constrast':
@@ -1154,21 +1178,54 @@ class frigate extends eqLogic
                 case 'motion_threshold':
                   // A venir
                 case 'ptz_autotracker':
-                  $cmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
+                  $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $cmd->event($value);
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  // commande action
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "LIGHT_OFF", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "LIGHT_ON", $infoCmd, 1, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "LIGHT_TOGGLE", $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'recordings':
-                  $cmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
+                  $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $cmd->event($value);
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  // commande action
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "LIGHT_OFF", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "LIGHT_ON", $infoCmd, 1, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "LIGHT_TOGGLE", $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'snapshots':
-                  $cmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
+                  $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $cmd->event($value);
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  // commande action
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "LIGHT_OFF", $infoCmd, 0, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "LIGHT_ON", $infoCmd, 1, "action");
+                  $cmd->setTemplate('dashboard', 'core::binarySwitch');
+                  $cmd->setTemplate('mobile', 'core::binarySwitch');
+                  $cmd->save();
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "LIGHT_TOGGLE", $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 default:
@@ -1214,27 +1271,62 @@ class frigateCmd extends cmd
       log::add(__CLASS__, 'debug', "Cron désactivé");
     } else if ($this->getLogicalId() == 'action_restart') {
       frigate::restartFrigate();
-    } else if ($this->getLogicalId() == 'action_start_audio') {
+    } 
+    //  AUDIO 
+    else if ($this->getLogicalId() == 'action_start_audio') {
       frigate::publish_camera_message($camera, 'audio/set', 'ON');
     } else if ($this->getLogicalId() == 'action_stop_audio') {
       frigate::publish_camera_message($camera, 'audio/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_start_detect') {
+    } else if ($this->getLogicalId() == 'action_toggle_audio') {
+      $audio = $frigate->getCmd(null, 'info_audio')->execCmd();
+      if ($audio != -1) {
+        frigate::publish_camera_message($camera, 'audio/set', ($audio == "1") ? 'ON' : 'OFF');
+      }
+    }
+    //  DETECT 
+    else if ($this->getLogicalId() == 'action_start_detect') {
       frigate::publish_camera_message($camera, 'detect/set', 'ON');
     } else if ($this->getLogicalId() == 'action_stop_detect') {
       frigate::publish_camera_message($camera, 'detect/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_start_ptz_autotracker') {
+    } else if ($this->getLogicalId() == 'action_toggle_detect') {
+      $detect = $frigate->getCmd(null, 'info_detect')->execCmd();
+      if ($detect != -1) {
+        frigate::publish_camera_message($camera, 'detect/set', ($detect == "1") ? 'ON' : 'OFF');
+      }
+    }
+    //  PTZ AUTO TRACKER 
+    else if ($this->getLogicalId() == 'action_start_ptz_autotracker') {
       frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'ON');
     } else if ($this->getLogicalId() == 'action_stop_ptz_autotracker') {
       frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_start_recordings') {
+    } else if ($this->getLogicalId() == 'action_toggle_ptz_autotracker') {
+      $ptz_autotracker = $frigate->getCmd(null, 'info_ptz_autotracker')->execCmd();
+      if ($ptz_autotracker != -1) {
+        frigate::publish_camera_message($camera, 'ptz_autotracker/set', ($ptz_autotracker == "1") ? 'ON' : 'OFF');
+      }
+    }
+    //  RECORDINGS 
+    else if ($this->getLogicalId() == 'action_start_recordings') {
       frigate::publish_camera_message($camera, 'recordings/set', 'ON');
     } else if ($this->getLogicalId() == 'action_stop_recordings') {
       frigate::publish_camera_message($camera, 'recordings/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_start_snapshots') {
+    } else if ($this->getLogicalId() == 'action_toggle_recordings') {
+      $recordings = $frigate->getCmd(null, 'info_recordings')->execCmd();
+      if ($recordings != -1) {
+        frigate::publish_camera_message($camera, 'recordings/set', ($recordings == "1") ? 'ON' : 'OFF');
+      }
+    }
+    //  SNAPSHOTS 
+    else if ($this->getLogicalId() == 'action_start_snapshots') {
       frigate::publish_camera_message($camera, 'snapshots/set', 'ON');
     } else if ($this->getLogicalId() == 'action_stop_snapshots') {
       frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
-    } 
+    } else if ($this->getLogicalId() == 'action_toggle_snapshots') {
+      $snapshots = $frigate->getCmd(null, 'info_snapshots')->execCmd();
+      if ($snapshots != -1) {
+        frigate::publish_camera_message($camera, 'snapshots/set', ($snapshots == "1") ? 'ON' : 'OFF');
+      }
+    }
   }
 
   /*     * **********************Getteur Setteur*************************** */
