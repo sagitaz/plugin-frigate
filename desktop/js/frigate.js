@@ -101,10 +101,10 @@ function addAction(_action, _type) {
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
     div += '</div>'
     div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" data-type="' + _type + '" />'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" placeholder="{{Label}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" data-type="' + _type + '" />'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" placeholder="{{Type}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-4">'
     div += '<div class="input-group input-group-sm">'
@@ -223,7 +223,7 @@ function printEqLogic(_eqLogic) {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
     }
 
-    if (_eqLogic.logicalId === "eqFrigateCamera_"+_eqLogic.configuration.name) {
+    if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
         $('#div_action').empty()
         ACTIONS_LIST = []
         if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
@@ -249,7 +249,7 @@ function printEqLogic(_eqLogic) {
         }
 
         const imgElement = document.getElementById('imgFrigate');
-      	let intervalId;
+        let intervalId;
 
         const observerOptions = {
             root: null,
@@ -282,9 +282,9 @@ function printEqLogic(_eqLogic) {
                 intervalId = null;
             }
         }
-      
+
         function refreshImage() {
-          	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+            const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
             const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
             const imgElement = document.getElementById('imgFrigate');
 
@@ -375,10 +375,10 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-          $('#div_alert').showAlert({
-            message: '{{Le redémarrage de Frigate est en cours.}}',
-            level: 'info'
-          });
+            $('#div_alert').showAlert({
+                message: '{{Le redémarrage de Frigate est en cours.}}',
+                level: 'info'
+            });
         }
     })
 });

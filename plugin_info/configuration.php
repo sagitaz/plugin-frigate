@@ -78,7 +78,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">
+            <label class="col-md-4 control-label">{{Taille des dossiers}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des datas (en MB)}}"></i></sup>
             </label>
             <div class="col-md-4">

@@ -446,10 +446,11 @@ class frigate extends eqLogic
         $clip = "null";
         $hasClip = 0;
       }
-      /*    if (empty($event['end_time'])) {
-        log::add(__CLASS__, 'debug', "Event without end_time : " . json_encode($event));
-        break;
-      }*/
+      	$endtime = $event['end_time'];
+        if (empty($event['end_time'])) {
+        	log::add(__CLASS__, 'debug', "Event without end_time, force 0 : " . json_encode($event));
+       		$endtime = 0;
+      	}
 
       if (!$frigate) {
         $frigate = new frigate_events();
@@ -462,7 +463,7 @@ class frigate extends eqLogic
         $frigate->setHasSnapshot($hasSnapshot);
         $frigate->setSnapshot($snapshot);
         $frigate->setStartTime($event['start_time']);
-        $frigate->setEndTime($event['end_time']);
+        $frigate->setEndTime($endTime);
         $frigate->setFalsePositive($event['false_positive']);
         $frigate->setEventId($event['id']);
         $frigate->setLabel($event['label']);
@@ -476,12 +477,16 @@ class frigate extends eqLogic
         $frigate->setType($type);
         $frigate->save();
         self::majEventsCmds($frigate);
-      } else if ($frigate->getEndTime() == NULL) {
-        $frigate->setEndTime($event['end_time']);
-        $frigate->setType($type);
-        $frigate->save();
-        self::majEventsCmds($frigate);
-      }
+      } else {
+        	//log::add(__CLASS__, 'debug', "Event : " . json_encode($frigate[0]->getEventId()));
+        	if ($frigate[0]->getEndTime() == 0) {
+        		log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time."));
+        		$frigate[0]->setEndTime($event['end_time']);
+        		$frigate[0]->setType($type);
+        		$frigate[0]->save();
+        		self::majEventsCmds($frigate[0]);
+            }
+      	}
     }
     // Nombre de jours a garder en DB
     $removeDays = config::byKey('remove_days', 'frigate');
