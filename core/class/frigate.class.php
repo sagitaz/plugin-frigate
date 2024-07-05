@@ -1134,6 +1134,7 @@ class frigate extends eqLogic
               switch ($innerKey) {
                 case 'motion':
                   // A venir
+                  break;
                 case 'audio':
                   // commande info
                   $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
@@ -1154,6 +1155,7 @@ class frigate extends eqLogic
                   break;
                 case 'birdeye':
                   // A venir
+                  break;
                 case 'detect':
                   $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
@@ -1173,10 +1175,13 @@ class frigate extends eqLogic
                   break;
                 case 'improve_constrast':
                   // A venir
+                  break;
                 case 'motion_contour_area':
                   // A venir
+                  break;
                 case 'motion_threshold':
                   // A venir
+                  break;
                 case 'ptz_autotracker':
                   $infoCmd = self::createCmd($eqCamera->getId(), "Etat " . $innerKey, "binary", "", "info_" . $innerKey, "LIGHT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
