@@ -446,10 +446,10 @@ class frigate extends eqLogic
         $clip = "null";
         $hasClip = 0;
       }
-      	$endtime = $event['end_time'];
+      $endTime = $event['end_time'];
         if (empty($event['end_time'])) {
         	log::add(__CLASS__, 'debug', "Event without end_time, force 0 : " . json_encode($event));
-       		$endtime = 0;
+        $endTime = 0;
       	}
 
       if (!$frigate) {
@@ -480,7 +480,7 @@ class frigate extends eqLogic
       } else {
         	//log::add(__CLASS__, 'debug', "Event : " . json_encode($frigate[0]->getEventId()));
         	if ($frigate[0]->getEndTime() == 0) {
-        		log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time."));
+        		log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time.");
         		$frigate[0]->setEndTime($event['end_time']);
         		$frigate[0]->setType($type);
         		$frigate[0]->save();
