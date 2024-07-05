@@ -471,8 +471,13 @@ class frigate extends eqLogic
         $frigate->setRetain($event['retain_indefinitely']);
         $frigate->setSubLabel($event['sub_label']);
         $frigate->setThumbnail($img);
+        if (!$mqtt) {
         $frigate->setTopScore(round($event['data']['top_score'] * 100, 0));
         $frigate->setScore(round($event['data']['score'] * 100, 0));
+        } else {
+          $frigate->setTopScore(round($event['top_score'] * 100, 0));
+          $frigate->setScore(round($event['score'] * 100, 0));
+        }
         $frigate->setZones($event['zones']);
         $frigate->setType($type);
         $frigate->save();
