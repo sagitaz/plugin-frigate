@@ -317,7 +317,7 @@ class frigate extends eqLogic
     return config::byKey('topic', 'frigate');
   }
 
-  public function publish_camera_message(string $camera, string $subTopic, string $payload)
+  public static function publish_camera_message(string $camera, string $subTopic, string $payload)
   {
     self::publish_message("{$camera}/{$subTopic}", $payload);
   }
@@ -1248,8 +1248,10 @@ class frigateCmd extends cmd
       frigate::publish_camera_message($camera, 'audio/set', 'OFF');
     } else if ($this->getLogicalId() == 'action_toggle_audio') {
       $audio = $frigate->getCmd(null, 'info_audio')->execCmd();
-      if ($audio != -1) {
-        frigate::publish_camera_message($camera, 'audio/set', ($audio == "1") ? 'ON' : 'OFF');
+      if ($audio == 1) {
+        frigate::publish_camera_message($camera, 'audio/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'audio/set', 'ON');
       }
     }
     //  DETECT 
@@ -1259,8 +1261,10 @@ class frigateCmd extends cmd
       frigate::publish_camera_message($camera, 'detect/set', 'OFF');
     } else if ($this->getLogicalId() == 'action_toggle_detect') {
       $detect = $frigate->getCmd(null, 'info_detect')->execCmd();
-      if ($detect != -1) {
-        frigate::publish_camera_message($camera, 'detect/set', ($detect == "1") ? 'ON' : 'OFF');
+      if ($detect == 1) {
+        frigate::publish_camera_message($camera, 'detect/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'detect/set', 'ON');
       }
     }
     //  PTZ AUTO TRACKER 
@@ -1270,8 +1274,10 @@ class frigateCmd extends cmd
       frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'OFF');
     } else if ($this->getLogicalId() == 'action_toggle_ptz_autotracker') {
       $ptz_autotracker = $frigate->getCmd(null, 'info_ptz_autotracker')->execCmd();
-      if ($ptz_autotracker != -1) {
-        frigate::publish_camera_message($camera, 'ptz_autotracker/set', ($ptz_autotracker == "1") ? 'ON' : 'OFF');
+      if ($ptz_autotracker == 1) {
+        frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'ON');
       }
     }
     //  RECORDINGS 
@@ -1281,8 +1287,10 @@ class frigateCmd extends cmd
       frigate::publish_camera_message($camera, 'recordings/set', 'OFF');
     } else if ($this->getLogicalId() == 'action_toggle_recordings') {
       $recordings = $frigate->getCmd(null, 'info_recordings')->execCmd();
-      if ($recordings != -1) {
-        frigate::publish_camera_message($camera, 'recordings/set', ($recordings == "1") ? 'ON' : 'OFF');
+      if ($recordings == 1) {
+        frigate::publish_camera_message($camera, 'recordings/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'recordings/set', 'ON');
       }
     }
     //  SNAPSHOTS 
@@ -1292,8 +1300,10 @@ class frigateCmd extends cmd
       frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
     } else if ($this->getLogicalId() == 'action_toggle_snapshots') {
       $snapshots = $frigate->getCmd(null, 'info_snapshots')->execCmd();
-      if ($snapshots != -1) {
-        frigate::publish_camera_message($camera, 'snapshots/set', ($snapshots == "1") ? 'ON' : 'OFF');
+      if ($snapshots == 1) {
+        frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'snapshots/set', 'ON');
       }
     }
   }
