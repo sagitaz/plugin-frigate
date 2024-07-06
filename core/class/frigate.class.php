@@ -803,8 +803,6 @@ class frigate extends eqLogic
   public static function createMQTTcmds($eqlogicId)
   {
     $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
-    $value = "0";
-    $infoCmd->event($value);
     $infoCmd->save();
     // commande action
     $cmd = self::createCmd($eqlogicId, "detect off", "other", "", "action_stop_detect", "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
@@ -816,8 +814,6 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "recordings Etat", "binary", "", "info_recordings", "JEEMATE_CAMERA_NVR_STATE", 0);
-    $value = "0";
-    $infoCmd->event($value);
     $infoCmd->save();
     // commande action
     $cmd = self::createCmd($eqlogicId, "recordings off", "other", "", "action_stop_recordings", "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
@@ -829,8 +825,6 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "snapshots Etat", "binary", "", "info_snapshots", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    $value = "0";
-    $infoCmd->event($value);
     $infoCmd->save();
     // commande action
     $cmd = self::createCmd($eqlogicId, "snapshots off", "other", "", "action_stop_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
