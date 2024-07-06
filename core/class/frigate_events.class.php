@@ -43,6 +43,7 @@ class frigate_events
 	private $score;
 	private $zones;
 	private $type;
+	private $isFavorite;
 
 	/*     * ***********************Methode static*************************** */
 
@@ -322,4 +323,16 @@ class frigate_events
 	{
 		$this->type = $type;
 	}
+
+	public function getIsFavorite()
+	{
+		return $this->isFavorite;
+	}
+
+	public function setIsFavorite($isFavorite)
+	{
+		$this->isFavorite = $isFavorite;
+	}
+	
+	
 }

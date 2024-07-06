@@ -454,13 +454,28 @@ class frigate extends eqLogic
     if (empty($recoveryDays)) {
       $recoveryDays = 7;
     }
+    // Nombre de jours a garder en DB
+    $removeDays = config::byKey('remove_days', 'frigate');
+    if (empty($removeDays)) {
+      $removeDays = 7;
+    } else if ($removeDays < $recoveryDays) {
+      $removeDays = $recoveryDays;
+      log::add(__CLASS__, 'warning', "le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. removeDays est donc égale à recoveryDays.");
+    }
 
-    $filteredEvents = array_filter($events, function ($event) use ($recoveryDays) {
+    $filteredRemoveEvents = array_filter($events, function ($event) use ($removeDays) {
+      return $event['start_time'] >= time() - $removeDays * 86400;
+    });
+    $filteredRemoveEvents = array_values($filteredRemoveEvents);
+    self::cleanDbEvents($filteredRemoveEvents);
+
+
+    $filteredRecoveryEvents = array_filter($events, function ($event) use ($recoveryDays) {
       return $event['start_time'] >= time() - $recoveryDays * 86400;
     });
-    $filteredEvents = array_values($filteredEvents);
+    $filteredRecoveryEvents = array_values($filteredRecoveryEvents);
 
-    foreach ($filteredEvents as $event) {
+    foreach ($filteredRecoveryEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
       $img = self::saveURL($event['id'], null, $event['camera'], 1);
@@ -525,6 +540,7 @@ class frigate extends eqLogic
         }
         $frigate->setZones($event['zones']);
         $frigate->setType($type);
+        $frigate->setIsFavorite(0);
         $frigate->save();
         self::majEventsCmds($frigate);
       } else {
@@ -538,20 +554,6 @@ class frigate extends eqLogic
         }
       }
     }
-    // Nombre de jours a garder en DB
-    $removeDays = config::byKey('remove_days', 'frigate');
-    if (empty($removeDays)) {
-      $removeDays = 7;
-    } else if ($removeDays < $recoveryDays) {
-      $removeDays = $recoveryDays;
-      log::add(__CLASS__, 'warning', "le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. removeDays est donc égale à recoveryDays.");
-    }
-
-    $filteredEvents = array_filter($events, function ($event) use ($removeDays) {
-      return $event['start_time'] >= time() - $removeDays * 86400;
-    });
-    $filteredEvents = array_values($filteredEvents);
-    self::cleanDbEvents($filteredEvents);
   }
 
   public static function cleanDbEvents($events)
@@ -565,25 +567,31 @@ class frigate extends eqLogic
 
     foreach ($inDbEvents as $inDbEvent) {
       if (!in_array($inDbEvent->getEventId(), $ids)) {
-        log::add(__CLASS__, 'debug', "delete in DB : " . $inDbEvent->getEventId());
-        $inDbEvent->remove();
-        log::add(__CLASS__, 'debug', "Events delete in DB");
-        // Recherche si clip et snapshot existent dans le dossier de sauvegarde
-        $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_clip.mp4";
-        $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
-        $thumbnail = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_thumbnail.jpg";
+        // Verifier si le fichier est un favoris
+        $isFavorite = $inDbEvent->getIsFavorite();
+        if ($isFavorite == 1) {
+          log::add(__CLASS__, 'debug', "Evènement " . $inDbEvent->getEventId() . " est un favoris, il ne doit pas être supprimé de la DB.");
+        } else {
+          log::add(__CLASS__, 'debug', "delete in DB : " . $inDbEvent->getEventId());
+          $inDbEvent->remove();
+          log::add(__CLASS__, 'debug', "Events delete in DB");
+          // Recherche si clip et snapshot existent dans le dossier de sauvegarde
+          $clip = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_clip.mp4";
+          $snapshot = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_snapshot.jpg";
+          $thumbnail = dirname(__FILE__, 3) . "/data/" . $inDbEvent->getCamera() . "/" . $inDbEvent->getEventId() . "_thumbnail.jpg";
 
-        if (file_exists($clip)) {
-          unlink($clip);
-          log::add(__CLASS__, 'debug', "MP4 clip delete");
-        }
-        if (file_exists($snapshot)) {
-          unlink($snapshot);
-          log::add(__CLASS__, 'debug', "JPG snapshot delete");
-        }
-        if (file_exists($thumbnail)) {
-          unlink($thumbnail);
-          log::add(__CLASS__, 'debug', "JPG thumbnail delete");
+          if (file_exists($clip)) {
+            unlink($clip);
+            log::add(__CLASS__, 'debug', "MP4 clip delete");
+          }
+          if (file_exists($snapshot)) {
+            unlink($snapshot);
+            log::add(__CLASS__, 'debug', "JPG snapshot delete");
+          }
+          if (file_exists($thumbnail)) {
+            unlink($thumbnail);
+            log::add(__CLASS__, 'debug', "JPG thumbnail delete");
+          }
         }
       }
     }
