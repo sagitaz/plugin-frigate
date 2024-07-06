@@ -770,7 +770,7 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $position = null, $infoCmd = null, $historized = 1, $type = "info")
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 1, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
@@ -785,7 +785,6 @@ class frigate extends eqLogic
       $cmd->setIsVisible($isVisible);
       $cmd->setIsHistorized($historized);
       $cmd->setUnite($unite);
-      $cmd->setOrder($position);
       if (is_object($infoCmd) && $type == 'action') {
         $cmd->setValue($infoCmd->getId());
         $cmd->setTemplate('dashboard', 'core::toggle');
@@ -1202,9 +1201,9 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_OFF", 1, 36, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_ON", 1, 37, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), $innerKey . " toggle", "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
@@ -1218,9 +1217,9 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_OFF", 1, 30, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_ON", 1, 31, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), $innerKey . " toggle", "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
@@ -1240,9 +1239,9 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_OFF", 1, 38, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_ON", 1, 39, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), $innerKey . " toggle", "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
@@ -1253,9 +1252,9 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_OFF", 1, 32, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_ON", 1, 33, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), $innerKey . " toggle", "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
@@ -1266,9 +1265,9 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, 34, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " off", "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, 35, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), $innerKey . " on", "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), $innerKey . " toggle", "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
