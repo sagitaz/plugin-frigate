@@ -393,8 +393,13 @@ class frigate extends eqLogic
     // Calculer la taille du dossier en octets
     $size = 0;
     $dir = dirname(__FILE__, 3) . "/data/";
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
-      $size += $file->getSize();
+    if (is_dir($dir)) {
+      $size = 0;
+      foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+        if ($file->isFile()) {
+          $size += $file->getSize();
+        }
+      }
     }
     // taille du dossier en MB
     $folderSizeInMB = round($size / 1024 / 1024, 2);
