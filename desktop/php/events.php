@@ -137,7 +137,23 @@ if (!isConnect('admin')) {
     echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
     echo '<div class="frigateEvent">';
     // div img
+    $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
+    $type = $event['type'];
+    $filterText = '';
+    if ($type == 'new') {
+      $filterText = 'Nouveau';
+    } elseif ($type == 'update') {
+      $filterText = 'En cours';
+    }
+    echo '<div class="image-container">';
     echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
+    echo '<button class="favorite-btn" onclick="toggleFavorite(this)" data-id="' . $event['id'] . '" >';
+    echo '<i class="' . $favoriteClass . '"></i>';
+    echo '</button>';
+    if (!empty($filterText)) {
+      echo '<div class="filter">' . $filterText . '</div>';
+    }
+    echo '</div>';
     // div texte
     echo '<div class="eventText">';
     $timeElapsed = timeElapsedString($event['date']);

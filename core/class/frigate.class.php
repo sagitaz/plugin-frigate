@@ -642,7 +642,9 @@ class frigate extends eqLogic
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
         "id" => $event->getEventId(),
-        "top_score" => $event->getTopScore()
+        "top_score" => $event->getTopScore(),
+        "type" => $event->getType(),
+        "isFavorite" => $event->getIsFavorite()
       );
     }
 
@@ -1268,6 +1270,16 @@ class frigate extends eqLogic
         }
       }
     }
+  }
+
+  public static function setFavorite($eventId, $isFav)
+  {
+    $events = frigate_events::byEventId($eventId);
+    foreach ($events as $event) {
+      $event->setIsFavorite($isFav);
+      $event->save();
+    }
+    return true;
   }
 }
 class frigateCmd extends cmd

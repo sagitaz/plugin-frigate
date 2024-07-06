@@ -271,3 +271,39 @@ document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
   radio.addEventListener('change', filterEvents);
 });
+
+function toggleFavorite(button) {
+  const eventId = button.getAttribute('data-id');
+  var icon = button.querySelector('i');
+  if (icon.classList.contains('fas')) {
+    icon.classList.remove('fas');
+    icon.classList.add('far');
+    setFavorite(eventId, 0);
+  } else {
+    icon.classList.remove('far');
+    icon.classList.add('fas');
+    setFavorite(eventId, 1);
+  }
+}
+
+function setFavorite(eventId, isFav) {
+  $.ajax({
+    type: "POST",
+    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+    data: {
+      action: "setFavorite",
+      eventId: eventId,
+      isFav: isFav
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.state != 'ok') {
+        $('#div_alert').showAlert({ message: data.result, level: 'danger' });
+        return;
+      }
+    }
+  })
+}

@@ -54,6 +54,12 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'setFavorite') {
+        // Changement de favori
+        $result = frigate::setFavorite(init('eventId'),init('state'));
+        ajax::success($result);
+    }
+
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
