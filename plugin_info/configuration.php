@@ -82,7 +82,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des datas (en MB)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="100MB par défaut et par caméra" />
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500MB par défaut" />
             </div>
         </div>
     </fieldset>

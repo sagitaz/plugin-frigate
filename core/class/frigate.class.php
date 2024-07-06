@@ -53,7 +53,7 @@ class frigate extends eqLogic
     config::save('topic', 'frigate', 'frigate');
     config::save('recovery_days', '7', 'frigate');
     config::save('remove_days', '7', 'frigate');
-    config::save('datas_weight', '100', 'frigate');
+    config::save('datas_weight', '500', 'frigate');
     config::save('cron', '5', 'frigate');
   }
   // configuration par defaut des crons
@@ -383,6 +383,50 @@ class frigate extends eqLogic
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
   }
+
+  public static function checkDatasWeight()
+  {
+    $recoveryDays = config::byKey('recovery_days', 'frigate'); // default 7
+    $removeDays = config::byKey('remove_days', 'frigate'); // default 7
+    $datasWeight = config::byKey('datas_weight', 'frigate'); // default 500 MB
+    $folderIsFull = false;
+    // Calculer la taille du dossier en octets
+    $size = 0;
+    $dir = dirname(__FILE__, 3) . "/data/";
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
+      $size += $file->getSize();
+    }
+    // taille du dossier en MB
+    $folderSizeInMB = round($size / 1024 / 1024, 2);
+    // taille disponible du dossier en MB
+    $folderAvailableSizeInMB = round(disk_free_space($dir) / 1024 / 1024, 2);
+    // On verifie qu'il y a suffisament de place sur Jeedom
+    if ($folderAvailableSizeInMB <= $datasWeight) {
+      $folderIsFull = true;
+      log::add(__CLASS__, 'debug', "Dossier Jeedom plein, taille : " . $folderSizeInMB . " MB");
+    } else {
+      log::add(__CLASS__, 'debug', "Dossier Jeedom OK, taille : " . $folderSizeInMB . " MB");
+      // On verifie que le dossier n'est pas plein
+      if ($folderSizeInMB <= $datasWeight) {
+        log::add(__CLASS__, 'debug', "Dossier data Frigate OK, taille : " . $folderSizeInMB . " MB");
+      } else {
+        log::add(__CLASS__, 'debug', "Dossier data Frigate plein, taille : " . $folderSizeInMB . " MB");
+        $folderIsFull = true;
+      }
+    }
+    // Si dossier plein alors on reduit le nombre de jours de recuperation automatiquement et de suppression
+    if ($folderIsFull) {
+      log::add(__CLASS__, 'debug', "Dossier KO, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement");
+      // on reduit le nombre de jours de recuperation automatiquement
+      $recoveryDays = $recoveryDays - 1;
+      config::save('recovery_days', $recoveryDays, 'frigate');
+      // on reduit le nombre de jours de suppression automatiquement
+      $removeDays = $removeDays - 1;
+      config::save('remove_days', $removeDays, 'frigate');
+      log::add(__CLASS__, 'debug', "Duree de recuperation : " . $recoveryDays . " jours, Duree de suppression : " . $removeDays . " jours");
+    }
+    return true;
+  }
   public static function getEvents($mqtt = false, $events = array(), $type = 'end')
   {
     if (!$mqtt) {
@@ -402,7 +446,8 @@ class frigate extends eqLogic
       $events = array_reverse($events);
     }
 
-
+    // Verifier la taille disponible dans le dossier data et agir en conserquence
+    self::checkDatasWeight();
 
     // Nombre de jours a filtrer et enregistrer en DB
     $recoveryDays = config::byKey('recovery_days', 'frigate');
@@ -447,10 +492,10 @@ class frigate extends eqLogic
         $hasClip = 0;
       }
       $endTime = $event['end_time'];
-        if (empty($event['end_time'])) {
-        	log::add(__CLASS__, 'debug', "Event without end_time, force 0 : " . json_encode($event));
+      if (empty($event['end_time'])) {
+        log::add(__CLASS__, 'debug', "Event without end_time, force 0 : " . json_encode($event));
         $endTime = 0;
-      	}
+      }
 
       if (!$frigate) {
         $frigate = new frigate_events();
@@ -472,8 +517,8 @@ class frigate extends eqLogic
         $frigate->setSubLabel($event['sub_label']);
         $frigate->setThumbnail($img);
         if (!$mqtt) {
-        $frigate->setTopScore(round($event['data']['top_score'] * 100, 0));
-        $frigate->setScore(round($event['data']['score'] * 100, 0));
+          $frigate->setTopScore(round($event['data']['top_score'] * 100, 0));
+          $frigate->setScore(round($event['data']['score'] * 100, 0));
         } else {
           $frigate->setTopScore(round($event['top_score'] * 100, 0));
           $frigate->setScore(round($event['score'] * 100, 0));
@@ -483,15 +528,15 @@ class frigate extends eqLogic
         $frigate->save();
         self::majEventsCmds($frigate);
       } else {
-        	//log::add(__CLASS__, 'debug', "Event : " . json_encode($frigate[0]->getEventId()));
-        	if ($frigate[0]->getEndTime() == 0) {
-        		log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time.");
-        		$frigate[0]->setEndTime($event['end_time']);
-        		$frigate[0]->setType($type);
-        		$frigate[0]->save();
-        		self::majEventsCmds($frigate[0]);
-            }
-      	}
+        //log::add(__CLASS__, 'debug', "Event : " . json_encode($frigate[0]->getEventId()));
+        if ($frigate[0]->getEndTime() == 0) {
+          log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time.");
+          $frigate[0]->setEndTime($event['end_time']);
+          $frigate[0]->setType($type);
+          $frigate[0]->save();
+          self::majEventsCmds($frigate[0]);
+        }
+      }
     }
     // Nombre de jours a garder en DB
     $removeDays = config::byKey('remove_days', 'frigate');
@@ -1136,11 +1181,11 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_OFF", 1,$infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_ON",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_TOGGLE",0,$infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_AUDIO_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'birdeye':
@@ -1152,11 +1197,11 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_OFF",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_ON",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_TOGGLE",0, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_DETECT_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'improve_constrast':
@@ -1174,11 +1219,11 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_OFF",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_TOGGLE",0, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_PTZ_AUTOTRACKER_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'recordings':
@@ -1187,11 +1232,11 @@ class frigate extends eqLogic
                   $infoCmd->event($value);
                   $infoCmd->save();
                   // commande action
-                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_OFF",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
                   $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_TOGGLE",0, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_NVR_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 case 'snapshots':
@@ -1202,9 +1247,9 @@ class frigate extends eqLogic
                   // commande action
                   $cmd = self::createCmd($eqCamera->getId(), "Stop " . $innerKey, "other", "", "action_stop_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_ON",1, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Start " . $innerKey, "other", "", "action_start_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
                   $cmd->save();
-                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE",0, $infoCmd, 0, "action");
+                  $cmd = self::createCmd($eqCamera->getId(), "Toggle " . $innerKey, "other", "", "action_toggle_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
                   $cmd->save();
                   break;
                 default:
@@ -1242,21 +1287,31 @@ class frigateCmd extends cmd
   {
     $frigate = $this->getEqLogic();
     $camera = $frigate->getConfiguration('name');
+
+    //  CRON START
     if ($this->getLogicalId() == 'action_startCron') {
       $frigate->getCmd(null, 'info_Cron')->event(1);
       log::add(__CLASS__, 'debug', "Cron activé");
-    } else if ($this->getLogicalId() == 'action_stopCron') {
+    }
+    //  CRON STOP
+    else if ($this->getLogicalId() == 'action_stopCron') {
       $frigate->getCmd(null, 'info_Cron')->event(0);
       log::add(__CLASS__, 'debug', "Cron désactivé");
-    } else if ($this->getLogicalId() == 'action_restart') {
+    }
+    //  RESTART
+    else if ($this->getLogicalId() == 'action_restart') {
       frigate::restartFrigate();
     }
-    //  AUDIO 
+    //  AUDIO START
     else if ($this->getLogicalId() == 'action_start_audio') {
       frigate::publish_camera_message($camera, 'audio/set', 'ON');
-    } else if ($this->getLogicalId() == 'action_stop_audio') {
+    }
+    //  AUDIO STOP
+    else if ($this->getLogicalId() == 'action_stop_audio') {
       frigate::publish_camera_message($camera, 'audio/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_toggle_audio') {
+    }
+    //  AUDIO TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_audio') {
       $audio = $frigate->getCmd(null, 'info_audio')->execCmd();
       if ($audio == 1) {
         frigate::publish_camera_message($camera, 'audio/set', 'OFF');
@@ -1264,12 +1319,16 @@ class frigateCmd extends cmd
         frigate::publish_camera_message($camera, 'audio/set', 'ON');
       }
     }
-    //  DETECT 
+    //  DETECT START
     else if ($this->getLogicalId() == 'action_start_detect') {
       frigate::publish_camera_message($camera, 'detect/set', 'ON');
-    } else if ($this->getLogicalId() == 'action_stop_detect') {
+    }
+    //  DETECT STOP
+    else if ($this->getLogicalId() == 'action_stop_detect') {
       frigate::publish_camera_message($camera, 'detect/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_toggle_detect') {
+    }
+    //  DETECT TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_detect') {
       $detect = $frigate->getCmd(null, 'info_detect')->execCmd();
       if ($detect == 1) {
         frigate::publish_camera_message($camera, 'detect/set', 'OFF');
@@ -1277,12 +1336,16 @@ class frigateCmd extends cmd
         frigate::publish_camera_message($camera, 'detect/set', 'ON');
       }
     }
-    //  PTZ AUTO TRACKER 
+    //  PTZ AUTO TRACKER ON
     else if ($this->getLogicalId() == 'action_start_ptz_autotracker') {
       frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'ON');
-    } else if ($this->getLogicalId() == 'action_stop_ptz_autotracker') {
+    }
+    //  PTZ AUTO TRACKER OFF
+    else if ($this->getLogicalId() == 'action_stop_ptz_autotracker') {
       frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_toggle_ptz_autotracker') {
+    }
+    //  PTZ AUTO TRACKER TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_ptz_autotracker') {
       $ptz_autotracker = $frigate->getCmd(null, 'info_ptz_autotracker')->execCmd();
       if ($ptz_autotracker == 1) {
         frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'OFF');
@@ -1290,12 +1353,16 @@ class frigateCmd extends cmd
         frigate::publish_camera_message($camera, 'ptz_autotracker/set', 'ON');
       }
     }
-    //  RECORDINGS 
+    //  RECORDINGS ON
     else if ($this->getLogicalId() == 'action_start_recordings') {
       frigate::publish_camera_message($camera, 'recordings/set', 'ON');
-    } else if ($this->getLogicalId() == 'action_stop_recordings') {
+    }
+    //  RECORDINGS OFF
+    else if ($this->getLogicalId() == 'action_stop_recordings') {
       frigate::publish_camera_message($camera, 'recordings/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_toggle_recordings') {
+    }
+    //  RECORDINGS TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_recordings') {
       $recordings = $frigate->getCmd(null, 'info_recordings')->execCmd();
       if ($recordings == 1) {
         frigate::publish_camera_message($camera, 'recordings/set', 'OFF');
@@ -1303,12 +1370,16 @@ class frigateCmd extends cmd
         frigate::publish_camera_message($camera, 'recordings/set', 'ON');
       }
     }
-    //  SNAPSHOTS 
+    //  SNAPSHOTS ON
     else if ($this->getLogicalId() == 'action_start_snapshots') {
       frigate::publish_camera_message($camera, 'snapshots/set', 'ON');
-    } else if ($this->getLogicalId() == 'action_stop_snapshots') {
+    }
+    //  SNAPSHOTS OFF
+    else if ($this->getLogicalId() == 'action_stop_snapshots') {
       frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
-    } else if ($this->getLogicalId() == 'action_toggle_snapshots') {
+    }
+    //  SNAPSHOTS TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_snapshots') {
       $snapshots = $frigate->getCmd(null, 'info_snapshots')->execCmd();
       if ($snapshots == 1) {
         frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
