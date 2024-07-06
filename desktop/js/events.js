@@ -144,7 +144,25 @@ function deleteAllEvents(eventId) {
       if (data.state != 'ok') {
         $('#div_alert').showAlert({ message: data.result, level: 'danger' });
         return;
-      } else {
+      } else if (data.result == 'Error 01') {
+        $('#div_alert').showAlert({
+          message: '{{L\'évènement est un favori. Suppression impossible. Veuillez d\'abord le supprimer de la liste des favoris.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'Error 02') {
+        $('#div_alert').showAlert({
+          message: '{{L\'URL du serveur Frigate n\'est pas configurée.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'Error 03') {
+        $('#div_alert').showAlert({
+          message: '{{Le port du serveur Frigate n\'est pas configuré.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'OK') {
         $('#div_alert').showAlert({
           message: '{{Suppression de l\'évènement réussi.}}',
           level: 'success'
@@ -300,8 +318,17 @@ function setFavorite(eventId, isFav) {
       handleAjaxError(request, status, error);
     },
     success: function (data) {
-      if (data.state != 'ok') {
-        $('#div_alert').showAlert({ message: data.result, level: 'danger' });
+      if (data.result == '0') {
+        $('#div_alert').showAlert({
+          message: '{{La caméra a été retirée de la liste des favoris.}}',
+          level: 'success'
+        });
+        return;
+      } else if (data.result == '1') {
+        $('#div_alert').showAlert({
+          message: '{{La caméra a été ajoutée à la liste des favoris.}}',
+          level: 'success'
+        });
         return;
       }
     }

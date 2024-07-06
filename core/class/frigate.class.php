@@ -416,7 +416,8 @@ class frigate extends eqLogic
     }
     // Si dossier plein alors on reduit le nombre de jours de recuperation automatiquement et de suppression
     if ($folderIsFull) {
-      log::add(__CLASS__, 'debug', "Dossier KO, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement");
+      log::add(__CLASS__, 'debug', "Dossier plein, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement");
+      message::add('frigate', __("Dossier plein, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement", __FILE__), null, null);
       // on reduit le nombre de jours de recuperation automatiquement
       $recoveryDays = $recoveryDays - 1;
       config::save('recovery_days', $recoveryDays, 'frigate');
@@ -600,15 +601,22 @@ class frigate extends eqLogic
   public static function deleteEvent($id, $all = false)
   {
     log::add(__CLASS__, 'debug', "Delete ID : " . $id);
+    $frigate = frigate_events::byEventId($id);
+    $isFavorite = $frigate[0]->getIsFavorite();
+    if ($isFavorite == 1) {
+      log::add(__CLASS__, 'debug', "Evènement " . $frigate[0]->getEventId() . " est un favoris, il ne doit pas être supprimé de la DB.");
+      message::add('frigate', __("L'évènement est un favoris, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
+      return "Error 01";
+    }
     $url = config::byKey('URL', 'frigate');
     if ($url == "") {
       log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-      return;
+      return "Error 02";
     }
     $port = config::byKey('port', 'frigate');
     if ($port == "") {
       log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-      return;
+      return "Error 03";
     }
 
     $resultURL = $url . ":" . $port . "/api/events/" . $id;
@@ -621,6 +629,8 @@ class frigate extends eqLogic
     foreach ($events as $event) {
       $event->remove();
     }
+
+    return "OK";
   }
   public static function showEvents()
   {
@@ -1279,7 +1289,8 @@ class frigate extends eqLogic
       $event->setIsFavorite($isFav);
       $event->save();
     }
-    return true;
+    $state = $event->getIsFavorite();
+    return $state;
   }
 }
 class frigateCmd extends cmd
