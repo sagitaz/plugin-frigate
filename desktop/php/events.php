@@ -145,7 +145,7 @@ if (!isConnect('admin')) {
     } elseif ($type == 'update') {
       $filterText = 'En cours';
     }
-    echo '<div class="image-container">';
+    echo '<div class="img-container">';
     echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
     echo '<button class="favorite-btn" onclick="toggleFavorite(this)" data-id="' . $event['id'] . '" >';
     echo '<i class="' . $favoriteClass . '"></i>';
