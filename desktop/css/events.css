@@ -77,7 +77,7 @@
 }
 
 .modal-content {
-  background-color: #fefefe;
+  background-color: rgb(var(--defaultBkg-color));
   margin: 5% auto;
   padding: 20px;
   border: 1px solid #888;
@@ -231,7 +231,7 @@
 .datetime-container label {
   font-size: 16px;
   font-weight: bold;
-  color: #333;
+  color: rgb(var(--defaultText-color));
 }
 
 .datetime-container input[type="datetime-local"] {
@@ -239,7 +239,7 @@
   border-radius: 4px;
   padding: 5px 10px;
   font-size: 14px;
-  color: #333;
+  color: rgb(var(--defaultText-color));
   transition: border-color 0.3s;
 }
 
@@ -259,7 +259,7 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #333;
+  color: rgb(var(--defaultText-color));
   cursor: pointer;
 }
 
@@ -312,7 +312,7 @@
   display: flex;
   align-items: center;
   font-size: 14px;
-  color: #333;
+  color: rgb(var(--defaultText-color));
   cursor: pointer;
   position: relative;
   padding-left: 30px;
