@@ -178,60 +178,6 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{audio}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="audio">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{birdeye}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="birdeye">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{detect}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="detect">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{improve_constrast}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="improve_constrast">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{motion_contour_area}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" disabled class="eqLogicAttr" data-l1key="configuration" data-l2key="motion_contour_area">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{motion_threshold}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" disabled class="eqLogicAttr" data-l1key="configuration" data-l2key="motion_threshold">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{ptz_autotracker}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="ptz_autotracker">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{recordings}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="recordings">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{snapshots}}</label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="snapshots">
-                                </div>
-                            </div>
                         </div>
 
                         <!-- Partie droite de l'onglet "Équipement" -->

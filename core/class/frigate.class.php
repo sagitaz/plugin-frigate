@@ -221,8 +221,11 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
   {
+
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
+    
+    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
     $name = $this->getConfiguration('name');
     $bbox = $this->getConfiguration('bbox', 0);
     $timestamp = $this->getConfiguration('timestamp', 1);
@@ -234,6 +237,7 @@ class frigate extends eqLogic
 
     $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
     $this->setConfiguration('img', $img);
+    }
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement

@@ -102,6 +102,11 @@
   gap: 10px;
 }
 
+.custom-button {
+  background-color: rgb(var(--defaultBkg-color));
+  color: rgb(var(--defaultText-color));
+}
+
 .media-container {
   display: flex;
   flex-direction: column;
