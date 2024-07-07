@@ -108,7 +108,7 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 
 document.getElementById('deleteAll').addEventListener('click', function () {
   const visibleEvents = getVisibleEvents();
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       visibleEvents.forEach(function (event) {
         const eventId = event.getAttribute('data-id');
@@ -120,7 +120,7 @@ document.getElementById('deleteAll').addEventListener('click', function () {
 });
 
 function deleteEvent(eventId) {
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuez ?}}', function (result) {
+  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       console.log("suppression de : " + eventId);
       deleteAllEvents(eventId);
@@ -144,7 +144,25 @@ function deleteAllEvents(eventId) {
       if (data.state != 'ok') {
         $('#div_alert').showAlert({ message: data.result, level: 'danger' });
         return;
-      } else {
+      } else if (data.result == 'Error 01') {
+        $('#div_alert').showAlert({
+          message: '{{L\'évènement est un favori. Suppression impossible. Veuillez d\'abord le supprimer de la liste des favoris.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'Error 02') {
+        $('#div_alert').showAlert({
+          message: '{{L\'URL du serveur Frigate n\'est pas configurée.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'Error 03') {
+        $('#div_alert').showAlert({
+          message: '{{Le port du serveur Frigate n\'est pas configuré.}}',
+          level: 'warning'
+        });
+        return;
+      } else if (data.result == 'OK') {
         $('#div_alert').showAlert({
           message: '{{Suppression de l\'évènement réussi.}}',
           level: 'success'
@@ -271,3 +289,48 @@ document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
   radio.addEventListener('change', filterEvents);
 });
+
+function toggleFavorite(button) {
+  const eventId = button.getAttribute('data-id');
+  var icon = button.querySelector('i');
+  if (icon.classList.contains('fas')) {
+    icon.classList.remove('fas');
+    icon.classList.add('far');
+    setFavorite(eventId, 0);
+  } else {
+    icon.classList.remove('far');
+    icon.classList.add('fas');
+    setFavorite(eventId, 1);
+  }
+}
+
+function setFavorite(eventId, isFav) {
+  $.ajax({
+    type: "POST",
+    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+    data: {
+      action: "setFavorite",
+      eventId: eventId,
+      isFav: isFav
+    },
+    dataType: 'json',
+    error: function (request, status, error) {
+      handleAjaxError(request, status, error);
+    },
+    success: function (data) {
+      if (data.result == '0') {
+        $('#div_alert').showAlert({
+          message: '{{La caméra a été retirée de la liste des favoris.}}',
+          level: 'success'
+        });
+        return;
+      } else if (data.result == '1') {
+        $('#div_alert').showAlert({
+          message: '{{La caméra a été ajoutée à la liste des favoris.}}',
+          level: 'success'
+        });
+        return;
+      }
+    }
+  })
+}

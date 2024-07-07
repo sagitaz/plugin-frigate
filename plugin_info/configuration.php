@@ -54,6 +54,14 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
+            <label class="col-md-4 control-label">{{MQTT Topic}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{MQTT Frigate Topic}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-md-4 control-label">{{Récupération des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
@@ -67,6 +75,14 @@ if (!isConnect()) {
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Taille des dossiers}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des datas (en MB)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500MB par défaut" />
             </div>
         </div>
     </fieldset>

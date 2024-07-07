@@ -101,7 +101,10 @@ function addAction(_action, _type) {
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
     div += '</div>'
     div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" data-type="' + _type + '" />'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" placeholder="{{Label}}" data-type="' + _type + '" />'
+    div += '</div>'
+    div += '<div class="col-sm-1">'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" placeholder="{{Type}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-4">'
     div += '<div class="input-group input-group-sm">'
@@ -116,7 +119,7 @@ function addAction(_action, _type) {
     div += '</div>'
     div += '</div>'
     var actionOption_id = jeedomUtils.uniqId()
-    div += '<div class="col-sm-6 actionOptions" id="' + actionOption_id + '"></div>'
+    div += '<div class="col-sm-5 actionOptions" id="' + actionOption_id + '"></div>'
 
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
@@ -220,7 +223,7 @@ function printEqLogic(_eqLogic) {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
     }
 
-    if (_eqLogic.logicalId === "eqFrigateCamera_"+_eqLogic.configuration.name) {
+    if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
         $('#div_action').empty()
         ACTIONS_LIST = []
         if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
@@ -246,7 +249,7 @@ function printEqLogic(_eqLogic) {
         }
 
         const imgElement = document.getElementById('imgFrigate');
-      	let intervalId;
+        let intervalId;
 
         const observerOptions = {
             root: null,
@@ -279,10 +282,28 @@ function printEqLogic(_eqLogic) {
                 intervalId = null;
             }
         }
-      
+        function extractFrigatePart(url) {
+            // Définir l'expression régulière pour capturer la partie souhaitée de l'URL
+            const regex = /\/api\/([^\/]+)\/latest\.jpg/;
+
+            // Exécuter l'expression régulière sur l'URL
+            const match = url.match(regex);
+
+            // Si une correspondance est trouvée, retourner la partie capturée
+            if (match && match[1]) {
+                return match[1];
+            } else {
+                // Si aucune correspondance n'est trouvée, retourner null ou une valeur par défaut
+                return null;
+            }
+        }
+
         function refreshImage() {
+
           	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
-            const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
+            const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+            const name = extractFrigatePart(img);
+
             const imgElement = document.getElementById('imgFrigate');
 
             $.ajax({
@@ -291,7 +312,8 @@ function printEqLogic(_eqLogic) {
                 data: {
                     action: "refreshCameras",
                     img: img,
-                    name: name
+                    name: name,
+                    eqlogicId: eqlogicId
                 },
                 dataType: 'json',
                 error: function (request, status, error) {
@@ -308,6 +330,8 @@ function printEqLogic(_eqLogic) {
                         imgUrl = data.result
                         imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
                     }
+
+                    // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
                 }
             })
         }
@@ -354,6 +378,26 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     level: 'success'
                 });
             }
+        }
+    })
+});
+
+document.getElementById('restartFrigate').addEventListener('click', function () {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "restartFrigate"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            $('#div_alert').showAlert({
+                message: '{{Le redémarrage de Frigate est en cours.}}',
+                level: 'info'
+            });
         }
     })
 });

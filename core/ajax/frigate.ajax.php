@@ -31,8 +31,8 @@ try {
 
     if (init('action') == 'deleteEvent') {
         // Suppression d'un event
-        frigate::deleteEvent(init('eventId'), true);
-        ajax::success();
+        $result = frigate::deleteEvent(init('eventId'), true);
+        ajax::success($result);
     }
     if (init('action') == 'searchAndCreate') {
         // Recherche et creation de cameras
@@ -40,11 +40,25 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'restartFrigate') {
+        // Redémarrage Frigate
+        frigate::restartFrigate();
+        ajax::success();
+    }
+
     if (init('action') == 'refreshCameras') {
         // Raffraichi la visualisation
         $name = init('name');
         $img = init('img');
-        $result = frigate::saveURL(null,null,$name,0,1,$img);
+        $eqlogicId = init('eqlogicId');
+        $result = frigate::saveURL(null, null, $name, 0, 1, $img);
+        frigate::createAndRefreshURLcmd($eqlogicId, $result);
+        ajax::success($result);
+    }
+
+    if (init('action') == 'setFavorite') {
+        // Changement de favori
+        $result = frigate::setFavorite(init('eventId'), init('isFav'));
         ajax::success($result);
     }
 

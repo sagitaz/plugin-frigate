@@ -10,7 +10,7 @@
     "require": "4.3",
     "category": "security",
     "hasDependency": false,
-    "hasOwnDeamon": false,
+    "hasOwnDeamon": true,
     "maxDependancyInstallTime": 0,
     "changelog_beta": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
     "changelog": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",

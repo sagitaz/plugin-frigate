@@ -20,5 +20,7 @@ CREATE TABLE IF NOT EXISTS `frigate_events` (
     `score` int(11) NULL,
     `topScore` int(11) NULL,
     `zones` text DEFAULT NULL,
+    `type` text DEFAULT NULL,
+    `isFavorite` tinyint(1),
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;
