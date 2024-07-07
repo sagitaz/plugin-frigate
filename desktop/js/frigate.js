@@ -282,10 +282,26 @@ function printEqLogic(_eqLogic) {
                 intervalId = null;
             }
         }
+        function extractFrigatePart(url) {
+            // Définir l'expression régulière pour capturer la partie souhaitée de l'URL
+            const regex = /\/api\/([^\/]+)\/latest\.jpg/;
+
+            // Exécuter l'expression régulière sur l'URL
+            const match = url.match(regex);
+
+            // Si une correspondance est trouvée, retourner la partie capturée
+            if (match && match[1]) {
+                return match[1];
+            } else {
+                // Si aucune correspondance n'est trouvée, retourner null ou une valeur par défaut
+                return null;
+            }
+        }
 
         function refreshImage() {
             const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
-            const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
+            const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+            const name = extractFrigatePart(img);
             const imgElement = document.getElementById('imgFrigate');
 
             $.ajax({
@@ -294,7 +310,8 @@ function printEqLogic(_eqLogic) {
                 data: {
                     action: "refreshCameras",
                     img: img,
-                    name: name
+                    name: name,
+                    eqlogicId: eqlogicId
                 },
                 dataType: 'json',
                 error: function (request, status, error) {

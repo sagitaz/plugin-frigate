@@ -799,6 +799,12 @@ class frigate extends eqLogic
     }
     return $cmd;
   }
+  public static function createAndRefreshURLcmd($eqlogicId, $url) {
+    $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "GENERIC_INFO");
+    $cmd->save();
+    $cmd->event($url);
+    $cmd->save();
+  }
 
   public static function createMQTTcmds($eqlogicId)
   {
@@ -1101,6 +1107,7 @@ class frigate extends eqLogic
     if ($latest == 1) {
       $lien = $img;
       $path = "/data/" . $camera . "/latest.jpg";
+
     }
 
     // Vérifiez si le fichier existe déjà

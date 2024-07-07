@@ -50,7 +50,9 @@ try {
         // Raffraichi la visualisation
         $name = init('name');
         $img = init('img');
+        $eqlogicId = init('eqlogicId');
         $result = frigate::saveURL(null, null, $name, 0, 1, $img);
+        frigate::createAndRefreshURLcmd($eqlogicId, $result);
         ajax::success($result);
     }
 
