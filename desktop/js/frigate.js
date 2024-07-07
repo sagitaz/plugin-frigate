@@ -299,11 +299,9 @@ function printEqLogic(_eqLogic) {
         }
 
         function refreshImage() {
-
           	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
             const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
             const name = extractFrigatePart(img);
-
             const imgElement = document.getElementById('imgFrigate');
 
             $.ajax({
