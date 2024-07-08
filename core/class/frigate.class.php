@@ -56,7 +56,7 @@ class frigate extends eqLogic
     config::save('cron', '5', 'frigate');
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
-    config::save('topic', 'frigate', 'frigate');
+      config::save('topic', 'frigate', 'frigate');
     }
   }
   // configuration par defaut des crons
@@ -324,6 +324,22 @@ class frigate extends eqLogic
     return config::byKey('topic', 'frigate');
   }
 
+  private static function getUrlFrigate()
+  {
+    $url = config::byKey('URL', 'frigate');
+    if ($url == "") {
+      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      return;
+    }
+    $port = config::byKey('port', 'frigate');
+    if ($port == "") {
+      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      return;
+    }
+    $urlFrigate = $url . ":" . $port;
+    return $urlFrigate;
+  }
+
   public static function publish_camera_message(string $camera, string $subTopic, string $payload)
   {
     self::publish_message("{$camera}/{$subTopic}", $payload);
@@ -374,19 +390,9 @@ class frigate extends eqLogic
 
   public static function getStats()
   {
-    $url = config::byKey('URL', 'frigate');
-    if ($url == "") {
-      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-      return;
-    }
-    $port = config::byKey('port', 'frigate');
-    if ($port == "") {
-      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-      return;
-    }
 
-    $resultURL = $url . ":" . $port . "/api/stats";
-
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/stats/";
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
   }
@@ -443,17 +449,8 @@ class frigate extends eqLogic
   public static function getEvents($mqtt = false, $events = array(), $type = 'end')
   {
     if (!$mqtt) {
-      $url = config::byKey('URL', 'frigate');
-      if ($url == "") {
-        log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-        return;
-      }
-      $port = config::byKey('port', 'frigate');
-      if ($port == "") {
-        log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-        return;
-      }
-      $resultURL = $url . ":" . $port . "/api/events";
+      $urlfrigate = self::getUrlFrigate();
+      $resultURL = $urlfrigate . "/api/events";
       $events = self::getcURL("Events", $resultURL);
       // Traiter les evenements du plus ancien au plus recent
       $events = array_reverse($events);
@@ -623,18 +620,9 @@ class frigate extends eqLogic
       message::add('frigate', __("L'évènement est un favoris, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
       return "Error 01";
     }
-    $url = config::byKey('URL', 'frigate');
-    if ($url == "") {
-      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-      return "Error 02";
-    }
-    $port = config::byKey('port', 'frigate');
-    if ($port == "") {
-      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-      return "Error 03";
-    }
 
-    $resultURL = $url . ":" . $port . "/api/events/" . $id;
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/events/" . $id;
 
     if ($all) {
       self::deletecURL($resultURL);
@@ -694,21 +682,12 @@ class frigate extends eqLogic
 
   public static function generateEqCameras()
   {
-    $url = config::byKey('URL', 'frigate');
-    if ($url == "") {
-      $result = "URL";
-      return $result;
-    }
-    $port = config::byKey('port', 'frigate');
-    if ($port == "") {
-      $result = "PORT";
-      return $result;
-    }
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/stats";
 
     $exist = 0;
     $addToName = "";
     $create = 1;
-    $resultURL = $url . ":" . $port . "/api/stats";
     $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
@@ -1106,21 +1085,12 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-    $url = config::byKey('URL', 'frigate');
-    if ($url == "") {
-      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-      return;
-    }
-    $port = config::byKey('port', 'frigate');
-    if ($port == "") {
-      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-      return;
-    }
+    $urlfrigate = self::getUrlFrigate();
     $format = ($type == "snapshot") ? "jpg" : "mp4";
-    $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/" . $type . "." . $format;
+    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($thumbnail == 1) {
-      $lien = "http://" . $url . ":" . $port . "/api/events/" . $eventId . "/thumbnail.jpg";
+      $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/thumbnail.jpg";
       $path = "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
     }
     if ($latest == 1) {
@@ -1175,19 +1145,19 @@ class frigate extends eqLogic
   public static function postConfig_topic($value)
   {
     if (class_exists('mqtt2')) {
-    $deamon_info = self::deamon_info();
-    if ($deamon_info['state'] === 'ok') {
-      self::deamon_start();
+      $deamon_info = self::deamon_info();
+      if ($deamon_info['state'] === 'ok') {
+        self::deamon_start();
+      }
     }
-  }
   }
 
   public static function removeMQTTTopicRegistration()
   {
     $topic = self::getTopic();
     if (class_exists('mqtt2')) {
-    log::add(__CLASS__, 'info', "Arrêt de l'écoute du topic Frigate sur mqtt2:'{$topic}'");
-    mqtt2::removePluginTopic($topic);
+      log::add(__CLASS__, 'info', "Arrêt de l'écoute du topic Frigate sur mqtt2:'{$topic}'");
+      mqtt2::removePluginTopic($topic);
     }
   }
 
@@ -1210,8 +1180,8 @@ class frigate extends eqLogic
   public static function deamon_stop()
   {
     if (class_exists('mqtt2')) {
-    log::add(__CLASS__, 'info', __('Arrêt du démon Frigate', __FILE__));
-    mqtt2::removePluginTopic(config::byKey('frigate', 'frigate'));
+      log::add(__CLASS__, 'info', __('Arrêt du démon Frigate', __FILE__));
+      mqtt2::removePluginTopic(config::byKey('frigate', 'frigate'));
     }
   }
 
