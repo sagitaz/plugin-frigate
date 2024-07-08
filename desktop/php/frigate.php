@@ -37,7 +37,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <i class="fas fa-sync"></i>
                 <br>
                 <span>{{Redémarrer Frigate}}</span>
-            </div>            
+            </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
@@ -88,7 +88,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
-            <li role="presentation" class="eqFrigate"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
+            <li role="presentation" class="eqActions"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
         </ul>
         <div class="tab-content">
             <!-- Onglet de configuration de l'équipement -->
@@ -253,7 +253,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     </table>
                 </div>
             </div><!-- /.tabpanel #commandtab-->
-            <div role="tabpanel" class="tab-pane eqFrigate" id="actionsTab">
+            <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
                     <div class="alert alert-info">

@@ -214,16 +214,24 @@ function addOrRemoveClass(element, className, isAdd) {
 
 function printEqLogic(_eqLogic) {
     if (_eqLogic && _eqLogic.logicalId) {
-        if (_eqLogic.logicalId === "eqFrigateEvents" || _eqLogic.logicalId === "eqFrigateStats") {
+        if (_eqLogic.logicalId === "eqFrigateStats") {
             addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', true);
+        } else if (_eqLogic.logicalId === "eqFrigateEvents") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
         } else {
             addOrRemoveClass('eqFrigate', 'jeedisable', false);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
         }
     } else {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        addOrRemoveClass('eqActions', 'jeedisable', false);
     }
 
-    if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
+
+    if (_eqLogic.logicalId != "eqFrigateStats") {
+
         $('#div_action').empty()
         ACTIONS_LIST = []
         if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
@@ -247,6 +255,9 @@ function printEqLogic(_eqLogic) {
                 }
             })
         }
+    }
+
+    if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
 
         const imgElement = document.getElementById('imgFrigate');
         let intervalId;
@@ -299,7 +310,7 @@ function printEqLogic(_eqLogic) {
         }
 
         function refreshImage() {
-          	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
+            const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
             const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
             const name = extractFrigatePart(img);
             const imgElement = document.getElementById('imgFrigate');

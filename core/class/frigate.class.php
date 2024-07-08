@@ -224,19 +224,19 @@ class frigate extends eqLogic
 
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
-    
-    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
-    $name = $this->getConfiguration('name');
-    $bbox = $this->getConfiguration('bbox', 0);
-    $timestamp = $this->getConfiguration('timestamp', 1);
-    $zones = $this->getConfiguration('zones', 0);
-    $mask = $this->getConfiguration('mask', 0);
-    $motion = $this->getConfiguration('motion', 0);
-    $regions = $this->getConfiguration('regions', 0);
-    $quality = $this->getConfiguration('quality', 70);
 
-    $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
-    $this->setConfiguration('img', $img);
+    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
+      $name = $this->getConfiguration('name');
+      $bbox = $this->getConfiguration('bbox', 0);
+      $timestamp = $this->getConfiguration('timestamp', 1);
+      $zones = $this->getConfiguration('zones', 0);
+      $mask = $this->getConfiguration('mask', 0);
+      $motion = $this->getConfiguration('motion', 0);
+      $regions = $this->getConfiguration('regions', 0);
+      $quality = $this->getConfiguration('quality', 70);
+
+      $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
+      $this->setConfiguration('img', $img);
     }
   }
 
@@ -803,7 +803,8 @@ class frigate extends eqLogic
     }
     return $cmd;
   }
-  public static function createAndRefreshURLcmd($eqlogicId, $url) {
+  public static function createAndRefreshURLcmd($eqlogicId, $url)
+  {
     $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "GENERIC_INFO");
     $cmd->save();
     $cmd->event($url);
@@ -844,7 +845,7 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
     $cmd->save();
   }
-  
+
   public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -865,6 +866,7 @@ class frigate extends eqLogic
   public static function majEventsCmds($event)
   {
     $eqlogicIds = [];
+    $cameraActionsExist = false;
     // Maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (is_object($frigate)) {
@@ -875,9 +877,16 @@ class frigate extends eqLogic
     $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
     if (is_object($eqCamera)) {
       $eqlogicIds[] = $eqCamera->getId();
-      self::executeActionNewEvent($eqCamera->getId(), $event);
     }
 
+
+    $cameraActions = $eqCamera->getConfiguration('actions');
+    $cameraActionsExist = (empty($cameraActions));
+    if (!$cameraActionsExist) {
+      self::executeActionNewEvent($eqCamera->getId(), $event);
+    } else {
+      self::executeActionNewEvent($frigate->getId(), $event);
+    }
 
     foreach ($eqlogicIds as $eqlogicId) {
       // Creation des commandes infos
@@ -1111,7 +1120,6 @@ class frigate extends eqLogic
     if ($latest == 1) {
       $lien = $img;
       $path = "/data/" . $camera . "/latest.jpg";
-
     }
 
     // Vérifiez si le fichier existe déjà
