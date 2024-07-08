@@ -1209,8 +1209,10 @@ class frigate extends eqLogic
 
   public static function deamon_stop()
   {
+    if (class_exists('mqtt2')) {
     log::add(__CLASS__, 'info', __('Arrêt du démon Frigate', __FILE__));
     mqtt2::removePluginTopic(config::byKey('frigate', 'frigate'));
+    }
   }
 
   public static function deamon_info()
