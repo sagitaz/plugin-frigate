@@ -50,11 +50,14 @@ class frigate extends eqLogic
     // Configuration par défaut
     config::save('URL', '', 'frigate');
     config::save('port', '5000', 'frigate');
-    config::save('topic', 'frigate', 'frigate');
     config::save('recovery_days', '7', 'frigate');
     config::save('remove_days', '7', 'frigate');
     config::save('datas_weight', '500', 'frigate');
     config::save('cron', '5', 'frigate');
+    // seulement si mqtt2 est installé
+    if (class_exists('mqtt2')) {
+    config::save('topic', 'frigate', 'frigate');
+    }
   }
   // configuration par defaut des crons
   public static function setConfigCron()
@@ -1171,17 +1174,21 @@ class frigate extends eqLogic
 
   public static function postConfig_topic($value)
   {
+    if (class_exists('mqtt2')) {
     $deamon_info = self::deamon_info();
     if ($deamon_info['state'] === 'ok') {
       self::deamon_start();
     }
   }
+  }
 
   public static function removeMQTTTopicRegistration()
   {
     $topic = self::getTopic();
+    if (class_exists('mqtt2')) {
     log::add(__CLASS__, 'info', "Arrêt de l'écoute du topic Frigate sur mqtt2:'{$topic}'");
     mqtt2::removePluginTopic($topic);
+    }
   }
 
   public static function deamon_start()
