@@ -6,6 +6,12 @@ if (!isConnect('admin')) {
 $plugin = plugin::byId('frigate');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
+
+$url = config::byKey('URL', 'frigate');
+$port = config::byKey('port', 'frigate');
+$urlFrigate = "http://" . $url . ":" . $port;
+sendVarToJS('frigateURL', $urlFrigate);
+
 ?>
 <style type="text/css">
     .jeedisable {
@@ -37,6 +43,11 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <i class="fas fa-sync"></i>
                 <br>
                 <span>{{Redémarrer Frigate}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" id="gotoFrigate" title="disponible seulement depuis connexion interne">
+                <i class="fas fa-external-link-alt"></i>
+                <br>
+                <span>{{Serveur Frigate}}</span>
             </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>

@@ -196,6 +196,11 @@ document.getElementById('gotoHome').addEventListener('click', function () {
     window.location.reload(true);
 });
 
+document.getElementById('gotoFrigate').addEventListener('click', function () {
+
+    window.open(frigateURL, '_blank');
+});
+
 function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }

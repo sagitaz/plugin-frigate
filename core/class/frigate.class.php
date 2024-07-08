@@ -477,7 +477,10 @@ class frigate extends eqLogic
       return $event['start_time'] >= time() - $removeDays * 86400;
     });
     $filteredRemoveEvents = array_values($filteredRemoveEvents);
-    self::cleanDbEvents($filteredRemoveEvents);
+
+    if (!$mqtt) {
+      self::cleanDbEvents($filteredRemoveEvents);
+    }
 
 
     $filteredRecoveryEvents = array_filter($events, function ($event) use ($recoveryDays) {
