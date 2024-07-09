@@ -49,6 +49,11 @@ sendVarToJS('frigateURL', $urlFrigate);
                 <br>
                 <span>{{Serveur Frigate}}</span>
             </div>
+            <div class="cursor eqLogicAction info" id="bt_discord" title="{{Posez vos questions dans le salon dédié, support officiel}}.">
+                <i class="fab fa-discord"></i>
+                <br>
+                <span>{{aide Discord}}</span>
+            </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php

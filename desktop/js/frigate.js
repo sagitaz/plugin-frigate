@@ -206,8 +206,11 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 });
 
 document.getElementById('gotoFrigate').addEventListener('click', function () {
-
     window.open(frigateURL, '_blank');
+});
+
+document.getElementById('bt_discord').addEventListener('click', function () {
+    window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });
 
 function gotoCameraEvents(cameraName) {
