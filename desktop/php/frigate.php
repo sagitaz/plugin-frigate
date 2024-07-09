@@ -183,15 +183,15 @@ sendVarToJS('frigateURL', $urlFrigate);
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{motion}}</label>
+                                <label class="col-sm-4 control-label motion-configuration">{{motion}}</label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="motion">
+                                    <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{regions}}</label>
+                                <label class="col-sm-4 control-label regions-configuration">{{regions}}</label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="regions">
+                                    <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
                         </div>
