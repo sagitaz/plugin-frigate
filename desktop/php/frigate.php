@@ -272,22 +272,36 @@ sendVarToJS('frigateURL', $urlFrigate);
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">{{Ne rien faire si}}</label>
+                        <div class="col-sm-6">
+                            <div class="input-group">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
+                                <span class="input-group-btn">
+                                    <a class="btn listCmdInfo btn-default roundedRight" data-atCaret="1"><i class="fa fa-list-alt"></i></a>
+                                </span>
+                            </div>
+                        </div>
+                    </div>
+                    <br>
+                    <br>
                     <div class="alert alert-info">
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
                         #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#, #type#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
-                    <form class="form-horizontal">
-                        <fieldset>
-                            <div id="div_action" class="col-xs-12" style="padding:10px;margin-bottom:15px;">
-                            </div>
-                        </fieldset>
-                    </form>
-                </div>
-            </div><!-- /.tabpanel  #actiontab-->
+                <form class="form-horizontal">
+                    <fieldset>
+                        <div id="div_action" class="col-xs-12" style="padding:10px;margin-bottom:15px;">
+                        </div>
+                    </fieldset>
+                </form>
+            </div>
+        </div><!-- /.tabpanel  #actiontab-->
 
-        </div><!-- /.tab-content -->
-    </div><!-- /.eqLogic -->
+
+    </div><!-- /.tab-content -->
+</div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->

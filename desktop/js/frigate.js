@@ -213,6 +213,13 @@ document.getElementById('bt_discord').addEventListener('click', function () {
     window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });
 
+$("#div_mainContainer").off('click', '.listCmdInfo').on('click', '.listCmdInfo', function () {
+    var el = $(this).closest('.input-group').find('input.form-control');
+    jeedom.cmd.getSelectModal({ cmd: { type: 'info' } }, function (result) {
+        el.value(result.human);
+    });
+});
+
 function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }
@@ -220,9 +227,9 @@ function gotoCameraEvents(cameraName) {
 function updateMotionVisibility() {
     const motionLabel = document.querySelector('.motion-configuration');
     if (document.querySelector('.motion-checkbox').checked) {
-      motionLabel.classList.add('motion-border');
+        motionLabel.classList.add('motion-border');
     } else {
-      motionLabel.classList.remove('motion-border');
+        motionLabel.classList.remove('motion-border');
     }
 }
 
@@ -240,7 +247,7 @@ document.querySelector('.regions-checkbox').addEventListener('change', updateReg
 
 updateMotionVisibility();
 updateRegionsVisibility();
-  
+
 function addOrRemoveClass(element, className, isAdd) {
     const tabs = document.getElementsByClassName(element);
     for (const tab of tabs) {

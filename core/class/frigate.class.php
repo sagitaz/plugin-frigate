@@ -1028,6 +1028,11 @@ class frigate extends eqLogic
     $time = date("H:i");
 
     $eqLogic = eqLogic::byId($eqLogicId);
+    // Vérifier si une condition est présente et ne pas effectué les actions si elle est vrai
+    if ($eqLogic->getConfiguration('conditionIf') != '' && jeedom::evaluateExpression($eqLogic->getConfiguration('conditionIf'))) {
+      	log::add(__CLASS__, 'info', $eqLogic->getHumanName() . ' les actions ne sont pas exècutées car ' . $eqLogic->getConfiguration('conditionIf') . ' est vrai.');
+		return;
+    }
     $actions = $eqLogic->getConfiguration('actions');
     foreach ($actions[0] as $action) {
       $id = str_replace("#", "", $action['cmd']);
