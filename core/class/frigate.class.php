@@ -329,15 +329,28 @@ class frigate extends eqLogic
     $url = config::byKey('URL', 'frigate');
     if ($url == "") {
       log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
-      return;
+      return false;
     }
     $port = config::byKey('port', 'frigate');
     if ($port == "") {
       log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
-      return;
+      return false;
     }
     $urlFrigate = $url . ":" . $port;
     return $urlFrigate;
+  }
+
+  public static function addMessages()
+  {
+    message::add('frigate', __("Merci d'avoir installé le plugin, pour toutes les demandes d'aide, veuillez contacter le support sur discord ou sur community.", __FILE__), null, null);
+    $system = system::getOsVersion();
+    if (version_compare($system, "11", "<")) {
+      message::add('frigate', __("Attention, vous utilisez la version ". $system." de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__), null, null);
+    } 
+    $jeedom = jeedom::version();
+    if (version_compare($jeedom, "4.4", "<")) {
+      message::add('frigate', __("Attention, vous utilisez la version ". $jeedom." de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__), null, null);
+    }
   }
 
   public static function publish_camera_message(string $camera, string $subTopic, string $payload)
@@ -392,7 +405,7 @@ class frigate extends eqLogic
   {
 
     $urlfrigate = self::getUrlFrigate();
-    $resultURL = $urlfrigate . "/api/stats/";
+    $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
   }
@@ -988,7 +1001,7 @@ class frigate extends eqLogic
     // Créez ou récupérez la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
-    if (str_replace('.', '', $version) < str_replace('.', '', $latestVersion)) {
+    if (version_compare($version , $latestVersion , "<")) {
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
     }
     $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");

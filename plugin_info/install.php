@@ -31,6 +31,7 @@ function frigate_install()
     frigate::generateEqStats();
     frigate::setConfig();
     frigate::setConfigCron();
+    frigate::addMessages();
     Log::add("frigate", 'info', 'Finish Install');
 }
 
@@ -63,6 +64,7 @@ function frigate_update()
     frigate::generateEqEvents();
     frigate::setCmdsCron();
     frigate::generateEqStats();
+    frigate::addMessages();
     Log::add("frigate", 'info', 'Finish Update');
 }
 
