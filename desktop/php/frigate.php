@@ -206,6 +206,9 @@ sendVarToJS('frigateURL', $urlFrigate);
                                 <?php
 
                                 $name = '';
+                                $conditionIf = '';
+                                $evaluateExpression = '';
+
                                 try {
                                     if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                         $eqLogicId = intval($_GET['id']);
@@ -215,6 +218,10 @@ sendVarToJS('frigateURL', $urlFrigate);
                                             $configuration = $equipment->getConfiguration();
                                             if (isset($configuration['name'])) {
                                                 $name = $configuration['name'];
+                                            }
+                                            if (isset($configuration['conditionIf'])) {
+                                                $conditionIf = $configuration['conditionIf'];
+                                                $evaluateExpression = jeedom::evaluateExpression($conditionIf);
                                             }
                                         }
                                     }
@@ -250,6 +257,7 @@ sendVarToJS('frigateURL', $urlFrigate);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
+                <a class="btn btn-primary btn-sm pull-right cmdAction" data-action="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
                 <a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
                 <br><br>
                 <div class="table-responsive">
@@ -282,6 +290,8 @@ sendVarToJS('frigateURL', $urlFrigate);
                                 </span>
                             </div>
                         </div>
+                        <label class="col-sm-1 control-label">{{Etat actuel : }}</label>
+                        <label class="col-sm-2 control-label"><?= $evaluateExpression ?></label>
                     </div>
                     <br>
                     <br>
@@ -290,18 +300,18 @@ sendVarToJS('frigateURL', $urlFrigate);
                         #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#, #type#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
-                <form class="form-horizontal">
-                    <fieldset>
-                        <div id="div_action" class="col-xs-12" style="padding:10px;margin-bottom:15px;">
-                        </div>
-                    </fieldset>
-                </form>
-            </div>
-        </div><!-- /.tabpanel  #actiontab-->
+                    <form class="form-horizontal">
+                        <fieldset>
+                            <div id="div_action" class="col-xs-12" style="padding:10px;margin-bottom:15px;">
+                            </div>
+                        </fieldset>
+                    </form>
+                </div>
+            </div><!-- /.tabpanel  #actiontab-->
 
 
-    </div><!-- /.tab-content -->
-</div><!-- /.eqLogic -->
+        </div><!-- /.tab-content -->
+    </div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->

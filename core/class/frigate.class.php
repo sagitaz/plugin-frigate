@@ -844,6 +844,27 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  public static function createPTZcmds($eqlogicId)
+  {
+    // commande action
+    $cmd = self::createCmd($eqlogicId, "PTZ move left", "other", "", "action_ptz_left", "CAMERA_LEFT", 1, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ move right", "other", "", "action_ptz_right", "CAMERA_RIGHT", 1, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ move up", "other", "", "action_ptz_up", "CAMERA_UP", 0, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ move down", "other", "", "action_ptz_down", "CAMERA_DOWN", 1, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ move stop", "other", "", "action_ptz_stop", "CAMERA_STOP", 1, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ zoom in", "other", "", "action_ptz_zoom_in", "CAMERA_ZOOM", 0, "", 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "PTZ zoom out", "other", "", "action_ptz_zoom_out", "CAMERA_DEZOOM", 0, "", 0, "action");
+    $cmd->save();
+
+    return true;
+  }
+
   public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -1435,6 +1456,34 @@ class frigateCmd extends cmd
       } else {
         frigate::publish_camera_message($camera, 'snapshots/set', 'ON');
       }
+    }
+    // PTZ MOVE LEFT
+    else if ($this->getLogicalId() == 'action_ptz_left') {
+      frigate::publish_camera_message($camera, 'ptz', 'MOVE_LEFT');
+    }
+    // PTZ MOVE RIGHT
+    else if ($this->getLogicalId() == 'action_ptz_right') {
+      frigate::publish_camera_message($camera, 'ptz', 'MOVE_RIGHT');
+    }
+    // PTZ MOVE UP
+    else if ($this->getLogicalId() == 'action_ptz_up') {
+      frigate::publish_camera_message($camera, 'ptz', 'MOVE_UP');
+    }
+    // PTZ MOVE DOWN
+    else if ($this->getLogicalId() == 'action_ptz_down') {
+      frigate::publish_camera_message($camera, 'ptz', 'MOVE_DOWN');
+    }
+    // PTZ MOVE STOP
+    else if ($this->getLogicalId() == 'action_ptz_stop') {
+      frigate::publish_camera_message($camera, 'ptz', 'STOP');
+    }
+    // PTZ ZOOM IN
+    else if ($this->getLogicalId() == 'action_ptz_zoom_in') {
+      frigate::publish_camera_message($camera, 'ptz', 'ZOOM_IN');
+    }
+    // PTZ ZOOM OUT
+    else if ($this->getLogicalId() == 'action_ptz_zoom_out') {
+      frigate::publish_camera_message($camera, 'ptz', 'ZOOM_OUT');
     }
   }
 

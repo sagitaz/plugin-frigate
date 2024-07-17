@@ -457,3 +457,29 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
         }
     })
 });
+
+
+
+document.getElementById('add-ptz').addEventListener('click', function () {
+
+    const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "addPTZ",
+            eqlogicId: eqlogicId
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            $('#div_alert').showAlert({
+                message: '{{Les commandes PTZ sont ajoutées à l\'équipement.}}',
+                level: 'info'
+            });
+        }
+    })
+});

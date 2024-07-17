@@ -62,6 +62,12 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'addPTZ') {
+        // Ajout d'un PTZ
+        $result = frigate::createPTZcmds(init('eqlogicId'));
+        ajax::success($result);
+    }
+
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {
