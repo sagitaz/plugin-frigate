@@ -458,8 +458,6 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
     })
 });
 
-
-
 document.getElementById('add-ptz').addEventListener('click', function () {
 
     const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
@@ -482,4 +480,5 @@ document.getElementById('add-ptz').addEventListener('click', function () {
             });
         }
     })
+    window.location.reload(true);
 });

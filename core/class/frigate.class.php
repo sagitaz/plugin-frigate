@@ -1044,8 +1044,10 @@ class frigate extends eqLogic
     $topScore = $event->getTopScore();
     $clip = $urlJeedom . $event->getClip();
     $snapshot = $urlJeedom . $event->getSnapshot();
+    $thumbnail = $urlJeedom . $event->getThumbnail();
     $clipPath = "/var/www/html" . $event->getClip();
     $snapshotPath = "/var/www/html" . $event->getSnapshot();
+    $thumbnailPath = "/var/www/html" . $event->getThumbnail();
     $camera = $event->getCamera();
     $label = $event->getLabel();
     $zones = $event->getZones();
@@ -1077,8 +1079,8 @@ class frigate extends eqLogic
       $enable = $action['options']['enable'];
       if ($enable) {
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#label#', '#start#', '#end#', '#duree#', '#type#'],
-          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $label, $start, $end, $duree, $type],
+          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#','#thumbnail#', '#thumbnail_path#' ,'#label#', '#start#', '#end#', '#duree#', '#type#'],
+          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type],
           $options
         );
 

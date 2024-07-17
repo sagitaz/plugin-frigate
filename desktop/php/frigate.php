@@ -257,7 +257,7 @@ sendVarToJS('frigateURL', $urlFrigate);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
-                <a class="btn btn-primary btn-sm pull-right cmdAction" data-action="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
                 <a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
                 <br><br>
                 <div class="table-responsive">
@@ -297,7 +297,7 @@ sendVarToJS('frigateURL', $urlFrigate);
                     <br>
                     <div class="alert alert-info">
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#, #type#
+                        #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #label#, #start#, #end#, #duree#, #type#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">
