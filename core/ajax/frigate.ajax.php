@@ -1,138 +1,94 @@
 <?php
-/* This file is part of Jeedom.
- *
- * Jeedom is free software: you can redistribute it and/or modify
- * it under the terms of the GNU General Public License as published by
- * the Free Software Foundation, either version 3 of the License, or
- * (at your option) any later version.
- *
- * Jeedom is distributed in the hope that it will be useful,
- * but WITHOUT ANY WARRANTY; without even the implied warranty of
- * MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
- * GNU General Public License for more details.
- *
- * You should have received a copy of the GNU General Public License
- * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
- */
-
-try {
-    require_once dirname(__FILE__) . '/../../../../core/php/core.inc.php';
-    include_file('core', 'authentification', 'php');
-
-    if (!isConnect('admin')) {
-        throw new Exception(__('401 - Accès non autorisé', __FILE__));
-    }
-
-    /* Fonction permettant l'envoi de l'entête 'Content-Type: application/json'
-    En V3 : indiquer l'argument 'true' pour contrôler le token d'accès Jeedom
-    En V4 : autoriser l'exécution d'une méthode 'action' en GET en indiquant le(s) nom(s) de(s) action(s) dans un tableau en argument
-  */
-    ajax::init();
-
-    if (init('action') == 'deleteEvent') {
-        // Suppression d'un event
-        $result = frigate::deleteEvent(init('eventId'), true);
-        ajax::success($result);
-    }
-    if (init('action') == 'searchAndCreate') {
-        // Recherche et creation de cameras
-        $result = frigate::generateEqCameras();
-        ajax::success($result);
-    }
-
-    if (init('action') == 'restartFrigate') {
-        // Redémarrage Frigate
-        frigate::restartFrigate();
-        ajax::success();
-    }
-
-    if (init('action') == 'refreshCameras') {
-        // Raffraichi la visualisation
-        $name = init('name');
-        $img = init('img');
-        $eqlogicId = init('eqlogicId');
-        $who = init('who');
-        $result = frigate::saveURL(null, null, $name, 0, 1, $img);
-        if ($who != "dashboard") {
-            frigate::createAndRefreshURLcmd($eqlogicId, $result);
-        }
-        ajax::success($result);
-    }
-
-    if (init('action') == 'setFavorite') {
-        // Changement de favori
-        $result = frigate::setFavorite(init('eventId'), init('isFav'));
-        ajax::success($result);
-    }
-
-    if (init('action') == 'addPTZ') {
-        // Ajout d'un PTZ
-        $result = frigate::createPTZcmds(init('eqlogicId'));
-        ajax::success($result);
-    }
-
-    if (init('action') == 'stream') {
-        // Récupère l'objet caméra à partir de son ID
-        $camera = frigate::byId(init('id'));
-
-        // Vérifie si la caméra existe
-        if (!is_object($camera)) {
-            throw new \Exception(__('Impossible de trouver la camera : ', __FILE__) . init('id'));
-        }
-
-        // Détermine le script à utiliser en fonction de la configuration de la caméra
-        $rtspScript = dirname(__FILE__) . '/../../3rdparty/rtsp-to-hls.sh';
-
-        // Vérifie si le processus RTSP-to-HLS n'est pas déjà en cours pour cette caméra
-        if (count(system::ps('rtsp-to-hls.sh.*' . $camera->getConfiguration('localApiKey'))) == 0) {
-            // Récupère les PID des processus FFmpeg en cours liés à cette caméra
-            $pids = shell_exec('(ps ax || ps w) | grep ffmpeg.*' . $camera->getConfiguration('localApiKey') . ' | grep -v grep | awk \'{print $1}\'');
-
-            // Si des PID sont trouvés, les tuer
-            if (!empty($pids)) {
-                $pids = explode("\n", trim($pids));
-                foreach ($pids as $pid) {
-                    if (is_numeric($pid)) {
-                        shell_exec('sudo kill -9 ' . $pid);
-                    }
-                }
-            }
-
-            // Crée le répertoire pour les segments HLS si nécessaire
-            if (!file_exists(dirname(__FILE__) . '/../../data/segments')) {
-                mkdir(dirname(__FILE__) . '/../../data/segments', 0777, true);
-            }
-
-            $rtspFlux = "rtsp://admin:noah2009W*@192.168.2.36:554/1";
-
-            // Exécute le script RTSP-to-HLS en arrière-plan
-            exec('nohup ' . $rtspScript . ' ' . $rtspFlux . ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');
-
-            // Attendre jusqu'à 30 secondes que le fichier M3U8 soit généré
-            $i = 0;
-            while (!file_exists(__DIR__ . '/../../data/' . $camera->getConfiguration('localApiKey') . '.m3u8')) {
-                sleep(1);
-                $i++;
-                if ($i > 30) {
-                    break;
-                }
-            }
-        }
-
-        // Met à jour le cache de la caméra avec le dernier appel de flux
-        $camera->setCache('lastStreamCall', strtotime('now'));
-
-        // Supprime les anciens segments HLS (fichiers .ts) de plus de 5 minutes
-        shell_exec(system::getCmdSudo() . ' find ' . __DIR__ . '/../../data/segments/' .
-            $camera->getConfiguration('localApiKey') . '-*.ts -mmin +5 -type f -exec rm -f {} \; 2>&1 > /dev/null');
-
-        // Retourne une réponse de succès
-        ajax::success();
-    }
-
-
-    throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
-    /*     * *********Catch exeption*************** */
-} catch (Exception $e) {
-    ajax::error(displayException($e), $e->getCode());
+# Vérifie le paramètre url et empêche le transfert de fichier
+if (isset($_GET['url']) and preg_match('#^https?://#', $_GET['url']) === 1) {
+    $url = $_GET['url'];
+    error_log('URL récupérée: ' . $url); // Débogage
+} else {
+    error_log('URL non valide ou non fournie');
+    header('HTTP/1.1 404 Not Found');
+    exit;
 }
+
+# Vérifie si le client a déjà l'élément demandé
+if (isset($_SERVER['HTTP_IF_MODIFIED_SINCE']) or isset($_SERVER['HTTP_IF_NONE_MATCH'])) {
+    header('HTTP/1.1 304 Not Modified');
+    exit;
+}
+
+$ch = curl_init();
+curl_setopt($ch, CURLOPT_URL, $url);
+curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+curl_setopt($ch, CURLOPT_HEADER, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+curl_setopt($ch, CURLOPT_BUFFERSIZE, 12800);
+curl_setopt($ch, CURLOPT_NOPROGRESS, false);
+curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, function ($DownloadSize, $Downloaded, $UploadSize, $Uploaded) {
+    return ($Downloaded > 1024 * 4096) ? 1 : 0;
+}); # max 4096kb
+$response = curl_exec($ch);
+
+if (curl_errno($ch)) {
+    error_log('Erreur cURL: ' . curl_error($ch));
+    header('HTTP/1.1 404 Not Found');
+    exit;
+}
+
+$http_code = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+if ($http_code != 200) {
+    error_log('HTTP Code non 200: ' . $http_code);
+    header('HTTP/1.1 404 Not Found');
+    exit;
+}
+
+$header_size = curl_getinfo($ch, CURLINFO_HEADER_SIZE);
+curl_close($ch);
+
+$header_blocks = array_filter(preg_split('#\n\s*\n#Uis', substr($response, 0, $header_size)));
+
+if (isset($header_blocks[array_key_last($header_blocks)])) {
+    $header_array = explode("\n", $header_blocks[array_key_last($header_blocks)]);
+} else {
+    error_log('Pas de headers trouvés');
+    header('HTTP/1.1 404 Not Found');
+    exit;
+}
+
+$body = substr($response, $header_size);
+
+$headers = [];
+foreach ($header_array as $header_value) {
+    $header_pieces = explode(': ', $header_value);
+    if (count($header_pieces) == 2) {
+        $headers[strtolower($header_pieces[0])] = trim($header_pieces[1]);
+    }
+}
+
+if (array_key_exists('content-type', $headers)) {
+    $ct = $headers['content-type'];
+    if (preg_match('#image/png|image/.*icon|image/jpe?g|image/gif|image/webp#', strtolower($ct)) !== 1) {
+        error_log('Type de contenu non autorisé: ' . $ct);
+        header('HTTP/1.1 404 Not Found');
+        exit;
+    }
+    header('Content-Type: ' . $ct);
+} else {
+    error_log('Type de contenu non trouvé');
+    header('HTTP/1.1 404 Not Found');
+    exit;
+}
+
+if (array_key_exists('content-length', $headers)) {
+    header('Content-Length: ' . $headers['content-length']);
+}
+if (array_key_exists('expires', $headers)) {
+    header('Expires: ' . $headers['expires']);
+}
+if (array_key_exists('cache-control', $headers)) {
+    header('Cache-Control: ' . $headers['cache-control']);
+}
+if (array_key_exists('last-modified', $headers)) {
+    header('Last-Modified: ' . $headers['last-modified']);
+}
+echo $body;
+exit;

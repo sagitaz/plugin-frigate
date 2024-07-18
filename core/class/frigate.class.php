@@ -231,7 +231,7 @@ class frigate extends eqLogic
     if ($this->getConfiguration('localApiKey') == '') {
       $this->setConfiguration('localApiKey', config::genKey());
     }
-    
+
     if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
       $name = $this->getConfiguration('name');
       $bbox = $this->getConfiguration('bbox', 0);
@@ -242,7 +242,7 @@ class frigate extends eqLogic
       $regions = $this->getConfiguration('regions', 0);
       $quality = $this->getConfiguration('quality', 70);
 
-      $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?bbox=" . $bbox . "&timestamp=" . $timestamp . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
+      $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
       $this->setConfiguration('img', $img);
     }
   }
@@ -333,19 +333,9 @@ class frigate extends eqLogic
       }
       $version = jeedom::versionAlias($_version);
 
-
       $replace['#cameraEqlogicId#'] = $this->getLogicalId();
       $replace['#cameraName#'] = $this->getConfiguration("name");
       $replace['#imgUrl#'] = $this->getConfiguration("img");
-      $replace['#snap#'] = '';
-      if (is_object($this->getCmd('info', 'info_url'))) {
-        $cmd = $this->getCmd('info', 'info_url');
-        $value = $cmd->execCmd();
-        if (($cmd->getIsVisible() == 1) && ($value != null)) {
-          $replace['#snap#'] = '<img id="imgFrigate_' . $logicalId . '" class="img-responsive" src="" />';
-        }
-      }
-
 
       $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widgetCamera', 'frigate')));
       cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);

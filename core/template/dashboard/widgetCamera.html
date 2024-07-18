@@ -6,20 +6,22 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     </center>
 
-    <img id="imgFrigate" class="img-responsive" src="" />
+    <img id="imgFrigate#id#" class="img-responsive" src="" />
 
     <script>
-        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=http://192.168.2.20:5000/api/frigate1/latest.jpg";
-        console.log('Image Source URL: ' + imgSrc);
-        let imgElement = document.getElementById('imgFrigate');
+        if (typeof window.imgSrc === 'undefined') {
+            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
+            console.log('Image Source URL: ' + imgSrc.replace(/&amp;/g, '&'));
+            let imgElement = document.getElementById('imgFrigate' + #id#);
 
-        function refreshImage() {
-            let newSrc = imgSrc + "&t=" + new Date().getTime();
-            console.log('Refreshing image with URL: ' + newSrc);
-            imgElement.src = newSrc;
+            function refreshImage() {
+                let newSrc = imgSrc.replace(/&amp;/g, '&') + "&t=" + new Date().getTime();
+                console.log('Refreshing image with URL: ' + newSrc);
+                imgElement.src = newSrc;
+            }
+
+            setInterval(refreshImage, 2000); // Refresh every 20 seconds
+            refreshImage(); // Initial call to display the image immediately
         }
-
-        setInterval(refreshImage, 10000); // Refresh every 20 seconds
-        refreshImage(); // Initial call to display the image immediately
     </script>
 </div>
