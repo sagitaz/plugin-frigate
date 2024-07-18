@@ -85,8 +85,18 @@ try {
 
         // Vérifie si le processus RTSP-to-HLS n'est pas déjà en cours pour cette caméra
         if (count(system::ps('rtsp-to-hls.sh.*' . $camera->getConfiguration('localApiKey'))) == 0) {
-            // Arrête tout processus FFmpeg en cours lié à cette caméra
-            shell_exec('(ps ax || ps w) | grep ffmpeg.*' . $camera->getConfiguration('localApiKey') . ' | awk \'{print $2}\' |  xargs sudo kill -9');
+            // Récupère les PID des processus FFmpeg en cours liés à cette caméra
+            $pids = shell_exec('(ps ax || ps w) | grep ffmpeg.*' . $camera->getConfiguration('localApiKey') . ' | grep -v grep | awk \'{print $1}\'');
+
+            // Si des PID sont trouvés, les tuer
+            if (!empty($pids)) {
+                $pids = explode("\n", trim($pids));
+                foreach ($pids as $pid) {
+                    if (is_numeric($pid)) {
+                        shell_exec('sudo kill -9 ' . $pid);
+                    }
+                }
+            }
 
             // Crée le répertoire pour les segments HLS si nécessaire
             if (!file_exists(dirname(__FILE__) . '/../../data/segments')) {
@@ -94,9 +104,9 @@ try {
             }
 
             $rtspFlux = "rtsp://admin:noah2009W*@192.168.2.36:554/1";
+
             // Exécute le script RTSP-to-HLS en arrière-plan
-            exec('nohup ' . $rtspScript . $rtspFlux .
-                ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');
+            exec('nohup ' . $rtspScript . ' ' . $rtspFlux . ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');
 
             // Attendre jusqu'à 30 secondes que le fichier M3U8 soit généré
             $i = 0;
@@ -114,11 +124,12 @@ try {
 
         // Supprime les anciens segments HLS (fichiers .ts) de plus de 5 minutes
         shell_exec(system::getCmdSudo() . ' find ' . __DIR__ . '/../../data/segments/' .
-        $camera->getConfiguration('localApiKey') . '-*.ts -mmin +5 -type f -exec rm -f {} \; 2>&1 > /dev/null');
+            $camera->getConfiguration('localApiKey') . '-*.ts -mmin +5 -type f -exec rm -f {} \; 2>&1 > /dev/null');
 
         // Retourne une réponse de succès
         ajax::success();
     }
+
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */

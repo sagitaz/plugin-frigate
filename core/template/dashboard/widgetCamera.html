@@ -1,58 +1,25 @@
-<script src="plugins/frigate/core/template/dashboard/hls-1.5.13.light.min.js"></script>
-<div class="eqLogic eqLogic-widget  allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
+<div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
     style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;width: #width#;height: #height#;#style#;">
-
-
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     </center>
 
-    <video id="video-player#id#" data-eqLogic_id="#id#"  controls width="640" height="360"></video>
+    <img id="imgFrigate" class="img-responsive" src="" />
 
     <script>
-        $.ajax({
-            type: "POST",
-            url: "plugins/camera/core/ajax/camera.ajax.php",
-            data: {
-                action: "stream",
-                id: "#id#"
-            },
-            global: false,
-            dataType: 'json',
-            error: function (request, status, error) {
-                handleAjaxError(request, status, error);
-            },
-            success: function (data) {
-                if (data.state != 'ok') {
-                    $('#div_alert').showAlert({ message: data.result, level: 'danger' });
-                    return;
-                }
-                try {
-                    if ('#cmd_off_id#' != '""' && '#cmd_on_id#' != '""') {
-                        $('.cmd[data-cmd_id=#cmd_off_id#]').show();
-                        $('.cmd[data-cmd_id=#cmd_on_id#]').hide();
-                    }
-                    var video#id# = document.getElementById('video-player#id#');
-                    if (Hls.isSupported()) {
-                        var video = document.getElementById('video');
-                        var hls = new Hls();
-                        hls.loadSource('/path/to/output.m3u8');
-                        hls.attachMedia(video);
-                        hls.on(Hls.Events.MANIFEST_PARSED, function () {
-                            video.play();
-                        });
-                    } else if (video.canPlayType('application/vnd.apple.mpegurl')) {
-                        video.src = '/path/to/output.m3u8';
-                        video.addEventListener('canplay', function () {
-                            video.play();
-                        });
-                    }
-                } catch (e) {
+        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=http://192.168.2.20:5000/api/frigate1/latest.jpg";
+        console.log('Image Source URL: ' + imgSrc);
+        let imgElement = document.getElementById('imgFrigate');
 
-                }
-            }
-        });
+        function refreshImage() {
+            let newSrc = imgSrc + "&t=" + new Date().getTime();
+            console.log('Refreshing image with URL: ' + newSrc);
+            imgElement.src = newSrc;
+        }
+
+        setInterval(refreshImage, 10000); // Refresh every 20 seconds
+        refreshImage(); // Initial call to display the image immediately
     </script>
 </div>
