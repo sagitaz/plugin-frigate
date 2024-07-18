@@ -313,10 +313,44 @@ class frigate extends eqLogic
   }
   */
 
-  /*
-  * Permet de modifier l'affichage du widget (également utilisable par les commandes)
-  public function toHtml($_version = 'dashboard') {}
-  */
+
+  // Permet de modifier l'affichage du widget (également utilisable par les commandes)
+  public function toHtml($_version = 'dashboard')
+  {
+    $logicalId = $this->getLogicalId();
+    if (strpos($logicalId, "eqFrigateCamera_") !== false) {
+      $type = "camera";
+    }
+
+    if ($type == 'camera') {
+      $replace = $this->preToHtml($_version);
+      if (!is_array($replace)) {
+        return $replace;
+      }
+      $version = jeedom::versionAlias($_version);
+
+
+      $replace['#cameraEqlogicId#'] = $this->getLogicalId();
+      $replace['#cameraName#'] = $this->getConfiguration("name");
+      $replace['#imgUrl#'] = $this->getConfiguration("img");
+      $replace['#snap#'] = '';
+      if (is_object($this->getCmd('info', 'info_url'))) {
+        $cmd = $this->getCmd('info', 'info_url');
+        $value = $cmd->execCmd();
+        if (($cmd->getIsVisible() == 1) && ($value != null)) {
+          $replace['#snap#'] = '<img id="imgFrigate_' . $logicalId . '" class="img-responsive" src="" />';
+        }
+      }
+
+
+      $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widgetCamera', 'frigate')));
+      cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
+      return $html;
+    } else {
+      return parent::toHtml($_version);
+    }
+  }
+
 
   /*     * **********************Getteur Setteur*************************** */
   private static function getTopic()
@@ -345,11 +379,11 @@ class frigate extends eqLogic
     message::add('frigate', __("Merci d'avoir installé le plugin, pour toutes les demandes d'aide, veuillez contacter le support sur discord ou sur community.", __FILE__), null, null);
     $system = system::getOsVersion();
     if (version_compare($system, "11", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version ". $system." de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__), null, null);
-    } 
+      message::add('frigate', __("Attention, vous utilisez la version " . $system . " de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__), null, null);
+    }
     $jeedom = jeedom::version();
     if (version_compare($jeedom, "4.4", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version ". $jeedom." de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__), null, null);
+      message::add('frigate', __("Attention, vous utilisez la version " . $jeedom . " de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__), null, null);
     }
   }
 
@@ -1022,7 +1056,7 @@ class frigate extends eqLogic
     // Créez ou récupérez la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
-    if (version_compare($version , $latestVersion , "<")) {
+    if (version_compare($version, $latestVersion, "<")) {
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
     }
     $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
@@ -1066,8 +1100,8 @@ class frigate extends eqLogic
     $eqLogic = eqLogic::byId($eqLogicId);
     // Vérifier si une condition est présente et ne pas effectué les actions si elle est vrai
     if ($eqLogic->getConfiguration('conditionIf') != '' && jeedom::evaluateExpression($eqLogic->getConfiguration('conditionIf'))) {
-      	log::add(__CLASS__, 'info', $eqLogic->getHumanName() . ' les actions ne sont pas exècutées car ' . $eqLogic->getConfiguration('conditionIf') . ' est vrai.');
-		return;
+      log::add(__CLASS__, 'info', $eqLogic->getHumanName() . ' les actions ne sont pas exècutées car ' . $eqLogic->getConfiguration('conditionIf') . ' est vrai.');
+      return;
     }
     $actions = $eqLogic->getConfiguration('actions');
     foreach ($actions[0] as $action) {
@@ -1079,7 +1113,7 @@ class frigate extends eqLogic
       $enable = $action['options']['enable'];
       if ($enable) {
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#','#thumbnail#', '#thumbnail_path#' ,'#label#', '#start#', '#end#', '#duree#', '#type#'],
+          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#'],
           [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type],
           $options
         );

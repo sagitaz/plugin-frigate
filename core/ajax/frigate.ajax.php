@@ -51,8 +51,11 @@ try {
         $name = init('name');
         $img = init('img');
         $eqlogicId = init('eqlogicId');
+        $who = init('who');
         $result = frigate::saveURL(null, null, $name, 0, 1, $img);
-        frigate::createAndRefreshURLcmd($eqlogicId, $result);
+        if ($who != "dashboard") {
+            frigate::createAndRefreshURLcmd($eqlogicId, $result);
+        }
         ajax::success($result);
     }
 
