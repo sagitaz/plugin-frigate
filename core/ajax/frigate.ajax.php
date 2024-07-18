@@ -71,6 +71,55 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'stream') {
+        // Récupère l'objet caméra à partir de son ID
+        $camera = frigate::byId(init('id'));
+
+        // Vérifie si la caméra existe
+        if (!is_object($camera)) {
+            throw new \Exception(__('Impossible de trouver la camera : ', __FILE__) . init('id'));
+        }
+
+        // Détermine le script à utiliser en fonction de la configuration de la caméra
+        $rtspScript = dirname(__FILE__) . '/../../3rdparty/rtsp-to-hls.sh';
+
+        // Vérifie si le processus RTSP-to-HLS n'est pas déjà en cours pour cette caméra
+        if (count(system::ps('rtsp-to-hls.sh.*' . $camera->getConfiguration('localApiKey'))) == 0) {
+            // Arrête tout processus FFmpeg en cours lié à cette caméra
+            shell_exec('(ps ax || ps w) | grep ffmpeg.*' . $camera->getConfiguration('localApiKey') . ' | awk \'{print $2}\' |  xargs sudo kill -9');
+
+            // Crée le répertoire pour les segments HLS si nécessaire
+            if (!file_exists(dirname(__FILE__) . '/../../data/segments')) {
+                mkdir(dirname(__FILE__) . '/../../data/segments', 0777, true);
+            }
+
+            $rtspFlux = "rtsp://admin:noah2009W*@192.168.2.36:554/1";
+            // Exécute le script RTSP-to-HLS en arrière-plan
+            exec('nohup ' . $rtspScript . $rtspFlux .
+                ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');
+
+            // Attendre jusqu'à 30 secondes que le fichier M3U8 soit généré
+            $i = 0;
+            while (!file_exists(__DIR__ . '/../../data/' . $camera->getConfiguration('localApiKey') . '.m3u8')) {
+                sleep(1);
+                $i++;
+                if ($i > 30) {
+                    break;
+                }
+            }
+        }
+
+        // Met à jour le cache de la caméra avec le dernier appel de flux
+        $camera->setCache('lastStreamCall', strtotime('now'));
+
+        // Supprime les anciens segments HLS (fichiers .ts) de plus de 5 minutes
+        shell_exec(system::getCmdSudo() . ' find ' . __DIR__ . '/../../data/segments/' .
+        $camera->getConfiguration('localApiKey') . '-*.ts -mmin +5 -type f -exec rm -f {} \; 2>&1 > /dev/null');
+
+        // Retourne une réponse de succès
+        ajax::success();
+    }
+
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */
 } catch (Exception $e) {

@@ -228,6 +228,10 @@ class frigate extends eqLogic
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
 
+    if ($this->getConfiguration('localApiKey') == '') {
+      $this->setConfiguration('localApiKey', config::genKey());
+    }
+    
     if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
       $name = $this->getConfiguration('name');
       $bbox = $this->getConfiguration('bbox', 0);
