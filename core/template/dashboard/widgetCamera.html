@@ -7,6 +7,11 @@
     </center>
 
     <img id="imgFrigate#id#" class="img-responsive" src="" />
+    <br>
+    <div id="tabPrincipal">
+        #actions#
+
+    </div>
 
     <script>
         if (typeof window.imgSrc === 'undefined') {
@@ -14,14 +19,122 @@
             console.log('Image Source URL: ' + imgSrc.replace(/&amp;/g, '&'));
             let imgElement = document.getElementById('imgFrigate' + #id#);
 
+            let intervalId;
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1 // image considérée visible si au moins 10% est visible
+            };
+
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        startImageFetchInterval();
+                    } else {
+                        stopImageFetchInterval();
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+            observer.observe(imgElement);
+
+            function startImageFetchInterval() {
+                if (!intervalId) {
+                    intervalId = setInterval(refreshImage, 2000);
+                }
+            }
+
+            function stopImageFetchInterval() {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+
             function refreshImage() {
                 let newSrc = imgSrc.replace(/&amp;/g, '&') + "&t=" + new Date().getTime();
                 console.log('Refreshing image with URL: ' + newSrc);
                 imgElement.src = newSrc;
             }
 
-            setInterval(refreshImage, 2000); // Refresh every 20 seconds
-            refreshImage(); // Initial call to display the image immediately
+            // setInterval(refreshImage, 2000); // Refresh every 20 seconds
+            refreshImage(); // Initial call to display the image immediately            
+
+        }
+
+        function execAction(cmdid) {
+            jeedom.cmd.execute({
+                id: cmdid
+            })
         }
     </script>
+
+    <style>
+        :root {
+            --frigate-icone-color#id#: white;
+        }
+
+        /* CSS dedié a la page principale */
+        #tabPrincipal {
+            border-collapse: collapse;
+            width: 90%;
+            margin: auto;
+        }
+
+        .frigate_widget .lignePrincipal {
+            border-top: solid !important;
+            border-color: rgba(230, 230, 230, 0.1) !important;
+            border-width: 2px !important;
+        }
+
+        .frigate_widget .cellPrincipalIconRegen {
+            display: inline-flex;
+            text-align: left
+        }
+
+        .frigate_widget .cellPrincipalIconSynthese {
+            display: inline-flex;
+            text-align: left
+        }
+
+        .frigate_widget .cellPrincipalIconScreen {
+            display: inline-flex;
+            text-align: right;
+        }
+
+        .frigate_widget .cellPrincipalIconSound {
+            display: inline-flex;
+            text-align: right;
+        }
+
+        .frigate_widget .iconAction#id# {
+            padding: 15px;
+            font-size: 22px;
+            color: var(--txt-color) !important;
+        }
+
+        .frigate_widget .iconAction#id#:hover {
+            color: var(--frigate-icone-color#id#) !important;
+        }
+
+        .frigate_widget .iconActionOff#id# {
+            padding: 15px;
+            font-size: 22px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconActionOff#id#:hover {
+            color: var(--frigate-icone-color#id#) !important;
+        }
+
+        .frigate_widget .cellPrincipalText {
+            display: table-cell;
+            font-size: 13px !important;
+            text-align: center;
+            vertical-align: middle;
+            padding: 8px;
+        }
+    </style>
 </div>

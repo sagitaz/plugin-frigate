@@ -2,7 +2,7 @@
 # Vérifie le paramètre url et empêche le transfert de fichier
 if (isset($_GET['url']) and preg_match('#^https?://#', $_GET['url']) === 1) {
     $url = $_GET['url'];
-    error_log('URL récupérée: ' . $url); // Débogage
+   // error_log('URL : ' . $url); // Débogage
 } else {
     error_log('URL non valide ou non fournie');
     header('HTTP/1.1 404 Not Found');

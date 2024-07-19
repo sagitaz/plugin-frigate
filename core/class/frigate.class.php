@@ -337,6 +337,62 @@ class frigate extends eqLogic
       $replace['#cameraName#'] = $this->getConfiguration("name");
       $replace['#imgUrl#'] = $this->getConfiguration("img");
 
+
+      $replace['#actions#'] = '';
+      $replace['#actions#'] = $replace['#actions#'] . '<div class="lignePrincipal">';
+      // Commandes recording
+      if (is_object($this->getCmd('action', 'action_start_recordings')) && is_object($this->getCmd('action', 'action_stop_recordings'))) {
+        $on = $this->getCmd("action", 'action_start_recordings');
+        $off = $this->getCmd("action", 'action_stop_recordings');
+        $etat = $this->getCmd("info", 'info_recordings');
+        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
+          if ($etat->execCmd() == 0) {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconActionOff' . $this->getId() . '" title="recording ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          } else {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconAction' . $this->getId() . '" title="recording OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          }
+        }
+      }
+      // Commandes snapshot
+      if (is_object($this->getCmd('action', 'action_start_snapshots')) && is_object($this->getCmd('action', 'action_stop_snapshots'))) {
+        $on = $this->getCmd("action", 'action_start_snapshots');
+        $off = $this->getCmd("action", 'action_stop_snapshots');
+        $etat = $this->getCmd("info", 'info_snapshots');
+        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
+          if ($etat->execCmd() == 0) {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="snapshot ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          } else {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconAction' . $this->getId() . '" title="snapshot OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          }
+        }
+      }
+      // commandes détections
+      if (is_object($this->getCmd('action', 'action_start_detect')) && is_object($this->getCmd('action', 'action_stop_detect'))) {
+        $on = $this->getCmd("action", 'action_start_detect');
+        $off = $this->getCmd("action", 'action_stop_detect');
+        $etat = $this->getCmd("info", 'info_detect');
+        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
+          if ($etat->execCmd() == 0) {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-bell iconActionOff' . $this->getId() . '" title="detection ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          } else {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-bell iconAction' . $this->getId() . '" title="detection OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          }
+        }
+      }
+      $replace['#actions#'] = $replace['#actions#'] . '</div>';
+
       $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widgetCamera', 'frigate')));
       cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
       return $html;
@@ -1317,6 +1373,7 @@ class frigate extends eqLogic
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
                   $infoCmd->event($value);
                   $infoCmd->save();
+                  $eqCamera->refreshWidget();
                   break;
                 case 'improve_constrast':
                   // A venir
@@ -1334,12 +1391,14 @@ class frigate extends eqLogic
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
                   $infoCmd->event($value);
                   $infoCmd->save();
+                  $eqCamera->refreshWidget();
                   break;
                 case 'snapshots':
                   $infoCmd = self::createCmd($eqCamera->getId(), $innerKey . " Etat", "binary", "", "info_" . $innerKey, "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
                   $infoCmd->event($value);
                   $infoCmd->save();
+                  $eqCamera->refreshWidget();
                   break;
                 default:
                   break;
