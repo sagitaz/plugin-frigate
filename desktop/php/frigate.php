@@ -12,6 +12,8 @@ $port = config::byKey('port', 'frigate');
 $urlFrigate = "http://" . $url . ":" . $port;
 sendVarToJS('frigateURL', $urlFrigate);
 
+$refresh = config::byKey('refresh_snapshot', 'frigate');
+sendVarToJS('refresh', $refresh);
 ?>
 <style type="text/css">
     .jeedisable {
