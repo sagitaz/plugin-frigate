@@ -333,8 +333,9 @@ function printEqLogic(_eqLogic) {
         observer.observe(imgElement);
 
         function startImageFetchInterval() {
+            const refresh = $('.configKey[data-l1key=refresh_snapshot]').value(result.value);
             if (!intervalId) {
-                intervalId = setInterval(refreshImage, 2000);
+                intervalId = setInterval(refreshImage, refresh);
             }
         }
 

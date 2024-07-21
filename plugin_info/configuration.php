@@ -85,5 +85,13 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500MB par défaut" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Durée de raffaichissement}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Snapshot refresh (en sc)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5sc par défaut" />
+            </div>
+        </div>
     </fieldset>
 </form>

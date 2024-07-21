@@ -53,6 +53,7 @@ class frigate extends eqLogic
     config::save('recovery_days', '7', 'frigate');
     config::save('remove_days', '7', 'frigate');
     config::save('datas_weight', '500', 'frigate');
+    config::save('refresh_snapshot', '5', 'frigate');
     config::save('cron', '5', 'frigate');
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
