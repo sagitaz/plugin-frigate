@@ -306,6 +306,10 @@ function printEqLogic(_eqLogic) {
 
     if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
 
+
+
+        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
+        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + img;
         const imgElement = document.getElementById('imgFrigate');
         let intervalId;
 
@@ -330,7 +334,7 @@ function printEqLogic(_eqLogic) {
 
         function startImageFetchInterval() {
             if (!intervalId) {
-                intervalId = setInterval(refreshImage, 10000);
+                intervalId = setInterval(refreshImage, 2000);
             }
         }
 
@@ -355,8 +359,12 @@ function printEqLogic(_eqLogic) {
                 return null;
             }
         }
-
         function refreshImage() {
+            let newSrc = imgSrc + "&t=" + new Date().getTime();
+            console.log('Refreshing image with URL: ' + newSrc);
+            imgElement.src = newSrc;
+        }
+ /*       function refreshImage() {
             const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
             const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
             const name = extractFrigatePart(img);
@@ -390,7 +398,7 @@ function printEqLogic(_eqLogic) {
                     // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
                 }
             })
-        }
+        } */
 
         refreshImage();
     }
