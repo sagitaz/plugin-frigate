@@ -357,7 +357,7 @@ class frigate extends eqLogic
 
 
       $replace['#actions#'] = '';
-      $replace['#actions#'] = $replace['#actions#'] . '<div class="lignePrincipal">';
+      $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-actions">';
       // Commandes recording
       if (is_object($this->getCmd('action', 'action_start_recordings')) && is_object($this->getCmd('action', 'action_stop_recordings'))) {
         $on = $this->getCmd("action", 'action_start_recordings');
@@ -365,11 +365,11 @@ class frigate extends eqLogic
         $etat = $this->getCmd("info", 'info_recordings');
         if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
           if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconActionOff' . $this->getId() . '" title="recording ON" onclick="execAction(' . $on->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconAction' . $this->getId() . '" title="recording OFF" onclick="execAction(' . $off->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           }
@@ -382,11 +382,11 @@ class frigate extends eqLogic
         $etat = $this->getCmd("info", 'info_snapshots');
         if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
           if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="snapshot ON" onclick="execAction(' . $on->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconAction' . $this->getId() . '" title="snapshot OFF" onclick="execAction(' . $off->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           }
@@ -399,11 +399,11 @@ class frigate extends eqLogic
         $etat = $this->getCmd("info", 'info_detect');
         if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
           if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconActionOff' . $this->getId() . '" title="detection ON" onclick="execAction(' . $on->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
             $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconAction' . $this->getId() . '" title="detection OFF" onclick="execAction(' . $off->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           }
@@ -413,7 +413,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_down'))) {
         $down = $this->getCmd("action", 'action_ptz_down');
         if ($down->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-down iconAction' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -423,7 +423,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_up'))) {
         $up = $this->getCmd("action", 'action_ptz_up');
         if ($up->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-up iconAction' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -433,7 +433,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_left'))) {
         $left = $this->getCmd("action", 'action_ptz_left');
         if ($left->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-left iconAction' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -443,7 +443,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_right'))) {
         $right = $this->getCmd("action", 'action_ptz_right');
         if ($right->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-right iconAction' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -453,7 +453,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
         $stop = $this->getCmd("action", 'action_ptz_stop');
         if ($stop->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-stop-circle iconAction' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -463,7 +463,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
         $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
         if ($zoom_in->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-plus-circle iconAction' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
@@ -473,7 +473,7 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
         $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
         if ($zoom_out->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="cellPrincipalIconScreen">';
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-minus-circle iconAction' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
