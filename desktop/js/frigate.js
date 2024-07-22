@@ -209,6 +209,27 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
     window.open(frigateURL, '_blank');
 });
 
+document.getElementById('getConfig').addEventListener('click', function () {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "getConfig"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            var json = data.result.json;
+            const blob = new Blob([json], {
+                type: "text/plain;charset=utf-8"
+            });
+            saveAs(blob, "frigateConfiguration.json");
+        }
+    })
+});
+
 document.getElementById('bt_discord').addEventListener('click', function () {
     window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });
@@ -364,41 +385,41 @@ function printEqLogic(_eqLogic) {
             console.log('Refreshing image with URL: ' + newSrc);
             imgElement.src = newSrc;
         }
- /*       function refreshImage() {
-            const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
-            const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
-            const name = extractFrigatePart(img);
-            const imgElement = document.getElementById('imgFrigate');
-
-            $.ajax({
-                type: "POST",
-                url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                data: {
-                    action: "refreshCameras",
-                    img: img,
-                    name: name,
-                    eqlogicId: eqlogicId
-                },
-                dataType: 'json',
-                error: function (request, status, error) {
-                    handleAjaxError(request, status, error);
-                },
-                success: function (data) {
-                    if (data.result == 'KO' || data.result == 'error') {
-                        $('#div_alert').showAlert({
-                            message: '{{L\'image n\'est pas disponible.}}',
-                            level: 'warning'
-                        });
-                        return;
-                    } else {
-                        imgUrl = data.result
-                        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                    }
-
-                    // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
-                }
-            })
-        } */
+        /*       function refreshImage() {
+                   const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
+                   const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+                   const name = extractFrigatePart(img);
+                   const imgElement = document.getElementById('imgFrigate');
+       
+                   $.ajax({
+                       type: "POST",
+                       url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                       data: {
+                           action: "refreshCameras",
+                           img: img,
+                           name: name,
+                           eqlogicId: eqlogicId
+                       },
+                       dataType: 'json',
+                       error: function (request, status, error) {
+                           handleAjaxError(request, status, error);
+                       },
+                       success: function (data) {
+                           if (data.result == 'KO' || data.result == 'error') {
+                               $('#div_alert').showAlert({
+                                   message: '{{L\'image n\'est pas disponible.}}',
+                                   level: 'warning'
+                               });
+                               return;
+                           } else {
+                               imgUrl = data.result
+                               imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+                           }
+       
+                           // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
+                       }
+                   })
+               } */
 
         refreshImage();
     }

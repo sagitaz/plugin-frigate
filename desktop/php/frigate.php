@@ -51,6 +51,11 @@ sendVarToJS('refresh', $refresh);
                 <br>
                 <span>{{Serveur Frigate}}</span>
             </div>
+            <div class="cursor eqLogicAction logoSecondary" id="getConfig" title="{{Télècharger le fichier de configuration Frigate}}.">
+                <i class="fas fa-download"></i>
+                <br>
+                <span>{{Debug}}</span>
+            </div>
             <div class="cursor eqLogicAction info" id="bt_discord" title="{{Posez vos questions dans le salon dédié, support officiel}}.">
                 <i class="fab fa-discord"></i>
                 <br>
@@ -320,5 +325,6 @@ sendVarToJS('refresh', $refresh);
 
 <!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
 <?php include_file('desktop', 'frigate', 'js', 'frigate'); ?>
+<?php include_file('desktop', 'fileSaver', 'js', 'frigate'); ?>
 <!-- Inclusion du fichier javascript du core - NE PAS MODIFIER NI SUPPRIMER -->
 <?php include_file('core', 'plugin.template', 'js'); ?>
