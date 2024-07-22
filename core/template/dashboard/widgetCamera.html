@@ -6,11 +6,12 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     </center>
 
-    <img id="imgFrigate#id#" class="img-responsive" src="" />
+    <div id="img-container">
+        <img id="imgFrigate#id#" class="img-responsive" src="" />
+    </div>
     <br>
-    <div id="tabPrincipal">
+    <div id="btn-container">
         #actions#
-
     </div>
 
     <script>
@@ -41,7 +42,6 @@
             observer.observe(imgElement);
 
             function startImageFetchInterval() {
-                const refresh = $('.configKey[data-l1key=refresh_snapshot]').value(result.value);
                 if (!intervalId) {
                     intervalId = setInterval(refreshImage, #refresh#);
                 }
@@ -74,11 +74,27 @@
 
     <style>
         :root {
-            --frigate-icone-color#id#: white;
+            --frigate-icone-color#id#: orange;
         }
 
-        /* CSS dedié a la page principale */
-        #tabPrincipal {
+        #img-container {
+            position: relative;
+            width: 100%;
+            height: auto;
+            background-image: url('../../data/no-img.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        #img-container img {
+            position: relative;
+            z-index: 1;
+            width: 100%;
+            height: auto;
+        }
+
+
+        #btn-container {
             border-collapse: collapse;
             width: 90%;
             margin: auto;
@@ -90,22 +106,7 @@
             border-width: 2px !important;
         }
 
-        .frigate_widget .cellPrincipalIconRegen {
-            display: inline-flex;
-            text-align: left
-        }
-
-        .frigate_widget .cellPrincipalIconSynthese {
-            display: inline-flex;
-            text-align: left
-        }
-
         .frigate_widget .cellPrincipalIconScreen {
-            display: inline-flex;
-            text-align: right;
-        }
-
-        .frigate_widget .cellPrincipalIconSound {
             display: inline-flex;
             text-align: right;
         }
@@ -128,14 +129,6 @@
 
         .frigate_widget .iconActionOff#id#:hover {
             color: var(--frigate-icone-color#id#) !important;
-        }
-
-        .frigate_widget .cellPrincipalText {
-            display: table-cell;
-            font-size: 13px !important;
-            text-align: center;
-            vertical-align: middle;
-            padding: 8px;
         }
     </style>
 </div>
