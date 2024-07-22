@@ -86,7 +86,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{Durée de raffaichissement}}
+            <label class="col-md-4 control-label">{{Durée de rafraîchissement}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Snapshot refresh (en sc)}}"></i></sup>
             </label>
             <div class="col-md-4">
