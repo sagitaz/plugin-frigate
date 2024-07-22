@@ -16,8 +16,10 @@
 
     <script>
         if (typeof window.imgSrc === 'undefined') {
-            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
-            console.log('Image Source URL: ' + imgSrc.replace(/&amp;/g, '&'));
+            let url = "#imgUrl#";
+            url = url.replace(/&amp;/g, '&');
+            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + encodeURIComponent(url);
+            console.log('Image Source URL: ' + imgSrc);
             let imgElement = document.getElementById('imgFrigate' + #id#);
 
             let intervalId;
@@ -78,17 +80,17 @@
         }
 
         .frigate_widget {
-            min-height: 90%;
-            min-width: 70%;
+            min-height: 25%;
+            min-width: 25%;
         }
 
         #img-container {
             position: relative;
             min-width: 100%;
             width: 100%;
-            min-height: 75%;
+            min-height: 60%;
             height: auto;
-            background-image: url('../data/no-img.png');
+            background-image: url('/plugins/frigate/core/data/no-img.png');
             background-size: cover;
             background-position: center;
         }
@@ -121,7 +123,7 @@
 
         .frigate_widget .iconAction#id# {
             padding: 10px;
-            font-size: 22px;
+            font-size: 18px;
             color: var(--txt-color) !important;
         }
 
@@ -131,7 +133,7 @@
 
         .frigate_widget .iconActionOff#id# {
             padding: 10px;
-            font-size: 22px;
+            font-size: 18px;
             color: red !important;
         }
 
