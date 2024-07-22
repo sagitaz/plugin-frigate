@@ -626,8 +626,13 @@ class frigate extends eqLogic
       config::save('recovery_days', $recoveryDays, 'frigate');
       // on reduit le nombre de jours de suppression automatiquement
       $removeDays = $removeDays - 1;
-      config::save('remove_days', $removeDays, 'frigate');
-      log::add(__CLASS__, 'debug', "Duree de recuperation : " . $recoveryDays . " jours, Duree de suppression : " . $removeDays . " jours");
+      if ($removeDays < 1) {
+        $removeDays = 1;
+        log::add(__CLASS__, 'debug', "Vous etes au nombre de jours minimum de suppression : " . $removeDays . " jours");
+      } else {
+        config::save('remove_days', $removeDays, 'frigate');
+        log::add(__CLASS__, 'debug', "Duree de recuperation : " . $recoveryDays . " jours, Duree de suppression : " . $removeDays . " jours");
+      }
     }
     return true;
   }

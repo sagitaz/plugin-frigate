@@ -71,6 +71,14 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'getConfig') {
+        $data = frigate::getConfig();
+        ajax::success(array(
+            "object" => $data,
+            "json" => json_encode($data),
+        ));
+    }
+
     if (init('action') == 'stream') {
         // Récupère l'objet caméra à partir de son ID
         $camera = frigate::byId(init('id'));
