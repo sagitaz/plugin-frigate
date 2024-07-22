@@ -48,16 +48,32 @@ class frigate extends eqLogic
   public static function setConfig()
   {
     // Configuration par défaut
-    config::save('URL', '', 'frigate');
-    config::save('port', '5000', 'frigate');
-    config::save('recovery_days', '7', 'frigate');
-    config::save('remove_days', '7', 'frigate');
-    config::save('datas_weight', '500', 'frigate');
-    config::save('refresh_snapshot', '5', 'frigate');
-    config::save('cron', '5', 'frigate');
+    if (!config::byKey('URL', 'frigate')) {
+      config::save('URL', 'http://localhost', 'frigate');
+    }
+    if (!config::byKey('port', 'frigate')) {
+      config::save('port', '5000', 'frigate');
+    }
+    if (!config::byKey('recovery_days', 'frigate')) {
+      config::save('recovery_days', '7', 'frigate');
+    }
+    if (!config::byKey('remove_days', 'frigate')) {
+      config::save('remove_days', '7', 'frigate');
+    }
+    if (!config::byKey('datas_weight', 'frigate')) {
+      config::save('datas_weight', '500', 'frigate');
+    }
+    if (!config::byKey('refresh_snapshot', 'frigate')) {
+      config::save('refresh_snapshot', '5', 'frigate');
+    }
+    if (!config::byKey('cron', 'frigate')) {
+      config::save('cron', '5', 'frigate');
+    }
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
-      config::save('topic', 'frigate', 'frigate');
+      if (!config::byKey('topic', 'frigate')) {
+        config::save('topic', 'frigate', 'frigate');
+      }
     }
   }
   // configuration par defaut des crons
