@@ -1362,6 +1362,8 @@ class frigate extends eqLogic
     } else {
       log::add(__CLASS__, 'debug', "Configuration : " . json_encode($config));
     }
+
+    return $config;
   }
 
   public static function postConfig_URL()
