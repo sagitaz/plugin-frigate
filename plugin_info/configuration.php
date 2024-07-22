@@ -54,8 +54,8 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{MQTT Topic}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{MQTT Frigate Topic}}"></i></sup>
+            <label class="col-md-4 control-label">{{Topic MQTT}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Topic MQTT de Frigate}}"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
@@ -79,18 +79,18 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Taille des dossiers}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des datas (en MB)}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des données (en Mo)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500MB par défaut" />
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500 Mo par défaut" />
             </div>
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Durée de rafraîchissement}}
-                <sup><i class="fas fa-question-circle tooltips" title="{{Snapshot refresh (en sc)}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips" title="{{Rafraichissement des captures des caméras (en secondes)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5sc par défaut" />
+                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5 secondes par défaut" />
             </div>
         </div>
     </fieldset>

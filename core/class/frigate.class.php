@@ -514,7 +514,7 @@ class frigate extends eqLogic
 
   public static function addMessages()
   {
-    message::add('frigate', __("Merci d'avoir installé le plugin, pour toutes les demandes d'aide, veuillez contacter le support sur discord ou sur community.", __FILE__), null, null);
+    message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__), null, null);
     $system = system::getOsVersion();
     if (version_compare($system, "11", "<")) {
       message::add('frigate', __("Attention, vous utilisez la version " . $system . " de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__), null, null);
@@ -586,7 +586,7 @@ class frigate extends eqLogic
   {
     $recoveryDays = config::byKey('recovery_days', 'frigate'); // default 7
     $removeDays = config::byKey('remove_days', 'frigate'); // default 7
-    $datasWeight = config::byKey('datas_weight', 'frigate'); // default 500 MB
+    $datasWeight = config::byKey('datas_weight', 'frigate'); // default 500 Mo
     $folderIsFull = false;
     // Calculer la taille du dossier en octets
     $size = 0;
@@ -599,28 +599,28 @@ class frigate extends eqLogic
         }
       }
     }
-    // taille du dossier en MB
+    // taille du dossier en Mo
     $folderSizeInMB = round($size / 1024 / 1024, 2);
-    // taille disponible du dossier en MB
+    // taille disponible du dossier en Mo
     $folderAvailableSizeInMB = round(disk_free_space($dir) / 1024 / 1024, 2);
     // On verifie qu'il y a suffisament de place sur Jeedom
     if ($folderAvailableSizeInMB <= $datasWeight) {
       $folderIsFull = true;
-      log::add(__CLASS__, 'debug', "Dossier Jeedom plein, taille : " . $folderSizeInMB . " MB");
+      log::add(__CLASS__, 'debug', "Dossier Jeedom plein, taille : " . $folderSizeInMB . " Mo");
     } else {
-      log::add(__CLASS__, 'debug', "Dossier Jeedom OK, taille : " . $folderSizeInMB . " MB");
+      log::add(__CLASS__, 'debug', "Dossier Jeedom OK, taille : " . $folderSizeInMB . " Mo");
       // On verifie que le dossier n'est pas plein
       if ($folderSizeInMB <= $datasWeight) {
-        log::add(__CLASS__, 'debug', "Dossier data Frigate OK, taille : " . $folderSizeInMB . " MB");
+        log::add(__CLASS__, 'debug', "Dossier data Frigate OK, taille : " . $folderSizeInMB . " Mo");
       } else {
-        log::add(__CLASS__, 'debug', "Dossier data Frigate plein, taille : " . $folderSizeInMB . " MB");
+        log::add(__CLASS__, 'debug', "Dossier data Frigate plein, taille : " . $folderSizeInMB . " Mo");
         $folderIsFull = true;
       }
     }
     // Si dossier plein alors on reduit le nombre de jours de recuperation automatiquement et de suppression
     if ($folderIsFull) {
-      log::add(__CLASS__, 'debug', "Dossier plein, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement");
-      message::add('frigate', __("Dossier plein, taille : " . $folderSizeInMB . " MB, on reduit le nombre de jours de récupération automatiquement", __FILE__), null, null);
+      log::add(__CLASS__, 'debug', "Dossier plein, taille : " . $folderSizeInMB . " Mo, on réduit le nombre de jours de récupération automatiquement");
+      message::add('frigate', __("Dossier plein, taille : " . $folderSizeInMB . " Mo, on réduit le nombre de jours de récupération automatiquement", __FILE__), null, null);
       // on reduit le nombre de jours de recuperation automatiquement
       $recoveryDays = $recoveryDays - 1;
       config::save('recovery_days', $recoveryDays, 'frigate');
@@ -628,10 +628,10 @@ class frigate extends eqLogic
       $removeDays = $removeDays - 1;
       if ($removeDays < 1) {
         $removeDays = 1;
-        log::add(__CLASS__, 'debug', "Vous etes au nombre de jours minimum de suppression : " . $removeDays . " jours");
+        log::add(__CLASS__, 'debug', "Vous êtes au nombre de jours minimum de suppression : " . $removeDays . " jours");
       } else {
         config::save('remove_days', $removeDays, 'frigate');
-        log::add(__CLASS__, 'debug', "Duree de recuperation : " . $recoveryDays . " jours, Duree de suppression : " . $removeDays . " jours");
+        log::add(__CLASS__, 'debug', "Durée de recuperation : " . $recoveryDays . " jours, Durée de suppression : " . $removeDays . " jours");
       }
     }
     return true;
@@ -773,7 +773,7 @@ class frigate extends eqLogic
         // Verifier si le fichier est un favoris
         $isFavorite = $inDbEvent->getIsFavorite();
         if ($isFavorite == 1) {
-          log::add(__CLASS__, 'debug', "Evènement " . $inDbEvent->getEventId() . " est un favoris, il ne doit pas être supprimé de la DB.");
+          log::add(__CLASS__, 'debug', "Evènement " . $inDbEvent->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
         } else {
           log::add(__CLASS__, 'debug', "delete in DB : " . $inDbEvent->getEventId());
           $inDbEvent->remove();
@@ -806,8 +806,8 @@ class frigate extends eqLogic
     $frigate = frigate_events::byEventId($id);
     $isFavorite = $frigate[0]->getIsFavorite();
     if ($isFavorite == 1) {
-      log::add(__CLASS__, 'debug', "Evènement " . $frigate[0]->getEventId() . " est un favoris, il ne doit pas être supprimé de la DB.");
-      message::add('frigate', __("L'évènement est un favoris, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
+      log::add(__CLASS__, 'debug', "Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
+      message::add('frigate', __("L'évènement est un favori, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
       return "Error 01";
     }
 
@@ -881,7 +881,7 @@ class frigate extends eqLogic
     $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
-    log::add(__CLASS__, 'debug', "Liste de cameras : " . json_encode($stats['cameras']));
+    log::add(__CLASS__, 'debug', "Liste des caméras : " . json_encode($stats['cameras']));
 
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
       $eqlogics = eqLogic::byObjectId("41");
@@ -893,7 +893,7 @@ class frigate extends eqLogic
         }
       }
       if ($exist) {
-        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . "existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
+        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
         $addToName = " by frigate plugin";
       }
       // Recherche équipement caméra
@@ -1142,9 +1142,9 @@ class frigate extends eqLogic
           self::createMQTTcmds($eqlogicCameraId);
         }
         foreach ($cameraStats as $key => $value) {
-          // Créez ou récupérez la commande
+          // Créer ou récupérer la commande
           $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO");
-          // Enregistrez la valeur de l'événement
+          // Enregistrer la valeur de l'événement
           $cmd->event($value);
           $cmd->save();
         }
@@ -1164,11 +1164,11 @@ class frigate extends eqLogic
     // Mise à jour des statistiques des détecteurs
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
-        // Créez un nom de commande en combinant le nom du détecteur et la clé
+        // Créer un nom de commande en combinant le nom du détecteur et la clé
         $cmdName = $detectorName . '_' . $key;
-        // Créez ou récupérez la commande
+        // Créer ou récupérer la commande
         $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO");
-        // Enregistrez la valeur de l'événement
+        // Enregistrer la valeur de l'évènement
         $cmd->event($value);
         $cmd->save();
 
@@ -1186,24 +1186,24 @@ class frigate extends eqLogic
     // Mise à jour des usages GPU
     foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
       foreach ($gpuStats as $key => $value) {
-        // Créez un nom de commande en combinant le nom du GPU et la clé
+        // Créer un nom de commande en combinant le nom du GPU et la clé
         $cmdName = $gpuName . '_' . $key;
-        // Créez ou récupérez la commande
+        // Créer ou récupérer la commande
         $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "gpu_" . $key, "GENERIC_INFO");
-        // Enregistrez la valeur de l'événement
+        // Enregistrer la valeur de l'événement
         $cmd->event($value);
         $cmd->save();
       }
     }
 
-    // Créez ou récupérez la commande version Frigate
+    // Créer ou récupérer la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
     }
     $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
-    // Enregistrez la valeur de l'événement
+    // Enregistrer la valeur de l'événement
     $cmd->event($version);
     $cmd->save();
   }
@@ -1241,7 +1241,7 @@ class frigate extends eqLogic
     $time = date("H:i");
 
     $eqLogic = eqLogic::byId($eqLogicId);
-    // Vérifier si une condition est présente et ne pas effectué les actions si elle est vrai
+    // Vérifier si une condition est présente et ne pas effectuer les actions si elle est vraie
     if ($eqLogic->getConfiguration('conditionIf') != '' && jeedom::evaluateExpression($eqLogic->getConfiguration('conditionIf'))) {
       log::add(__CLASS__, 'info', $eqLogic->getHumanName() . ' les actions ne sont pas exècutées car ' . $eqLogic->getConfiguration('conditionIf') . ' est vrai.');
       return;
@@ -1316,15 +1316,15 @@ class frigate extends eqLogic
       $path = "/data/" . $camera . "/latest.jpg";
     }
 
-    // Vérifiez si le fichier existe déjà
+    // Vérifier si le fichier existe déjà
     if (file_exists($path) && $latest == 0) {
       return $urlJeedom . str_replace("/var/www/html", "", $path);
     }
 
-    // Obtenez le répertoire du chemin de destination
+    // Obtenir le répertoire du chemin de destination
     $destinationDir = dirname(dirname(__FILE__, 3) . $path);
 
-    // Vérifiez si le répertoire existe, sinon créez-le
+    // Vérifier si le répertoire existe, sinon le créer
     if (!is_dir($destinationDir)) {
       if (!mkdir($destinationDir, 0755, true)) {
         log::add(__CLASS__, 'debug', "Échec de la création du répertoire.");
@@ -1332,11 +1332,11 @@ class frigate extends eqLogic
       }
     }
 
-    // Téléchargez l'image ou la vidéo
+    // Télécharger l'image ou la vidéo
     $content = file_get_contents($lien);
 
     if ($content !== false) {
-      // Enregistrez l'image ou la vidéo dans le dossier spécifié
+      // Enregistrer l'image ou la vidéo dans le dossier spécifié
       $file = file_put_contents(dirname(__FILE__, 3) . $path, $content);
       if ($file !== false) {
         $result = "/plugins/frigate" . $path;
