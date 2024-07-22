@@ -337,7 +337,7 @@ class frigate extends eqLogic
       $replace['#cameraEqlogicId#'] = $this->getLogicalId();
       $replace['#cameraName#'] = $this->getConfiguration("name");
       $replace['#imgUrl#'] = $this->getConfiguration("img");
-      $replace['#refresh#'] = config::byKey('refresh_snapshot', 'frigate');
+      $replace['#refresh#'] = config::byKey('refresh_snapshot', 'frigate') * 1000;
 
 
       $replace['#actions#'] = '';

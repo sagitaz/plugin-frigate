@@ -12,7 +12,7 @@ $port = config::byKey('port', 'frigate');
 $urlFrigate = "http://" . $url . ":" . $port;
 sendVarToJS('frigateURL', $urlFrigate);
 
-$refresh = config::byKey('refresh_snapshot', 'frigate');
+$refresh = config::byKey('refresh_snapshot', 'frigate') * 1000;
 sendVarToJS('refresh', $refresh);
 ?>
 <style type="text/css">
