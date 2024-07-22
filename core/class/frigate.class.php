@@ -259,7 +259,7 @@ class frigate extends eqLogic
       $regions = $this->getConfiguration('regions', 0);
       $quality = $this->getConfiguration('quality', 70);
 
-      $img = htmlspecialchars("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
+      $img = $encoded_url = urlencode("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
       $this->setConfiguration('img', $img);
     }
   }

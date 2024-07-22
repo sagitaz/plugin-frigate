@@ -329,8 +329,8 @@ function printEqLogic(_eqLogic) {
 
 
 
-        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
-        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + encodeURIComponent(img);
+        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + img;
         const imgElement = document.getElementById('imgFrigate');
         let intervalId;
 

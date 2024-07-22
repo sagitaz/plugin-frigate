@@ -16,10 +16,8 @@
 
     <script>
         if (typeof window.imgSrc === 'undefined') {
-            let url = "#imgUrl#";
-            url = url.replace(/&amp;/g, '&');
-            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + encodeURIComponent(url);
-            console.log('Image Source URL: ' + imgSrc);
+            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
+            console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
             let imgElement = document.getElementById('imgFrigate' + #id#);
 
             let intervalId;
