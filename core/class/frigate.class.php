@@ -1277,6 +1277,21 @@ class frigate extends eqLogic
     return $result;
   }
 
+  public static function getConfig() {
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/config";
+    $config = self::getcURL("Configuration", $resultURL);
+    if ($config === false) {
+      log::add(__CLASS__, 'debug', "Configuration non créée");
+    } else {
+      log::add(__CLASS__, 'debug', "Configuration : " . json_encode($config));
+    }
+  }
+
+  public static function postConfig_URL() {
+    self::getConfig();
+  }
+
   public static function preConfig_topic($value)
   {
     if (self::getTopic() != $value) {
