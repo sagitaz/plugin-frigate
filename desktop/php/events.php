@@ -137,7 +137,23 @@ if (!isConnect('admin')) {
     echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
     echo '<div class="frigateEvent">';
     // div img
+    $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
+    $type = $event['type'];
+    $filterText = '';
+    if ($type == 'new') {
+      $filterText = 'Nouveau';
+    } elseif ($type == 'update') {
+      $filterText = 'En cours';
+    }
+    echo '<div class="img-container">';
     echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
+    echo '<button class="favorite-btn" onclick="toggleFavorite(this)" data-id="' . $event['id'] . '" >';
+    echo '<i class="' . $favoriteClass . '"></i>';
+    echo '</button>';
+    if (!empty($filterText)) {
+      echo '<div class="filter">' . $filterText . '</div>';
+    }
+    echo '</div>';
     // div texte
     echo '<div class="eventText">';
     $timeElapsed = timeElapsedString($event['date']);
@@ -188,7 +204,7 @@ if (!isConnect('admin')) {
       echo '<i class="fas fa-film"></i>';
       echo '</button>';
     }
-    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
+    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur Frigate">';
     echo '<i class="fas fa-trash"></i>';
     echo '</button>';
     echo '</div>';
@@ -207,8 +223,8 @@ if (!isConnect('admin')) {
       <div class="modal-header">
         <h2 id="mediaTitle"></h2>
         <div class="button-container">
-          <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
-          <button id="showImage" class="hidden-btn">Voir la snapshot</button>
+          <button id="showVideo" class="hidden-btn custom-button">Voir la vidéo</button>
+          <button id="showImage" class="hidden-btn custom-button">Voir la snapshot</button>
         </div>
       </div>
       <div class="media-container">

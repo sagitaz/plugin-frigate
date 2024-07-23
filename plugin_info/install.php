@@ -31,6 +31,7 @@ function frigate_install()
     frigate::generateEqStats();
     frigate::setConfig();
     frigate::setConfigCron();
+    frigate::addMessages();
     Log::add("frigate", 'info', 'Finish Install');
 }
 
@@ -44,9 +45,28 @@ function frigate_update()
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate"); */
     $sql1 = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql1, array(), DB::FETCH_TYPE_ALL);
+    // Vérifier si la colonne 'type' existe déjà dans la table 'frigate_events'
+    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'type';";
+    $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
+    if (empty($resultCheck)) {
+        // Création de la nouvelle colonne 'type' si elle n'existe pas
+        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `type` text DEFAULT NULL;";
+        DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+    }    
+    // Vérifier si la colonne 'isFavorite' existe déjà dans la table 'frigate_events'
+    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'isFavorite';";
+    $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
+    if (empty($resultCheck)) {
+        // Création de la nouvelle colonne 'isFavorite' si elle n'existe pas
+        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `isFavorite` tinyint(1);";
+        DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+    }
     frigate::generateEqEvents();
     frigate::setCmdsCron();
     frigate::generateEqStats();
+    frigate::setConfig();
+    frigate::addMessages();
+    frigate::deleteLatestFile();
     Log::add("frigate", 'info', 'Finish Update');
 }
 
@@ -57,4 +77,7 @@ function frigate_remove()
     $sql = "DROP TABLE IF EXISTS `frigate_events`;";
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
+
+    Log::add("frigate", "info", "==> Désenregistrement du topic Frigate de MQTT2");
+    frigate::removeMQTTTopicRegistration();
 }

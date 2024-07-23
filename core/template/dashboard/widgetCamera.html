@@ -1,0 +1,157 @@
+<div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
+    data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
+    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;width: #width#;height: #height#;#style#;">
+    <center class="widget-name">
+        <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+        <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+    </center>
+
+    <div class="column">
+        <div class="img-container">
+            <img id="imgFrigate#id#" class="img-responsive" src="" />
+        </div>
+        <div class="btn-container">
+            #actions#
+        </div>
+    </div>
+
+    <script>
+        if (window.imgSrc === undefined) {
+            let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
+            console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
+            let imgElement = document.getElementById('imgFrigate' + #id#);
+
+            let intervalId;
+
+            const observerOptions = {
+                root: null,
+                rootMargin: '0px',
+                threshold: 0.1 // image considérée visible si au moins 10% est visible
+            };
+
+            const observerCallback = (entries, observer) => {
+                entries.forEach(entry => {
+                    if (entry.isIntersecting) {
+                        startImageFetchInterval();
+                    } else {
+                        stopImageFetchInterval();
+                    }
+                });
+            };
+
+            const observer = new IntersectionObserver(observerCallback, observerOptions);
+            observer.observe(imgElement);
+
+            function startImageFetchInterval() {
+                if (!intervalId) {
+                    intervalId = setInterval(refreshImage, #refresh#);
+                }
+            }
+
+            function stopImageFetchInterval() {
+                if (intervalId) {
+                    clearInterval(intervalId);
+                    intervalId = null;
+                }
+            }
+
+            function refreshImage() {
+                let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
+                console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
+                imgElement.src = newSrc;
+            }
+
+            // setInterval(refreshImage, 2000); // Refresh every 20 seconds
+            refreshImage(); // Initial call to display the image immediately            
+
+        }
+
+        function execAction(cmdid) {
+            jeedom.cmd.execute({
+                id: cmdid
+            })
+        }
+    </script>
+
+    <style>
+        :root {
+            --frigate-icone-color#id#: orange;
+        }
+
+        .frigate_widget {
+            min-height: 300px;
+            min-width: 30%;
+        }
+
+        .frigate_widget .column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: auto;
+        }
+
+        .frigate_widget .img-container {
+            position: relative;
+            flex-grow: 1;
+            min-width: 100%;
+            width: 100%;
+            height: auto;
+            background-image: url('/plugins/frigate/data/no-imgage.png');
+            background-size: cover;
+            background-position: center;
+        }
+
+        .frigate_widget .img-container img {
+            position: relative;
+            z-index: 1;
+            min-width: 100%;
+            width: 100%;
+            height: auto;
+        }
+
+
+        .frigate_widget .btn-container {
+            border-collapse: collapse;
+            padding-top: 10px;
+            width: 90%;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
+        }
+
+        .frigate_widget .btn-actions {
+            border-top: solid !important;
+            border-color: rgba(230, 230, 230, 0.1) !important;
+            border-width: 2px !important;
+        }
+
+        .frigate_widget .btn-icon {
+            display: inline-flex;
+            text-align: right;
+        }
+
+        .frigate_widget .iconAction#id# {
+            padding: 10px;
+            font-size: 22px;
+            color: var(--txt-color) !important;
+        }
+
+        .frigate_widget .iconAction#id#:hover {
+            color: var(--frigate-icone-color#id#) !important;
+        }
+
+        .frigate_widget .iconActionOff#id# {
+            padding: 10px;
+            font-size: 22px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconActionOff#id#:hover {
+            color: var(--frigate-icone-color#id#) !important;
+        }
+    </style>
+</div>

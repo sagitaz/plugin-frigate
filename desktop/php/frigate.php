@@ -6,6 +6,14 @@ if (!isConnect('admin')) {
 $plugin = plugin::byId('frigate');
 sendVarToJS('eqType', $plugin->getId());
 $eqLogics = eqLogic::byType($plugin->getId());
+
+$url = config::byKey('URL', 'frigate');
+$port = config::byKey('port', 'frigate');
+$urlFrigate = "http://" . $url . ":" . $port;
+sendVarToJS('frigateURL', $urlFrigate);
+
+$refresh = config::byKey('refresh_snapshot', 'frigate') * 1000;
+sendVarToJS('refresh', $refresh);
 ?>
 <style type="text/css">
     .jeedisable {
@@ -32,6 +40,26 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 <i class="fas fa-wrench"></i>
                 <br>
                 <span>{{Configuration}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" id="restartFrigate">
+                <i class="fas fa-sync"></i>
+                <br>
+                <span>{{Redémarrer Frigate}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" id="gotoFrigate" title="disponible seulement depuis connexion interne">
+                <i class="fas fa-external-link-alt"></i>
+                <br>
+                <span>{{Serveur Frigate}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" id="getConfig" title="{{Télècharger le fichier de configuration Frigate}}.">
+                <i class="fas fa-download"></i>
+                <br>
+                <span>{{Debug}}</span>
+            </div>
+            <div class="cursor eqLogicAction info" id="bt_discord" title="{{Posez vos questions dans le salon dédié, support officiel}}.">
+                <i class="fab fa-discord"></i>
+                <br>
+                <span>{{aide Discord}}</span>
             </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
@@ -83,7 +111,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
-            <li role="presentation" class="eqFrigate"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
+            <li role="presentation" class="eqActions"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
         </ul>
         <div class="tab-content">
             <!-- Onglet de configuration de l'équipement -->
@@ -162,15 +190,15 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{motion}}</label>
+                                <label class="col-sm-4 control-label motion-configuration"><span>{{motion}}</span></label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="motion">
+                                    <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{regions}}</label>
+                                <label class="col-sm-4 control-label regions-configuration"><span>{{régions}}</span></label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="regions">
+                                    <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
                         </div>
@@ -185,6 +213,9 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                 <?php
 
                                 $name = '';
+                                $conditionIf = '';
+                                $evaluateExpression = '';
+
                                 try {
                                     if (isset($_GET['id']) && is_numeric($_GET['id'])) {
                                         $eqLogicId = intval($_GET['id']);
@@ -194,6 +225,10 @@ $eqLogics = eqLogic::byType($plugin->getId());
                                             $configuration = $equipment->getConfiguration();
                                             if (isset($configuration['name'])) {
                                                 $name = $configuration['name'];
+                                            }
+                                            if (isset($configuration['conditionIf'])) {
+                                                $conditionIf = $configuration['conditionIf'];
+                                                $evaluateExpression = jeedom::evaluateExpression($conditionIf);
                                             }
                                         }
                                     }
@@ -229,6 +264,7 @@ $eqLogics = eqLogic::byType($plugin->getId());
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
                 <a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
                 <br><br>
                 <div class="table-responsive">
@@ -248,12 +284,29 @@ $eqLogics = eqLogic::byType($plugin->getId());
                     </table>
                 </div>
             </div><!-- /.tabpanel #commandtab-->
-            <div role="tabpanel" class="tab-pane eqFrigate" id="actionsTab">
+            <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
+                    <br>
+                    <div class="form-group">
+                        <label class="col-sm-1 control-label">{{Ne rien faire si}}</label>
+                        <div class="col-sm-6">
+                            <div class="input-group">
+                                <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
+                                <span class="input-group-btn">
+                                    <a class="btn listCmdInfo btn-default roundedRight" data-atCaret="1"><i class="fa fa-list-alt"></i></a>
+                                </span>
+                            </div>
+                        </div>
+                        <label class="col-sm-1 control-label">{{Etat actuel : }}</label>
+                        <label class="col-sm-2 control-label"><?= $evaluateExpression ?></label>
+                    </div>
+                    <br>
                     <br>
                     <div class="alert alert-info">
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #time#,#event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #snapshot#, #clip#, #snapshot_path#, #clip_path#, #label#, #start#, #end#, #duree#
+                        #time#, #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
+                        <br>
+                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">
@@ -265,11 +318,12 @@ $eqLogics = eqLogic::byType($plugin->getId());
                 </div>
             </div><!-- /.tabpanel  #actiontab-->
 
+
         </div><!-- /.tab-content -->
     </div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
-<!-- Inclusion du fichier javascript du plugin (dossier, nom_du_fichier, extension_du_fichier, id_du_plugin) -->
+<?php include_file('desktop', 'frigate', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'frigate', 'js', 'frigate'); ?>
-<!-- Inclusion du fichier javascript du core - NE PAS MODIFIER NI SUPPRIMER -->
+<?php include_file('desktop', 'fileSaver', 'js', 'frigate'); ?>
 <?php include_file('core', 'plugin.template', 'js'); ?>
