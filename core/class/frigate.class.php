@@ -589,16 +589,8 @@ class frigate extends eqLogic
     $datasWeight = config::byKey('datas_weight', 'frigate'); // default 500 Mo
     $folderIsFull = false;
     // Calculer la taille du dossier en octets
-    $size = 0;
     $dir = dirname(__FILE__, 3) . "/data/";
-    if (is_dir($dir)) {
-      $size = 0;
-      foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($dir)) as $file) {
-        if ($file->isFile()) {
-          $size += $file->getSize();
-        }
-      }
-    }
+    $size = self::getFolderSize($dir);
     // taille du dossier en Mo
     $folderSizeInMB = round($size / 1024 / 1024, 2);
     // taille disponible du dossier en Mo
@@ -636,6 +628,107 @@ class frigate extends eqLogic
     }
     return true;
   }
+
+  public static function getFolderSize($folder)
+  {
+    $size = 0;
+    // Parcourt récursivement tous les fichiers et dossiers
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
+      $size += $file->getSize(); // Ajoute la taille du fichier
+    }
+    $size = round($size / 1024 / 1024, 2);
+    return $size;
+  }
+
+  public static function deleteOldestFiles($folder, $tailleMax)
+  {
+    $favoris = array();
+    $folderSize = self::getFolderSize($folder);
+
+    while ($folderSize > $tailleMax) {
+      log::add(__CLASS__, 'debug', "Le dossier data fait actuellement " . $folderSize . "Mo sur les " . $tailleMax . "Mo permis");
+      $oldestFile = null;
+      $oldestTime = time();
+
+      // Parcourt récursivement tous les fichiers et dossiers
+      foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
+        if ($file->isFile() && strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPath() !== $folder) {
+          $id = self::extractID($file->getFilename());
+          // Vérifie que le fichier n'est pas dans le tableau favoris
+          if (in_array($id, $favoris)) {
+            continue;
+          }
+          // Vérifie si c'est un fichier et s'il est plus ancien
+          if ($file->getMTime() < $oldestTime) {
+            $oldestFile = $file;
+            $oldestTime = $file->getMTime();
+          }
+        }
+      }
+
+      if ($oldestFile !== null) {
+        $id = self::extractID($oldestFile->getFilename());
+        log::add(__CLASS__, 'debug', "delete in DB ID: " . $id);
+        $delete = self::removeFile($id);
+        if ($delete) {
+          // Mettre à jour la taille du dossier
+          $folderSize = self::getFolderSize($folder);
+          continue; // Continue la boucle pour vérifier la taille à nouveau
+        } else {
+          $favoris[] = $id;
+          continue;
+        }
+      } else {
+        // Si aucun fichier n'est trouvé, sortir de la boucle pour éviter une boucle infinie
+        break;
+      }
+    }
+  }
+
+
+  public static function removeFile($id)
+  {
+    $event = frigate_events::byEventId($id);
+    log::add(__CLASS__, 'debug', "Favoris : " . json_encode($event[0]->getIsFavorite()));
+    // Verifier si le fichier est un favoris
+    $isFavorite = $event[0]->getIsFavorite();
+    if ($isFavorite == 1) {
+      log::add(__CLASS__, 'debug', "Evènement " . $id . " est un favori, il ne doit pas être supprimé de la DB.");
+      return false;
+    } else {
+      log::add(__CLASS__, 'debug', "delete in DB : " . $id);
+      $event[0]->remove();
+      log::add(__CLASS__, 'debug', "Events delete in DB");
+      // Recherche si clip et snapshot existent dans le dossier de sauvegarde
+      $clip = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_clip.mp4";
+      $snapshot = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_snapshot.jpg";
+      $thumbnail = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_thumbnail.jpg";
+
+      if (file_exists($clip)) {
+        unlink($clip);
+        log::add(__CLASS__, 'debug', "MP4 clip delete");
+      }
+      if (file_exists($snapshot)) {
+        unlink($snapshot);
+        log::add(__CLASS__, 'debug', "JPG snapshot delete");
+      }
+      if (file_exists($thumbnail)) {
+        unlink($thumbnail);
+        log::add(__CLASS__, 'debug', "JPG thumbnail delete");
+      }
+      return true;
+    }
+  }
+
+  public static function extractID($filename)
+  {
+    // Utiliser une expression régulière pour extraire l'ID du nom de fichier
+    if (preg_match('/^\d+\.\d+-[a-z0-9]+/', $filename, $matches)) {
+      return $matches[0];
+    }
+    return null;
+  }
+
   public static function getEvents($mqtt = false, $events = array(), $type = 'end')
   {
     if (!$mqtt) {
@@ -647,15 +740,17 @@ class frigate extends eqLogic
     }
 
     // Verifier la taille disponible dans le dossier data et agir en conserquence
-    self::checkDatasWeight();
+    // self::checkDatasWeight();
 
     // Nombre de jours a filtrer et enregistrer en DB
     $recoveryDays = config::byKey('recovery_days', 'frigate');
     if (empty($recoveryDays)) {
       $recoveryDays = 7;
     }
+
+
     // Nombre de jours a garder en DB
-    $removeDays = config::byKey('remove_days', 'frigate');
+    /* $removeDays = config::byKey('remove_days', 'frigate');
     if (empty($removeDays)) {
       $removeDays = 7;
     } else if ($removeDays < $recoveryDays) {
@@ -671,7 +766,7 @@ class frigate extends eqLogic
     if (!$mqtt) {
       self::cleanDbEvents($filteredRemoveEvents);
     }
-
+*/
 
     $filteredRecoveryEvents = array_filter($events, function ($event) use ($recoveryDays) {
       return $event['start_time'] >= time() - $recoveryDays * 86400;
@@ -679,6 +774,15 @@ class frigate extends eqLogic
     $filteredRecoveryEvents = array_values($filteredRecoveryEvents);
 
     foreach ($filteredRecoveryEvents as $event) {
+      // Avant, on verifie la taille disponible dans le dossier data
+      $tailleMax = config::byKey('datas_weight', 'frigate'); // default 500 Mo
+      $dir = dirname(__FILE__, 3) . "/data";
+      $size = self::getFolderSize($dir);
+      log::add(__CLASS__, 'debug', "Le dossier data fait actuellement " . $size . "Mo sur les " . $tailleMax . "Mo permis");
+      if ($size > $tailleMax) {
+        self::deleteOldestFiles($dir, $tailleMax);
+      }
+
       $frigate = frigate_events::byEventId($event['id']);
 
       $img = self::saveURL($event['id'], null, $event['camera'], 1);
