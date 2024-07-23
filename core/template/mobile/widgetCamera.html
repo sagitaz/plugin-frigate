@@ -15,7 +15,7 @@
     </div>
 
     <script>
-        if (typeof window.imgSrc === 'undefined') {
+        if (window.imgSrc === undefined) {
             let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
             console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
             let imgElement = document.getElementById('imgFrigate' + #id#);
@@ -55,8 +55,8 @@
             }
 
             function refreshImage() {
-                let newSrc = imgSrc.replace(/&amp;/g, '&') + "&t=" + new Date().getTime();
-                console.log('Refreshing image with URL: ' + newSrc);
+                let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
+                console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
                 imgElement.src = newSrc;
             }
 
