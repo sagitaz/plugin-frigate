@@ -381,8 +381,8 @@ function printEqLogic(_eqLogic) {
             }
         }
         function refreshImage() {
-            let newSrc = imgSrc + "&t=" + new Date().getTime();
-            console.log('Refreshing image with URL: ' + newSrc);
+            let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
+            console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
             imgElement.src = newSrc;
         }
         /*       function refreshImage() {
