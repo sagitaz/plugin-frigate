@@ -1636,6 +1636,22 @@ class frigate extends eqLogic
     $state = $event->getIsFavorite();
     return $state;
   }
+
+
+public static function deleteLatestFile()
+{
+    $folder = "/data/";
+    $fileName = "lastest.png";
+    // Parcourt récursivement tous les fichiers et dossiers
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
+        if ($file->isFile() && $file->getFilename() === $fileName) {
+            // Supprime le fichier
+            unlink($file->getPathname());
+            log::add(__CLASS__, 'debug', "Deleted file: " . $file->getPathname());
+        }
+    }
+}
+
 }
 class frigateCmd extends cmd
 {

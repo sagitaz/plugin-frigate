@@ -65,8 +65,8 @@ function frigate_update()
     frigate::setCmdsCron();
     frigate::generateEqStats();
     frigate::setConfig();
-    frigate::setConfigCron();
     frigate::addMessages();
+    frigate::deleteLatestFile();
     Log::add("frigate", 'info', 'Finish Update');
 }
 
