@@ -104,12 +104,31 @@
 
         .frigate_widget .img-container img {
             position: relative;
-            z-index: 2;
+            z-index: 1;
             min-width: 100%;
             width: 100%;
             height: auto;
         }
 
+        .frigate_widget .btn-detect {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            z-index: 2;
+            text-align: right;
+        }
+
+        .frigate_widget .iconDetect#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconDetectOff#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: var(--txt-color) !important;
+        }
 
         .frigate_widget .btn-container {
             border-collapse: collapse;
@@ -123,22 +142,7 @@
             margin-right: auto;
             text-align: center;
         }
-        .frigate_widget .btn-detect {
-            display: inline-flex;
-            z-index: 2;
-            text-align: right;
-        }
 
-        .frigate_widget .iconDetect#id# {
-            padding: 10px;
-            font-size: 20px;
-            color: var(--txt-color) !important;
-        }
-        .frigate_widget .iconDetectOff#id# {
-            padding: 10px;
-            font-size: 20px;
-            color: red !important;
-        }
 
         .frigate_widget .btn-actions {
             border-top: solid !important;

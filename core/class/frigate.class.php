@@ -410,7 +410,7 @@ class frigate extends eqLogic
         }
       }
       // commantes motions
-      $replace['#detectNow#'];
+      $replace['#detectNow#'] = "";
       if (is_object($this->getCmd('info', 'info_detectNow'))) {
         $detectNow = $this->getCmd("info", 'info_detectNow');
         if ($detectNow->getIsVisible() == 1) {
@@ -421,8 +421,8 @@ class frigate extends eqLogic
             $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>';
           } else {
             $replace['#detectNow#'] = $replace['#detectNow#'] . '<div class="btn-detect">';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user iconDetectOff' . $this->getId() . '"></i>';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>'; 
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user-slash iconDetectOff' . $this->getId() . '"></i>';
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>';
           }
         }
       }
@@ -1626,6 +1626,10 @@ class frigate extends eqLogic
                   $value = ($innerValue['state'] == 'ON') ? "1" : "0";
                   $infoCmd->event($value);
                   $infoCmd->save();
+                  $infoCmd = self::createCmd($eqCamera->getId(), "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+                  $value = ($innerValue == 'ON') ? "1" : "0";
+                  $infoCmd->event($value);
+                  $infoCmd->save();
                   $eqCamera->refreshWidget();
                   break;
                 case 'audio':
@@ -1687,20 +1691,19 @@ class frigate extends eqLogic
   }
 
 
-public static function deleteLatestFile()
-{
+  public static function deleteLatestFile()
+  {
     $folder = dirname(__FILE__, 3) . "/data/";
     $fileName = "latest.jpg";
     // Parcourt récursivement tous les fichiers et dossiers
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
-        if ($file->isFile() && $file->getFilename() === $fileName) {
-            // Supprime le fichier
-            unlink($file->getPathname());
-            log::add(__CLASS__, 'debug', "Deleted file: " . $file->getPathname());
-        }
+      if ($file->isFile() && $file->getFilename() === $fileName) {
+        // Supprime le fichier
+        unlink($file->getPathname());
+        log::add(__CLASS__, 'debug', "Deleted file: " . $file->getPathname());
+      }
     }
-}
-
+  }
 }
 class frigateCmd extends cmd
 {
