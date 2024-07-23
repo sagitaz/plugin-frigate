@@ -1640,7 +1640,7 @@ class frigate extends eqLogic
 
 public static function deleteLatestFile()
 {
-    $folder = "/data/";
+    $folder = dirname(__FILE__, 3) . "/data/";
     $fileName = "lastest.png";
     // Parcourt récursivement tous les fichiers et dossiers
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
