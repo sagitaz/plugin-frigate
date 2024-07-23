@@ -409,6 +409,39 @@ class frigate extends eqLogic
           }
         }
       }
+      // commantes motions
+      $replace['#detectNow#'];
+      if (is_object($this->getCmd('info', 'info_detectNow'))) {
+        $detectNow = $this->getCmd("info", 'info_detectNow');
+        if ($detectNow->getIsVisible() == 1) {
+          $value = $detectNow->execCmd();
+          if ($value == 1) {
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '<div class="btn-detect">';
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user iconDetect' . $this->getId() . '"></i>';
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>';
+          } else {
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '<div class="btn-detect">';
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user iconDetectOff' . $this->getId() . '"></i>';
+            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>'; 
+          }
+        }
+      }
+      if (is_object($this->getCmd('action', 'action_start_motion')) && is_object($this->getCmd('action', 'action_stop_motion'))) {
+        $on = $this->getCmd("action", 'action_start_motion');
+        $off = $this->getCmd("action", 'action_stop_motion');
+        $etat = $this->getCmd("info", 'info_motion');
+        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
+          if ($etat->execCmd() == 0) {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-shapes iconActionOff' . $this->getId() . '" title="motion ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          } else {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-shapes iconAction' . $this->getId() . '" title="motion OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          }
+        }
+      }
       // commandes PTZ down
       if (is_object($this->getCmd('action', 'action_ptz_down'))) {
         $down = $this->getCmd("action", 'action_ptz_down');
@@ -1123,6 +1156,18 @@ class frigate extends eqLogic
     $cmd->save();
     $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
     $cmd->save();
+
+    $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+    $infoCmd->save();
+    $infoCmd = self::createCmd($eqlogicId, "motion Etat", "binary", "", "info_motion", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+    $infoCmd->save();
+    // commande action
+    $cmd = self::createCmd($eqlogicId, "motion off", "other", "", "action_stop_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "motion on", "other", "", "action_start_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "motion toggle", "other", "", "action_toggle_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
+    $cmd->save();
   }
 
   public static function createPTZcmds($eqlogicId)
@@ -1577,7 +1622,11 @@ class frigate extends eqLogic
             foreach ($value as $innerKey => $innerValue) {
               switch ($innerKey) {
                 case 'motion':
-                  // A venir
+                  $infoCmd = self::createCmd($eqCamera->getId(), $innerKey . " Etat", "binary", "", "info_" . $innerKey, "JEEMATE_CAMERA_DETECT_STATE", 0);
+                  $value = ($innerValue['state'] == 'ON') ? "1" : "0";
+                  $infoCmd->event($value);
+                  $infoCmd->save();
+                  $eqCamera->refreshWidget();
                   break;
                 case 'audio':
                   break;
@@ -1776,6 +1825,23 @@ class frigateCmd extends cmd
         frigate::publish_camera_message($camera, 'snapshots/set', 'OFF');
       } else {
         frigate::publish_camera_message($camera, 'snapshots/set', 'ON');
+      }
+    }
+    // MOTION ON
+    else if ($this->getLogicalId() == 'action_start_motion') {
+      frigate::publish_camera_message($camera, 'motion/set', 'ON');
+    }
+    // MOTION OFF
+    else if ($this->getLogicalId() == 'action_stop_motion') {
+      frigate::publish_camera_message($camera, 'motion/set', 'OFF');
+    }
+    // MOTION TOGGLE
+    else if ($this->getLogicalId() == 'action_toggle_motion') {
+      $motion = $frigate->getCmd(null, 'info_motion')->execCmd();
+      if ($motion == 1) {
+        frigate::publish_camera_message($camera, 'motion/set', 'OFF');
+      } else {
+        frigate::publish_camera_message($camera, 'motion/set', 'ON');
       }
     }
     // PTZ MOVE LEFT
