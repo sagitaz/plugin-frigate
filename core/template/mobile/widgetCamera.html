@@ -6,12 +6,13 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     </center>
 
-    <div id="img-container">
-        <img id="imgFrigate#id#" class="img-responsive" src="" />
-    </div>
-    <br>
-    <div id="btn-container">
-        #actions#
+    <div class="column">
+        <div class="img-container">
+            <img id="imgFrigate#id#" class="img-responsive" src="" />
+        </div>
+        <div class="btn-container">
+            #actions#
+        </div>
     </div>
 
     <script>
@@ -82,18 +83,25 @@
             min-width: 25%;
         }
 
-        #img-container {
+        .frigate_widget .column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: auto;
+        }
+
+        .frigate_widget .img-container {
             position: relative;
+            flex-grow: 1;
             min-width: 100%;
             width: 100%;
-            min-height: 60%;
             height: auto;
             background-image: url('/plugins/frigate/data/no-imgage.png');
             background-size: cover;
             background-position: center;
         }
 
-        #img-container img {
+        .frigate_widget .img-container img {
             position: relative;
             z-index: 1;
             min-width: 100%;
@@ -101,11 +109,17 @@
             height: auto;
         }
 
-
-        #btn-container {
+        .frigate_widget .btn-container {
             border-collapse: collapse;
+            padding-top: 10px;
             width: 90%;
-            margin: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
         }
 
         .frigate_widget .btn-actions {

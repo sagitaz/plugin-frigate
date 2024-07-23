@@ -6,16 +6,17 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
     </center>
 
-    <div id="img-container">
-        <img id="imgFrigate#id#" class="img-responsive" src="" />
-    </div>
-    <br>
-    <div id="btn-container">
-        #actions#
+    <div class="column">
+        <div class="img-container">
+            <img id="imgFrigate#id#" class="img-responsive" src="" />
+        </div>
+        <div class="btn-container">
+            #actions#
+        </div>
     </div>
 
     <script>
-        if (typeof window.imgSrc === 'undefined') {
+        if (window.imgSrc === undefined) {
             let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
             console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
             let imgElement = document.getElementById('imgFrigate' + #id#);
@@ -55,8 +56,8 @@
             }
 
             function refreshImage() {
-                let newSrc = imgSrc.replace(/&amp;/g, '&') + "&t=" + new Date().getTime();
-                console.log('Refreshing image with URL: ' + newSrc);
+                let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
+                console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
                 imgElement.src = newSrc;
             }
 
@@ -82,8 +83,16 @@
             min-width: 30%;
         }
 
-        #img-container {
+        .frigate_widget .column {
+            display: flex;
+            flex-direction: column;
+            justify-content: space-between;
+            height: auto;
+        }
+
+        .frigate_widget .img-container {
             position: relative;
+            flex-grow: 1;
             min-width: 100%;
             width: 100%;
             height: auto;
@@ -92,7 +101,7 @@
             background-position: center;
         }
 
-        #img-container img {
+        .frigate_widget .img-container img {
             position: relative;
             z-index: 1;
             min-width: 100%;
@@ -101,10 +110,17 @@
         }
 
 
-        #btn-container {
+        .frigate_widget .btn-container {
             border-collapse: collapse;
+            padding-top: 10px;
             width: 90%;
-            margin: auto;
+            position: absolute;
+            bottom: 0;
+            left: 0;
+            right: 0;
+            margin-left: auto;
+            margin-right: auto;
+            text-align: center;
         }
 
         .frigate_widget .btn-actions {
