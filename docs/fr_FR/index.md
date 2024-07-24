@@ -90,7 +90,7 @@ Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécut
 
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 En configuration sans MQTT, ce n'est pas utile, tous les évènementssont de type **end**.
-En MQTT, ils peuvent être de type **start**, **update** et **end**.
+En MQTT, ils peuvent être de type **new**, **update** et **end**.
 
 ### Exemple de notification :
 #### Plugin JeeMate
