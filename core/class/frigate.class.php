@@ -49,7 +49,7 @@ class frigate extends eqLogic
   {
     // Configuration par défaut
     if (!config::byKey('URL', 'frigate')) {
-      config::save('URL', 'http://localhost', 'frigate');
+      config::save('URL', '127.0.0.1', 'frigate');
     }
     if (!config::byKey('port', 'frigate')) {
       config::save('port', '5000', 'frigate');
@@ -1527,11 +1527,6 @@ class frigate extends eqLogic
     }
 
     return $config;
-  }
-
-  public static function postConfig_URL()
-  {
-    self::getConfig();
   }
 
   public static function preConfig_topic($value)
