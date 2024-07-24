@@ -722,9 +722,8 @@ class frigate extends eqLogic
   public static function removeFile($id)
   {
     $event = frigate_events::byEventId($id);
-    log::add(__CLASS__, 'debug', "Favoris : " . json_encode($event[0]->getIsFavorite()));
     // Verifier si le fichier est un favoris
-    $isFavorite = $event[0]->getIsFavorite();
+    $isFavorite = $event[0]->getIsFavorite() ?? 0;
     if ($isFavorite == 1) {
       log::add(__CLASS__, 'debug', "Evènement " . $id . " est un favori, il ne doit pas être supprimé de la DB.");
       return false;
@@ -908,7 +907,7 @@ class frigate extends eqLogic
     foreach ($inDbEvents as $inDbEvent) {
       if (!in_array($inDbEvent->getEventId(), $ids)) {
         // Verifier si le fichier est un favoris
-        $isFavorite = $inDbEvent->getIsFavorite();
+        $isFavorite = $inDbEvent->getIsFavorite() ?? 0;
         if ($isFavorite == 1) {
           log::add(__CLASS__, 'debug', "Evènement " . $inDbEvent->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
         } else {
@@ -941,7 +940,7 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "Delete ID : " . $id);
     $frigate = frigate_events::byEventId($id);
-    $isFavorite = $frigate[0]->getIsFavorite();
+    $isFavorite = $frigate[0]->getIsFavorite() ?? 0;
     if ($isFavorite == 1) {
       log::add(__CLASS__, 'debug', "Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
       message::add('frigate', __("L'évènement est un favori, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
@@ -984,7 +983,7 @@ class frigate extends eqLogic
         "id" => $event->getEventId(),
         "top_score" => $event->getTopScore(),
         "type" => $event->getType(),
-        "isFavorite" => $event->getIsFavorite()
+        "isFavorite" => $event->getIsFavorite() ?? 0
       );
     }
 
@@ -1274,6 +1273,21 @@ class frigate extends eqLogic
       }
       $cmd2->event($value);
       $cmd2->save();
+
+
+      $cmd = self::createCmd($eqlogicId, "URL snapshot", "string", "", "info_url_snapshot", "GENERIC_INFO");
+      $cmd->event($event->getSnapshot());
+      $cmd->save();
+
+
+      $cmd = self::createCmd($eqlogicId, "URL clip", "string", "", "info_url_clip", "GENERIC_INFO");
+      $cmd->event($event->getClip());
+      $cmd->save();
+
+
+      $cmd = self::createCmd($eqlogicId, "URL thumbnail", "string", "", "info_url_thumbnail", "GENERIC_INFO");
+      $cmd->event($event->getThumbnail());
+      $cmd->save();
     }
   }
 
