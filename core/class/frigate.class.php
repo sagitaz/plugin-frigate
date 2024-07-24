@@ -433,11 +433,11 @@ class frigate extends eqLogic
         if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
           if ($etat->execCmd() == 0) {
             $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-shapes iconActionOff' . $this->getId() . '" title="motion ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-male iconActionOff' . $this->getId() . '" title="motion ON" onclick="execAction(' . $on->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           } else {
             $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-shapes iconAction' . $this->getId() . '" title="motion OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-walking iconAction' . $this->getId() . '" title="motion OFF" onclick="execAction(' . $off->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           }
         }
