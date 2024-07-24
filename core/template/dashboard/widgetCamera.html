@@ -8,6 +8,7 @@
 
     <div class="column">
         <div class="img-container">
+            #detectNow#
             <img id="imgFrigate#id#" class="img-responsive" src="" />
         </div>
         <div class="btn-container">
@@ -109,6 +110,25 @@
             height: auto;
         }
 
+        .frigate_widget .btn-detect {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            z-index: 2;
+            text-align: right;
+        }
+
+        .frigate_widget .iconDetect#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconDetectOff#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: var(--txt-color) !important;
+        }
 
         .frigate_widget .btn-container {
             border-collapse: collapse;
@@ -122,6 +142,7 @@
             margin-right: auto;
             text-align: center;
         }
+
 
         .frigate_widget .btn-actions {
             border-top: solid !important;
