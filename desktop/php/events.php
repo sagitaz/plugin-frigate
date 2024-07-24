@@ -15,7 +15,7 @@ if (!isConnect('admin')) {
   <div class="input-group" style="margin-bottom:20px">
     <span class="input-group-btn">
       <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
-      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> supprimer tous les events visibles </a>
+      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> supprimer tous les évènements visibles </a>
     </span>
   </div>
   <?php
