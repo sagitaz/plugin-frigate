@@ -18,7 +18,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 
 # <u>Demon</u>
 Le demon démarre automatiquement après avoir sauvegarder la partie configuration et y avoir configuré le topic Frigate.
-Pour pouvoir utiliser MQTT, il faut que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
+Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly, voir le désactiver.
 
 # <u>Utilisation</u>
@@ -39,7 +39,21 @@ Après installation du plugin et la configuration de l'URL et du port de votre s
 ### Equipement
 A gauche, les quelques paramètres disponibles pour la visualisation présente à droite. Refresh de l'image toute les 2 secondes.
 ### Commandes
-Sont présents ici les informations sur le dernier évènement de la caméra et sur ses statistiques.
+#### infos
+##### toutes les cameras
+Les informations sur le dernier évènement de la caméra et sur ses statistiques.
+##### MQTT
+L'information sur détection en cours
+#### actions
+Pour avoir les commandes actions il est obligatoire d'utiliser MQTT, sans cela, les commandes ne seront pas créées.
+Je vous invite a lire la doc de Frigate pour la configuration de votre serveur MQTT.
+- **Detect** : etat, on, off, toggle
+- **Snapshot** : etat, on, off, toggle
+- **Recording** : etat, on, off, toggle
+- **Motion** : etat, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
+Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ, il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
+N'ayant pas de caméra PTZ, merci de me fournir un fichier configuration afin que je mette la création de ces boutons en automatique.
+- **PTZ** : left, right, up, down, stop, zoom in, zoom out
 ### Actions
 #### Conditions
 Indiquer ici dans quel cas les actions NE DOIVENT PAS être exécutées.
