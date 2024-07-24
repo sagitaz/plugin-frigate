@@ -1622,15 +1622,24 @@ class frigate extends eqLogic
             foreach ($value as $innerKey => $innerValue) {
               switch ($innerKey) {
                 case 'motion':
-                  $infoCmd = self::createCmd($eqCamera->getId(), $innerKey . " Etat", "binary", "", "info_" . $innerKey, "JEEMATE_CAMERA_DETECT_STATE", 0);
-                  $value = ($innerValue['state'] == 'ON') ? "1" : "0";
-                  $infoCmd->event($value);
-                  $infoCmd->save();
-                  $infoCmd = self::createCmd($eqCamera->getId(), "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-                  $value = ($innerValue == 'ON') ? "1" : "0";
-                  $infoCmd->event($value);
-                  $infoCmd->save();
-                  $eqCamera->refreshWidget();
+                  if (isset($innerValue['state']) && $innerValue['state']) {
+                    log::add(__CLASS__, 'info', $key . ' => Valeur motion state : ' . $innerValue['state']);
+                    $infoCmd = self::createCmd($eqCamera->getId(), $innerKey . " Etat", "binary", "", "info_" . $innerKey, "JEEMATE_CAMERA_DETECT_STATE", 0);
+                    $value = ($innerValue['state'] == 'ON') ? "1" : "0";
+                    log::add(__CLASS__, 'info', $key . ' => Valeur motion state : ' . $value);
+                    $infoCmd->event($value);
+                    $infoCmd->save();
+                    $eqCamera->refreshWidget();
+                  }
+                  if (isset($innerValue) && !is_array($innerValue)) {
+                    log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $innerValue);
+                    $infoCmd = self::createCmd($eqCamera->getId(), "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+                    $value = ($innerValue == 'ON') ? "1" : "0";
+                    log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $value);
+                    $infoCmd->event($value);
+                    $infoCmd->save();
+                    $eqCamera->refreshWidget();
+                  }
                   break;
                 case 'audio':
                   break;
