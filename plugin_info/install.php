@@ -58,9 +58,13 @@ function frigate_update()
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
     if (empty($resultCheck)) {
         // Création de la nouvelle colonne 'isFavorite' si elle n'existe pas
-        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `isFavorite` tinyint(1);";
+        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `isFavorite` tinyint(1) DEFAULT 0;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
+    // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0
+    $sqlUpdate = "UPDATE `jeedom`.`frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` IS NULL;";
+    DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
+    
     frigate::generateEqEvents();
     frigate::setCmdsCron();
     frigate::generateEqStats();
