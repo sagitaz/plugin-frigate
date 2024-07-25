@@ -850,11 +850,17 @@ class frigate extends eqLogic
         } else {
           $has_clip = 0;
         }
+        if ($event['has_snapshot'] == "true") {
+          $has_snapshot = 1;
+        } else {
+          $has_snapshot = 0;
+        }
         $hasclip = $frigate->getHasClip();
-        if ($hasclip != $has_clip) {
+        $hasSnapshot = $frigate->getHasSnapshot();
+        if ($hasclip != $has_clip || $hasSnapshot != $has_snapshot) {
           $infos = self::getEventinfos($event);
-          log::add(__CLASS__, 'debug', "refresh Events (has clip =" . $infos["hasClip"] . ") => " . json_encode($event));
-          log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau clip.");
+          log::add(__CLASS__, 'debug', "refresh Events => " . json_encode($event));
+          log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau clip/snapshot.");
           $frigate->setHasClip($infos["hasClip"]);
           $frigate->setClip($infos["clip"]);
           $frigate->setHasSnapshot($infos["hasSnapshot"]);
@@ -863,7 +869,7 @@ class frigate extends eqLogic
         }
         if ($frigate->getEndTime() == 0) {
           $infos = self::getEventinfos($event);
-          log::add(__CLASS__, 'debug', "refresh Events (mqtt=" . $mqtt . ") => " . json_encode($event));
+          log::add(__CLASS__, 'debug', "refresh Events => " . json_encode($event));
           log::add(__CLASS__, 'debug', "Mise à jour de l'évènement avec le nouveau end time.");
           $frigate->setEndTime($event['end_time']);
           $frigate->setHasClip($infos["hasClip"]);
