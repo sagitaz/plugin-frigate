@@ -1374,8 +1374,10 @@ class frigate extends eqLogic
   private static function executeActionNewEvent($eqLogicId, $event)
   {
       // Récupération des URLs externes et internes
-      $urlJeedom = network::getNetworkAccess('external') ?: network::getNetworkAccess('internal');
-      $urlFrigate = self::getUrlFrigate();
+      $urlJeedom = network::getNetworkAccess('external');
+      if ($urlJeedom == "") {
+        $urlJeedom = network::getNetworkAccess('internal');
+      }
 
       // Initialisation des variables d'événement
       $eventId = $event->getEventId();
