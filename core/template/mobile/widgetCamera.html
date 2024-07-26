@@ -8,10 +8,17 @@
 
     <div class="column">
         <div class="img-container">
+            #detectNow#
             <img id="imgFrigate#id#" class="img-responsive" src="" />
         </div>
         <div class="btn-container">
-            #actions#
+            <div class="btn-actions">
+                <div class="btn-icon">
+                    <i class="fas fa-minus-circle iconActionOff0" onclick="gotoCameraEvents()"
+                        title="{{Afficher les évènements de la caméra}}"></i>
+                </div>
+                #actions#
+            </div>
         </div>
     </div>
 
@@ -65,7 +72,10 @@
             refreshImage(); // Initial call to display the image immediately            
 
         }
-
+        function gotoCameraEvents() {
+            const camera = #cameraName#;
+            jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
+        }
         function execAction(cmdid) {
             jeedom.cmd.execute({
                 id: cmdid
@@ -121,7 +131,25 @@
             margin-right: auto;
             text-align: center;
         }
+        .frigate_widget .btn-detect {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            z-index: 2;
+            text-align: right;
+        }
 
+        .frigate_widget .iconDetect#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconDetectOff#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: var(--txt-color) !important;
+        }
         .frigate_widget .btn-actions {
             border-top: solid !important;
             border-color: rgba(230, 230, 230, 0.1) !important;

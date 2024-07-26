@@ -357,7 +357,6 @@ class frigate extends eqLogic
 
 
       $replace['#actions#'] = '';
-      $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-actions">';
       // Commandes recording
       if (is_object($this->getCmd('action', 'action_start_recordings')) && is_object($this->getCmd('action', 'action_stop_recordings'))) {
         $on = $this->getCmd("action", 'action_start_recordings');
@@ -512,7 +511,6 @@ class frigate extends eqLogic
         }
       }
 
-      $replace['#actions#'] = $replace['#actions#'] . '</div>';
 
       $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widgetCamera', 'frigate')));
       cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
