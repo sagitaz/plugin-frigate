@@ -133,39 +133,25 @@ if (!isConnect('admin')) {
 
   echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {
-    //div globale start
-    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
-    echo '<div class="frigateEvent">';
-    // div img
-    $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
+    $id = $event['id'];
+    $camera = $event['camera'];
+    $label = $event['label'];
     $type = $event['type'];
+    $date = $event['date'];
+    $timeElapsed = timeElapsedString($date);
+    $percentage = $event['percentage'];
+    $duration = $event['duration'];
+    $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
     $filterText = '';
     if ($type == 'new') {
       $filterText = 'Nouveau';
     } elseif ($type == 'update') {
       $filterText = 'En cours';
     }
-    echo '<div class="img-container">';
-    echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-    echo '<button class="favorite-btn" onclick="toggleFavorite(this)" data-id="' . $event['id'] . '" >';
-    echo '<i class="' . $favoriteClass . '"></i>';
-    echo '</button>';
-    if (!empty($filterText)) {
-      echo '<div class="filter">' . $filterText . '</div>';
-    }
-    echo '</div>';
-    // div texte
-    echo '<div class="eventText">';
-    $timeElapsed = timeElapsedString($event['date']);
-    echo '<span class="inline-title">' . $event['label'] . '</span><span class="inline-subtitle duration"> ' . $timeElapsed . '</span><br/><br/>';
-    echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';
-
     $cameraFound = false;
     $cameraId = 0;
     try {
-      $attribut = 'name';
-      $valeurRecherchee = $event['camera'];
-      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $valeurRecherchee, 'frigate', false);
+      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $camera, 'frigate', false);
       if ($frigateCamera != false) {
         $cameraFound = true;
         $cameraId = $frigateCamera->getId();
@@ -173,73 +159,23 @@ if (!isConnect('admin')) {
     } catch (Exception $e) {
       //echo "Erreur : " . $e->getMessage();
     }
-
-    if ($cameraFound) {
-      echo '<a onclick="gotoCamera(\'' . $cameraId . '\')" title="Afficher la page de la caméra">';
-    }
-    echo '<i class="fas fa-video"></i><span>  ' . $event['camera'] . '</span>';
-    if ($cameraFound) {
-      echo '</a>';
-    }
-    echo '<br>';
-
-    $formattedDuration = '<div class=\'duration\'>' . formatDuration($event['duree']) . '</div>';
-    $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($event['duree']) . '</div>';
-
-    echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' ' . $formattedDuration . '</span>';
-    echo '</div>';
-    // div buttons
-    echo '<div class="eventBtns"';
-    if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
-    if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
-    echo ' data-title="' . $event['label'] . ' <div class=\'percentage percentageTitle\' data-percentage=\'' . $event['top_score'] . '\'>' . $event['top_score'] . ' %</div> - ' . $event['camera'] . ' - ' . $event['date'] . ' ' . $formattedDurationTitle . '"';
-    echo '>';
-    if ($event['hasSnapshot'] == 1) {
-      echo '<button class="hover-button snapshot-btn" title="Voir le snapshot">';
-      echo '<i class="fas fa-camera"></i>';
-      echo '</button>';
-    }
-    if ($event['hasClip'] == 1) {
-      echo '<button class="hover-button video-btn" title="Voir le clip">';
-      echo '<i class="fas fa-film"></i>';
-      echo '</button>';
-    }
-    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur Frigate">';
-    echo '<i class="fas fa-trash"></i>';
-    echo '</button>';
-    echo '</div>';
-    // div globale end
-    echo '</div>';
-    echo '</div>';
+	  $topScore = $event['top_score'];
+    $duree = $event['duree'];
+    $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
+    $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($duree) . '</div>';
+	  $img = $event['img'];
+    $hasSnapshot = $event['hasSnapshot'];
+    $snapshot = $event['snapshot'];
+    $hasClip = $event['hasClip'];
+    $clip = $event['clip'];
+    
+  	// event creation with a template
+    include 'event.template.php';
   }
   echo '</div>';
 
+  include 'event.modal.template.php';
   ?>
-
-  <div id="mediaModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-
-      <div class="modal-header">
-        <h2 id="mediaTitle"></h2>
-        <div class="button-container">
-          <button id="showVideo" class="hidden-btn custom-button">Voir la vidéo</button>
-          <button id="showImage" class="hidden-btn custom-button">Voir la snapshot</button>
-        </div>
-      </div>
-      <div class="media-container">
-        <div class="video-container active">
-          <video id="videoPlayer" width="100%" controls autoplay>
-            <source id="videoSource" src="" type="video/mp4">
-            Votre navigateur ne supporte pas la balise vidéo.
-          </video>
-        </div>
-        <div class="image-container">
-          <img id="snapshotImage" src="" alt="Snapshot" width="100%">
-        </div>
-      </div>
-    </div>
-  </div>
 
 </div>
 

@@ -21,6 +21,9 @@ Le démon démarre automatiquement après avoir sauvegardé la partie configurat
 Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly, voire le désactiver.
 
+**Deamon NOK :**
+Si vous n'avez pas mqtt-manager, il est normal que le deamon reste sur NOK, aucun problème le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
+
 # <u>Utilisation</u>
 ## Equipement Events
 L'équipement est créé de manière automatique à l'installation du plugin.
