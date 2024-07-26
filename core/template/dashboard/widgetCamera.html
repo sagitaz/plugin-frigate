@@ -14,7 +14,7 @@
         <div class="btn-container">
             <div class="btn-actions">
                 <div class="btn-icon">
-                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents()"
+                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents#id#()"
                         title="Afficher les évènements de la caméra"></i>
                 </div>
                 #actions#
@@ -72,7 +72,7 @@
             refreshImage(); // Initial call to display the image immediately            
 
         }
-        function gotoCameraEvents() {
+        function gotoCameraEvents#id#() {
             const camera = '#cameraName#';
             jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
         }
