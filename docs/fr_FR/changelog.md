@@ -4,6 +4,11 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 26/07/2024 Beta 0.8.1
+- corrections récupération clips et snapshots
+- modification couleur boutons widget
+- le dossier data n'est plus pris en compte dans les sauvegardes jeedom
+
 # 22/07/2024 Beta 0.8.0
 - Ajout variable #thumbnail_path# et #thumbnail#
 - Ajout MQTT2 dependance

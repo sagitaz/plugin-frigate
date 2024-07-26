@@ -447,7 +447,7 @@ class frigate extends eqLogic
         $down = $this->getCmd("action", 'action_ptz_down');
         if ($down->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-down iconAction' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -457,7 +457,7 @@ class frigate extends eqLogic
         $up = $this->getCmd("action", 'action_ptz_up');
         if ($up->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-up iconAction' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -467,7 +467,7 @@ class frigate extends eqLogic
         $left = $this->getCmd("action", 'action_ptz_left');
         if ($left->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-left iconAction' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -477,7 +477,7 @@ class frigate extends eqLogic
         $right = $this->getCmd("action", 'action_ptz_right');
         if ($right->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-right iconAction' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -487,7 +487,7 @@ class frigate extends eqLogic
         $stop = $this->getCmd("action", 'action_ptz_stop');
         if ($stop->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-stop-circle iconAction' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -497,7 +497,7 @@ class frigate extends eqLogic
         $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
         if ($zoom_in->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-plus-circle iconAction' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -507,7 +507,7 @@ class frigate extends eqLogic
         $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
         if ($zoom_out->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-minus-circle iconAction' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
