@@ -249,9 +249,6 @@ function gotoCamera(cameraId) {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
 }
 
-window.addEventListener('load', function () {
-  filterEvents();
-});
 document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
   checkbox.addEventListener('change', filterEvents);
 });
@@ -334,3 +331,5 @@ function setFavorite(eventId, isFav) {
     }
   })
 }
+
+filterEvents();
