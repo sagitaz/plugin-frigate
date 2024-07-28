@@ -14,7 +14,7 @@
         <div class="btn-container">
             <div class="btn-actions">
                 <div class="btn-icon">
-                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents()"
+                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents#id#()"
                         title="Afficher les évènements de la caméra"></i>
                 </div>
                 #actions#
@@ -72,8 +72,8 @@
             refreshImage(); // Initial call to display the image immediately            
 
         }
-        function gotoCameraEvents() {
-            const camera = #cameraName#;
+        function gotoCameraEvents#id#() {
+            const camera = '#cameraName#';
             jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
         }
         function execAction(cmdid) {
@@ -106,7 +106,7 @@
             min-width: 100%;
             width: 100%;
             height: auto;
-            background-image: url('/plugins/frigate/data/no-imgage.png');
+            background-image: url('/plugins/frigate/data/no-image.png');
             background-size: cover;
             background-position: center;
         }
@@ -167,24 +167,23 @@
         .frigate_widget .iconAction#id# {
             padding: 10px;
             font-size: 20px;
-            color: var(--txt-color) !important;
-            color: orange !important;
+            color: var(--frigate-icone-color#id#) !important;
+            transition: transform 1s ease;
         }
 
         .frigate_widget .iconAction#id#:hover {
-            font-size: 22px;
-            color: var(--frigate-icone-color#id#) !important;
+            transform: scale(1.5);
         }
 
         .frigate_widget .iconActionOff#id# {
             padding: 10px;
             font-size: 20px;
             color: var(--txt-color) !important;
+            transition: transform 1s ease;
         }
 
         .frigate_widget .iconActionOff#id#:hover {
-            font-size: 22px;
-            color: var(--frigate-icone-color#id#) !important;
+            transform: scale(1.5);
         }
     </style>
 </div>
