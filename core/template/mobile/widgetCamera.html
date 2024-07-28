@@ -8,10 +8,17 @@
 
     <div class="column">
         <div class="img-container">
+            #detectNow#
             <img id="imgFrigate#id#" class="img-responsive" src="" />
         </div>
         <div class="btn-container">
-            #actions#
+            <div class="btn-actions">
+                <div class="btn-icon">
+                    <i class="fas fa-minus-circle iconActionOff0" onclick="gotoCameraEvents()"
+                        title="{{Afficher les évènements de la caméra}}"></i>
+                </div>
+                #actions#
+            </div>
         </div>
     </div>
 
@@ -65,7 +72,10 @@
             refreshImage(); // Initial call to display the image immediately            
 
         }
-
+        function gotoCameraEvents() {
+            const camera = #cameraName#;
+            jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
+        }
         function execAction(cmdid) {
             jeedom.cmd.execute({
                 id: cmdid
@@ -96,7 +106,7 @@
             min-width: 100%;
             width: 100%;
             height: auto;
-            background-image: url('/plugins/frigate/data/no-imgage.png');
+            background-image: url('/plugins/frigate/data/no-image.png');
             background-size: cover;
             background-position: center;
         }
@@ -121,7 +131,25 @@
             margin-right: auto;
             text-align: center;
         }
+        .frigate_widget .btn-detect {
+            position: absolute;
+            bottom: 5px;
+            right: 5px;
+            z-index: 2;
+            text-align: right;
+        }
 
+        .frigate_widget .iconDetect#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: red !important;
+        }
+
+        .frigate_widget .iconDetectOff#id# {
+            padding: 10px;
+            font-size: 20px;
+            color: var(--txt-color) !important;
+        }
         .frigate_widget .btn-actions {
             border-top: solid !important;
             border-color: rgba(230, 230, 230, 0.1) !important;
@@ -136,22 +164,23 @@
         .frigate_widget .iconAction#id# {
             padding: 10px;
             font-size: 18px;
-            color: var(--txt-color) !important;
-            color: orange !important;
+            color: var(--frigate-icone-color#id#) !important;
+            transition: transform 1s ease;
         }
 
         .frigate_widget .iconAction#id#:hover {
-            color: var(--frigate-icone-color#id#) !important;
+            transform: scale(1.5);
         }
 
         .frigate_widget .iconActionOff#id# {
             padding: 10px;
             font-size: 18px;
             color: var(--txt-color) !important;
+            transition: transform 1s ease;
         }
 
         .frigate_widget .iconActionOff#id#:hover {
-            color: var(--frigate-icone-color#id#) !important;
-        }
+            transform: scale(1.5);
+        }     
     </style>
 </div>
