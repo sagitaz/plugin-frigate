@@ -3,6 +3,10 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 26/07/2024 Beta 0.8.2
+- corrections récupération thumbnail
+- Ajout bouton pour acceder aux évènements de la caméra sur le widget
+- Petites corrections
 
 # 26/07/2024 Beta 0.8.1
 - corrections récupération clips et snapshots
