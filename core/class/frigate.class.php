@@ -1818,6 +1818,105 @@ class frigate extends eqLogic
     // retourne le répertoire de sauvegarde des snapshots et des vidéos des events à ne pas enregistrer dans le backup Jeedom
     return ['data'];
   }
+
+  
+  public static function getFrigateConfiguration() 
+  {
+      log::add(__CLASS__, 'info', "getFrigateConfiguration");
+        
+  	  $urlfrigate = self::getUrlFrigate();
+      $resultURL = $urlfrigate . "/api/config/raw";
+
+      $ch = curl_init($resultURL);
+      curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+      curl_setopt($ch, CURLOPT_HTTPGET, true);
+
+      $curlResponse = curl_exec($ch);
+
+      if ($curlResponse === false) {
+    	$error = 'Erreur cURL : ' . curl_error($ch);
+        curl_close($ch);
+        log::add(__CLASS__, 'error', 'getFrigateConfiguration :: ' . $error);
+        $response = array(
+          'status' => 'error',
+          'message' => $error
+        );
+
+        return $response;
+      }
+
+      $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+      if ($httpCode != 200) {
+    	$error = 'Erreur : Impossible de récupérer la configuration. Code de statut : ' . $httpCode;
+        curl_close($ch);
+        log::add(__CLASS__, 'error', 'getFrigateConfiguration :: ' . $error);
+        $response = array(
+          'status' => 'error',
+          'message' => $error
+        );
+        
+        return $response;
+      }
+
+      curl_close($ch);
+
+      //log::add(__CLASS__, 'info', "getFrigateConfiguration:: save config file");
+      //$file = file_put_contents(dirname(__FILE__, 3) . '/data/config.yaml', $curlResponse);
+
+      $response = array(
+        'status' => 'success',
+        'message' => $curlResponse
+      );
+
+  	  return $response;
+  }
+  
+  public static function sendFrigateConfiguration($frigateConfiguration, $restart = false)
+  {
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/config/save" . ($restart ? '?save_option=restart' : '');
+    
+    $ch = curl_init($resultURL);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_POST, true);
+    curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-yaml'));
+    curl_setopt($ch, CURLOPT_POSTFIELDS, $frigateConfiguration);
+    
+   	log::add(__CLASS__, 'debug', 'sendFrigateConfiguration :: Data : ' . $frigateConfiguration);
+    $curlResponse = curl_exec($ch);
+
+    if ($curlResponse === false) {
+    	$error = 'Erreur cURL : ' . curl_error($ch);
+        curl_close($ch);
+        log::add(__CLASS__, 'error', 'sendFrigateConfiguration :: ' . $error);
+        $response = array(
+          'status' => 'error',
+          'message' => $error
+        );
+
+        return $response;
+    }
+
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    if ($httpCode != 200) {
+    	$error = 'Erreur : Impossible de sauvegarder la configuration. Code de statut : ' . $httpCode;
+        curl_close($ch);
+        log::add(__CLASS__, 'error', 'sendFrigateConfiguration :: ' . $error);
+        $response = array(
+          'status' => 'error',
+          'message' => $error
+        );
+
+        return $response;
+    }
+
+    curl_close($ch);
+    $response = array(
+      'status' => 'success',
+      'message' => $curlResponse
+    );
+    return $response;
+  }  
 }
 class frigateCmd extends cmd
 {

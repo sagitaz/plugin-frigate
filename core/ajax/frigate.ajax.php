@@ -47,7 +47,7 @@ try {
     }
 
     if (init('action') == 'refreshCameras') {
-        // Raffraichi la visualisation
+        // Rafraichit la visualisation
         $name = init('name');
         $img = init('img');
         $eqlogicId = init('eqlogicId');
@@ -79,6 +79,26 @@ try {
         ));
     }
 
+    if (init('action') == 'getFrigateConfiguration') {
+        log::add(__CLASS__, 'info', "getFrigateConfiguration");
+        $result = frigate::getFrigateConfiguration();
+        ajax::success($result);
+    }
+    
+    if (init('action') == 'sendFrigateConfiguration') {
+        log::add(__CLASS__, 'info', "sendFrigateConfiguration");
+        $config = init('data');
+        $result = frigate::sendFrigateConfiguration($config);
+        ajax::success($result);
+    }
+    
+    if (init('action') == 'sendFrigateConfigurationAndRestart') {
+        log::add(__CLASS__, 'info', "sendFrigateConfigurationAndRestart");
+        $config = init('data');
+        $result = frigate::sendFrigateConfiguration($config, true);
+        ajax::success($result);
+    }
+ 
     if (init('action') == 'stream') {
         // Récupère l'objet caméra à partir de son ID
         $camera = frigate::byId(init('id'));
