@@ -209,6 +209,15 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
     window.open(frigateURL, '_blank');
 });
 
+document.getElementById('editConfiguration').addEventListener('click', function () {
+    bootbox.confirm('{{Configuration avancée, à vos propres risques ! Aucun support ne sera donné !}}', function(result)   {
+      if (result) {
+        $('#md_modal2').dialog({title: "{{Edition du fichier de configuration Frigate}}"});
+        $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=editConfiguration.modal').dialog('open');
+      }
+    });
+});
+
 document.getElementById('getConfig').addEventListener('click', function () {
     $.ajax({
         type: "POST",

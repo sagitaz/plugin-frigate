@@ -51,6 +51,11 @@ sendVarToJS('refresh', $refresh);
                 <br>
                 <span>{{Serveur Frigate}}</span>
             </div>
+            <div class="cursor eqLogicAction logoSecondary" id="editConfiguration" title="{{Editer le fichier de configuration Frigate}}.">
+                <i class="far fa-file-alt"></i>
+                <br>
+                <span>{{Configuration Frigate}}</span>
+            </div>
             <div class="cursor eqLogicAction logoSecondary" id="getConfig" title="{{Télécharger le fichier de configuration Frigate}}.">
                 <i class="fas fa-download"></i>
                 <br>
