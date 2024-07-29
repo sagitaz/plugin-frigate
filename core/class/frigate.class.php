@@ -262,7 +262,7 @@ class frigate extends eqLogic
       $img = $encoded_url = urlencode("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
       $this->setConfiguration('img', $img);
 
-      self::createCamerasCmds($this->getLogicalId());
+      self::createCamerasCmds($this->getId());
     }
   }
 
@@ -340,6 +340,7 @@ class frigate extends eqLogic
   // Permet de modifier l'affichage du widget (également utilisable par les commandes)
   public function toHtml($_version = 'dashboard')
   {
+    $type = "";
     $logicalId = $this->getLogicalId();
     if (strpos($logicalId, "eqFrigateCamera_") !== false) {
       $type = "camera";
@@ -516,7 +517,7 @@ class frigate extends eqLogic
       // commandes make snapshot
       if (is_object($this->getCmd('action', 'action_make_snapshot'))) {
         $make_snapshot = $this->getCmd("action", 'action_make_snapshot');
-        if ($make_snapshot->getIsVisible() == 1) { 
+        if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="CREER SNAPSHOT" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
@@ -676,7 +677,10 @@ class frigate extends eqLogic
   {
     $size = 0;
     // Parcourt récursivement tous les fichiers et dossiers
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) { // Exclure les sous-dossiers "snapshots" et "clips"
+      if (strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'snapshots') === 0 || strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'clips') === 0) {
+        continue;
+      }
       $size += $file->getSize(); // Ajoute la taille du fichier
     }
     $size = round($size / 1024 / 1024, 2);
@@ -695,6 +699,11 @@ class frigate extends eqLogic
 
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
+        // Exclure les sous-dossiers "snapshots" et "clips"
+        if (strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'snapshots') === 0 || strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'clips') === 0) {
+          continue;
+        }
+
         if ($file->isFile() && strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPath() !== $folder) {
           $id = self::extractID($file->getFilename());
           // Vérifie que le fichier n'est pas dans le tableau favoris
@@ -733,37 +742,37 @@ class frigate extends eqLogic
   {
     $event = frigate_events::byEventId($id);
     if (!empty($event) && isset($event[0])) {
-    // Verifier si le fichier est un favoris
-    $isFavorite = $event[0]->getIsFavorite() ?? 0;
-    if ($isFavorite == 1) {
-      log::add(__CLASS__, 'debug', "Evènement " . $id . " est un favori, il ne doit pas être supprimé de la DB.");
-      return false;
-    } else {
-      log::add(__CLASS__, 'debug', "delete in DB : " . $id);
-      $event[0]->remove();
-      log::add(__CLASS__, 'debug', "Events delete in DB");
-      // Recherche si clip et snapshot existent dans le dossier de sauvegarde
-      $clip = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_clip.mp4";
-      $snapshot = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_snapshot.jpg";
-      $thumbnail = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_thumbnail.jpg";
+      // Verifier si le fichier est un favoris
+      $isFavorite = $event[0]->getIsFavorite() ?? 0;
+      if ($isFavorite == 1) {
+        log::add(__CLASS__, 'debug', "Evènement " . $id . " est un favori, il ne doit pas être supprimé de la DB.");
+        return false;
+      } else {
+        log::add(__CLASS__, 'debug', "delete in DB : " . $id);
+        $event[0]->remove();
+        log::add(__CLASS__, 'debug', "Events delete in DB");
+        // Recherche si clip et snapshot existent dans le dossier de sauvegarde
+        $clip = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_clip.mp4";
+        $snapshot = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_snapshot.jpg";
+        $thumbnail = dirname(__FILE__, 3) . "/data/" . $event[0]->getCamera() . "/" . $id . "_thumbnail.jpg";
 
-      if (file_exists($clip)) {
-        unlink($clip);
-        log::add(__CLASS__, 'debug', "MP4 clip delete");
+        if (file_exists($clip)) {
+          unlink($clip);
+          log::add(__CLASS__, 'debug', "MP4 clip delete");
+        }
+        if (file_exists($snapshot)) {
+          unlink($snapshot);
+          log::add(__CLASS__, 'debug', "JPG snapshot delete");
+        }
+        if (file_exists($thumbnail)) {
+          unlink($thumbnail);
+          log::add(__CLASS__, 'debug', "JPG thumbnail delete");
+        }
+        return true;
       }
-      if (file_exists($snapshot)) {
-        unlink($snapshot);
-        log::add(__CLASS__, 'debug', "JPG snapshot delete");
-      }
-      if (file_exists($thumbnail)) {
-        unlink($thumbnail);
-        log::add(__CLASS__, 'debug', "JPG thumbnail delete");
-      }
-      return true;
+    } else {
+      return false;
     }
-  } else {
-    return false;
-  }
   }
 
   public static function extractID($filename)
@@ -1190,10 +1199,14 @@ class frigate extends eqLogic
 
   public static function createCamerasCmds($eqlogicId)
   {
-    $cmd = self::createCmd($eqlogicId, "Créer un snapshot", "other", "", "action_make_snapshot", "", 1, null, 0, "action");
+    $infoCmd = self::createCmd($eqlogicId, "snapshot manuel Etat", "string", "", "info_make_snapshot", "", 0);
+    $infoCmd->save();
+    $cmd = self::createCmd($eqlogicId, "Créer un snapshot", "other", "", "action_make_snapshot", "", 1, $infoCmd, 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "Créer une video", "other", "", "action_make_video", "", 1, null, 0, "action");
-    $cmd->save();
+ /*   $infoCmd = self::createCmd($eqlogicId, "video manuel Etat", "string", "", "info_make_video", "", 0);
+    $infoCmd->save();
+    $cmd = self::createCmd($eqlogicId, "Créer une video", "other", "", "action_make_video", "", 1, $infoCmd, 0, "action");
+    $cmd->save(); */
   }
   public static function createMQTTcmds($eqlogicId)
   {
@@ -1543,7 +1556,8 @@ class frigate extends eqLogic
   {
     // mode de fonctionnement : 0 = defaut, 1 = thumbnail, 2 = latest, 3 = snapshot, 4 = clip
     $result = "";
-    $uniqueId = md5($camera . $eventId . $type . $mode . $file);
+    $max = 2147483647; // sinon bug sur envirronnement en 64 bits
+    $uniqueId = rand(1, $max);
     $urlJeedom = network::getNetworkAccess('external');
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
@@ -1559,11 +1573,11 @@ class frigate extends eqLogic
       $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
-      $lien = $file;
-      $path = "/data/" . $camera . "/" .$uniqueId . "_snapshot.jpg";
+      $lien = urldecode($file);
+      $path = "/data/snapshots/" . $camera . "/" . $uniqueId . "_snapshot.jpg";
     } elseif ($mode == 4) {
       $lien = $file;
-      $path = "/data/" . $camera . "/" . $uniqueId . "_clip.mp4";
+      $path = "/data/clips/" . $camera . "/" . $uniqueId . "_clip.mp4";
     }
 
     // Vérifier si le fichier existe déjà
@@ -1916,7 +1930,7 @@ class frigate extends eqLogic
       'message' => $curlResponse
     );
     return $response;
-  }  
+  }
 }
 class frigateCmd extends cmd
 {
@@ -1943,6 +1957,7 @@ class frigateCmd extends cmd
   {
     $frigate = $this->getEqLogic();
     $camera = $frigate->getConfiguration('name');
+    $file = $frigate->getConfiguration('img');
     $logicalId = $this->getLogicalId();
 
     switch ($logicalId) {
@@ -2019,11 +2034,12 @@ class frigateCmd extends cmd
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
         break;
       case 'action_make_snapshot':
-        frigate::saveURL(null, null, $this->getConfiguration('name'), 3);
+        $url = frigate::saveURL(null, null, $camera, 3, $file);
+        $frigate->getCmd(null, 'info_make_snapshot')->event($url);
         break;
-      case 'action_make_video':
-        frigate::saveURL(null, null, $this->getConfiguration('name'), 4);
-        break;
+    /*  case 'action_make_video':
+        frigate::saveURL(null, null, $camera, 4);
+        break; */
       default:
         log::add(__CLASS__, 'error', "Unknown action: $logicalId");
     }

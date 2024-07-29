@@ -98,7 +98,7 @@ try {
         $result = frigate::sendFrigateConfiguration($config, true);
         ajax::success($result);
     }
- 
+
     if (init('action') == 'stream') {
         // Récupère l'objet caméra à partir de son ID
         $camera = frigate::byId(init('id'));
@@ -131,7 +131,7 @@ try {
                 mkdir(dirname(__FILE__) . '/../../data/segments', 0777, true);
             }
 
-            $rtspFlux = "rtsp://admin:noah2009W*@192.168.2.36:554/1";
+            $rtspFlux = "";
 
             // Exécute le script RTSP-to-HLS en arrière-plan
             exec('nohup ' . $rtspScript . ' ' . $rtspFlux . ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');
