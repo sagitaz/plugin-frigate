@@ -52,7 +52,7 @@ try {
         $img = init('img');
         $eqlogicId = init('eqlogicId');
         $who = init('who');
-        $result = frigate::saveURL(null, null, $name, 0, 1, $img);
+        $result = frigate::saveURL(null, null, $name, 2, $img);
         if ($who != "dashboard") {
             frigate::createAndRefreshURLcmd($eqlogicId, $result);
         }

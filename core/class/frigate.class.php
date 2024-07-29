@@ -261,6 +261,8 @@ class frigate extends eqLogic
 
       $img = $encoded_url = urlencode("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
       $this->setConfiguration('img', $img);
+
+      self::createCamerasCmds($this->getLogicalId());
     }
   }
 
@@ -507,6 +509,16 @@ class frigate extends eqLogic
         if ($zoom_out->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '</div>';
+        }
+      }
+
+      // commandes make snapshot
+      if (is_object($this->getCmd('action', 'action_make_snapshot'))) {
+        $make_snapshot = $this->getCmd("action", 'action_make_snapshot');
+        if ($make_snapshot->getIsVisible() == 1) { 
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="CREER SNAPSHOT" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -1176,6 +1188,13 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  public static function createCamerasCmds($eqlogicId)
+  {
+    $cmd = self::createCmd($eqlogicId, "Créer un snapshot", "other", "", "action_make_snapshot", "", 1, null, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "Créer une video", "other", "", "action_make_video", "", 1, null, 0, "action");
+    $cmd->save();
+  }
   public static function createMQTTcmds($eqlogicId)
   {
     $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
@@ -1520,9 +1539,11 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId = null, $type = null, $camera, $thumbnail = 0, $latest = 0, $img = "")
+  public static function saveURL($eventId = null, $type = null, $camera, $mode = 0, $file = "")
   {
+    // mode de fonctionnement : 0 = defaut, 1 = thumbnail, 2 = latest, 3 = snapshot, 4 = clip
     $result = "";
+    $uniqueId = md5($camera . $eventId . $type . $mode . $file);
     $urlJeedom = network::getNetworkAccess('external');
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
@@ -1531,16 +1552,22 @@ class frigate extends eqLogic
     $format = ($type == "snapshot") ? "jpg" : "mp4";
     $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
-    if ($thumbnail == 1) {
+    if ($mode == 1) {
       $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/thumbnail.jpg";
       $path = "/data/" . $camera . "/" . $eventId . "_thumbnail.jpg";
-    } elseif ($latest == 1) {
-      $lien = $img;
+    } elseif ($mode == 2) {
+      $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
+    } elseif ($mode == 3) {
+      $lien = $file;
+      $path = "/data/" . $camera . "/" .$uniqueId . "_snapshot.jpg";
+    } elseif ($mode == 4) {
+      $lien = $file;
+      $path = "/data/" . $camera . "/" . $uniqueId . "_clip.mp4";
     }
 
     // Vérifier si le fichier existe déjà
-    if (file_exists($path) && $latest == 0) {
+    if (file_exists($path) && $mode != 2) {
       return $urlJeedom . str_replace("/var/www/html", "", $path);
     }
 
@@ -1891,6 +1918,12 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
+        break;
+      case 'action_make_snapshot':
+        frigate::saveURL(null, null, $this->getConfiguration('name'), 3);
+        break;
+      case 'action_make_video':
+        frigate::saveURL(null, null, $this->getConfiguration('name'), 4);
         break;
       default:
         log::add(__CLASS__, 'error', "Unknown action: $logicalId");
