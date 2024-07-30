@@ -15,106 +15,140 @@
  */
 var app_config = {
     init: function () {
-		console.log('ENTER init');
       	
         $("#synchroConfiguration").click(function () {
-          console.log('synchroConfiguration');
           app_config.show();
         })
 
+        $("#downloadConfiguration").click(function () {
+      		$.ajax({
+            type: 'POST',
+            url: 'plugins/frigate/core/ajax/frigate.ajax.php',
+            data: {
+                action: 'getFrigateConfiguration',
+                type: 'GET'
+            },
+            dataType: 'json',
+            global: false,
+            error: function (request, status, error) {
+              handleAjaxError(request, status, error);
+            },
+            success: function (data) {
+              if (data.result.status == 'success') {
+                const now = new Date();
+                const day = String(now.getDate()).padStart(2, '0');
+                const month = String(now.getMonth() + 1).padStart(2, '0');
+                const year = now.getFullYear();
+                const hours = String(now.getHours()).padStart(2, '0');
+                const minutes = String(now.getMinutes()).padStart(2, '0');
+                const fileName = `configurationFrigate_${year}-${month}-${day}_${hours}h${minutes}.yaml`;
+
+                const yamlContent = data.result.message;
+                const blob = new Blob([yamlContent], {
+                    type: "application/x-yaml"
+                });
+                saveAs(blob, fileName);                      
+              }
+              else {
+                $('#div_configFrigateAlert').showAlert({
+                  message: data.result.message,
+                  level: 'danger'
+                });
+              }
+            }
+          });
+        })
+
         $("#sendConfiguration").click(function () {
-            console.log('sendConfiguration');
-			$.ajax({
-				type: 'POST',
-				url: 'plugins/frigate/core/ajax/frigate.ajax.php',
-				data: {
-					action: 'sendFrigateConfiguration',
-					data: $("#frigateConfiguration").val()
-				},
-				dataType: 'json',
-				global: false,
-				error: function (request, status, error) {
-					handleAjaxError(request, status, error, $('#div_confighomebridgeAlert'));
-				},
-				success: function (data) {
-					if (data.result != false) {
-                        console.log('envoi réussi !');
-                        $('#div_configFrigateAlert').showAlert({
-                          message: '{{Envoi de la configuration au serveur Frigate réussi.}}',
-                          level: 'success'
-                        });                      
-                    } else {
-                        console.log('Envoi de la configuration Frigate échoué ! (' + data.result.message + ')');
-                        $('#div_configFrigateAlert').showAlert({
-                          message: data.result.message,
-                          level: 'danger'
-                        });                      
-                    }
-				}
-			});
+          $.ajax({
+            type: 'POST',
+            url: 'plugins/frigate/core/ajax/frigate.ajax.php',
+            data: {
+              action: 'sendFrigateConfiguration',
+              data: $("#frigateConfiguration").val()
+            },
+            dataType: 'json',
+            global: false,
+            error: function (request, status, error) {
+              handleAjaxError(request, status, error, $('#div_confighomebridgeAlert'));
+            },
+            success: function (data) {
+              if (data.result != false) {
+                console.log('envoi réussi !');
+                $('#div_configFrigateAlert').showAlert({
+                  message: '{{Envoi de la configuration au serveur Frigate réussi.}}',
+                  level: 'success'
+                });                      
+              } else {
+                console.log('Envoi de la configuration Frigate échoué ! (' + data.result.message + ')');
+                $('#div_configFrigateAlert').showAlert({
+                  message: data.result.message,
+                  level: 'danger'
+                });                      
+              }
+            }
+          });
         })
         
       	$("#sendConfigurationAndRestart").click(function () {
-            console.log('frigateConfigurationAndRestart');
-			$.ajax({
-				type: 'POST',
-				url: 'plugins/frigate/core/ajax/frigate.ajax.php',
-				data: {
-					action: 'sendFrigateConfigurationAndRestart',
-					data: $("#frigateConfiguration").val()
-				},
-				dataType: 'json',
-				global: false,
-				error: function (request, status, error) {
-					handleAjaxError(request, status, error, $('#div_confighomebridgeAlert'));
-				},
-				success: function (data) {
-					if (data.result != false) {
-                        console.log('envoi de la configuration Frigate avec redémarrage réussi !');
-                        $('#div_configFrigateAlert').showAlert({
-                          message: '{{Envoi de la configuration au serveur Frigate avec redémarrage réussi.}}',
-                          level: 'success'
-                        });                      
-                    } else {
-                        console.log('Envoi de la configuration Frigate échoué ! (' + data.result.message + ')');
-                        $('#div_configFrigateAlert').showAlert({
-                          message: data.result.message,
-                          level: 'danger'
-                        });                      
-                    }
-				}
-			});
+          $.ajax({
+            type: 'POST',
+            url: 'plugins/frigate/core/ajax/frigate.ajax.php',
+            data: {
+              action: 'sendFrigateConfigurationAndRestart',
+              data: $("#frigateConfiguration").val()
+            },
+            dataType: 'json',
+            global: false,
+            error: function (request, status, error) {
+              handleAjaxError(request, status, error, $('#div_confighomebridgeAlert'));
+            },
+            success: function (data) {
+              if (data.result != false) {
+                console.log('Envoi de la configuration Frigate avec redémarrage réussi !');
+                $('#div_configFrigateAlert').showAlert({
+                  message: '{{Envoi de la configuration au serveur Frigate avec redémarrage réussi.}}',
+                  level: 'success'
+                });                      
+              } else {
+                console.log('Envoi de la configuration Frigate échoué ! (' + data.result.message + ')');
+                $('#div_configFrigateAlert').showAlert({
+                  message: data.result.message,
+                  level: 'danger'
+                });                      
+              }
+            }
+          });
         })                                      
     },
     show: function () {
-		console.log('ENTER show');
-		$.ajax({
-			type: 'POST',
-			url: 'plugins/frigate/core/ajax/frigate.ajax.php',
-			data: {
-				action: 'getFrigateConfiguration',
-				type: 'GET'
-			},
-			dataType: 'json',
-			global: false,
-			error: function (request, status, error) {
-              handleAjaxError(request, status, error);
-			},
-			success: function (data) {
-				if (data.result.status == 'success') {
-                  $('#div_configFrigateAlert').showAlert({
-                    message: '{{Configuration du serveur Frigate récupérée.}}',
-                    level: 'success'
-                  });
-                  $("#frigateConfiguration").val(data.result.message);
-                }
-                else {
-                  $('#div_configFrigateAlert').showAlert({
-                    message: data.result.message,
-                    level: 'danger'
-                  });
-                }
-			}
-		});
+      $.ajax({
+        type: 'POST',
+        url: 'plugins/frigate/core/ajax/frigate.ajax.php',
+        data: {
+          action: 'getFrigateConfiguration',
+          type: 'GET'
+        },
+        dataType: 'json',
+        global: false,
+        error: function (request, status, error) {
+                handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+          if (data.result.status == 'success') {
+            $('#div_configFrigateAlert').showAlert({
+              message: '{{Configuration du serveur Frigate récupérée.}}',
+              level: 'success'
+            });
+            $("#frigateConfiguration").val(data.result.message);
+          }
+          else {
+            $('#div_configFrigateAlert').showAlert({
+              message: data.result.message,
+              level: 'danger'
+            });
+          }
+        }
+      });
     }
 };
