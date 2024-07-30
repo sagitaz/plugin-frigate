@@ -15,7 +15,28 @@
  */
 var app_config = {
     init: function () {
-      	
+
+        $("#frigateConfiguration").on("change keyup paste load", function() {
+          const yamlInput = $("#frigateConfiguration").val();
+
+          try {
+            jsyaml.load(yamlInput);
+            $("#sendConfiguration").removeClass('disabled');
+            $("#sendConfigurationAndRestart").removeClass('disabled');
+            $("#div_yamlAlert").removeClass('alert-danger');
+            $("#div_yamlAlert").removeClass('alert-warning');
+            $("#div_yamlAlert").addClass('alert-success');
+            $('#div_yamlAlert')[0].innerHTML='{{Fichier de configuration valide.}}';
+          } catch (e) {
+            $("#sendConfiguration").addClass('disabled');
+            $("#sendConfigurationAndRestart").addClass('disabled');
+            $("#div_yamlAlert").removeClass('alert-warning');
+            $("#div_yamlAlert").removeClass('alert-success');
+            $("#div_yamlAlert").addClass('alert-danger');
+            $('#div_yamlAlert')[0].innerHTML = '{{Fichier de configuration invalide}} : ' + e.message;
+          }
+        });
+
         $("#synchroConfiguration").click(function () {
           app_config.show();
         })
@@ -148,6 +169,7 @@ var app_config = {
               level: 'danger'
             });
           }
+          $("#frigateConfiguration").change();
         }
       });
     }

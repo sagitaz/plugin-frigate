@@ -49,6 +49,7 @@ if (!isConnect('admin')) {
 <button id="sendConfiguration" class="btn btn-warning pull-right" data-title="Envoie et remplace le fichier de configuration Frigate"><i class="fas fa-cloud-upload-alt"></i> {{Envoyer la configuration}}</button>
 <br/>
 <br/>
+<div id='div_yamlAlert' class="alert"></div>
 </div>
 <div class="bound-config">
     <textarea id="frigateConfiguration" class="boxsizingborder" spellcheck="false"></textarea>
@@ -63,3 +64,6 @@ if (!isConnect('admin')) {
         window["app_config"].show();
     }
 </script>
+  
+<!-- js-yaml 4.1.0 https://github.com/nodeca/js-yaml -->
+<?php include_file('desktop', 'yaml', 'js', 'frigate'); ?>
