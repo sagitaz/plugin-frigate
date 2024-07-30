@@ -71,14 +71,6 @@ try {
         ajax::success($result);
     }
 
-    if (init('action') == 'getConfig') {
-        $data = frigate::getConfig();
-        ajax::success(array(
-            "object" => $data,
-            "json" => json_encode($data),
-        ));
-    }
-
     if (init('action') == 'getFrigateConfiguration') {
         log::add(__CLASS__, 'info', "getFrigateConfiguration");
         $result = frigate::getFrigateConfiguration();

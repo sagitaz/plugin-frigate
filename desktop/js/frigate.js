@@ -218,27 +218,6 @@ document.getElementById('editConfiguration').addEventListener('click', function 
     });
 });
 
-document.getElementById('getConfig').addEventListener('click', function () {
-    $.ajax({
-        type: "POST",
-        url: "plugins/frigate/core/ajax/frigate.ajax.php",
-        data: {
-            action: "getConfig"
-        },
-        dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
-        },
-        success: function (data) {
-            var json = data.result.json;
-            const blob = new Blob([json], {
-                type: "text/plain;charset=utf-8"
-            });
-            saveAs(blob, "frigateConfiguration.json");
-        }
-    })
-});
-
 document.getElementById('bt_discord').addEventListener('click', function () {
     window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });
