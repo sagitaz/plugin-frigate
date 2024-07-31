@@ -61,6 +61,11 @@ sendVarToJS('refresh', $refresh);
                 <br>
                 <span>{{Configuration Frigate}}</span>
             </div>
+            <div class="cursor eqLogicAction logoSecondary" id="frigateLogs" title="{{Voir les différents logs du serveur  Frigate}}.">
+                <i class="far fa-file-alt"></i>
+                <br>
+                <span>{{Logs Frigate}}</span>
+            </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
