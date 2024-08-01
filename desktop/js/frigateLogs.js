@@ -115,15 +115,7 @@ var app_config = {
             });
         });
 
-        $("#nginxLogsBtn").click(() => {
-            
-          	console.log('nginx');
-          	this.ajaxRequest('createEvent', { type: 'POST', camera: 'frigate1', label: 'person' }, () => {
-                console.log('event created');
-            });
-          
-          	return;
-          
+        $("#nginxLogsBtn").click(() => {          
           	this.ajaxRequest('logs', { type: 'GET', service: 'nginx' }, (logs) => {
                 app_config.textLogs = logs;
               	app_config.showAlert('{{Logs nginx récupérés.}}', 'success');
