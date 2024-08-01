@@ -40,6 +40,13 @@ try {
         $result = frigate::deleteEvent(init('eventId'), true);
         ajax::success($result);
     }
+
+    if (init('action') == 'createEvent') {
+        // Creation d'un event
+        $result = frigate::createEvent(init('camera'), init('label'));
+        ajax::success($result);
+    }
+    
     if (init('action') == 'searchAndCreate') {
         // Recherche et creation de cameras
         $result = frigate::generateEqCameras();

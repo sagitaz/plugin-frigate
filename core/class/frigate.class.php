@@ -580,12 +580,15 @@ class frigate extends eqLogic
     mqtt2::publish(self::getTopic() . "/{$subTopic}", $payload);
   }
 
-  private static function getcURL($function, $url, $decodeJson = true)
+  private static function getcURL($function, $url, $decodeJson = true, $post = false)
   {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    if ($post) {
+    	curl_setopt($ch, CURLOPT_POST, TRUE);
+    }
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
@@ -596,6 +599,11 @@ class frigate extends eqLogic
     $response = $decodeJson?json_decode($data, true) : $data;
     log::add(__CLASS__, 'debug', $function . " : mise à jour.");
     return $response;
+  }
+
+  private static function postcURL($function, $url, $decodeJson = true)
+  {
+      return self::getcURL($function, $url, $decodeJson, true);
   }
 
   private static function deletecURL($url)
@@ -623,6 +631,15 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
+  }
+
+  public static function createEvent($camera, $label)
+  {
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . $label . "/create";
+    $response = self::postcURL("CreateEvent", $resultURL);
+
+    return $response;
   }
 
   public static function getLogs($service)
