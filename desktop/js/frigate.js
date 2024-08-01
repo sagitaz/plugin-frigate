@@ -218,6 +218,11 @@ document.getElementById('editConfiguration').addEventListener('click', function 
     });
 });
 
+document.getElementById('frigateLogs').addEventListener('click', function () {
+    $('#md_modal2').dialog({title: "{{Affichage des logs du serveur Frigate}}"});
+    $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=frigateLogs.modal').dialog('open');
+});
+  
 document.getElementById('bt_discord').addEventListener('click', function () {
     window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });

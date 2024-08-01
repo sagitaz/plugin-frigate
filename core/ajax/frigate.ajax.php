@@ -29,6 +29,12 @@ try {
   */
     ajax::init();
 
+    if (init('action') == 'logs') {
+        // Récupération des logs
+      	$result = frigate::getLogs(init('service'));
+        ajax::success($result);
+    }
+
     if (init('action') == 'deleteEvent') {
         // Suppression d'un event
         $result = frigate::deleteEvent(init('eventId'), true);

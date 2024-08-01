@@ -580,7 +580,7 @@ class frigate extends eqLogic
     mqtt2::publish(self::getTopic() . "/{$subTopic}", $payload);
   }
 
-  private static function getcURL($function, $url)
+  private static function getcURL($function, $url, $decodeJson = true)
   {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
@@ -593,7 +593,7 @@ class frigate extends eqLogic
       die();
     }
     curl_close($ch);
-    $response = json_decode($data, true);
+    $response = $decodeJson?json_decode($data, true) : $data;
     log::add(__CLASS__, 'debug', $function . " : mise à jour.");
     return $response;
   }
@@ -619,11 +619,19 @@ class frigate extends eqLogic
 
   public static function getStats()
   {
-
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
+  }
+
+  public static function getLogs($service)
+  {
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/logs/" . $service;
+    $logs = self::getcURL("Logs", $resultURL, false);
+
+    return $logs;
   }
 
   public static function checkDatasWeight()
