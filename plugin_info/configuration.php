@@ -93,5 +93,13 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5 secondes par défaut" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Afficher la vidéo en vignette dans la page des évènements}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
+			</div>
+		</div>
     </fieldset>
 </form>
