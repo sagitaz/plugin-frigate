@@ -1830,6 +1830,7 @@ class frigate extends eqLogic
         case 'events':
           log::add(__CLASS__, 'info', ' => Traitement mqtt events');
           self::getEvents(true, [$value['after']], $value['type']);
+          event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           break;
 
         case 'stats':
