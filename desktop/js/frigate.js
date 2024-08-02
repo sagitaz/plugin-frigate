@@ -101,7 +101,10 @@ function addAction(_action, _type) {
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
     div += '</div>'
     div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" data-type="' + _type + '" />'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" placeholder="{{Label}}" data-type="' + _type + '" />'
+    div += '</div>'
+    div += '<div class="col-sm-1">'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" placeholder="{{Type}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-4">'
     div += '<div class="input-group input-group-sm">'
@@ -116,7 +119,7 @@ function addAction(_action, _type) {
     div += '</div>'
     div += '</div>'
     var actionOption_id = jeedomUtils.uniqId()
-    div += '<div class="col-sm-6 actionOptions" id="' + actionOption_id + '"></div>'
+    div += '<div class="col-sm-5 actionOptions" id="' + actionOption_id + '"></div>'
 
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
@@ -135,6 +138,15 @@ $('.bt_addAction').off('click').on('click', function () {
     addAction({}, 'action')
 })
 
+$('body').off('focusout', ".cmdAction.expressionAttr[data-l1key=cmd]").on('focusout', '.cmdAction.expressionAttr[data-l1key=cmd]', function (event) {
+    var type = $(this).attr('data-type')
+    var expression = $(this).closest('.' + type).getValues('.expressionAttr')
+    var el = $(this)
+    jeedom.cmd.displayActionOption($(this).value(), init(expression[0].options), function (html) {
+        el.closest('.' + type).find('.actionOptions').html(html)
+        jeedomUtils.taAutosize()
+    })
+})
 
 $("body").off('click', ".listAction").on('click', ".listAction", function () {
     var type = $(this).attr('data-type')
@@ -193,10 +205,62 @@ document.getElementById('gotoHome').addEventListener('click', function () {
     window.location.reload(true);
 });
 
+document.getElementById('gotoFrigate').addEventListener('click', function () {
+    window.open(frigateURL, '_blank');
+});
+
+document.getElementById('editConfiguration').addEventListener('click', function () {
+    bootbox.confirm('{{Configuration avancée, à vos propres risques ! Aucun support ne sera donné !}}', function(result)   {
+      if (result) {
+        $('#md_modal2').dialog({title: "{{Edition du fichier de configuration Frigate}}"});
+        $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=editConfiguration.modal').dialog('open');
+      }
+    });
+});
+
+document.getElementById('frigateLogs').addEventListener('click', function () {
+    $('#md_modal2').dialog({title: "{{Affichage des logs du serveur Frigate}}"});
+    $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=frigateLogs.modal').dialog('open');
+});
+  
+document.getElementById('bt_discord').addEventListener('click', function () {
+    window.open('https://discord.gg/PGAPDHhdtC', '_blank');
+});
+
+$("#div_mainContainer").off('click', '.listCmdInfo').on('click', '.listCmdInfo', function () {
+    var el = $(this).closest('.input-group').find('input.form-control');
+    jeedom.cmd.getSelectModal({ cmd: { type: 'info' } }, function (result) {
+        el.value(result.human);
+    });
+});
+
 function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }
 
+function updateMotionVisibility() {
+    const motionLabel = document.querySelector('.motion-configuration');
+    if (document.querySelector('.motion-checkbox').checked) {
+        motionLabel.classList.add('motion-border');
+    } else {
+        motionLabel.classList.remove('motion-border');
+    }
+}
+
+function updateRegionsVisibility() {
+    const regionsLabel = document.querySelector('.regions-configuration');
+    if (document.querySelector('.regions-checkbox').checked) {
+        regionsLabel.classList.add('regions-border');
+    } else {
+        regionsLabel.classList.remove('regions-border');
+    }
+}
+
+document.querySelector('.motion-checkbox').addEventListener('change', updateMotionVisibility);
+document.querySelector('.regions-checkbox').addEventListener('change', updateRegionsVisibility);
+
+updateMotionVisibility();
+updateRegionsVisibility();
 
 function addOrRemoveClass(element, className, isAdd) {
     const tabs = document.getElementsByClassName(element);
@@ -211,16 +275,24 @@ function addOrRemoveClass(element, className, isAdd) {
 
 function printEqLogic(_eqLogic) {
     if (_eqLogic && _eqLogic.logicalId) {
-        if (_eqLogic.logicalId === "eqFrigateEvents" || _eqLogic.logicalId === "eqFrigateStats") {
+        if (_eqLogic.logicalId === "eqFrigateStats") {
             addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', true);
+        } else if (_eqLogic.logicalId === "eqFrigateEvents") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
         } else {
             addOrRemoveClass('eqFrigate', 'jeedisable', false);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
         }
     } else {
         addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        addOrRemoveClass('eqActions', 'jeedisable', false);
     }
 
-    if (_eqLogic.logicalId === "eqFrigateCamera_"+_eqLogic.configuration.name) {
+
+    if (_eqLogic.logicalId != "eqFrigateStats") {
+
         $('#div_action').empty()
         ACTIONS_LIST = []
         if (isset(_eqLogic.configuration) && isset(_eqLogic.configuration.actions)) {
@@ -244,9 +316,16 @@ function printEqLogic(_eqLogic) {
                 }
             })
         }
+    }
 
+    if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
+
+
+
+        const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
+        let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + img;
         const imgElement = document.getElementById('imgFrigate');
-      	let intervalId;
+        let intervalId;
 
         const observerOptions = {
             root: null,
@@ -269,7 +348,7 @@ function printEqLogic(_eqLogic) {
 
         function startImageFetchInterval() {
             if (!intervalId) {
-                intervalId = setInterval(refreshImage, 10000);
+                intervalId = setInterval(refreshImage, refresh);
             }
         }
 
@@ -279,38 +358,61 @@ function printEqLogic(_eqLogic) {
                 intervalId = null;
             }
         }
-      
-        function refreshImage() {
-          	const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
-            const name = $('.eqLogicAttr[data-l1key=configuration][data-l2key=name]').val();
-            const imgElement = document.getElementById('imgFrigate');
+        function extractFrigatePart(url) {
+            // Définir l'expression régulière pour capturer la partie souhaitée de l'URL
+            const regex = /\/api\/([^\/]+)\/latest\.jpg/;
 
-            $.ajax({
-                type: "POST",
-                url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                data: {
-                    action: "refreshCameras",
-                    img: img,
-                    name: name
-                },
-                dataType: 'json',
-                error: function (request, status, error) {
-                    handleAjaxError(request, status, error);
-                },
-                success: function (data) {
-                    if (data.result == 'KO' || data.result == 'error') {
-                        $('#div_alert').showAlert({
-                            message: '{{L\'image n\'est pas disponible.}}',
-                            level: 'warning'
-                        });
-                        return;
-                    } else {
-                        imgUrl = data.result
-                        imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                    }
-                }
-            })
+            // Exécuter l'expression régulière sur l'URL
+            const match = url.match(regex);
+
+            // Si une correspondance est trouvée, retourner la partie capturée
+            if (match && match[1]) {
+                return match[1];
+            } else {
+                // Si aucune correspondance n'est trouvée, retourner null ou une valeur par défaut
+                return null;
+            }
         }
+        function refreshImage() {
+            let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
+            console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
+            imgElement.src = newSrc;
+        }
+        /*       function refreshImage() {
+                   const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
+                   const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+                   const name = extractFrigatePart(img);
+                   const imgElement = document.getElementById('imgFrigate');
+       
+                   $.ajax({
+                       type: "POST",
+                       url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                       data: {
+                           action: "refreshCameras",
+                           img: img,
+                           name: name,
+                           eqlogicId: eqlogicId
+                       },
+                       dataType: 'json',
+                       error: function (request, status, error) {
+                           handleAjaxError(request, status, error);
+                       },
+                       success: function (data) {
+                           if (data.result == 'KO' || data.result == 'error') {
+                               $('#div_alert').showAlert({
+                                   message: '{{L\'image n\'est pas disponible.}}',
+                                   level: 'warning'
+                               });
+                               return;
+                           } else {
+                               imgUrl = data.result
+                               imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
+                           }
+       
+                           // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
+                       }
+                   })
+               } */
 
         refreshImage();
     }
@@ -356,4 +458,49 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
             }
         }
     })
+});
+
+document.getElementById('restartFrigate').addEventListener('click', function () {
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "restartFrigate"
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            $('#div_alert').showAlert({
+                message: '{{Le redémarrage de Frigate est en cours.}}',
+                level: 'info'
+            });
+        }
+    })
+});
+
+document.getElementById('add-ptz').addEventListener('click', function () {
+
+    const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+
+    $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "addPTZ",
+            eqlogicId: eqlogicId
+        },
+        dataType: 'json',
+        error: function (request, status, error) {
+            handleAjaxError(request, status, error);
+        },
+        success: function (data) {
+            $('#div_alert').showAlert({
+                message: '{{Les commandes PTZ sont ajoutées à l\'équipement.}}',
+                level: 'info'
+            });
+        }
+    })
+    window.location.reload(true);
 });

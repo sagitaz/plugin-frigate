@@ -54,6 +54,14 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
+            <label class="col-md-4 control-label">{{Topic MQTT}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Topic MQTT de Frigate}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
+            </div>
+        </div>
+        <div class="form-group">
             <label class="col-md-4 control-label">{{Récupération des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
@@ -69,5 +77,29 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Taille des dossiers}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des données (en Mo)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500 Mo par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Durée de rafraîchissement}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Rafraichissement des captures des caméras (en secondes)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5 secondes par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Afficher la vidéo en vignette dans la page des évènements}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
+			</div>
+		</div>
     </fieldset>
 </form>

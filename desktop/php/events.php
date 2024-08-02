@@ -10,16 +10,19 @@ if (!isConnect('admin')) {
 ?>
 
 
-<div class="col-lg-12"><br>
-  <br>
+<div class="col-lg-12">
+  <br><br>
   <div class="input-group" style="margin-bottom:20px">
     <span class="input-group-btn">
-      <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
-      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> supprimer tous les events visibles </a>
+      <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> {{retour}} </a>
+      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> {{supprimer tous les évènements visibles}} </a>
+  	  <a class="btn btn-warning roundedRight" id="createEvent"><i class="fas fa-plus-circle"></i> {{créer un nouvel évènement}} </a>
     </span>
   </div>
+
   <?php
 
+  // functions
   function formatDuration($seconds)
   {
     $hours = floor($seconds / 3600);
@@ -68,88 +71,59 @@ if (!isConnect('admin')) {
       }
     }
 
-    if (!$full) $string = array_slice($string, 0, 1);
+    if (!$full)
+      $string = array_slice($string, 0, 1);
     return $string ? 'il y a ' . implode(', ', $string) : 'à l\'instant';
   }
 
   $events = frigate::showEvents();
 
-  echo '<div class="col-sm-10 flex-container">';
-  echo '  <a class="btn btn-info button-xs" id="selectAllCameras" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '  <a class="btn btn-info button-xs" id="deselectAllCameras" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
-  echo '  <div class="checkbox-container">';
+  // cameras variables
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
   $cameras = array_unique(array_column($events, 'camera'));
-  foreach ($cameras as $camera) {
-    $isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras);
-    echo '    <label><input type="checkbox" class="eqLogicAttr cameraFilter" value="' . $camera . '" ' . ($isChecked ? 'checked' : '') . '>';
-    echo '    <span class="custom-checkbox"></span> ' . ucfirst($camera) . '</label>';
-  }
-  echo '  </div>';
-  echo '</div>';
 
-  echo '<div class="col-sm-10 flex-container">';
-  echo '  <a class="btn btn-info button-xs" id="selectAllLabels" style="margin-right:10px"><i class="fas fa-check"></i> {{Tout}}</a>';
-  echo '  <a class="btn btn-info button-xs" id="deselectAllLabels" style="margin-right:20px"><i class="fas fa-times"></i> {{Aucun}}</a>';
-  echo '  <div class="checkbox-container">';
+  // labels variables
   $selectedLabels = isset($_GET['categories']) ? explode(',', $_GET['categories']) : [];
   $labels = array_unique(array_column($events, 'label'));
-  foreach ($labels as $label) {
-    $isChecked = empty($selectedLabels) || in_array($label, $selectedLabels);
-    echo '    <label><input type="checkbox" class="eqLogicAttr labelFilter" value="' . $label . '" ' . ($isChecked ? 'checked' : '') . '> ';
-    echo '    <span class="custom-checkbox"></span> ' . ucfirst($label) . '</label>';
-  }
-  echo '  </div>';
-  echo '</div>';
 
-  echo '<div class="col-sm-12" style="margin-bottom:10px">';
-  echo '<div class="col-sm-4 datetime-container">
-        <label>Entre <input type="datetime-local" id="startDate"></label>
-        <label>et <input type="datetime-local" id="endDate"></label>
-        <label>Ou de </label>
-    </div>';
-
+  // filters variables
   $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
-
   $timeFilters = [
-    ''    => 'Toutes les dates',
-    '1h'  => 'Moins d\'une heure',
-    '2h'  => 'Moins de deux heures',
-    '6h'  => 'Moins de six heures',
+    '' => 'Toutes les dates',
+    '1h' => 'Moins d\'une heure',
+    '2h' => 'Moins de deux heures',
+    '6h' => 'Moins de six heures',
     '12h' => 'Moins de douze heures',
-    '1j'  => 'Moins d\'un jour',
-    '2j'  => 'Moins de deux jours',
-    '1s'  => 'Moins d\'une semaine'
+    '1j' => 'Moins d\'un jour',
+    '2j' => 'Moins de deux jours',
+    '1s' => 'Moins d\'une semaine'
   ];
 
-  echo '<div class="col-sm-8 radio-container">';
-  foreach ($timeFilters as $value => $label) {
-    $isChecked = $value === $selectedTimeFilter;
-    echo '<label><input type="radio" name="timeFilter" value="' . $value . '" ' . ($isChecked ? 'checked' : '') . '>';
-    echo '<span class="custom-radio"></span> ' . $label . '</label>';
-  }
-  echo '</div>';
-  echo '</div>';
+  // events filters (template)
+  include 'event.filters.template.php';
 
   echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {
-    //div globale start
-    echo '<div data-date="' . $event['date'] .  '" data-camera="' . $event['camera'] . '" data-label="' . $event['label'] . '" data-id="' . $event['id'] . '" class="frigateEventContainer">';
-    echo '<div class="frigateEvent">';
-    // div img
-    echo '<img class="imgSnap" src="' . $event['img'] . '"/>';
-    // div texte
-    echo '<div class="eventText">';
-    $timeElapsed = timeElapsedString($event['date']);
-    echo '<span class="inline-title">' . $event['label'] . '</span><span class="inline-subtitle duration"> ' . $timeElapsed . '</span><br/><br/>';
-    echo '<i class="fas fa-minus-square"></i><span>  ' . $event['label'] . ' <div class="percentage" data-percentage="' . $event['top_score'] . '">' . $event['top_score'] . '%</div></span><br>';
-
+    // event variables
+    $id = $event['id'];
+    $camera = $event['camera'];
+    $label = $event['label'];
+    $type = $event['type'];
+    $date = $event['date'];
+    $timeElapsed = timeElapsedString($date);
+    $percentage = $event['percentage'] ?? 0;
+    $duration = $event['duration'] ?? 0;
+    $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
+    $filterText = '';
+    if ($type == 'new') {
+      $filterText = 'Nouveau';
+    } elseif ($type == 'update') {
+      $filterText = 'En cours';
+    }
     $cameraFound = false;
     $cameraId = 0;
     try {
-      $attribut = 'name';
-      $valeurRecherchee = $event['camera'];
-      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $valeurRecherchee, 'frigate', false);
+      $frigateCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $camera, 'frigate', false);
       if ($frigateCamera != false) {
         $cameraFound = true;
         $cameraId = $frigateCamera->getId();
@@ -157,73 +131,24 @@ if (!isConnect('admin')) {
     } catch (Exception $e) {
       //echo "Erreur : " . $e->getMessage();
     }
+    $topScore = $event['top_score'];
+    $duree = $event['duree'];
+    $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
+    $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($duree) . '</div>';
+    $img = $event['img'];
+    $hasSnapshot = $event['hasSnapshot'];
+    $snapshot = $event['snapshot'];
+    $hasClip = $event['hasClip'];
+    $clip = $event['clip'];
 
-    if ($cameraFound) {
-      echo '<a onclick="gotoCamera(\'' . $cameraId . '\')" title="Afficher la page de la caméra">';
-    }
-    echo '<i class="fas fa-video"></i><span>  ' . $event['camera'] . '</span>';
-    if ($cameraFound) {
-      echo '</a>';
-    }
-    echo '<br>';
-
-    $formattedDuration = '<div class=\'duration\'>' . formatDuration($event['duree']) . '</div>';
-    $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($event['duree']) . '</div>';
-
-    echo '<i class="fas fa-clock"></i><span>  ' . $event['date'] . ' ' . $formattedDuration . '</span>';
-    echo '</div>';
-    // div buttons
-    echo '<div class="eventBtns"';
-    if ($event['hasSnapshot'] == 1) echo ' data-snapshot="' . $event['snapshot'] . '"';
-    if ($event['hasClip'] == 1) echo ' data-video="' . $event['clip'] . '"';
-    echo ' data-title="' . $event['label'] . ' <div class=\'percentage percentageTitle\' data-percentage=\'' . $event['top_score'] . '\'>' . $event['top_score'] . ' %</div> - ' . $event['camera'] . ' - ' . $event['date'] . ' ' . $formattedDurationTitle . '"';
-    echo '>';
-    if ($event['hasSnapshot'] == 1) {
-      echo '<button class="hover-button snapshot-btn" title="Voir le snapshot">';
-      echo '<i class="fas fa-camera"></i>';
-      echo '</button>';
-    }
-    if ($event['hasClip'] == 1) {
-      echo '<button class="hover-button video-btn" title="Voir le clip">';
-      echo '<i class="fas fa-film"></i>';
-      echo '</button>';
-    }
-    echo '<button class="hover-button" onclick="deleteEvent(\'' . $event['id'] . '\')" title="Supprimer l\'event sur votre serveur frigate">';
-    echo '<i class="fas fa-trash"></i>';
-    echo '</button>';
-    echo '</div>';
-    // div globale end
-    echo '</div>';
-    echo '</div>';
+    // event creation (template)
+    include 'event.template.php';
   }
   echo '</div>';
 
+  // event modal (template)
+  include 'event.modal.template.php';
   ?>
-
-  <div id="mediaModal" class="modal">
-    <div class="modal-content">
-      <span class="close">&times;</span>
-
-      <div class="modal-header">
-        <h2 id="mediaTitle"></h2>
-        <div class="button-container">
-          <button id="showVideo" class="hidden-btn">Voir la vidéo</button>
-          <button id="showImage" class="hidden-btn">Voir la snapshot</button>
-        </div>
-      </div>
-      <div class="media-container">
-        <div class="video-container active">
-          <video id="videoPlayer" width="100%" controls autoplay>
-            <source id="videoSource" src="" type="video/mp4">
-            Votre navigateur ne supporte pas la balise vidéo.
-          </video>
-        </div>
-        <div class="image-container">
-          <img id="snapshotImage" src="" alt="Snapshot" width="100%">
-        </div>
-      </div>
-    </div>
-  </div>
 
 </div>
 

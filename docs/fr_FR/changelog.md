@@ -3,6 +3,37 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 26/07/2024 Beta 0.8.3
+- corrections erreur cron isFavorite
+- Ajout bouton pour faire un snapshot
+- Ajout d'un editeur pour le fichier de configuration ( toutes les modification sont à vos risques, lisez bien la documentation officielle de Frigate) et faite une sauvegarde de la configuration avant.
+
+# 26/07/2024 Beta 0.8.2
+- corrections récupération thumbnail
+- Ajout bouton pour acceder aux évènements de la caméra sur le widget
+- Petites corrections
+
+# 26/07/2024 Beta 0.8.1
+- corrections récupération clips et snapshots
+- modification couleur boutons widget
+- le dossier data n'est plus pris en compte dans les sauvegardes jeedom
+
+# 22/07/2024 Beta 0.8.0
+- Ajout variable #thumbnail_path# et #thumbnail#
+- Ajout MQTT2 dependance
+- Ajout Widget dashboard et mobile
+- Ajout event favoris
+- Ajout commandes redemarer (équipement statistiques)
+- Ajout dans les actions d'une condition d'èxécution
+- Creation des commandes detect, snapshot et recording (start, stop, toggle)
+- Bouton disponible pour créer les commandes PTZ
+- Configuration du délais de refresh
+- Configuration de la taille maxi du dossier de sauvegarde des snapshots et clips
+- Modification visualisation snapshot
+- Ajout bouton debug (fichier config)
+- Ajout bouton discord
+- Ajout bouton serveur Frigate
+- Multiples petites corrections
 
 # 22/06/2024 Beta 0.7.5
 - Ajout variable #time#, #event_id#, #snapshot_path# et #clip_path#
