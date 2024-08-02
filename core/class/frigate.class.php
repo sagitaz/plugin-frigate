@@ -519,11 +519,11 @@ class frigate extends eqLogic
       }
 
       // commandes make snapshot
-      if (is_object($this->getCmd('action', 'action_make_snapshot'))) {
-        $make_snapshot = $this->getCmd("action", 'action_make_snapshot');
+      if (is_object($this->getCmd('action', 'action_make_event'))) {
+        $make_snapshot = $this->getCmd("action", 'action_make_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="CREER SNAPSHOT" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="Créer event" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -591,7 +591,7 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     if ($post) {
-    	curl_setopt($ch, CURLOPT_POST, TRUE);
+      curl_setopt($ch, CURLOPT_POST, TRUE);
     }
     $data = curl_exec($ch);
 
@@ -600,14 +600,14 @@ class frigate extends eqLogic
       die();
     }
     curl_close($ch);
-    $response = $decodeJson?json_decode($data, true) : $data;
+    $response = $decodeJson ? json_decode($data, true) : $data;
     log::add(__CLASS__, 'debug', $function . " : mise à jour.");
     return $response;
   }
 
   private static function postcURL($function, $url, $decodeJson = true)
   {
-      return self::getcURL($function, $url, $decodeJson, true);
+    return self::getcURL($function, $url, $decodeJson, true);
   }
 
   private static function deletecURL($url)
@@ -1233,14 +1233,12 @@ class frigate extends eqLogic
 
   public static function createCamerasCmds($eqlogicId)
   {
-    $infoCmd = self::createCmd($eqlogicId, "snapshot manuel Etat", "string", "", "info_make_snapshot", "", 0);
-    $infoCmd->save();
-    $cmd = self::createCmd($eqlogicId, "Créer un snapshot", "other", "", "action_make_snapshot", "", 1, $infoCmd, 0, "action");
+
+    $cmd = self::createCmd($eqlogicId, "Créer un évenement via API", "other", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
-    /*   $infoCmd = self::createCmd($eqlogicId, "video manuel Etat", "string", "", "info_make_video", "", 0);
-    $infoCmd->save();
-    $cmd = self::createCmd($eqlogicId, "Créer une video", "other", "", "action_make_video", "", 1, $infoCmd, 0, "action");
-    $cmd->save(); */
+
+    $cmd = self::createCmd($eqlogicId, "Créer une évenement", "other", "", "action_make_event", "", 1, null, 0, "action");
+    $cmd->save();
   }
   public static function createMQTTcmds($eqlogicId)
   {
@@ -1617,11 +1615,19 @@ class frigate extends eqLogic
       $lien = urldecode($file);
       $path = "/data/" . $camera . "/" . $eventId . "_snapshot.jpg";
     } elseif ($mode == 4) {
+      log::add(__CLASS__, 'debug', "RTSP = " . $file);
       $path = "/data/" . $camera . "/" . $eventId . "_clip.mp4";
-      // clip creator    
-      $cmd = 'ffmpeg -rtsp_transport tcp -loglevel fatal -i "' . $file . '" -c:v copy -bsf:a aac_adtstoasc -y -t 10 -movflags faststart ' . $path;
-      shell_exec($cmd);
+      $newpath = dirname(__FILE__, 3) . $path;
+      log::add(__CLASS__, 'debug', "Path = " . $newpath);
+      // clip creator
+      $output = [];
+      $return_var = 0;
+      $cmd = 'ffmpeg -rtsp_transport tcp -loglevel fatal -i "' . $file . '" -c:v copy -bsf:a aac_adtstoasc -y -t 10 -movflags faststart ' . $newpath;
+      exec($cmd, $output, $return_var);
       $result = "/plugins/frigate" . $path;
+      log::add(__CLASS__, 'debug', "Commande exécutée : " . $cmd);
+      log::add(__CLASS__, 'debug', "Sortie : " . implode("\n", $output));
+      log::add(__CLASS__, 'debug', "Code de retour : " . $return_var);
       return $result;
     }
 
@@ -1671,6 +1677,7 @@ class frigate extends eqLogic
     $timestamp = microtime(true);
     $formattedTimestamp = sprintf('%.6f', $timestamp);
     $startTime = time();
+    $endTime = $startTime + 10;
     $uniqueId = self::createUniqueId($formattedTimestamp);
     // create snapshot
     $url = frigate::saveURL($uniqueId, null, $camera, 3, $file);
@@ -1682,9 +1689,9 @@ class frigate extends eqLogic
     $eqLogic->getCmd(null, 'info_url_thumbnail')->event($url);
     $eqLogic->getCmd(null, 'info_timestamp')->event($startTime);
     $eqLogic->getCmd(null, 'info_label')->event("manuel");
-    $eqLogic->getCmd(null, 'info_score')->event("0");
-    $eqLogic->getCmd(null, 'info_top_score')->event("0");
-    $eqLogic->getCmd(null, 'info_duree')->event("0");
+    $eqLogic->getCmd(null, 'info_score')->event(50);
+    $eqLogic->getCmd(null, 'info_topscore')->event(50);
+    $eqLogic->getCmd(null, 'info_duree')->event(10);
 
     // Creation de l'evenement  dans la DB
     log::add(__CLASS__, 'debug', "Creating new frigate event for event ID: " . $uniqueId);
@@ -1696,12 +1703,12 @@ class frigate extends eqLogic
     $frigate->setHasSnapshot(1);
     $frigate->setSnapshot($url);
     $frigate->setStartTime($startTime);
-    $frigate->setEndTime($startTime);
+    $frigate->setEndTime($endTime);
     $frigate->setEventId($timestamp);
     $frigate->setLabel("manuel");
     $frigate->setThumbnail($url);
-    $frigate->setTopScore(0);
-    $frigate->setScore(0);
+    $frigate->setTopScore(50);
+    $frigate->setScore(50);
     $frigate->setType("end");
     $frigate->setIsFavorite(0);
     $frigate->save();
@@ -2134,13 +2141,12 @@ class frigateCmd extends cmd
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
         break;
-      case 'action_make_snapshot':
-     //   frigate::createSnapshot($frigate);
+      case 'action_make_api_event':
         frigate::createEvent($camera, 'manuel');
         break;
-        /*  case 'action_make_video':
-        frigate::saveURL(null, null, $camera, 4);
-        break; */
+      case 'action_make_event':
+        frigate::createSnapshot($frigate);
+        break;
       default:
         log::add(__CLASS__, 'error', "Unknown action: $logicalId");
     }
