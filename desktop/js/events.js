@@ -169,7 +169,7 @@ function deleteAllEvents(eventId) {
         return;
       } else if (data.result == 'OK') {
         $('#div_alert').showAlert({
-          message: '{{Suppression de l\'évènement réussi.}}',
+          message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
         window.location.reload(true);
@@ -322,13 +322,13 @@ function setFavorite(eventId, isFav) {
     success: function (data) {
       if (data.result == '0') {
         $('#div_alert').showAlert({
-          message: '{{La caméra a été retirée de la liste des favoris.}}',
+          message: '{{L\'évènement a été retiré de la liste des favoris.}}',
           level: 'success'
         });
         return;
       } else if (data.result == '1') {
         $('#div_alert').showAlert({
-          message: '{{La caméra a été ajoutée à la liste des favoris.}}',
+          message: '{{L\'évènement a été ajouté à la liste des favoris.}}',
           level: 'success'
         });
         return;
