@@ -169,7 +169,7 @@ function deleteAllEvents(eventId) {
         return;
       } else if (data.result == 'OK') {
         $('#div_alert').showAlert({
-          message: '{{Suppression de l\'évènement réussi.}}',
+          message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
         window.location.reload(true);
