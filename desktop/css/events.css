@@ -66,7 +66,7 @@
 .modal {
   display: none;
   position: fixed;
-  z-index: 5;
+  z-index: 10;
   left: 0;
   top: 0;
   width: 100%;
@@ -376,13 +376,13 @@
 .favorite-btn {
   position: absolute;
   top: 2px;
-  right: 2px;
+  left: 2px;
   background: transparent;
   border: none;
   font-size: 18px;
   color: gold;
   cursor: pointer;
-  z-index: 4;
+  z-index: 9;
 }
 
 .filter {
@@ -393,7 +393,7 @@
   color: white;
   text-align: center;
   padding: 5px 0;
-  z-index: 3;
+  z-index: 7;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
 }

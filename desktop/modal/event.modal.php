@@ -47,9 +47,8 @@ if (!isConnect('admin')) {
         <label class="col-sm-2 control-label">{{Caméra}} :</label>
       
         <?php    
-          $plugin = plugin::byId('frigate');
-          $eqLogics = eqLogic::byType($plugin->getId());
-          if (count($eqLogics) != 0) {
+          $eqLogics = eqLogic::byType('frigate');
+          if (count($eqLogics) == 0) {
             echo '<label class="col-sm-8 control-label">{{Aucune caméra Frigate trouvée}}</label>';
           } else {
             // Liste des caméras

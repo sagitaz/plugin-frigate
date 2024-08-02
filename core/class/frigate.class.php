@@ -1689,8 +1689,8 @@ class frigate extends eqLogic
     $eqLogic->getCmd(null, 'info_url_thumbnail')->event($url);
     $eqLogic->getCmd(null, 'info_timestamp')->event($startTime);
     $eqLogic->getCmd(null, 'info_label')->event("manuel");
-    $eqLogic->getCmd(null, 'info_score')->event(50);
-    $eqLogic->getCmd(null, 'info_topscore')->event(50);
+    $eqLogic->getCmd(null, 'info_score')->event(0);
+    $eqLogic->getCmd(null, 'info_topscore')->event(0);
     $eqLogic->getCmd(null, 'info_duree')->event(10);
 
     // Creation de l'evenement  dans la DB
@@ -1707,8 +1707,8 @@ class frigate extends eqLogic
     $frigate->setEventId($timestamp);
     $frigate->setLabel("manuel");
     $frigate->setThumbnail($url);
-    $frigate->setTopScore(50);
-    $frigate->setScore(50);
+    $frigate->setTopScore(0);
+    $frigate->setScore(0);
     $frigate->setType("end");
     $frigate->setIsFavorite(0);
     $frigate->save();
