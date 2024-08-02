@@ -47,7 +47,7 @@
     <div class="img-container">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container -->
-      <?php if ($hasClip == 1): ?>
+      <?php if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1): ?>
         <div class="video-overlay">
           <video src="<?= $clip ?>" autoplay muted loop></video>
         </div>
