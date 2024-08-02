@@ -337,7 +337,7 @@ function setFavorite(eventId, isFav) {
   })
 }
 
-$('body').off('frigate::event').on('frigate::event', function(_event, _options) {
+$('body').off('frigate::events').on('frigate::events', function(_event, _options) {
   window.location.reload()
 })
 filterEvents();
