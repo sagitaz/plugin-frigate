@@ -52,6 +52,7 @@ class frigate extends eqLogic
     config::save('recovery_days', '7', 'frigate');
     config::save('remove_days', '7', 'frigate');
     config::save('cron', '5', 'frigate');
+    config::save('event::displayVideo', true, 'frigate');
   }
   // configuration par defaut des crons
   public static function setConfigCron()
