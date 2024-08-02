@@ -45,7 +45,7 @@
 
     <!-- div img -->
     <div class="img-container">
-      <img class="imgSnap" src="<?= $img ?>" />
+      <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container -->
       <?php if ($hasClip == 1): ?>
         <div class="video-overlay">
