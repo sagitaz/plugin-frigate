@@ -111,8 +111,8 @@ if (!isConnect('admin')) {
     $type = $event['type'];
     $date = $event['date'];
     $timeElapsed = timeElapsedString($date);
-    $percentage = $event['percentage'];
-    $duration = $event['duration'];
+    $percentage = $event['percentage'] ?? 0;
+    $duration = $event['duration'] ?? 0;
     $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
     $filterText = '';
     if ($type == 'new') {

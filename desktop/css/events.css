@@ -210,9 +210,12 @@
 .percentage[data-percentage^="4"],
 .percentage[data-percentage^="3"],
 .percentage[data-percentage^="2"],
-.percentage[data-percentage^="1"],
-.percentage[data-percentage^="0"] {
+.percentage[data-percentage^="1"] {
   background-color: #b71c1c;
+}
+
+.percentage[data-percentage^="0"] {
+  display: none;
 }
 
 .inline-title {
