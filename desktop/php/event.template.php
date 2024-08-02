@@ -1,4 +1,44 @@
 <!-- event template -->
+<style>
+  .img-container {
+    position: relative;
+    display: inline-block;
+    width: 100%;
+    height: auto;
+  }
+
+  .imgSnap {
+    width: 100%;
+    height: auto;
+    border-radius: 0;
+  }
+
+  .video-overlay {
+    display: none;
+    position: absolute;
+    top: 0;
+    left: 0;
+    --width: 100%;
+    height: 100%;
+    background-color: rgba(0, 0, 0, 0.5);
+    z-index: 10;
+    overflow: hidden;
+    border-radius: 10px;
+    --scale: 1.1;
+  }
+
+  .video-overlay video {
+    --width: 100%;
+    height: 100%;
+    object-fit: cover;
+    display: block;
+  }
+
+  .img-container:hover .video-overlay {
+    display: block;
+  }
+</style>
+
 <div data-date="<?= $date ?>" data-camera="<?= $camera ?>" data-label="<?= $label ?>" data-id="<?= $id ?>"
   class="frigateEventContainer">
   <div class="frigateEvent">
@@ -6,6 +46,12 @@
     <!-- div img -->
     <div class="img-container">
       <img class="imgSnap" src="<?= $img ?>" />
+      <!-- Hidden video container -->
+      <?php if ($hasClip == 1): ?>
+        <div class="video-overlay">
+          <video src="<?= $clip ?>" autoplay muted loop></video>
+        </div>
+      <?php endif; ?>
       <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
         <i class="<?= $favoriteClass ?>"></i>
       </button>
@@ -39,17 +85,17 @@
                echo 'data-video="' . $clip . '"'; ?>
       data-title="<?= $label ?> <div class='percentage percentageTitle' data-percentage='<?= $topScore ?>'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $formattedDurationTitle ?>">
       <?php if ($hasSnapshot == 1): ?>
-        <button class="hover-button snapshot-btn" title="Voir le snapshot">
+        <button class="hover-button snapshot-btn" title="Voir la capture">
           <i class="fas fa-camera"></i>
         </button>
       <?php endif; ?>
       <?php if ($hasClip == 1): ?>
-        <button class="hover-button video-btn" title="Voir le clip">
+        <button class="hover-button video-btn" title="Voir la vidéo">
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
       <button class="hover-button" onclick="deleteEvent('<?= $id ?>')"
-        title="Supprimer l'event sur votre serveur Frigate">
+        title="Supprimer l'évènement sur votre serveur Frigate">
         <i class="fas fa-trash"></i>
       </button>
     </div>

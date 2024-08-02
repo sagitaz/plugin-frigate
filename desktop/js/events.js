@@ -108,7 +108,7 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 
 document.getElementById('deleteAll').addEventListener('click', function () {
   const visibleEvents = getVisibleEvents();
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ?<br/>Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       visibleEvents.forEach(function (event) {
         const eventId = event.getAttribute('data-id');
@@ -119,8 +119,13 @@ document.getElementById('deleteAll').addEventListener('click', function () {
   });
 });
 
+document.getElementById('createEvent').addEventListener('click', function () {
+  $('#md_modal').dialog({title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 300})
+    .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
+});
+
 function deleteEvent(eventId) {
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ?<br/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       console.log("suppression de : " + eventId);
       deleteAllEvents(eventId);
