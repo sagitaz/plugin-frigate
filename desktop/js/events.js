@@ -120,7 +120,7 @@ document.getElementById('deleteAll').addEventListener('click', function () {
 });
 
 document.getElementById('createEvent').addEventListener('click', function () {
-  $('#md_modal').dialog({title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 300})
+  $('#md_modal').dialog({title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400})
     .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
 });
 

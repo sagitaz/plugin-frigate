@@ -43,7 +43,7 @@ try {
 
     if (init('action') == 'createEvent') {
         // Creation d'un event
-        $result = frigate::createEvent(init('camera'), init('label'));
+        $result = frigate::createEvent(init('camera'), init('label'), init('video'), init('duration'),init('score'));
         ajax::success($result);
     }
     
