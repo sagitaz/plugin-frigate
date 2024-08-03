@@ -661,7 +661,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "score : " . $score);
     log::add(__CLASS__, 'debug', "duration : " . $duration);
     log::add(__CLASS__, 'debug', "video : " . $video);
-    log::add(__CLASS__, 'debug', "include_recording : " . $include_recording);
+    log::add(__CLASS__, 'debug', "include_recording : " . $includeRecording);
     log::add(__CLASS__, 'debug', "sub_label : " . $subLabel);
     
     $params = [
