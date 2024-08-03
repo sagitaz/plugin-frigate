@@ -44,12 +44,12 @@ if (!isConnect('admin')) {
 <div id="event_editor">
     <br>
     <div>
-        <label class="col-sm-2 control-label">{{Caméra}} :</label>
+        <label class="col-sm-3 control-label">{{Caméra}}</label>
       
         <?php    
           $eqLogics = eqLogic::byType('frigate');
           if (count($eqLogics) == 0) {
-            echo '<label class="col-sm-8 control-label">{{Aucune caméra Frigate trouvée}}</label>';
+            echo '<label class="col-sm-8 control-label">{{Aucune caméra Frigate}}</label>';
           } else {
             // Liste des caméras
       		echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
@@ -67,9 +67,24 @@ if (!isConnect('admin')) {
         ?>
     </div>
     <br><br>
+    <div>
+      <label class="col-sm-3 control-label">{{Label}}</label>
+    	<input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" value="manuel" placeholder="{{Saisissez un label d'évènement (ex: person)}}">
     </div>
-        <label class="col-sm-2 control-label">{{Label}} :</label>
-    	<input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" placeholder="{{Saisissez un label d'évènement (ex: person)}}">
+    <br><br>
+    <div>
+      <label class="col-sm-3 control-label">{{Score}}</label>
+		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="0" data-l1key="score" placeholder="{{Score de reconnaissance}}">
+    </div>
+    <br><br>
+    <div>
+      <label class="col-sm-3 control-label">{{Inclure une vidéo}}</label>
+      <input id="videoCheckbox" class="eventAttr form-control" type="checkbox" checked data-l1key="video" placeholder="{{Inclure une vidéo}}">
+    </div>
+    <br>
+    <div id="durationContainer">
+      <label class="col-sm-3 control-label">{{Durée}}</label>
+		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="40" data-l1key="duration" placeholder="{{Durée de la vidéo en secondes}}">
     </div>
     <br><br>
 </div>
