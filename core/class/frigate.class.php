@@ -1720,6 +1720,8 @@ class frigate extends eqLogic
 
   public static function createSnapshot($eqLogic)
   {
+    log::add(__CLASS__, 'debug', "---------------------------------------------------");
+    log::add(__CLASS__, 'debug', "| Créer snapshot");
     //$frigate = eqLogic::byId($eqLogicId);
     $camera = $eqLogic->getConfiguration('name');
     $file = $eqLogic->getConfiguration('img');
@@ -1734,6 +1736,7 @@ class frigate extends eqLogic
     // create clip
     $urlClip = frigate::saveURL($uniqueId, null, $camera, 4, $rtsp);
     // mise a jour des commandes
+    log::add(__CLASS__, 'debug', "| Mise à jour des commandes.");
     $eqLogic->getCmd(null, 'info_url_snapshot')->event($url);
     $eqLogic->getCmd(null, 'info_url_clip')->event($urlClip);
     $eqLogic->getCmd(null, 'info_url_thumbnail')->event($url);
@@ -1744,7 +1747,7 @@ class frigate extends eqLogic
     $eqLogic->getCmd(null, 'info_duree')->event(10);
 
     // Creation de l'evenement  dans la DB
-    log::add(__CLASS__, 'debug', "Creating new frigate event for event ID: " . $uniqueId);
+    log::add(__CLASS__, 'debug', "| Creating new frigate event for event ID: " . $uniqueId);
     $frigate = new frigate_events();
     $frigate->setCamera($camera);
     $frigate->setLasted($url);
@@ -1762,6 +1765,7 @@ class frigate extends eqLogic
     $frigate->setType("end");
     $frigate->setIsFavorite(0);
     $frigate->save();
+    log::add(__CLASS__, 'debug', "---------------------------------------------------");
   }
 
   public static function createUniqueId($timestamp)
