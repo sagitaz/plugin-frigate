@@ -30,7 +30,10 @@ function createNewEvent() {
         data: {
             action: "createEvent",
             camera: $('.eventAttr[data-l1key=camera]').value(),
-            label: $('.eventAttr[data-l1key=label]').value()
+            label: $('.eventAttr[data-l1key=label]').value(),
+            score: Math.min(100, $('.eventAttr[data-l1key=score]').value()),
+            video: $('.eventAttr[data-l1key=video]').value(),
+            duration: $('.eventAttr[data-l1key=duration]').value()            
         },
         dataType: 'json',
         error: function (request, status, error) {
@@ -51,5 +54,16 @@ function createNewEvent() {
     });
 }
 
-$('#md_modal').dialog('option', 'width', 600); 
-$('#md_modal').dialog('option', 'height', 300);
+function updateDurationDisplay() {
+    if ($('#videoCheckbox').is(':checked')) {
+      durationContainer.style.display = 'block';
+    } else {
+      durationContainer.style.display = 'none';
+    }
+  }
+  
+  $('#videoCheckbox').on('change', updateDurationDisplay);
+  updateDurationDisplay();
+  
+  $('#md_modal').dialog('option', 'width', 600); 
+  $('#md_modal').dialog('option', 'height', 400);

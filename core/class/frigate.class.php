@@ -587,13 +587,20 @@ class frigate extends eqLogic
     mqtt2::publish(self::getTopic() . "/{$subTopic}", $payload);
   }
 
-  private static function getcURL($function, $url, $decodeJson = true, $post = false)
+  private static function getcURL($function, $url, $params = null, $decodeJson = true, $post = false)
   {
     $ch = curl_init();
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
     if ($post) {
+      $jsonParams = json_encode($params);      
+      curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonParams);
+      curl_setopt($ch, CURLOPT_HTTPHEADER, [
+          'Content-Type: application/json',
+          'Content-Length: ' . strlen($jsonParams)
+      ]);
+      
       curl_setopt($ch, CURLOPT_POST, TRUE);
     }
     $data = curl_exec($ch);
@@ -608,7 +615,7 @@ class frigate extends eqLogic
     return $response;
   }
 
-  private static function postcURL($function, $url, $decodeJson = true)
+  private static function postcURL($function, $url, $params = null, $decodeJson = true)
   {
     return self::getcURL($function, $url, $decodeJson, true);
   }
@@ -640,11 +647,31 @@ class frigate extends eqLogic
     self::majStatsCmds($stats);
   }
 
-  public static function createEvent($camera, $label)
+  public static function createEvent($camera, $label, $video = true, $duration = 20, $score = 30, $subLabel = '')
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . $label . "/create";
-    $response = self::postcURL("CreateEvent", $resultURL);
+
+    $score = max(0, min(100, floatval($score)));
+    $score = $score / 100;
+    $duration = floatval($duration);
+    $video = isset($_POST['video']) ? intval($_POST['video']) : 0;
+    $includeRecording = (intval($video) == 1);
+    
+    log::add(__CLASS__, 'debug', "score : " . $score);
+    log::add(__CLASS__, 'debug', "duration : " . $duration);
+    log::add(__CLASS__, 'debug', "video : " . $video);
+    log::add(__CLASS__, 'debug', "include_recording : " . $include_recording);
+    log::add(__CLASS__, 'debug', "sub_label : " . $subLabel);
+    
+    $params = [
+      'source_type' => 'api',
+      'sub_label' => $subLabel,
+      'score' => $score,
+      'duration' => $duration,
+      'include_recording' => $includeRecording
+    ];
+    $response = self::postcURL("CreateEvent", $resultURL, $params);
 
     return $response;
   }
@@ -653,7 +680,7 @@ class frigate extends eqLogic
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/logs/" . $service;
-    $logs = self::getcURL("Logs", $resultURL, false);
+    $logs = self::getcURL("Logs", $resultURL, null, false);
 
     return $logs;
   }
