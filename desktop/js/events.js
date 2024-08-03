@@ -340,4 +340,34 @@ function setFavorite(eventId, isFav) {
 $('body').off('frigate::events').on('frigate::events', function(_event, _options) {
   window.location.reload()
 })
-filterEvents();
+
+document.addEventListener('DOMContentLoaded', () => {
+  function loadAndPlayVideo(video) {
+    const src = video.getAttribute('data-src');
+    if (src) {
+      video.setAttribute('src', src);
+      video.load();
+      video.play();
+    }
+  }
+
+  function resetVideo(video) {
+    video.pause();
+    video.currentTime = 0;
+    video.src = '';
+  }
+
+  function handleHover(event) {
+    const video = event.currentTarget.querySelector('video[data-src]');
+    if (video) {
+      resetVideo(video);
+      loadAndPlayVideo(video);
+    }
+  }
+
+  document.querySelectorAll('.img-container').forEach(container => {
+    container.addEventListener('mouseenter', handleHover);
+  });
+  
+  filterEvents();
+});
