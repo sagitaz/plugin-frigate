@@ -75,6 +75,9 @@ class frigate extends eqLogic
         config::save('topic', 'frigate', 'frigate');
       }
     }
+    if (!config::byKey('event::displayVideo', 'frigate')) {
+      config::save('event::displayVideo', true, 'frigate');
+    }
   }
   // configuration par defaut des crons
   public static function setConfigCron()
