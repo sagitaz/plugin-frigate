@@ -102,92 +102,55 @@ class frigate extends eqLogic
       config::save('functionality::cronHourly::enable', 0, 'frigate');
     }
   }
+
+  private static function execCron($frequence)
+  {
+      log::add(__CLASS__, 'debug', "Exécution du cron : {$frequence}");
+
+      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+      if (empty($frigate)) {
+          return;
+      }
+
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      if (config::byKey($frequence, 'frigate', 0) !== 1 || $execute !== "1") {
+          return;
+      }
+
+      self::getEvents();
+      self::getStats();
+  }
+
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cron::enable');
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron5::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cron5::enable');
   }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron10::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cron10::enable');
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron15::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cron15::enable');
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cron30::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cron30::enable');
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate)) {
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-      if (config::byKey('functionality::cronHourly::enable', 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
-      }
-    }
+    self::execCron('functionality::cronHourly::enable');
   }
-
 
   /*
   * Fonction exécutée automatiquement tous les jours par Jeedom
