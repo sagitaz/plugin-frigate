@@ -692,10 +692,7 @@ class frigate extends eqLogic
   {
     $size = 0;
     // Parcourt récursivement tous les fichiers et dossiers
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) { // Exclure les sous-dossiers "snapshots" et "clips"
-      if (strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'snapshots') === 0 || strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'clips') === 0) {
-        continue;
-      }
+    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) { 
       $size += $file->getSize(); // Ajoute la taille du fichier
     }
     $size = round($size / 1024 / 1024, 2);
@@ -714,11 +711,6 @@ class frigate extends eqLogic
 
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
-        // Exclure les sous-dossiers "snapshots" et "clips"
-        if (strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'snapshots') === 0 || strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR . 'clips') === 0) {
-          continue;
-        }
-
         if ($file->isFile() && strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPath() !== $folder) {
           $id = self::extractID($file->getFilename());
           // Vérifie que le fichier n'est pas dans le tableau favoris
@@ -1355,14 +1347,14 @@ class frigate extends eqLogic
     $cameraName = $event->getCamera();
     $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
     if (is_object($eqCamera)) {
-      $eqlogicIds[] = $eqCamera->getId();
+      $eqlogicIds[] = $eqCamera->getId();   
+      // Récupération de la configuration des actions de la caméra
+      $cameraActions = $eqCamera->getConfiguration('actions');
+      // Vérifier si la liste d'actions est vide
+      $cameraActionsExist = !empty($cameraActions);
     }
 
-    // Récupération de la configuration des actions de la caméra
-    $cameraActions = $eqCamera->getConfiguration('actions');
 
-    // Vérifier si la liste d'actions est vide
-    $cameraActionsExist = !empty($cameraActions);
 
     if ($cameraActionsExist) {
       // Vérifier si toutes les actions sont désactivées
