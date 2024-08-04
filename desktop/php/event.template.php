@@ -76,7 +76,7 @@
         </a>
       <?php endif; ?>
       <br>
-      <i class="fas fa-clock"></i><span> <?= $date ?> <?= $formattedDuration ?></span>
+      <i class="fas fa-clock"></i><span> <?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?></span>
     </div>
 
     <!-- div buttons -->
