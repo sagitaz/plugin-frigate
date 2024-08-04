@@ -269,57 +269,13 @@ class frigate extends eqLogic
       $img = $encoded_url = urlencode("http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions);
       $this->setConfiguration('img', $img);
 
-      self::createCamerasCmds($this->getId());
     }
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
   public function postSave()
   {
-    /*
-    $camera = $this->getConfiguration('name');
-    $audio = $this->getConfiguration('audio', -1);
-    if ($audio != -1) {
-      self::publish_camera_message($camera, 'audio/set', ($audio == "1") ? 'ON' : 'OFF');
-    }
-    $birdeye = $this->getConfiguration('birdeye', -1);
-    if ($birdeye != -1) {
-      self::publish_camera_message($camera, 'birdeye/set', ($birdeye == "1") ? 'ON' : 'OFF');
-    }
-    $detect = $this->getConfiguration('detect', -1);
-    if ($detect != -1) {
-      self::publish_camera_message($camera, 'detect/set', ($detect == "1") ? 'ON' : 'OFF');
-    }
-    $improve_constrast = $this->getConfiguration('improve_constrast', -1);
-    if ($improve_constrast != -1) {
-      self::publish_camera_message($camera, 'improve_constrast/set', ($improve_constrast == "1") ? 'ON' : 'OFF');
-    }
-    /* TODO : $motion_contour_area : integer (10s)
-    $motion_contour_area = $this->getConfiguration('detect', -1);
-    if ($motion_contour_area != -1) {
-      self::publish_camera_message($camera, 'motion_contour_area/set', ($motion_contour_area == "1") ? 'ON' : 'OFF');
-    }
-    */
-    /* TODO : $motion_threshold : integer (30s)
-    $motion_threshold = $this->getConfiguration('motion_threshold', -1);
-    if ($motion_threshold != -1) {
-      self::publish_camera_message($camera, 'motion_threshold/set', ($motion_threshold == "1") ? 'ON' : 'OFF');
-    }*/
-    /*
-
-    $ptz_autotracker = $this->getConfiguration('ptz_autotracker', -1);
-    if ($ptz_autotracker != -1) {
-      self::publish_camera_message($camera, 'ptz_autotracker/set', ($ptz_autotracker == "1") ? 'ON' : 'OFF');
-    }
-    $recordings = $this->getConfiguration('recordings', -1);
-    if ($recordings != -1) {
-      self::publish_camera_message($camera, 'recordings/set', ($recordings == "1") ? 'ON' : 'OFF');
-    }
-    $snapshots = $this->getConfiguration('snapshots', -1);
-    if ($snapshots != -1) {
-      self::publish_camera_message($camera, 'snapshots/set', ($snapshots == "1") ? 'ON' : 'OFF');
-    }
-    */
+    self::createCamerasCmds($this->getId());
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
@@ -1190,7 +1146,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "Liste des caméras : " . json_encode($stats['cameras']));
 
     foreach ($stats['cameras'] as $cameraName => $cameraStats) {
-      $eqlogics = eqLogic::byObjectId("41");
+      $eqlogics = eqLogic::byObjectId($defaultRoom);
       foreach ($eqlogics as $eqlogic) {
         $name = $eqlogic->getname();
         if ($name === $cameraName) {
