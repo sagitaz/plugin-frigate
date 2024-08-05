@@ -566,7 +566,7 @@ class frigate extends eqLogic
     self::majStatsCmds($stats);
   }
 
-  public static function createEvent($camera, $label, $video = true, $duration = 20, $score = 30, $subLabel = '')
+  public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . $label . "/create";
@@ -574,14 +574,14 @@ class frigate extends eqLogic
     $score = max(0, min(100, floatval($score)));
     $score = $score / 100;
     $duration = floatval($duration);
-    $video = isset($_POST['video']) ? intval($_POST['video']) : 0;
-    $includeRecording = (intval($video) == 1);
+    $includeRecording = ($video == 1);
     
-    log::add(__CLASS__, 'debug', "score : " . $score);
-    log::add(__CLASS__, 'debug', "duration : " . $duration);
-    log::add(__CLASS__, 'debug', "video : " . $video);
-    log::add(__CLASS__, 'debug', "include_recording : " . $includeRecording);
-    log::add(__CLASS__, 'debug', "sub_label : " . $subLabel);
+    log::add(__CLASS__, 'debug', "label : {$label}");
+    log::add(__CLASS__, 'debug', "score : {$score}");
+    log::add(__CLASS__, 'debug', "duration : {$duration}");
+    log::add(__CLASS__, 'debug', "video : {$video}");
+    log::add(__CLASS__, 'debug', "include_recording : " . ($includeRecording ? "true" : "false"));
+    log::add(__CLASS__, 'debug', "sub_label : {$subLabel}");
     
     $params = [
       'source_type' => 'api',
@@ -1206,7 +1206,7 @@ class frigate extends eqLogic
   public static function createCamerasCmds($eqlogicId)
   {
 
-    $cmd = self::createCmd($eqlogicId, "Créer un évenement via API", "other", "", "action_make_api_event", "", 1, null, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Créer un évenement via API", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
 
     $cmd = self::createCmd($eqlogicId, "Créer une évenement", "other", "", "action_make_event", "", 1, null, 0, "action");
@@ -2053,6 +2053,48 @@ class frigateCmd extends cmd
   }
   */
 
+  private function parseEventParameters($_options) {
+    // Valeurs par défaut
+    // TODO : récupérer les valeurs par défaut pour chaque caméra (et plus au niveau de la config plugin)
+    $defaults = [
+        'label' => config::byKey('defaultLabel', 'frigate'),
+        'video' => (int)config::byKey('defaultVideo', 'frigate'),
+        'duration' => (int)config::byKey('defaultDuration', 'frigate'),
+        'score' => (int)config::byKey('defaultScore', 'frigate')
+    ];
+
+    // Récupération du label
+    if ($_options['title'] != '') $defaults['label'] = $_options['title'];
+    
+    // Récupération des paramètres dans $_options['message']
+    $params = explode('|', $_options['message']);
+    foreach ($params as $param) {
+        list($key, $value) = explode('=', $param);
+        $key = trim($key);
+        $value = trim($value);
+
+        if ($key === 'video') {
+            if (is_numeric($value)) {
+                $defaults['video'] = (int)$value;
+            }
+        }
+
+        if ($key === 'duration') {
+            if (is_numeric($value) && $value > 0) {
+                $defaults['duration'] = (int)$value;
+            }
+        }
+
+        if ($key === 'score') {
+            if (is_numeric($value) && $value >= 0 && $value <= 100) {
+                $defaults['score'] = (int)$value;
+            }
+        }
+    }
+
+    return $defaults;
+  }
+
   // Exécution d'une commande
   public function execute($_options = array())
   {
@@ -2135,7 +2177,9 @@ class frigateCmd extends cmd
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
         break;
       case 'action_make_api_event':
-        frigate::createEvent($camera, 'manuel');
+        //score=12|video=1|duration=20
+        $eventParams = self::parseEventParameters($_options);
+        frigate::createEvent($camera, $eventParams['label'], $eventParams['video'], $eventParams['duration'], $eventParams['score']);
         break;
       case 'action_make_event':
         frigate::createSnapshot($frigate);
