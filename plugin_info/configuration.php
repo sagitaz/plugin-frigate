@@ -94,7 +94,7 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
-            <label class="col-md-4 control-label">{{Afficher la vidéo en vignette dans la page des évènements}}
+            <label class="col-md-4 control-label">{{Vidéos en vignette dans la page des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture}}"></i></sup>
             </label>
 			<div class="col-md-4">
