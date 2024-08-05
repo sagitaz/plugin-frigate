@@ -536,7 +536,7 @@ class frigate extends eqLogic
 
   private static function postcURL($function, $url, $params = null, $decodeJson = true)
   {
-    return self::getcURL($function, $url, $decodeJson, true);
+    return self::getcURL($function, $url, $params, $decodeJson, true);
   }
 
   private static function deletecURL($url)
