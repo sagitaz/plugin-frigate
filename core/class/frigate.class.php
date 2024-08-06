@@ -105,7 +105,12 @@ class frigate extends eqLogic
 
   private static function execCron($frequence)
   {
-    log::add(__CLASS__, 'debug', "Exécution du cron : {$frequence}");
+    log::add(__CLASS__, 'debug', "----------------------START CRON----------------------------------");
+    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+    log::add(__CLASS__, 'debug', "| clean folder data");
+    self::cleanFolderData();
+    log::add(__CLASS__, 'debug', "| clean all oldest files");
+    self::cleanAllOldestFiles();
 
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (empty($frigate)) {
@@ -113,12 +118,15 @@ class frigate extends eqLogic
     }
 
     $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
-    if (config::byKey($frequence, 'frigate', 0) !== 1 || $execute !== "1") {
-      return;
-    }
 
-    self::getEvents();
-    self::getStats();
+    if (config::byKey($frequence, 'frigate', 0) == 1) {
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
+      }
+    }
+    log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
+    return;
   }
 
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
@@ -154,8 +162,7 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
-    self::cleanFolderData();
-    self::cleanAllOldestFiles();
+    self::execCron('functionality::cronDaily::enable');
   }
 
 
@@ -561,10 +568,12 @@ class frigate extends eqLogic
 
   public static function getStats()
   {
+    log::add(__CLASS__, 'debug', "----------------------START STATS----------------------------------");
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
+    log::add(__CLASS__, 'debug', "----------------------END STATS----------------------------------");
   }
 
   public static function createEvent($camera, $label, $video = true, $duration = 20, $score = 30, $subLabel = '')
@@ -630,7 +639,7 @@ class frigate extends eqLogic
     foreach ($filteredRecoveryEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
-      log::add(__CLASS__, 'debug', "--------------------------------------------------------");
+      log::add(__CLASS__, 'debug', "----------------------START EVENT----------------------------------");
       log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
 
       $infos = self::getEventinfos($mqtt, $event);
@@ -722,7 +731,7 @@ class frigate extends eqLogic
         }
       }
     }
-    log::add(__CLASS__, 'debug', "--------------------------------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------END EVENT----------------------------------");
   }
 
   public static function getEventinfos($mqtt, $event)
@@ -824,44 +833,75 @@ class frigate extends eqLogic
   {
     // Nettoyage du dossier des images caméra
     $folder = dirname(__FILE__, 3) . "/data";
-    $id = "";
+
     if (file_exists($folder)) {
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
-        if ($file->isFile() && strpos($file->getPath(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPath() !== $folder) {
+        if ($file->isFile()) {
           $id = self::extractID($file->getFilename());
-          // verifier si l'id existe dans la database
+          // Vérifier si l'id existe dans la base de données
           $frigate = frigate_events::byEventId($id);
           if (!$frigate) {
-            log::add(__CLASS__, 'debug', "| File deleted: " . $file->getPath() . " not found in database");
-            unlink($file->getPath());
+            log::add(__CLASS__, 'debug', "| File " . $file->getPathname() . " not found in database");
+            if (unlink($file->getPathname())) {
+              log::add(__CLASS__, 'debug', "| Successfully deleted: " . $file->getPathname());
+            } else {
+              log::add(__CLASS__, 'error', "| Error deleting file: " . $file->getPathname());
+            }
           }
         }
       }
+    } else {
+      log::add(__CLASS__, 'error', "| Folder does not exist: " . $folder);
     }
   }
+
 
   // nettoyer la DB de tous les fichiers dont la date de creation est supérieure au nombre de jours configurer
   // Exécution en cronDaily
-  public static function cleanAllOldestFiles() {
+  public static function cleanAllOldestFiles()
+  {
     $days = config::byKey('remove_days', 'frigate', "7");
-    $events = [];
+    // Vérifier si $days est un nombre et supérieur à 0
+    if (!is_numeric($days) || $days <= 0) {
+      log::add(__CLASS__, 'error', "| Invalid configuration for 'remove_days': " . $days . " It must be a positive number.");
+      return;
+    }
+    log::add(__CLASS__, 'info', "| Cleaning files older than " . $days . " days.");
+
     $events = frigate_events::getAllOldestNotFavorite($days);
+
     if (!empty($events)) {
       foreach ($events as $event) {
-        self::cleanDbEvent($event['id']);
+        $eventId = $event->getEventId();
+
+        // Log the event ID being cleaned
+        log::add(__CLASS__, 'info', "| Cleaning event ID: " . $eventId);
+
+        $result = self::cleanDbEvent($eventId);
+
+        // Vérifier si la suppression de l'événement a réussi
+        if ($result) {
+          log::add(__CLASS__, 'info', "| Successfully cleaned event ID: " . $eventId);
+        } else {
+          log::add(__CLASS__, 'error', "| Failed to clean event ID: " . $eventId);
+        }
       }
+    } else {
+      log::add(__CLASS__, 'info', "| No events found older than " . $days . " days.");
     }
   }
 
-  public static function cleanOldestFile() {
+
+  public static function cleanOldestFile()
+  {
     $events = [];
     $events = frigate_events::getOldestNotFavorite();
-    if (!empty($events)) {  
+    if (!empty($events)) {
       foreach ($events as $event) {
-        self::cleanDbEvent($event['id']);
+        self::cleanDbEvent($event->getEventId());
       }
-    }  
+    }
   }
 
   // Supprime le plus vieux si dossier plein
