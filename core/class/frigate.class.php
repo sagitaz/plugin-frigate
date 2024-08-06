@@ -689,7 +689,6 @@ class frigate extends eqLogic
           'Snapshot' => $infos["snapshot"],
           'Box' => $event['box'],
           'Camera' => $event['camera'],
-          'Data' => $event['data'],
           'FalsePositive' => $event['false_positive'],
           'Label' => $event['label'],
           'PlusId' => $event['plus_id'],
@@ -705,7 +704,7 @@ class frigate extends eqLogic
           $setMethod = 'set' . $field;
           $currentValue = $frigate->$getMethod();
 
-          // Si les deux valeurs sont des chaînes JSON, les décoder avant de les comparer
+     /*     // Si les deux valeurs sont des chaînes JSON, les décoder avant de les comparer
           if (is_string($currentValue) && is_string($value)) {
             $decodedCurrentValue = json_decode($currentValue, true);
             $decodedValue = json_decode($value, true);
@@ -713,7 +712,7 @@ class frigate extends eqLogic
             if (json_last_error() === JSON_ERROR_NONE && $decodedCurrentValue === $decodedValue) {
               continue; // Les valeurs sont identiques après décodage
             }
-          }
+          } */
 
           if ((is_null($currentValue) || $currentValue === '' || $currentValue != $value) && !is_null($value) && $value !== '') {
             log::add(__CLASS__, 'debug', "| Updating field '$field' for event ID: " . $event['id'] . ". Old Value: " . json_encode($currentValue) . ", New Value: " . json_encode($value));
@@ -723,6 +722,8 @@ class frigate extends eqLogic
         }
 
         if ($updated) {
+          $frigate->setData($event['data']);
+          log::add(__CLASS__, 'debug', "| Updating field data for event ID: " . $event['id']);
           $frigate->save();
           self::majEventsCmds($frigate);
           log::add(__CLASS__, 'debug', "| Frigate event updated and saved for event ID: " . $event['id']);
@@ -736,7 +737,7 @@ class frigate extends eqLogic
 
   public static function getEventinfos($mqtt, $event)
   {
-    $dir = dirname(__FILE__, 3) . "/data";
+    $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     // verifier si le fichier thumbnail existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_thumbnail.jpg')) {
       log::add(__CLASS__, 'debug', "| File not found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg, trying to download');
@@ -745,7 +746,7 @@ class frigate extends eqLogic
         $img = "null";
       }
     } else {
-      log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg');
+      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg');
       $img = $dir . '/' . $event['id'] . '_thumbnail.jpg';
     }
 
@@ -766,7 +767,7 @@ class frigate extends eqLogic
         $hasSnapshot = 0;
       }
     } else {
-      log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
+      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       $snapshot = $dir . '/' . $event['id'] . '_snapshot.jpg';
       $hasSnapshot = 1;
     }
@@ -789,7 +790,7 @@ class frigate extends eqLogic
         $hasClip = 0;
       }
     } else {
-      log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_clip.mp4');
+      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_clip.mp4');
       $clip = $dir . '/' . $event['id'] . '_clip.mp4';
       $hasClip = 1;
     }
@@ -1316,11 +1317,9 @@ class frigate extends eqLogic
     // Si la liste d'actions n'est pas vide et qu'au moins une action est activée
     if ($cameraActionsExist) {
       self::executeActionNewEvent($eqCamera->getId(), $event);
-      log::add(__CLASS__, 'debug', "| Execution des actions caméra " . $cameraName);
     } else {
       // Sinon, on exécute les actions suivantes
       self::executeActionNewEvent($frigate->getId(), $event);
-      log::add(__CLASS__, 'debug', "| Execution des actions frigate par " . $frigate->getName());
     }
 
 
@@ -1524,7 +1523,6 @@ class frigate extends eqLogic
       // Vérifier les conditions de temps et de label/type
       // Exécuter l'action seulement si $start est compris entre l'heure actuelle et -3h
       if ($event->getStartTime() <= time() - 10800) {
-        log::add(__CLASS__, 'debug', "| Heure dépassée : " . $start);
         continue;
       }
 
