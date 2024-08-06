@@ -107,6 +107,34 @@ class frigate_events
 		return 'frigate_events';
 	}
 
+	public static function getOldestNotFavorite()
+	{
+		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
+				FROM frigate_events
+				WHERE isFavorite != 1
+				ORDER BY startTime ASC
+				LIMIT 1;';
+		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
+	}
+
+	public static function getAllOldestNotFavorite($_days)
+	{
+		$days = intval($_days);
+		$seconds = $days * 24 * 60 * 60;
+
+		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
+            FROM frigate_events
+            WHERE isFavorite != 1
+            AND startTime < (UNIX_TIMESTAMP(NOW()) - :seconds);';
+
+		$values = array(
+				'seconds' => $seconds,
+			);
+
+		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
+	}
+
+
 	/*     * **********************Getteur Setteur*************************** */
 
 	public function getId()
