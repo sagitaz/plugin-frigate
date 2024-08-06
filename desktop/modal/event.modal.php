@@ -69,22 +69,24 @@ if (!isConnect('admin')) {
     <br><br>
     <div>
       <label class="col-sm-3 control-label">{{Label}}</label>
-    	<input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" value="manuel" placeholder="{{Saisissez un label d'évènement (ex: person)}}">
-    </div>
-    <br><br>
-    <div>
-      <label class="col-sm-3 control-label">{{Score}}</label>
-		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="0" data-l1key="score" placeholder="{{Score de reconnaissance}}">
+      <div>
+      <label class="col-sm-3 control-label">{{Label}}</label>
+      <input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" value="<?= config::byKey('defaultLabel', 'frigate') ?>" placeholder="{{Saisissez un label d'évènement (ex: person)}}">
     </div>
     <br><br>
     <div>
       <label class="col-sm-3 control-label">{{Inclure une vidéo}}</label>
-      <input id="videoCheckbox" class="eventAttr form-control" type="checkbox" checked data-l1key="video" placeholder="{{Inclure une vidéo}}">
+      <input id="videoCheckbox" class="eventAttr form-control" type="checkbox" <?=(config::byKey('defaultVideo', 'frigate') == '1') ? 'checked' : ''; ?> data-l1key="video" placeholder="{{Inclure une vidéo}}">
     </div>
     <br>
     <div id="durationContainer">
       <label class="col-sm-3 control-label">{{Durée}}</label>
 		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="40" data-l1key="duration" placeholder="{{Durée de la vidéo en secondes}}">
+    </div>
+    <br><br>
+    <div>
+      <label class="col-sm-3 control-label">{{Score}}</label>
+		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="<?= config::byKey('defaultScore', 'frigate') ?>" data-l1key="score" placeholder="{{Score de reconnaissance}}">
     </div>
     <br><br>
 </div>
