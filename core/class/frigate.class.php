@@ -538,7 +538,7 @@ class frigate extends eqLogic
     }
     curl_close($ch);
     $response = $decodeJson ? json_decode($data, true) : $data;
-    log::add(__CLASS__, 'debug', $function . " : mise à jour.");
+    log::add(__CLASS__, 'debug', "| " . $function . " : mise à jour.");
     return $response;
   }
 
@@ -730,8 +730,8 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'debug', "| No changes detected for event ID: " . $event['id']);
         }
       }
+      log::add(__CLASS__, 'debug', "----------------------END EVENT----------------------------------");
     }
-    log::add(__CLASS__, 'debug', "----------------------END EVENT----------------------------------");
   }
 
   public static function getEventinfos($mqtt, $event)
@@ -838,15 +838,18 @@ class frigate extends eqLogic
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
-          $id = self::extractID($file->getFilename());
-          // Vérifier si l'id existe dans la base de données
-          $frigate = frigate_events::byEventId($id);
-          if (!$frigate) {
-            log::add(__CLASS__, 'debug', "| File " . $file->getPathname() . " not found in database");
-            if (unlink($file->getPathname())) {
-              log::add(__CLASS__, 'debug', "| Successfully deleted: " . $file->getPathname());
-            } else {
-              log::add(__CLASS__, 'error', "| Error deleting file: " . $file->getPathname());
+          // Vérifiez que le fichier est dans un sous-dossier de /data
+          if (strpos($file->getPathname(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPathname() !== $folder) {
+            $id = self::extractID($file->getFilename());
+            // Vérifier si l'id existe dans la base de données
+            $frigate = frigate_events::byEventId($id);
+            if (!$frigate) {
+              log::add(__CLASS__, 'debug', "| File " . $file->getPathname() . " not found in database");
+              if (unlink($file->getPathname())) {
+                log::add(__CLASS__, 'debug', "| Successfully deleted: " . $file->getPathname());
+              } else {
+                log::add(__CLASS__, 'error', "| Error deleting file: " . $file->getPathname());
+              }
             }
           }
         }
