@@ -814,6 +814,13 @@ class frigate extends eqLogic
       $newScore = round($event['score'] * 100, 0);
     }
 
+    // calculer les zones
+	  $newZones = isset($event['entered_zones']) 
+            && is_array($event['entered_zones']) 
+            && !empty($event['entered_zones'])
+      ? implode(', ', $event['entered_zones'])
+      : null;
+    
     // renvoyer les infos
     $infos = array(
       "image" => $img,
