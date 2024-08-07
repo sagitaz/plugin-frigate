@@ -117,7 +117,7 @@ class frigate_events
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
 
-	public static function getAllOldestNotFavorite($_days)
+	public static function getOldestNotFavorites($_days)
 	{
 		$days = intval($_days);
 		$seconds = $days * 24 * 60 * 60;

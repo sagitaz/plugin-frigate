@@ -866,14 +866,19 @@ class frigate extends eqLogic
   public static function cleanAllOldestFiles()
   {
     $days = config::byKey('remove_days', 'frigate', "7");
+    $recoveryDays = config::byKey('recovery_days', 'frigate', "7");
     // Vérifier si $days est un nombre et supérieur à 0
     if (!is_numeric($days) || $days <= 0) {
       log::add(__CLASS__, 'error', "| Invalid configuration for 'remove_days': " . $days . " It must be a positive number.");
       return;
     }
+    if ($days < $recoveryDays) {
+      log::add(__CLASS__, 'warning', "| 'remove_days' must be greater than 'recovery_days'");
+      $days = $recoveryDays;
+    }
     log::add(__CLASS__, 'info', "| Cleaning files older than " . $days . " days.");
 
-    $events = frigate_events::getAllOldestNotFavorite($days);
+    $events = frigate_events::getOldestNotFavorites($days);
 
     if (!empty($events)) {
       foreach ($events as $event) {
