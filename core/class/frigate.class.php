@@ -105,11 +105,11 @@ class frigate extends eqLogic
 
   private static function execCron($frequence)
   {
-    log::add(__CLASS__, 'debug', "----------------------START CRON----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
     log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
-    log::add(__CLASS__, 'debug', "| clean folder data");
+    log::add(__CLASS__, 'debug', "| Clean folder data");
     self::cleanFolderData();
-    log::add(__CLASS__, 'debug', "| clean all oldest files");
+    log::add(__CLASS__, 'debug', "| Clean oldest files");
     self::cleanAllOldestFiles();
 
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -478,12 +478,12 @@ class frigate extends eqLogic
   {
     $url = config::byKey('URL', 'frigate');
     if ($url == "") {
-      log::add(__CLASS__, 'debug', "Error: L'URL ne peut être vide.");
+      log::add(__CLASS__, 'error', "| Error: L'URL ne peut être vide.");
       return false;
     }
     $port = config::byKey('port', 'frigate');
     if ($port == "") {
-      log::add(__CLASS__, 'debug', "Error: Le port ne peut être vide");
+      log::add(__CLASS__, 'error', "| Error: Le port ne peut être vide");
       return false;
     }
     $urlFrigate = $url . ":" . $port;
@@ -510,7 +510,7 @@ class frigate extends eqLogic
 
   public static function publish_message(string $subTopic, string $payload)
   {
-    log::add(__CLASS__, 'debug', "publish_message : " . self::getTopic() . "/{$subTopic} avec payload : {$payload}");
+    log::add(__CLASS__, 'debug', "| publish_message : " . self::getTopic() . "/{$subTopic} avec payload : {$payload}");
     mqtt2::publish(self::getTopic() . "/{$subTopic}", $payload);
   }
 
@@ -533,7 +533,7 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'debug', "Error:" . curl_error($ch));
+      log::add(__CLASS__, 'error', "| Error:" . curl_error($ch));
       die();
     }
     curl_close($ch);
@@ -557,18 +557,18 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'debug', "Error:" . curl_error($ch));
+      log::add(__CLASS__, 'error', "| Error:" . curl_error($ch));
       die();
     }
     curl_close($ch);
     $response = json_decode($data, true);
-    log::add(__CLASS__, 'debug', "Delete on Frigate : " . json_encode($response));
+    log::add(__CLASS__, 'debug', "| Delete on Frigate : " . json_encode($response));
     return $response;
   }
 
   public static function getStats()
   {
-    log::add(__CLASS__, 'debug', "----------------------START STATS----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:START STATS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
@@ -585,13 +585,15 @@ class frigate extends eqLogic
     $score = $score / 100;
     $duration = floatval($duration);
     $includeRecording = ($video == 1);
-    
-    log::add(__CLASS__, 'debug', "label : {$label}");
-    log::add(__CLASS__, 'debug', "score : {$score}");
-    log::add(__CLASS__, 'debug', "duration : {$duration}");
-    log::add(__CLASS__, 'debug', "video : {$video}");
-    log::add(__CLASS__, 'debug', "include_recording : " . ($includeRecording ? "true" : "false"));
-    log::add(__CLASS__, 'debug', "sub_label : {$subLabel}");
+
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:START CREATE EVENT:/fg:----------------------------------");
+    log::add(__CLASS__, 'debug', "| label : {$label}");
+    log::add(__CLASS__, 'debug', "| score : {$score}");
+    log::add(__CLASS__, 'debug', "| duration : {$duration}");
+    log::add(__CLASS__, 'debug', "| video : {$video}");
+    log::add(__CLASS__, 'debug', "| include_recording : " . ($includeRecording ? "true" : "false"));
+    log::add(__CLASS__, 'debug', "| sub_label : {$subLabel}");
+    log::add(__CLASS__, 'debug', "----------------------END CREATE EVENT----------------------------------");
     
     $params = [
       'source_type' => 'api',
@@ -639,7 +641,7 @@ class frigate extends eqLogic
     foreach ($filteredRecoveryEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
-      log::add(__CLASS__, 'debug', "----------------------START EVENT----------------------------------");
+      log::add(__CLASS__, 'debug', "----------------------:fg-success:START EVENT:/fg:----------------------------------");
       log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
 
       $infos = self::getEventinfos($mqtt, $event);
@@ -839,17 +841,18 @@ class frigate extends eqLogic
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
+          $path = $file->getPathname();
           // Vérifiez que le fichier est dans un sous-dossier de /data
-          if (strpos($file->getPathname(), $folder . DIRECTORY_SEPARATOR) === 0 && $file->getPathname() !== $folder) {
+          if (strpos($path, $folder . DIRECTORY_SEPARATOR) === 0 && $path !== $folder . DIRECTORY_SEPARATOR . basename($path)) {
             $id = self::extractID($file->getFilename());
             // Vérifier si l'id existe dans la base de données
             $frigate = frigate_events::byEventId($id);
             if (!$frigate) {
-              log::add(__CLASS__, 'debug', "| File " . $file->getPathname() . " not found in database");
-              if (unlink($file->getPathname())) {
-                log::add(__CLASS__, 'debug', "| Successfully deleted: " . $file->getPathname());
+              log::add(__CLASS__, 'debug', "| File " . $path . " not found in database");
+              if (unlink($path)) {
+                log::add(__CLASS__, 'debug', "| Successfully deleted: " . $path);
               } else {
-                log::add(__CLASS__, 'error', "| Error deleting file: " . $file->getPathname());
+                log::add(__CLASS__, 'error', "| Error deleting file: " . $path);
               }
             }
           }
@@ -916,7 +919,7 @@ class frigate extends eqLogic
   // Supprime le plus vieux si dossier plein
   public static function cleanFolderDataIfFull()
   {
-    $maxSize = config::byKey('datas_weight', 'frigate') * 1024 * 1024;
+    $maxSize = config::byKey('datas_weight', 'frigate');
     $size = self::getFolderSize();
     log::add(__CLASS__, 'debug', "| Folder size: " . $size);
     log::add(__CLASS__, 'debug', "| Max folder size: " . $maxSize);
@@ -967,7 +970,7 @@ class frigate extends eqLogic
       // Verifier si le fichier est un favoris
       $isFavorite = $frigate->getIsFavorite() ?? 0;
       if ($isFavorite == 1) {
-        log::add(__CLASS__, 'debug', "Evènement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
+        log::add(__CLASS__, 'debug', "| Evènement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
       } else {
         // Recherche si clip et snapshot existent dans le dossier de sauvegarde
         $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
@@ -976,19 +979,19 @@ class frigate extends eqLogic
 
         if (file_exists($clip)) {
           unlink($clip);
-          log::add(__CLASS__, 'debug', "MP4 clip delete for event " . $frigate->getEventId());
+          log::add(__CLASS__, 'debug', "| MP4 clip delete for event " . $frigate->getEventId());
         }
         if (file_exists($snapshot)) {
           unlink($snapshot);
-          log::add(__CLASS__, 'debug', "JPG snapshot delete for event " . $frigate->getEventId());
+          log::add(__CLASS__, 'debug', "| JPG snapshot delete for event " . $frigate->getEventId());
         }
         if (file_exists($thumbnail)) {
           unlink($thumbnail);
-          log::add(__CLASS__, 'debug', "JPG thumbnail delete for event " . $frigate->getEventId());
+          log::add(__CLASS__, 'debug', "| JPG thumbnail delete for event " . $frigate->getEventId());
         }
 
         $frigate->remove();
-        log::add(__CLASS__, 'debug', "Evènement " . $frigate->getEventId() . " supprimé de la DB.");
+        log::add(__CLASS__, 'debug', "| Evènement " . $frigate->getEventId() . " supprimé de la DB.");
       }
       return true;
     } else {
@@ -1002,7 +1005,7 @@ class frigate extends eqLogic
     if (!empty($frigate) && isset($frigate[0])) {
       $isFavorite = $frigate[0]->getIsFavorite() ?? 0;
       if ($isFavorite == 1) {
-        log::add(__CLASS__, 'debug', "Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
+        log::add(__CLASS__, 'debug', "| Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
         message::add('frigate', __("L'évènement est un favori, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
         return "Error 01";
       }
@@ -1115,7 +1118,7 @@ class frigate extends eqLogic
 
   public static function restartFrigate()
   {
-    log::add(__CLASS__, 'info', "restartFrigate");
+    log::add(__CLASS__, 'info', ":fg-warning:restartFrigate:/fg:");
     self::publish_message('restart', '');
   }
 
