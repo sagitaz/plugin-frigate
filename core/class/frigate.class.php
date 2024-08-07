@@ -668,7 +668,7 @@ class frigate extends eqLogic
         $frigate->setThumbnail($infos["thumbnail"]);
         $frigate->setTopScore($infos["topScore"]);
         $frigate->setScore($infos["score"]);
-        $frigate->setZones($event['zones']);
+        $frigate->setZones($infos['zones']);
         $frigate->setType($type);
         $frigate->setIsFavorite(0);
         $frigate->save();
@@ -698,7 +698,8 @@ class frigate extends eqLogic
           'Thumbnail' => $infos["thumbnail"],
           'Type' => $type,
           'TopScore' => $infos["topScore"],
-          'Score' => $infos["score"]
+          'Score' => $infos["score"],
+          'Zones' => $infos['zones']
         ];
 
         foreach ($fieldsToUpdate as $field => $value) {
@@ -824,7 +825,8 @@ class frigate extends eqLogic
       "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
       "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
       "topScore" => $newTopScore,
-      "score" => $newScore
+      "score" => $newScore,
+      "zones" => $newZones
     );
 
     return $infos;
@@ -1046,7 +1048,8 @@ class frigate extends eqLogic
         "id" => $event->getEventId(),
         "top_score" => $event->getTopScore(),
         "type" => $event->getType(),
-        "isFavorite" => $event->getIsFavorite() ?? 0
+        "isFavorite" => $event->getIsFavorite() ?? 0,
+        "zones" => $event->getZones() ?? ''
       );
     }
 
