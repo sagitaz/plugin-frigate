@@ -55,15 +55,19 @@ function createNewEvent() {
 }
 
 function updateDurationDisplay() {
-    if ($('#videoCheckbox').is(':checked')) {
-      durationContainer.style.display = 'block';
-    } else {
-      durationContainer.style.display = 'none';
-    }
+  if ($('#videoCheckbox').is(':checked')) {
+    durationContainer.style.display = 'block';
+  } else {
+    durationContainer.style.display = 'none';
   }
+}
   
-  $('#videoCheckbox').on('change', updateDurationDisplay);
-  updateDurationDisplay();
-  
-  $('#md_modal').dialog('option', 'width', 600); 
-  $('#md_modal').dialog('option', 'height', 400);
+$('#videoCheckbox').on('change', updateDurationDisplay);
+updateDurationDisplay();
+
+$('#md_modal').dialog('option', 'width', 600); 
+$('#md_modal').dialog('option', 'height', 400);
+
+$(document).ready(function() {
+  $('.eventAttr[data-l1key=camera]').select2();
+});

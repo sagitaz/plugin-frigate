@@ -328,7 +328,11 @@ sendVarToJS('refresh', $refresh);
     </div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
+<?php include_file('desktop', 'select2', 'css', 'frigate'); ?>
+<?php include_file('desktop', 'select2.custom', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'frigate', 'css', 'frigate'); ?>
+
+<?php include_file('desktop', 'select2', 'js', 'frigate'); ?>
 <?php include_file('desktop', 'frigate', 'js', 'frigate'); ?>
 <?php include_file('desktop', 'fileSaver', 'js', 'frigate'); ?>
 <?php include_file('core', 'plugin.template', 'js'); ?>

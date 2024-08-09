@@ -38,7 +38,6 @@ if (!isConnect('admin')) {
         content: "\f00d";
     }
 </style>
-<legend><i class="fas fa-building"></i>{{Configuration du nouvel évènement}}</legend>
 <br>
 
 <div id="event_editor">
@@ -52,7 +51,7 @@ if (!isConnect('admin')) {
             echo '<label class="col-sm-8 control-label">{{Aucune caméra Frigate}}</label>';
           } else {
             // Liste des caméras
-      		echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
+      		  echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
             echo '<div class="eqLogicThumbnailContainer">';
             foreach ($eqLogics as $eqLogic) {
               $parts = explode('][', trim($eqLogic->getHumanName(false, false), '[]'));
@@ -88,10 +87,13 @@ if (!isConnect('admin')) {
       <label class="col-sm-3 control-label">{{Score}}</label>
 		  <input class="eventAttr col-sm-8 form-control input-sm" type="number" value="<?= config::byKey('defaultScore', 'frigate') ?>" data-l1key="score" placeholder="{{Score de reconnaissance}}">
     </div>
-    <br><br>
+    <br><br><br>
 </div>
 <div class="form-actions pull-right"><a class="btn btn-success eqLogicAction" onclick="createNewEvent()">
         <i class="fas fa-check-circle"></i> {{Sauvegarder}}</a></div>
 </div>
 
+<?php include_file('desktop', 'select2', 'css', 'frigate'); ?>
+<?php include_file('desktop', 'select2.custom', 'css', 'frigate'); ?>
+<?php include_file('desktop', 'select2', 'js', 'frigate'); ?>
 <?php include_file('desktop', 'modal_event', 'js', 'frigate'); ?>

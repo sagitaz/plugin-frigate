@@ -504,3 +504,7 @@ document.getElementById('add-ptz').addEventListener('click', function () {
     })
     window.location.reload(true);
 });
+
+$(document).ready(function() {
+    $('.eqLogicAttr[data-l1key=object_id]').select2();
+});

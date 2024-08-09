@@ -1,0 +1,26 @@
+.select2-container--default .select2-selection--single .select2-selection__rendered {
+  background-color: var(--form-bg-color) !important;
+  color: var(--txt-color) !important;
+}
+
+.select2-dropdown {
+  background-color: var(--form-bg-color) !important;
+}
+
+.select2-container--default .select2-results__option--highlighted.select2-results__option--selectable{
+  color: var(--form-bg-color) !important;
+}
+
+.select2-container--default .select2-results__option--selected{
+  background-color: var(--txt-color) !important;
+  color: var(--form-bg-color) !important;
+}
+
+.select2-container--default .select2-selection--single {
+  background-color: var(--form-bg-color) !important;
+  border: unset !important;
+  height: 30px!important
+}
+.select2-search--dropdown{
+  border:1px outset var(--txt-color) !important;
+}
