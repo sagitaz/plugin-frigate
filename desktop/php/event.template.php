@@ -71,7 +71,7 @@
       <?php if ($cameraFound): ?>
         <a onclick="gotoCamera('<?= $cameraId ?>')" title="Afficher la page de la caméra">
         <?php endif; ?>
-        <i class="fas fa-video"></i><span> <?= $camera ?></span>
+        <i class="fas fa-video"></i><span> <?= $camera ?><?= $zones !== '' ? ' - ' . htmlspecialchars(str_replace('_', ' ', $zones)) : '' ?></span>
         <?php if ($cameraFound): ?>
         </a>
       <?php endif; ?>
