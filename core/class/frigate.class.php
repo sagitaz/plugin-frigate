@@ -593,7 +593,6 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "| video : {$video}");
     log::add(__CLASS__, 'debug', "| include_recording : " . ($includeRecording ? "true" : "false"));
     log::add(__CLASS__, 'debug', "| sub_label : {$subLabel}");
-    log::add(__CLASS__, 'debug', "----------------------END CREATE EVENT----------------------------------");
     
     $params = [
       'source_type' => 'api',
@@ -604,6 +603,7 @@ class frigate extends eqLogic
     ];
     $response = self::postcURL("CreateEvent", $resultURL, $params);
 
+    log::add(__CLASS__, 'debug', "----------------------END CREATE EVENT----------------------------------");
     return $response;
   }
 
@@ -749,7 +749,7 @@ class frigate extends eqLogic
       }
     } else {
       //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg');
-      $img = $dir . '/' . $event['id'] . '_thumbnail.jpg';
+      $img = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_thumbnail.jpg';
     }
 
     // verifier si le fichier snapshot existe avant de le telecharger
@@ -770,7 +770,7 @@ class frigate extends eqLogic
       }
     } else {
       //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
-      $snapshot = $dir . '/' . $event['id'] . '_snapshot.jpg';
+      $snapshot = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_snapshot.jpg';
       $hasSnapshot = 1;
     }
 
@@ -793,7 +793,7 @@ class frigate extends eqLogic
       }
     } else {
       //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      $clip = $dir . '/' . $event['id'] . '_clip.mp4';
+      $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
       $hasClip = 1;
     }
 
