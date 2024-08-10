@@ -6,7 +6,7 @@
 # 10/08/2024 Beta 0.9.0
 - Ajout bouton et options create event.
 - Corrections erreur cron isFavorite.
-- Ajout d'un éditeur pour le fichier de configuration ( toutes les modifications sont à vos risques, lisez bien la documentation officielle de Frigate ) et faites une sauvegarde de la configuration avant.
+- Ajout d'un éditeur pour le fichier de configuration ( toutes les modifications sont à vos risques, lisez bien la documentation officielle de Frigate et faites une sauvegarde de la configuration avant ).
 - Récupération des logs du serveur Frigate.
 - Modification de la gestion du nettoyage des dossiers et events.
 - Pleins d'autres modifications .

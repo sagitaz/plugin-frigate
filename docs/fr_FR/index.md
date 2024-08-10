@@ -137,7 +137,14 @@ Tous les évènements favoris ne sont pas supprimés.
 ### Création d'un évènement manuel
 Dans la configuration générale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
 Sur la page **Events**, vous trouverez un bouton permettant de créer un nouvel évènement.
-Pour chaque caméra, une commande action vous permettra aussi de créer un évènement (avec les valeurs par défaut).
+Pour chaque caméra, une commande action vous permettra aussi de créer un évènement.
+Cette commande est de type message, si vous laissez vide alors les paramètres par défaut seront utilisés (depuis le widget ce sera toujours le cas).
+title : ``Indiquer le label``
+message : ``score=80 | video=1 | duration=20``
+
+Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5sc par defaut, donc en paramétrant à 20sc vous obtiendrez une vidéo de 30sc.
+
+Pour le moment les évènements créés ne sont remontés qu'au **cron**. En effet Frigate n'envois rien en MQTT sur cette commande. On travaille sur une mise a jour automatique.
 
 # <u>Configuration Frigate</u>
 > **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
