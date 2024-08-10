@@ -19,7 +19,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 # <u>Demon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
 Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
-Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly, voire le désactiver.
+Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Deamon NOK :**
 Si vous n'avez pas mqtt-manager, il est normal que le deamon reste sur NOK, aucun problème le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
@@ -35,6 +35,7 @@ J'en ajouterai suivant les demandes et besoins de chacun.
 ## Equipement Statistiques
 L'équipement est créé de manière automatique à l'installation du plugin.
 Celui-ci comporte des commandes infos avec quelques statistiques disponibles.
+Il comporte aussi la commande action permettant de redémarrer le serveur Frigate.
 J'en ajouterai suivant les demandes et besoins de chacun.
 
 ## Equipement Caméra
@@ -93,7 +94,7 @@ Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécut
 
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 
-En configuration sans MQTT, ce n'est pas utile, tous les évènementssont de type **end**.
+En configuration sans MQTT, ce n'est pas utile, tous les évènements sont de type **end**.
 En MQTT, ils peuvent être de type **new**, **update** et **end**.
 
 
@@ -132,6 +133,24 @@ Tous les évènements favoris ne sont pas supprimés.
 > **ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible, une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
 
 > **ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
+
+### Création d'un évènement manuel
+Dans la configuration génèrale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
+Sur la page **Events**, vous trouverez un bouton permettant de créer un nouveau évènement.
+Pour chaque caméra, une commande action vous permettra aussi de créer un évènement (avec les valeurs par défaut).
+
+# <u>Configuration Frigate</u>
+> **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
+
+# <u>Logs Frigate</u>
+Visualiser tous les logs de votre serveur Frigate
+
+# <u>Cron</u>
+**Si vous n'utilisez pas MQTT** : un cron régulier vous permet de récupérer les derniers events et donc d'exécuter les actions associées.
+
+**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron horaire est suffisant, il permet de mettre à jour les infos de l'evénement.
+
+Dans tous les cas, laisser au moins un cron actif car il sera vérifier à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire ils seront supprimés.
 
 # <u>Widget</u>
 Le widget est en cours de création.

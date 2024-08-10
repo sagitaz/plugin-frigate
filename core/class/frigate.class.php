@@ -449,8 +449,8 @@ class frigate extends eqLogic
       }
 
       // commandes make snapshot
-      if (is_object($this->getCmd('action', 'action_make_event'))) {
-        $make_snapshot = $this->getCmd("action", 'action_make_event');
+      if (is_object($this->getCmd('action', 'action_make_api_event'))) {
+        $make_snapshot = $this->getCmd("action", 'action_make_api_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
           $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="Créer event" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
@@ -642,12 +642,11 @@ class frigate extends eqLogic
       $frigate = frigate_events::byEventId($event['id']);
 
       log::add(__CLASS__, 'debug', "----------------------:fg-success:START EVENT:/fg:----------------------------------");
-      log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
 
       $infos = self::getEventinfos($mqtt, $event);
 
       if (!$frigate) {
-        log::add(__CLASS__, 'debug', "| Creating new frigate event for event ID: " . $event['id']);
+        log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
         $frigate = new frigate_events();
         $frigate->setBox($event['box']);
         $frigate->setCamera($event['camera']);
@@ -675,7 +674,6 @@ class frigate extends eqLogic
         self::majEventsCmds($frigate);
         log::add(__CLASS__, 'debug', "| Frigate event created and saved for event ID: " . $event['id']);
       } else {
-        log::add(__CLASS__, 'debug', "| Updating existing frigate event for event ID: " . $event['id']);
 
         if (is_array($frigate) && !empty($frigate)) {
           $frigate = $frigate[0];
@@ -1198,11 +1196,11 @@ class frigate extends eqLogic
   public static function createCamerasCmds($eqlogicId)
   {
 
-    $cmd = self::createCmd($eqlogicId, "Créer un évènement via API", "message", "", "action_make_api_event", "", 1, null, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
 
-    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
-    $cmd->save();
+  /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
+    $cmd->save(); */
   }
   public static function createMQTTcmds($eqlogicId)
   {
