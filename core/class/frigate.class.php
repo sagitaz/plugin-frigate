@@ -257,6 +257,18 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement après la suppression de l'équipement
   public function postRemove()
   {
+    $name = $this->getConfiguration('name');
+    $events = frigate_events::all();
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:START REMOVE EQLOGIC:/fg:----------------------------------");
+    foreach ($events as $event) {
+      if ($event->getCamera() == $name) {
+        $event->setIsFavorite(0);
+        $event->save();
+        $eventId = $event->getEventId();
+        self::cleanDbEvent($eventId);
+      }
+    }
+    log::add(__CLASS__, 'debug', "----------------------END REMOVE EQLOGIC----------------------------------");
   }
 
   /*
