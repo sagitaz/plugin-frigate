@@ -22,12 +22,12 @@ Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre 
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Deamon NOK :**
-Si vous n'avez pas mqtt-manager, il est normal que le deamon reste sur NOK, aucun problème le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
+Si vous n'avez pas mqtt-manager, il est normal que le deamon reste sur NOK. Aucun problème le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
 ## Equipement Events
 L'équipement est créé de manière automatique à l'installation du plugin.
-Celui-ci comporte des commandes infos avec la valeur du dernier event reçu.
+Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
 Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveaux évènements.
 J'en ajouterai suivant les demandes et besoins de chacun.
 
@@ -41,7 +41,7 @@ J'en ajouterai suivant les demandes et besoins de chacun.
 ## Equipement Caméra
 Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton rechercher. Les caméras trouvées seront automatiquement créées.
 ### Equipement
-A gauche, les quelques paramètres disponibles pour la visualisation présente à droite. Refresh de l'image toute les 2 secondes.
+A gauche, les quelques paramètres disponibles pour la visualisation présente à droite. Refresh de l'image toutes les 2 secondes.
 ### Commandes
 #### infos
 ##### toutes les cameras
@@ -49,13 +49,13 @@ Les informations sur le dernier évènement de la caméra et sur ses statistique
 ##### MQTT
 L'information sur détection en cours
 #### actions
-Pour avoir les commandes actions il est obligatoire d'utiliser MQTT, sans cela, les commandes ne seront pas créées.
-Je vous invite a lire la doc de Frigate pour la configuration de votre serveur MQTT.
+Pour avoir les commandes actions, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées.
+Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
 - **Detect** : etat, on, off, toggle
 - **Snapshot** : etat, on, off, toggle
 - **Recording** : etat, on, off, toggle
 - **Motion** : etat, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
-Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ, il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
+Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ. Il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
 N'ayant pas de caméra PTZ, merci de me fournir un fichier configuration afin que je mette la création de ces boutons en automatique.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
 ### Actions
@@ -71,7 +71,7 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#has_snapshot#** : texte 0 ou 1
 - **#top_score#** : le score maximum en pourcentage -> 92 %
 - **#zones#** : tableau
-- **#snapshot#** : liens vers fichier image
+- **#snapshot#** : lien vers fichier image
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#snapshot_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
@@ -98,7 +98,7 @@ En configuration sans MQTT, ce n'est pas utile, tous les évènements sont de ty
 En MQTT, ils peuvent être de type **new**, **update** et **end**.
 
 
-### Exemple de notification :
+### Exemple de notifications :
 #### Plugin JeeMate
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
@@ -135,8 +135,8 @@ Tous les évènements favoris ne sont pas supprimés.
 > **ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
 
 ### Création d'un évènement manuel
-Dans la configuration génèrale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
-Sur la page **Events**, vous trouverez un bouton permettant de créer un nouveau évènement.
+Dans la configuration générale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
+Sur la page **Events**, vous trouverez un bouton permettant de créer un nouvel évènement.
 Pour chaque caméra, une commande action vous permettra aussi de créer un évènement (avec les valeurs par défaut).
 
 # <u>Configuration Frigate</u>
@@ -148,9 +148,9 @@ Visualiser tous les logs de votre serveur Frigate
 # <u>Cron</u>
 **Si vous n'utilisez pas MQTT** : un cron régulier vous permet de récupérer les derniers events et donc d'exécuter les actions associées.
 
-**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron horaire est suffisant, il permet de mettre à jour les infos de l'evénement.
+**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron horaire est suffisant, il permet de mettre à jour les infos de l'évènement.
 
-Dans tous les cas, laisser au moins un cron actif car il sera vérifier à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire ils seront supprimés.
+Dans tous les cas, laisser au moins un cron actif car il sera vérifié à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire, ils seront supprimés.
 
 # <u>Widget</u>
 Le widget est en cours de création.
