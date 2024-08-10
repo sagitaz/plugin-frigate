@@ -14,8 +14,9 @@ if (!isConnect('admin')) {
   <br><br>
   <div class="input-group" style="margin-bottom:20px">
     <span class="input-group-btn">
-      <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> retour </a>
-      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> supprimer tous les évènements visibles </a>
+      <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> {{retour}} </a>
+      <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> {{supprimer tous les évènements visibles}} </a>
+  	  <a class="btn btn-warning roundedRight" id="createEvent"><i class="fas fa-plus-circle"></i> {{créer un nouvel évènement}} </a>
     </span>
   </div>
 
@@ -110,8 +111,8 @@ if (!isConnect('admin')) {
     $type = $event['type'];
     $date = $event['date'];
     $timeElapsed = timeElapsedString($date);
-    $percentage = $event['percentage'];
-    $duration = $event['duration'];
+    $percentage = $event['percentage'] ?? 0;
+    $duration = $event['duration'] ?? 0;
     $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
     $filterText = '';
     if ($type == 'new') {

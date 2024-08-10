@@ -51,15 +51,20 @@ sendVarToJS('refresh', $refresh);
                 <br>
                 <span>{{Serveur Frigate}}</span>
             </div>
-            <div class="cursor eqLogicAction logoSecondary" id="getConfig" title="{{Télécharger le fichier de configuration Frigate}}.">
-                <i class="fas fa-download"></i>
-                <br>
-                <span>{{Debug}}</span>
-            </div>
             <div class="cursor eqLogicAction info" id="bt_discord" title="{{Posez vos questions dans le salon dédié, support officiel}}.">
                 <i class="fab fa-discord"></i>
                 <br>
                 <span>{{aide Discord}}</span>
+            </div>
+            <div class="cursor eqLogicAction warning" id="editConfiguration" title="{{Editer le fichier de configuration Frigate}}.">
+                <i class="far fa-file-alt"></i>
+                <br>
+                <span>{{Configuration Frigate}}</span>
+            </div>
+            <div class="cursor eqLogicAction logoSecondary" id="frigateLogs" title="{{Voir les différents logs du serveur  Frigate}}.">
+                <i class="far fa-file-alt"></i>
+                <br>
+                <span>{{Logs Frigate}}</span>
             </div>
         </div>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
@@ -323,7 +328,11 @@ sendVarToJS('refresh', $refresh);
     </div><!-- /.eqLogic -->
 </div><!-- /.row row-overflow -->
 
+<?php include_file('desktop', 'select2', 'css', 'frigate'); ?>
+<?php include_file('desktop', 'select2.custom', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'frigate', 'css', 'frigate'); ?>
+
+<?php include_file('desktop', 'select2', 'js', 'frigate'); ?>
 <?php include_file('desktop', 'frigate', 'js', 'frigate'); ?>
 <?php include_file('desktop', 'fileSaver', 'js', 'frigate'); ?>
 <?php include_file('core', 'plugin.template', 'js'); ?>

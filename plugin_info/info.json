@@ -1,9 +1,9 @@
 {
     "id": "frigate",
     "name": "frigate",
-    "pluginVersion": "0.8.2",
+    "pluginVersion": "0.9.0",
     "description": {
-        "fr_FR": "Plugin Frigate pour jeedom. Ne fonctionne qu'avec les version de Frigate > 0.13.0"
+        "fr_FR": "Plugin Frigate pour Jeedom. Ne fonctionne qu'avec les versions de Frigate > 0.13.0"
     },
     "licence": "AGPL",
     "author": "Sagitaz et Noodom",

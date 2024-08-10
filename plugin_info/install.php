@@ -39,7 +39,7 @@ function frigate_install()
 function frigate_update()
 {
     Log::add("frigate", 'info', 'Start Update');
- /*   Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
+    /*   Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
     $sql = "DROP TABLE IF EXISTS `frigate_events`;";
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
     Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate"); */
@@ -52,7 +52,7 @@ function frigate_update()
         // Création de la nouvelle colonne 'type' si elle n'existe pas
         $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `type` text DEFAULT NULL;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
-    }    
+    }
     // Vérifier si la colonne 'isFavorite' existe déjà dans la table 'frigate_events'
     $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'isFavorite';";
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
@@ -61,10 +61,10 @@ function frigate_update()
         $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `isFavorite` tinyint(1) DEFAULT 0;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
-    // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0
-    $sqlUpdate = "UPDATE `jeedom`.`frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` IS NULL;";
+    // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0UPDATE `frigate_events`
+    $sqlUpdate = "UPDATE `jeedom`.`frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` != 1 AND `isFavorite` != 0;";
     DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
-    
+
     frigate::generateEqEvents();
     frigate::setCmdsCron();
     frigate::generateEqStats();

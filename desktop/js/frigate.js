@@ -209,27 +209,20 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
     window.open(frigateURL, '_blank');
 });
 
-document.getElementById('getConfig').addEventListener('click', function () {
-    $.ajax({
-        type: "POST",
-        url: "plugins/frigate/core/ajax/frigate.ajax.php",
-        data: {
-            action: "getConfig"
-        },
-        dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
-        },
-        success: function (data) {
-            var json = data.result.json;
-            const blob = new Blob([json], {
-                type: "text/plain;charset=utf-8"
-            });
-            saveAs(blob, "frigateConfiguration.json");
-        }
-    })
+document.getElementById('editConfiguration').addEventListener('click', function () {
+    bootbox.confirm('{{Configuration avancée, à vos propres risques ! Aucun support ne sera donné !}}', function(result)   {
+      if (result) {
+        $('#md_modal2').dialog({title: "{{Edition du fichier de configuration Frigate}}"});
+        $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=editConfiguration.modal').dialog('open');
+      }
+    });
 });
 
+document.getElementById('frigateLogs').addEventListener('click', function () {
+    $('#md_modal2').dialog({title: "{{Affichage des logs du serveur Frigate}}"});
+    $('#md_modal2').load('index.php?v=d&plugin=frigate&modal=frigateLogs.modal').dialog('open');
+});
+  
 document.getElementById('bt_discord').addEventListener('click', function () {
     window.open('https://discord.gg/PGAPDHhdtC', '_blank');
 });
@@ -510,4 +503,8 @@ document.getElementById('add-ptz').addEventListener('click', function () {
         }
     })
     window.location.reload(true);
+});
+
+$(document).ready(function() {
+    $('.eqLogicAttr[data-l1key=object_id]').select2();
 });

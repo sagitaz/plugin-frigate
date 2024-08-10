@@ -29,11 +29,24 @@ try {
   */
     ajax::init();
 
+    if (init('action') == 'logs') {
+        // Récupération des logs
+      	$result = frigate::getLogs(init('service'));
+        ajax::success($result);
+    }
+
     if (init('action') == 'deleteEvent') {
         // Suppression d'un event
         $result = frigate::deleteEvent(init('eventId'), true);
         ajax::success($result);
     }
+
+    if (init('action') == 'createEvent') {
+        // Creation d'un event
+        $result = frigate::createEvent(init('camera'), init('label'), init('video'), init('duration'),init('score'));
+        ajax::success($result);
+    }
+    
     if (init('action') == 'searchAndCreate') {
         // Recherche et creation de cameras
         $result = frigate::generateEqCameras();
@@ -47,12 +60,12 @@ try {
     }
 
     if (init('action') == 'refreshCameras') {
-        // Raffraichi la visualisation
+        // Rafraichit la visualisation
         $name = init('name');
         $img = init('img');
         $eqlogicId = init('eqlogicId');
         $who = init('who');
-        $result = frigate::saveURL(null, null, $name, 0, 1, $img);
+        $result = frigate::saveURL(null, null, $name, 2, $img);
         if ($who != "dashboard") {
             frigate::createAndRefreshURLcmd($eqlogicId, $result);
         }
@@ -71,12 +84,24 @@ try {
         ajax::success($result);
     }
 
-    if (init('action') == 'getConfig') {
-        $data = frigate::getConfig();
-        ajax::success(array(
-            "object" => $data,
-            "json" => json_encode($data),
-        ));
+    if (init('action') == 'getFrigateConfiguration') {
+        log::add(__CLASS__, 'info', "getFrigateConfiguration");
+        $result = frigate::getFrigateConfiguration();
+        ajax::success($result);
+    }
+    
+    if (init('action') == 'sendFrigateConfiguration') {
+        log::add(__CLASS__, 'info', "sendFrigateConfiguration");
+        $config = init('data');
+        $result = frigate::sendFrigateConfiguration($config);
+        ajax::success($result);
+    }
+    
+    if (init('action') == 'sendFrigateConfigurationAndRestart') {
+        log::add(__CLASS__, 'info', "sendFrigateConfigurationAndRestart");
+        $config = init('data');
+        $result = frigate::sendFrigateConfiguration($config, true);
+        ajax::success($result);
     }
 
     if (init('action') == 'stream') {
@@ -111,7 +136,7 @@ try {
                 mkdir(dirname(__FILE__) . '/../../data/segments', 0777, true);
             }
 
-            $rtspFlux = "rtsp://admin:noah2009W*@192.168.2.36:554/1";
+            $rtspFlux = "";
 
             // Exécute le script RTSP-to-HLS en arrière-plan
             exec('nohup ' . $rtspScript . ' ' . $rtspFlux . ' "' . $camera->getConfiguration('localApiKey') . '" > /dev/null 2>&1 &');

@@ -108,7 +108,7 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 
 document.getElementById('deleteAll').addEventListener('click', function () {
   const visibleEvents = getVisibleEvents();
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ? Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ?<br/>Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       visibleEvents.forEach(function (event) {
         const eventId = event.getAttribute('data-id');
@@ -119,8 +119,13 @@ document.getElementById('deleteAll').addEventListener('click', function () {
   });
 });
 
+document.getElementById('createEvent').addEventListener('click', function () {
+  $('#md_modal').dialog({title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400})
+    .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
+});
+
 function deleteEvent(eventId) {
-  bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ? Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ?<br/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
     if (result) {
       console.log("suppression de : " + eventId);
       deleteAllEvents(eventId);
@@ -164,7 +169,7 @@ function deleteAllEvents(eventId) {
         return;
       } else if (data.result == 'OK') {
         $('#div_alert').showAlert({
-          message: '{{Suppression de l\'évènement réussi.}}',
+          message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
         window.location.reload(true);
@@ -317,13 +322,13 @@ function setFavorite(eventId, isFav) {
     success: function (data) {
       if (data.result == '0') {
         $('#div_alert').showAlert({
-          message: '{{La caméra a été retirée de la liste des favoris.}}',
+          message: '{{L\'évènement a été retiré de la liste des favoris.}}',
           level: 'success'
         });
         return;
       } else if (data.result == '1') {
         $('#div_alert').showAlert({
-          message: '{{La caméra a été ajoutée à la liste des favoris.}}',
+          message: '{{L\'évènement a été ajouté à la liste des favoris.}}',
           level: 'success'
         });
         return;
@@ -332,4 +337,37 @@ function setFavorite(eventId, isFav) {
   })
 }
 
-filterEvents();
+$('body').off('frigate::events').on('frigate::events', function(_event, _options) {
+  window.location.reload()
+})
+
+document.addEventListener('DOMContentLoaded', () => {
+  function loadAndPlayVideo(video) {
+    const src = video.getAttribute('data-src');
+    if (src) {
+      video.setAttribute('src', src);
+      video.load();
+      video.play();
+    }
+  }
+
+  function resetVideo(video) {
+    video.pause();
+    video.currentTime = 0;
+    video.src = '';
+  }
+
+  function handleHover(event) {
+    const video = event.currentTarget.querySelector('video[data-src]');
+    if (video) {
+      resetVideo(video);
+      loadAndPlayVideo(video);
+    }
+  }
+
+  document.querySelectorAll('.img-container').forEach(container => {
+    container.addEventListener('mouseenter', handleHover);
+  });
+  
+  filterEvents();
+});
