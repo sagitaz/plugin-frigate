@@ -628,11 +628,25 @@ class frigate extends eqLogic
     return $logs;
   }
 
-  public static function getEvents($mqtt = false, $events = array(), $type = 'end')
+  public static function getEvent($id = null, $type = 'end')
   {
-    if (!$mqtt) {
+    if ($id == null) return;
+    
+    self::getEvents(false, array(), $type, $id);
+  }
+
+  public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null)
+  {
+    if ($id !== null) {
       $urlfrigate = self::getUrlFrigate();
-      $resultURL = $urlfrigate . "/api/events";
+      $resultURL = "{$urlFrigate}/api/events/{$id}";
+      $event = self::getcURL("ManualEvent", $resultURL);
+      // Traiter un évènement
+      $events = array($event);
+    }
+    else if (!$mqtt) {
+      $urlfrigate = self::getUrlFrigate();
+      $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
       // Traiter les evenements du plus ancien au plus recent
       $events = array_reverse($events);
@@ -1822,6 +1836,14 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'info', ' => Traitement mqtt events');
           self::getEvents(true, [$value['after']], $value['type']);
           event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
+          break;
+
+        case 'reviews':
+          $eventId = $value['after']['data']['detections'][0];
+          $eventType = $value['type'];
+          log::add(__CLASS__, 'info', ' => Traitement mqtt manual event <=');
+          self::getEvent($eventId, $eventType);
+          event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
 
         case 'stats':
