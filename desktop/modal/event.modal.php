@@ -67,7 +67,6 @@ if (!isConnect('admin')) {
     </div>
     <br><br>
     <div>
-      <label class="col-sm-3 control-label">{{Label}}</label>
       <div>
       <label class="col-sm-3 control-label">{{Label}}</label>
       <input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" value="<?= config::byKey('defaultLabel', 'frigate') ?>" placeholder="{{Saisissez un label d'évènement (ex: person)}}">
