@@ -140,6 +140,7 @@ if (!isConnect('admin')) {
     $snapshot = $event['snapshot'];
     $hasClip = $event['hasClip'];
     $clip = $event['clip'];
+    $zones = $event['zones'];
 
     // event creation (template)
     include 'event.template.php';
