@@ -186,35 +186,39 @@
   line-height: 20px;
 }
 
-.percentage[data-percentage="100"] {
+.percentage-100 {
   background-color: #4caf50;
 }
 
-.percentage[data-percentage^="9"] {
+.percentage-99 {
   background-color: #4caf50;
 }
 
-.percentage[data-percentage^="8"] {
+.percentage-89 {
   background-color: #66bb6a;
 }
 
-.percentage[data-percentage^="7"],
-.percentage[data-percentage^="6"] {
+.percentage-79 {
   background-color: #ff9800;
 }
 
-.percentage[data-percentage^="5"] {
+.percentage-69 {
+  background-color: #ff9800;
+}
+
+.percentage-59 {
   background-color: #f44336;
 }
 
-.percentage[data-percentage^="4"],
-.percentage[data-percentage^="3"],
-.percentage[data-percentage^="2"],
-.percentage[data-percentage^="1"] {
+.percentage-49,
+.percentage-39,
+.percentage-29,
+.percentage-19,
+.percentage-9 {
   background-color: #b71c1c;
 }
 
-.percentage[data-percentage^="0"] {
+.percentage-0 {
   display: none;
 }
 
