@@ -32,11 +32,11 @@ if (!isConnect('admin')) {
     $formattedDuration = '';
     if ($hours > 0) {
       $formattedDuration .= $hours . 'h';
-      $formattedDuration .= str_pad($minutes, 2, '0', STR_PAD_LEFT) . 'mn';
-      $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+      $formattedDuration .= ' ' . str_pad($minutes, 2, '0', STR_PAD_LEFT) . 'mn';
+      //$formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
     } elseif ($minutes > 0) {
       $formattedDuration .= $minutes . 'mn';
-      $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+      $formattedDuration .= ' ' . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
     } else {
       $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
     }

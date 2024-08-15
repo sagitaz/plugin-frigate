@@ -69,13 +69,16 @@
         <div class="percentage" data-percentage="<?= $topScore ?>"><?= $topScore ?>%</div>
       </span><br>
       <?php if ($cameraFound): ?>
-        <a onclick="gotoCamera('<?= $cameraId ?>')" title="Afficher la page de la caméra">
-        <?php endif; ?>
-        <i class="fas fa-video"></i><span> <?= $camera ?><?= $zones !== '' ? ' - ' . htmlspecialchars(str_replace('_', ' ', $zones)) : '' ?></span>
-        <?php if ($cameraFound): ?>
-        </a>
+        <div style='display: flex;align-items: center;gap: 10px;'>
+          <a class="container-text" onclick="gotoCamera('<?= $cameraId ?>')" title="Afficher la page de la caméra">
+          <?php endif; ?>
+          <i class="fas fa-video"></i><span> <?= $camera ?></span>
+          <?php if ($cameraFound): ?>
+          </a>
+          <?php $zonesFormatted = htmlspecialchars(str_replace('_', ' ', $zones)) ?>
+          <?= $zones !== '' ? '<div class="zones"" title="' . $zonesFormatted .'">' . $zonesFormatted . '</div>': '' ?>
+        </div>
       <?php endif; ?>
-      <br>
       <i class="fas fa-clock"></i><span> <?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?></span>
     </div>
 
