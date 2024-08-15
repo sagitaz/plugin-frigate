@@ -23,6 +23,24 @@ if (!isConnect('admin')) {
   <?php
 
   // functions
+  function getPercentageClass($score) 
+  {
+    if ($score === 100) return 'percentage-100';
+    if ($score >= 90) return 'percentage-99';
+    if ($score >= 80) return 'percentage-89';
+    if ($score >= 70) return 'percentage-79';
+    if ($score >= 60) return 'percentage-69';
+    if ($score >= 50) return 'percentage-59';
+    if ($score >= 40) return 'percentage-49';
+    if ($score >= 30) return 'percentage-39';
+    if ($score >= 20) return 'percentage-29';
+    if ($score >= 10) return 'percentage-19';
+    if ($score > 0) return 'percentage-9';
+    if ($score === 0) return 'percentage-0';
+  
+    return '';
+  }
+  
   function formatDuration($seconds)
   {
     $hours = floor($seconds / 3600);

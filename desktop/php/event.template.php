@@ -66,7 +66,7 @@
       <span class="inline-subtitle duration"> <?= $timeElapsed ?></span><br /><br />
       <i class="fas fa-minus-square"></i>
       <span> <?= $label ?>
-        <div class="percentage" data-percentage="<?= $topScore ?>"><?= $topScore ?>%</div>
+        <div class="percentage <?= getPercentageClass($topScore) ?>"><?= $topScore ?>%</div>
       </span><br>
       <?php if ($cameraFound): ?>
         <div style='display: flex;align-items: center;gap: 10px;'>
@@ -86,7 +86,7 @@
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
       echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
                echo 'data-video="' . $clip . '"'; ?>
-      data-title="<?= $label ?> <div class='percentage percentageTitle' data-percentage='<?= $topScore ?>'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $formattedDurationTitle ?>">
+      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $formattedDurationTitle ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="Voir la capture">
           <i class="fas fa-camera"></i>
