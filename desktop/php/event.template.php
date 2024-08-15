@@ -49,7 +49,7 @@
       <!-- Hidden video container -->
       <?php if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1): ?>
         <div class="video-overlay">
-          <video src="<?= $clip ?>" autoplay muted loop></video>
+          <video data-src="<?= $clip ?>" autoplay="" muted="" loop=""></video>
         </div>
       <?php endif; ?>
       <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
