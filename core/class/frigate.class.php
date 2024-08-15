@@ -1328,7 +1328,7 @@ class frigate extends eqLogic
     if (is_object($eqCamera)) {
       $eqlogicIds[] = $eqCamera->getId();
       // Récupération de la configuration des actions de la caméra
-      $cameraActions = $eqCamera->getConfiguration('actions');
+      $cameraActions = $eqCamera->getConfiguration('actions')[0];
       // Vérifier si la liste d'actions est vide
       $cameraActionsExist = !empty($cameraActions);
     }
@@ -1340,7 +1340,7 @@ class frigate extends eqLogic
       $allActionsDisabled = true;
       foreach ($cameraActions as $action) {
         // Vérifier si l'action est activée
-        $enable = $action['options']['enable'];
+        $enable = $action['options']['enable'] ?? false;
 
         if ($enable) {
           // Si au moins une action est activée, on met à jour $allActionsDisabled à false
@@ -1569,12 +1569,12 @@ class frigate extends eqLogic
       }
 
       // Exécuter l'action seulement si le label correspond
-      if ($cmdLabelName === $label) {
+      if ($cmdLabelName !== "all" && $cmdLabelName !== $label) {
         continue;
       }
 
       // Exécuter l'action seulement si le type correspond
-      if ($cmdTypeName === $type) {
+      if ($cmdTypeName !== "end" && $cmdTypeName !== $type) {
         continue;
       }
 
