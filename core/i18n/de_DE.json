@@ -1,0 +1,60 @@
+{
+    "plugins\/frigate\/core\/ajax\/frigate.ajax.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff"
+    },
+    "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Afficher": "Anzeige",
+        "Aucune": "Irgendein",
+        "Choisir une icône": "Wählen Sie ein Symbol",
+        "Historiser": "Chronik",
+        "Inverser": "Umgekehrt",
+        "Max": "Max",
+        "Min": "Minimum",
+        "Sélectionner la commande": "Befehl auswählen",
+        "Sélectionner un mot-clé": "Schlüsselwort auswählen",
+        "Tester": "Prüfung",
+        "Type": "Typ",
+        "Unité": "Unit"
+    },
+    "plugins\/frigate\/desktop\/modal\/event.modal.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff",
+        "Caméra": "Kamera",
+        "Durée": "Dauer",
+        "Sauvegarder": "Zu schützen"
+    },
+    "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
+        "Aucun": "Nein",
+        "Tout": "Alles"
+    },
+    "plugins\/frigate\/desktop\/php\/events.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff"
+    },
+    "plugins\/frigate\/desktop\/php\/frigate.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff",
+        "Actions": "Lager",
+        "Activer": "Aktivieren",
+        "Ajouter une commande": "Kommando einfügen",
+        "Aucun": "Nein",
+        "Catégorie": "Kategorie",
+        "Commandes": "Befehle",
+        "Configuration": "Konfiguration",
+        "Configuration avancée": "Erweiterte Konfiguration",
+        "Dupliquer": "Duplikat",
+        "Equipement": "Gerät",
+        "Etat": "Zustand",
+        "Gestion": "Management",
+        "Nom": "Name",
+        "Objet parent": "Übergeordnetes Objekt",
+        "Options": "Optionen",
+        "Rechercher": "Suchen nach",
+        "Sauvegarder": "Zu schützen",
+        "Supprimer": "Entfernen",
+        "Type": "Typ",
+        "Visible": "Sichtbar",
+        "Visualisation": "Visualisierung"
+    },
+    "plugins\/frigate\/plugin_info\/configuration.php": {
+        "Aucune": "Irgendein",
+        "Port": "Hafen"
+    }
+}

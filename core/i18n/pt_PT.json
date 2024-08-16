@@ -1,0 +1,60 @@
+{
+    "plugins\/frigate\/core\/ajax\/frigate.ajax.php": {
+        "401 - Accès non autorisé": "401 - Acesso não autorizado"
+    },
+    "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Afficher": "Mostrar",
+        "Aucune": "Nenhuma",
+        "Choisir une icône": "Escolha um ícone",
+        "Historiser": "Histórico",
+        "Inverser": "Inverter",
+        "Max": "Máx.",
+        "Min": "Mínimo",
+        "Sélectionner la commande": "Selecionar o comando",
+        "Sélectionner un mot-clé": "Selecione uma palavra-chave",
+        "Tester": "Testar",
+        "Type": "Tipo",
+        "Unité": "Unidade"
+    },
+    "plugins\/frigate\/desktop\/modal\/event.modal.php": {
+        "401 - Accès non autorisé": "401 - Acesso não autorizado",
+        "Caméra": "Câmera",
+        "Durée": "Duração",
+        "Sauvegarder": "Guardar"
+    },
+    "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
+        "Aucun": "Nenhum",
+        "Tout": "Tudo"
+    },
+    "plugins\/frigate\/desktop\/php\/events.php": {
+        "401 - Accès non autorisé": "401 - Acesso não autorizado"
+    },
+    "plugins\/frigate\/desktop\/php\/frigate.php": {
+        "401 - Accès non autorisé": "401 - Acesso não autorizado",
+        "Actions": "Ações",
+        "Activer": "Ativar",
+        "Ajouter une commande": "Adicionar comando",
+        "Aucun": "Nenhum",
+        "Catégorie": "Categoria",
+        "Commandes": "Comandos",
+        "Configuration": "Configuração",
+        "Configuration avancée": "Configuração avançada",
+        "Dupliquer": "Duplicar",
+        "Equipement": "Equipamento",
+        "Etat": "Estado",
+        "Gestion": "Gestão",
+        "Nom": "Nome",
+        "Objet parent": "Objeto pai",
+        "Options": "Opções",
+        "Rechercher": "Pesquisar",
+        "Sauvegarder": "Guardar",
+        "Supprimer": "Eliminar",
+        "Type": "Tipo",
+        "Visible": "Visível",
+        "Visualisation": "Vista"
+    },
+    "plugins\/frigate\/plugin_info\/configuration.php": {
+        "Aucune": "Nenhuma",
+        "Port": "Porta"
+    }
+}

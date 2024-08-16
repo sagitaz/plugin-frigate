@@ -1,0 +1,60 @@
+{
+    "plugins\/frigate\/core\/ajax\/frigate.ajax.php": {
+        "401 - Accès non autorisé": "401 - Accesso non autorizzato"
+    },
+    "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Afficher": "Mostra",
+        "Aucune": "Aucune",
+        "Choisir une icône": "Seleziona un\\'icona",
+        "Historiser": "Storicizza",
+        "Inverser": "Inverti",
+        "Max": "Max",
+        "Min": "Min",
+        "Sélectionner la commande": "Seleziona comando",
+        "Sélectionner un mot-clé": "Seleziona una parola chiave",
+        "Tester": "Prova",
+        "Type": "Tipo",
+        "Unité": "Unità"
+    },
+    "plugins\/frigate\/desktop\/modal\/event.modal.php": {
+        "401 - Accès non autorisé": "401 - Accesso non autorizzato",
+        "Caméra": "Telecamera",
+        "Durée": "Durée",
+        "Sauvegarder": "Sauvegarder"
+    },
+    "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
+        "Aucun": "Nessuno",
+        "Tout": "Tutto"
+    },
+    "plugins\/frigate\/desktop\/php\/events.php": {
+        "401 - Accès non autorisé": "401 - Accesso non autorizzato"
+    },
+    "plugins\/frigate\/desktop\/php\/frigate.php": {
+        "401 - Accès non autorisé": "401 - Accesso non autorizzato",
+        "Actions": "Stock",
+        "Activer": "Attivare",
+        "Ajouter une commande": "Aggiungi un comando",
+        "Aucun": "Nessuno",
+        "Catégorie": "Categoria",
+        "Commandes": "Comandi",
+        "Configuration": "Configurazione",
+        "Configuration avancée": "Configurazione avanzata",
+        "Dupliquer": "Duplicato",
+        "Equipement": "Dispositivo",
+        "Etat": "Stato",
+        "Gestion": "Gestione",
+        "Nom": "Nome",
+        "Objet parent": "Oggetto padre",
+        "Options": "Opzioni",
+        "Rechercher": "Ricercare",
+        "Sauvegarder": "Sauvegarder",
+        "Supprimer": "Supprimer",
+        "Type": "Tipo",
+        "Visible": "Visibile",
+        "Visualisation": "Visualisation"
+    },
+    "plugins\/frigate\/plugin_info\/configuration.php": {
+        "Aucune": "Aucune",
+        "Port": "Porta"
+    }
+}
