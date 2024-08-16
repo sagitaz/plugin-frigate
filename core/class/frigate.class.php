@@ -194,24 +194,16 @@ class frigate extends eqLogic
   /*     * *********************Méthodes d'instance************************* */
 
   // Fonction exécutée automatiquement avant la création de l'équipement
-  public function preInsert()
-  {
-  }
+  public function preInsert() {}
 
   // Fonction exécutée automatiquement après la création de l'équipement
-  public function postInsert()
-  {
-  }
+  public function postInsert() {}
 
   // Fonction exécutée automatiquement avant la mise à jour de l'équipement
-  public function preUpdate()
-  {
-  }
+  public function preUpdate() {}
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
-  public function postUpdate()
-  {
-  }
+  public function postUpdate() {}
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
@@ -250,9 +242,7 @@ class frigate extends eqLogic
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
-  public function preRemove()
-  {
-  }
+  public function preRemove() {}
 
   // Fonction exécutée automatiquement après la suppression de l'équipement
   public function postRemove()
@@ -545,7 +535,7 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'error', "| Error:" . curl_error($ch));
+      log::add(__CLASS__, 'error', "| Error getcURL:" . curl_error($ch));
       die();
     }
     curl_close($ch);
@@ -569,7 +559,7 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'error', "| Error:" . curl_error($ch));
+      log::add(__CLASS__, 'error', "| Error: deletecURL" . curl_error($ch));
       die();
     }
     curl_close($ch);
@@ -605,7 +595,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "| video : {$video}");
     log::add(__CLASS__, 'debug', "| include_recording : " . ($includeRecording ? "true" : "false"));
     log::add(__CLASS__, 'debug', "| sub_label : {$subLabel}");
-    
+
     $params = [
       'source_type' => 'api',
       'sub_label' => $subLabel,
@@ -631,21 +621,20 @@ class frigate extends eqLogic
   public static function getEvent($id = null, $type = 'end')
   {
     if ($id == null) return;
-    
+
     self::getEvents(false, array(), $type, $id);
   }
 
   public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null)
   {
     if ($id !== null) {
-      $urlfrigate = self::getUrlFrigate();
+      $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events/{$id}";
       $event = self::getcURL("ManualEvent", $resultURL);
       // Traiter un évènement
       $events = array($event);
-    }
-    else if (!$mqtt) {
-      $urlfrigate = self::getUrlFrigate();
+    } else if (!$mqtt) {
+      $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
       // Traiter les evenements du plus ancien au plus recent
@@ -731,7 +720,7 @@ class frigate extends eqLogic
           $setMethod = 'set' . $field;
           $currentValue = $frigate->$getMethod();
 
-     /*     // Si les deux valeurs sont des chaînes JSON, les décoder avant de les comparer
+          /*     // Si les deux valeurs sont des chaînes JSON, les décoder avant de les comparer
           if (is_string($currentValue) && is_string($value)) {
             $decodedCurrentValue = json_decode($currentValue, true);
             $decodedValue = json_decode($value, true);
@@ -839,12 +828,12 @@ class frigate extends eqLogic
     }
 
     // calculer les zones
-	  $newZones = isset($event['entered_zones']) 
-            && is_array($event['entered_zones']) 
-            && !empty($event['entered_zones'])
+    $newZones = isset($event['entered_zones'])
+      && is_array($event['entered_zones'])
+      && !empty($event['entered_zones'])
       ? implode(', ', $event['entered_zones'])
       : null;
-    
+
     // renvoyer les infos
     $infos = array(
       "image" => $img,
@@ -1225,7 +1214,7 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
 
-  /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
+    /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
     $cmd->save(); */
   }
   public static function createMQTTcmds($eqlogicId)
@@ -1328,7 +1317,7 @@ class frigate extends eqLogic
     if (is_object($eqCamera)) {
       $eqlogicIds[] = $eqCamera->getId();
       // Récupération de la configuration des actions de la caméra
-      $cameraActions = $eqCamera->getConfiguration('actions')[0];
+      $cameraActions = $eqCamera->getConfiguration('actions');
       // Vérifier si la liste d'actions est vide
       $cameraActionsExist = !empty($cameraActions);
     }
@@ -1336,6 +1325,8 @@ class frigate extends eqLogic
 
 
     if ($cameraActionsExist) {
+      log::add(__CLASS__, 'debug', "| ACTION: Vérification des actions caméra.");
+
       // Vérifier si toutes les actions sont désactivées
       $allActionsDisabled = true;
       foreach ($cameraActions as $action) {
@@ -1345,6 +1336,7 @@ class frigate extends eqLogic
         if ($enable) {
           // Si au moins une action est activée, on met à jour $allActionsDisabled à false
           $allActionsDisabled = false;
+          log::add(__CLASS__, 'debug', "| ACTION: Une action caméra est activée.");
           break;
         }
       }
@@ -1352,17 +1344,23 @@ class frigate extends eqLogic
       // Si toutes les actions sont désactivées, on met à jour $cameraActionsExist à false
       if ($allActionsDisabled) {
         $cameraActionsExist = false;
+        log::add(__CLASS__, 'debug', "| ACTION: Toutes les actions caméra sont désactivées.");
       }
+    } else {
+      log::add(__CLASS__, 'debug', "| ACTION: Aucune action confiurée.");
     }
 
     // Vérification des actions caméra existantes
     // Si la liste d'actions n'est pas vide et qu'au moins une action est activée
     if ($cameraActionsExist) {
+      log::add(__CLASS__, 'debug', "| ACTION: Exécution des actions pour la caméra (ID: " . $eqCamera->getId() . ").");
       self::executeActionNewEvent($eqCamera->getId(), $event);
     } else {
       // Sinon, on exécute les actions suivantes
+      log::add(__CLASS__, 'debug', "| ACTION: Aucune action caméra activée, exécution des actions pour l'équipement Events (ID: " . $frigate->getId() . ").");
       self::executeActionNewEvent($frigate->getId(), $event);
     }
+
 
 
     foreach ($eqlogicIds as $eqlogicId) {
@@ -1562,19 +1560,21 @@ class frigate extends eqLogic
         $options
       );
 
-      // Vérifier les conditions de temps et de label/type
-      // Exécuter l'action seulement si $start est compris entre l'heure actuelle et -3h
+      // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
       if ($event->getStartTime() <= time() - 10800) {
+        log::add(__CLASS__, 'debug', "| ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
         continue;
       }
 
-      // Exécuter l'action seulement si le label correspond
-      if ($cmdLabelName !== "all" && $cmdLabelName !== $label) {
+      // Vérifie si le label de commande ne correspond pas au label attendu
+      if ($cmdLabelName !== $label && $cmdLabelName !== "all") {
+        log::add(__CLASS__, 'debug', "| ACTION: Label de commande ('{$cmdLabelName}') ne correspond pas au label attendu ('{$label}') et n'est pas 'all', l'action sera ignoré.");
         continue;
       }
 
-      // Exécuter l'action seulement si le type correspond
-      if ($cmdTypeName !== "end" && $cmdTypeName !== $type) {
+      // Vérifie si le type de commande ne correspond pas au type attendu
+      if ($cmdTypeName !== $type && $cmdTypeName !== "end") {
+        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}') et n'est pas 'end', l'action sera ignoré.");
         continue;
       }
 
@@ -1591,6 +1591,7 @@ class frigate extends eqLogic
           $cmd->execCmd($options);
         }
       } else {
+        log::add(__CLASS__, 'debug', "| ACTION : " . $optionsJson);
         $cmd->execCmd($options);
       }
     }
@@ -2074,43 +2075,44 @@ class frigateCmd extends cmd
   }
   */
 
-  private function parseEventParameters($_options) {
+  private function parseEventParameters($_options)
+  {
     // Valeurs par défaut
     // TODO : récupérer les valeurs par défaut pour chaque caméra (et plus au niveau de la config plugin)
     $defaults = [
-        'label' => config::byKey('defaultLabel', 'frigate'),
-        'video' => (int)config::byKey('defaultVideo', 'frigate'),
-        'duration' => (int)config::byKey('defaultDuration', 'frigate'),
-        'score' => (int)config::byKey('defaultScore', 'frigate')
+      'label' => config::byKey('defaultLabel', 'frigate'),
+      'video' => (int)config::byKey('defaultVideo', 'frigate'),
+      'duration' => (int)config::byKey('defaultDuration', 'frigate'),
+      'score' => (int)config::byKey('defaultScore', 'frigate')
     ];
 
     // Récupération du label
     if ($_options['title'] != '') $defaults['label'] = $_options['title'];
-    
+
     // Récupération des paramètres dans $_options['message']
     $params = explode('|', $_options['message']);
     foreach ($params as $param) {
-        list($key, $value) = explode('=', $param);
-        $key = trim($key);
-        $value = trim($value);
+      list($key, $value) = explode('=', $param);
+      $key = trim($key);
+      $value = trim($value);
 
-        if ($key === 'video') {
-            if (is_numeric($value)) {
-                $defaults['video'] = (int)$value;
-            }
+      if ($key === 'video') {
+        if (is_numeric($value)) {
+          $defaults['video'] = (int)$value;
         }
+      }
 
-        if ($key === 'duration') {
-            if (is_numeric($value) && $value > 0) {
-                $defaults['duration'] = (int)$value;
-            }
+      if ($key === 'duration') {
+        if (is_numeric($value) && $value > 0) {
+          $defaults['duration'] = (int)$value;
         }
+      }
 
-        if ($key === 'score') {
-            if (is_numeric($value) && $value >= 0 && $value <= 100) {
-                $defaults['score'] = (int)$value;
-            }
+      if ($key === 'score') {
+        if (is_numeric($value) && $value >= 0 && $value <= 100) {
+          $defaults['score'] = (int)$value;
         }
+      }
     }
 
     return $defaults;
