@@ -54,10 +54,10 @@ if (!isConnect('admin')) {
       		  echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
             echo '<div class="eqLogicThumbnailContainer">';
             foreach ($eqLogics as $eqLogic) {
-              $parts = explode('][', trim($eqLogic->getHumanName(false, false), '[]'));
-              $camera = $parts[1];
-              if ($camera !== 'Events' && $camera !== 'Statistiques') {
-                echo '<option value="' . $camera . '">' . $camera . '</option>';
+              $cameraOption = $eqLogic->getName();
+              $cameraValue = $eqLogic->getConfiguration('name');
+              if ($cameraOption !== 'Events' && $cameraOption !== 'Statistiques') {
+                echo '<option value="' . $cameraValue . '">' . $cameraOption . '</option>';
               }
             }
             echo '</div>';
