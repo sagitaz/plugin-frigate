@@ -829,10 +829,10 @@ class frigate extends eqLogic
     }
 
     // calculer les zones
-    $newZones = isset($event['entered_zones'])
-      && is_array($event['entered_zones'])
-      && !empty($event['entered_zones'])
-      ? implode(', ', $event['entered_zones'])
+    $newZones = isset($event['zones'])
+      && is_array($event['zones'])
+      && !empty($event['zones'])
+      ? implode(', ', $event['zones'])
       : null;
 
     // renvoyer les infos
@@ -1392,6 +1392,10 @@ class frigate extends eqLogic
 
       $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "GENERIC_INFO");
       $cmd->event($event->getScore());
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones", "GENERIC_INFO");
+      $cmd->event($event->getZones());
       $cmd->save();
 
       $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO");
