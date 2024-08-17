@@ -1547,8 +1547,7 @@ class frigate extends eqLogic
     $actions = $eqLogic->getConfiguration('actions')[0];
 
     foreach ($actions as $action) {
-      $id = str_replace("#", "", $action['cmd']);
-      $cmd = cmd::byId($id);
+      $cmd = $action['cmd'];
       $cmdLabelName = $action['cmdLabelName'] ?: "all";
       $cmdTypeName = $action['cmdTypeName'] ?: "end";
       $options = $action['options'];
@@ -1588,16 +1587,16 @@ class frigate extends eqLogic
       if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
         if ($hasClip == 1) {
           log::add(__CLASS__, 'debug', "| ACTION CLIP : " . $optionsJson);
-          $cmd->execCmd($options);
+          scenarioExpression::createAndExec('action', $cmd, $options);
         }
       } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
         if ($hasSnapshot == 1) {
           log::add(__CLASS__, 'debug', "| ACTION SNAPSHOT : " . $optionsJson);
-          $cmd->execCmd($options);
+          scenarioExpression::createAndExec('action', $cmd, $options);
         }
       } else {
         log::add(__CLASS__, 'debug', "| ACTION : " . $optionsJson);
-        $cmd->execCmd($options);
+        scenarioExpression::createAndExec('action', $cmd, $options);
       }
     }
   }
