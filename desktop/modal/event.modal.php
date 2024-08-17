@@ -54,10 +54,10 @@ if (!isConnect('admin')) {
       		  echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
             echo '<div class="eqLogicThumbnailContainer">';
             foreach ($eqLogics as $eqLogic) {
-              $parts = explode('][', trim($eqLogic->getHumanName(false, false), '[]'));
-              $camera = $parts[1];
-              if ($camera !== 'Events' && $camera !== 'Statistiques') {
-                echo '<option value="' . $camera . '">' . $camera . '</option>';
+              $cameraOption = $eqLogic->getName();
+              $cameraValue = $eqLogic->getConfiguration('name');
+              if ($cameraOption !== 'Events' && $cameraOption !== 'Statistiques') {
+                echo '<option value="' . $cameraValue . '">' . $cameraOption . '</option>';
               }
             }
             echo '</div>';
@@ -67,7 +67,6 @@ if (!isConnect('admin')) {
     </div>
     <br><br>
     <div>
-      <label class="col-sm-3 control-label">{{Label}}</label>
       <div>
       <label class="col-sm-3 control-label">{{Label}}</label>
       <input class="eventAttr col-sm-8 form-control input-sm" data-l1key="label" value="<?= config::byKey('defaultLabel', 'frigate') ?>" placeholder="{{Saisissez un label d'évènement (ex: person)}}">

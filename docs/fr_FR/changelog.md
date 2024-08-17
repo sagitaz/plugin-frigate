@@ -3,6 +3,13 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 17/08/2024 Beta 0.9.1
+- Traduction Anglais, Allemand, Espagnol, Italien, Portugais. merci @mips
+- Correction de l'exécution des actions.
+- Nouvelle gestion pour réception des évènements MQTT (Frigate 0.14).
+- Correction pour la création d'un évènement manuel.
+- Amélioration de la page des évènements.
+
 # 10/08/2024 Beta 0.9.0
 - Ajout bouton et options create event.
 - Corrections erreur cron isFavorite.

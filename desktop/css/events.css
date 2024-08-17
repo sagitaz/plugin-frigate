@@ -153,69 +153,86 @@
 
 .duration {
   display: inline-block;
-  padding: 5px;
-  border-radius: 5px;
+  padding: 0 5px 0 5px;
+  border-radius: 3px;
   background-color: #B9A9A7;
   color: black;
   font-weight: bold;
-  margin-top: 5px;
-  height: 20px;
-  line-height: 10px;
   margin-left: 10px;
+  line-height: 18px;
 }
 
 .durationTitle {
   height: 30px;
-  line-height: 15px;
+  line-height: 28px !important;
+}
+
+.container-text {
+  flex-shrink: 0;
 }
 
 .percentage {
   display: inline-block;
-  padding: 5px;
+  padding: 0 2px 0 2px;
   border-radius: 5px;
   color: black;
   font-weight: bold;
-  margin-top: 5px;
-  height: 20px;
-  line-height: 10px;
-  margin-left: 20px;
+  line-height: 16px;
+  margin-left: 10px;
 }
 
 .percentageTitle {
   height: 30px;
-  line-height: 20px;
+  line-height: 28px !important;
 }
 
-.percentage[data-percentage="100"] {
+.percentage-100 {
   background-color: #4caf50;
 }
 
-.percentage[data-percentage^="9"] {
+.percentage-99 {
   background-color: #4caf50;
 }
 
-.percentage[data-percentage^="8"] {
+.percentage-89 {
   background-color: #66bb6a;
 }
 
-.percentage[data-percentage^="7"],
-.percentage[data-percentage^="6"] {
+.percentage-79 {
   background-color: #ff9800;
 }
 
-.percentage[data-percentage^="5"] {
+.percentage-69 {
+  background-color: #ff9800;
+}
+
+.percentage-59 {
   background-color: #f44336;
 }
 
-.percentage[data-percentage^="4"],
-.percentage[data-percentage^="3"],
-.percentage[data-percentage^="2"],
-.percentage[data-percentage^="1"] {
+.percentage-49,
+.percentage-39,
+.percentage-29,
+.percentage-19,
+.percentage-9 {
   background-color: #b71c1c;
 }
 
-.percentage[data-percentage^="0"] {
+.percentage-0 {
   display: none;
+}
+
+.zones {
+  display: inline-block;
+  background-color: var(--link-color);
+  border-radius: 3px;
+  overflow: hidden;
+  text-overflow: ellipsis;
+  white-space: nowrap;
+  max-width: 100%;
+  line-height: 16px;
+  color: #000000;
+  padding: 0 3px 0 3px;
 }
 
 .inline-title {
