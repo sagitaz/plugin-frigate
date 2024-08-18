@@ -1581,8 +1581,8 @@ class frigate extends eqLogic
       }
 
       // Vérifie si le type de commande ne correspond pas au type attendu
-      if ($cmdTypeName !== $type && $cmdTypeName !== "end") {
-        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}') et n'est pas 'end', l'action sera ignoré.");
+      if ($cmdTypeName !== $type) {
+        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}'), l'action sera ignoré.");
         continue;
       }
 
