@@ -3,6 +3,9 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 18/08/2024 Beta 0.9.2
+- Correction des actions du type "mots clés".
+
 # 17/08/2024 Beta 0.9.1
 - Traduction Anglais, Allemand, Espagnol, Italien, Portugais. merci @mips
 - Correction de l'exécution des actions.
