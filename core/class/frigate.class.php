@@ -675,7 +675,7 @@ class frigate extends eqLogic
         $frigate->setEndTime($infos["endTime"]);
         $frigate->setFalsePositive($event['false_positive']);
         $frigate->setEventId($event['id']);
-        $frigate->setLabel($event['label']);
+        $frigate->setLabel($infos['label']);
         $frigate->setPlusId($event['plus_id']);
         $frigate->setRetain($event['retain_indefinitely']);
         $frigate->setSubLabel($event['sub_label']);
@@ -707,7 +707,7 @@ class frigate extends eqLogic
           'Box' => $event['box'],
           'Camera' => $event['camera'],
           'FalsePositive' => $event['false_positive'],
-          'Label' => $event['label'],
+          'Label' => $infos['label'],
           'PlusId' => $event['plus_id'],
           'SubLabel' => $event['sub_label'],
           'Thumbnail' => $infos["thumbnail"],
@@ -829,12 +829,22 @@ class frigate extends eqLogic
     }
 
     // calculer les zones
-    $newZones = isset($event['entered_zones'])
-      && is_array($event['entered_zones'])
-      && !empty($event['entered_zones'])
-      ? implode(', ', $event['entered_zones'])
+    $newZones = isset($event['zones'])
+      && is_array($event['zones'])
+      && !empty($event['zones'])
+      ? implode(', ', $event['zones'])
       : null;
 
+    // nettoyer le label
+    $label = $event['label'];
+    // Détecter si la chaîne est déjà en UTF-8
+    if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
+      // Si la chaîne est déjà en UTF-8, on la décodera à partir de UTF-8
+      $label = utf8_decode($label);
+    } else {
+      // Sinon, on la convertit de ISO-8859-1 à UTF-8
+      $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    }
     // renvoyer les infos
     $infos = array(
       "image" => $img,
@@ -847,7 +857,8 @@ class frigate extends eqLogic
       "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
       "topScore" => $newTopScore,
       "score" => $newScore,
-      "zones" => $newZones
+      "zones" => $newZones,
+      "label" => $label
     );
 
     return $infos;
@@ -1394,6 +1405,10 @@ class frigate extends eqLogic
       $cmd->event($event->getScore());
       $cmd->save();
 
+      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones", "GENERIC_INFO");
+      $cmd->event($event->getZones());
+      $cmd->save();
+
       $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO");
       $cmd->event($event->getEventId());
       $cmd->save();
@@ -1547,8 +1562,7 @@ class frigate extends eqLogic
     $actions = $eqLogic->getConfiguration('actions')[0];
 
     foreach ($actions as $action) {
-      $id = str_replace("#", "", $action['cmd']);
-      $cmd = cmd::byId($id);
+      $cmd = $action['cmd'];
       $cmdLabelName = $action['cmdLabelName'] ?: "all";
       $cmdTypeName = $action['cmdTypeName'] ?: "end";
       $options = $action['options'];
@@ -1578,8 +1592,8 @@ class frigate extends eqLogic
       }
 
       // Vérifie si le type de commande ne correspond pas au type attendu
-      if ($cmdTypeName !== $type && $cmdTypeName !== "end") {
-        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}') et n'est pas 'end', l'action sera ignoré.");
+      if ($cmdTypeName !== $type) {
+        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}'), l'action sera ignoré.");
         continue;
       }
 
@@ -1588,16 +1602,16 @@ class frigate extends eqLogic
       if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
         if ($hasClip == 1) {
           log::add(__CLASS__, 'debug', "| ACTION CLIP : " . $optionsJson);
-          $cmd->execCmd($options);
+          scenarioExpression::createAndExec('action', $cmd, $options);
         }
       } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
         if ($hasSnapshot == 1) {
           log::add(__CLASS__, 'debug', "| ACTION SNAPSHOT : " . $optionsJson);
-          $cmd->execCmd($options);
+          scenarioExpression::createAndExec('action', $cmd, $options);
         }
       } else {
         log::add(__CLASS__, 'debug', "| ACTION : " . $optionsJson);
-        $cmd->execCmd($options);
+        scenarioExpression::createAndExec('action', $cmd, $options);
       }
     }
   }

@@ -4,6 +4,8 @@
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 **Le plugin est compatible avec les versions de Frigate supérieures à 0.13.0**
 
+La version 0.14 du serveur Frigate apporte son lots de nouveautées et de breaking change, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter), par contre on ne fera pas plusieurs dévellopements pour rester oppérationnel avec les anciennes version, donc si quelques choses ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
+
 # <u>Configuration</u>
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
 - **Port** : le port du serveur Frigate (5000 par défaut)
@@ -144,7 +146,9 @@ message : ``score=80 | video=1 | duration=20``
 
 Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5sc par defaut, donc en paramétrant à 20sc vous obtiendrez une vidéo de 30sc.
 
-Pour le moment les évènements créés ne sont remontés qu'au **cron**. En effet Frigate n'envois rien en MQTT sur cette commande. On travaille sur une mise a jour automatique.
+Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
+
+Pour ceux n'utilisant pas MQTT ou en version < 0.14, les évènements créés ne seront remontés qu'au **cron**.
 
 # <u>Configuration Frigate</u>
 > **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !

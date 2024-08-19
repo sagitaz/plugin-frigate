@@ -3,6 +3,11 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 19/08/2024 Beta 0.9.2
+- Correction des actions du type "mots clés".
+- Correction du filtre "type" sur l'exécution des actions.
+- Correction des accents dans la création d'évènement.
+
 # 17/08/2024 Beta 0.9.1
 - Traduction Anglais, Allemand, Espagnol, Italien, Portugais. merci @mips
 - Correction de l'exécution des actions.
