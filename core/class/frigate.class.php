@@ -675,7 +675,7 @@ class frigate extends eqLogic
         $frigate->setEndTime($infos["endTime"]);
         $frigate->setFalsePositive($event['false_positive']);
         $frigate->setEventId($event['id']);
-        $frigate->setLabel($event['label']);
+        $frigate->setLabel($infos['label']);
         $frigate->setPlusId($event['plus_id']);
         $frigate->setRetain($event['retain_indefinitely']);
         $frigate->setSubLabel($event['sub_label']);
@@ -707,7 +707,7 @@ class frigate extends eqLogic
           'Box' => $event['box'],
           'Camera' => $event['camera'],
           'FalsePositive' => $event['false_positive'],
-          'Label' => $event['label'],
+          'Label' => $infos['label'],
           'PlusId' => $event['plus_id'],
           'SubLabel' => $event['sub_label'],
           'Thumbnail' => $infos["thumbnail"],
@@ -835,6 +835,16 @@ class frigate extends eqLogic
       ? implode(', ', $event['zones'])
       : null;
 
+    // nettoyer le label
+    $label = $event['label'];
+    // Détecter si la chaîne est déjà en UTF-8
+    if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
+      // Si la chaîne est déjà en UTF-8, on la décodera à partir de UTF-8
+      $label = utf8_decode($label);
+    } else {
+      // Sinon, on la convertit de ISO-8859-1 à UTF-8
+      $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
+    }
     // renvoyer les infos
     $infos = array(
       "image" => $img,
@@ -847,7 +857,8 @@ class frigate extends eqLogic
       "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
       "topScore" => $newTopScore,
       "score" => $newScore,
-      "zones" => $newZones
+      "zones" => $newZones,
+      "label" => $label
     );
 
     return $infos;
