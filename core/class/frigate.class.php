@@ -736,6 +736,13 @@ class frigate extends eqLogic
             log::add(__CLASS__, 'debug', "| Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
             $frigate->$setMethod($newValue);
             $updated = true;
+            if ($field == 'Type' && $newValue == 'end') {
+              $infos = self::getEventinfos($mqtt, $event, true);
+              $frigate->setSnapshot($infos["snapshot"]);
+              $frigate->setClip($infos["clip"]);
+              log::add(__CLASS__, 'debug', "| Mise à jour forcé des champs snapshot et clip pour event ID: " . $event['id']);
+              $frigate->save();
+            }  
           }
         }
 
@@ -753,7 +760,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function getEventinfos($mqtt, $event)
+  public static function getEventinfos($mqtt, $event, $force = false)
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     // verifier si le fichier thumbnail existe avant de le telecharger
@@ -769,7 +776,7 @@ class frigate extends eqLogic
     }
 
     // verifier si le fichier snapshot existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_snapshot.jpg')) {
+    if (!file_exists($dir . '/' . $event['id'] . '_snapshot.jpg') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       if ($event['has_snapshot'] == "true") {
         log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
@@ -791,7 +798,7 @@ class frigate extends eqLogic
     }
 
     // verifier si le fichier clip existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4')) {
+    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
       if ($event['has_clip'] == "true") {
         log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
