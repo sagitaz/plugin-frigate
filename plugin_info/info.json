@@ -1,29 +1,40 @@
 {
-    "id": "frigate",
-    "name": "frigate",
-    "pluginVersion": "0.7.5",
-    "description": {
-        "fr_FR": "Plugin Frigate pour jeedom. Ne fonctionne qu'avec les version de Frigate > 0.13.0"
-    },
-    "licence": "AGPL",
-    "author": "Sagitaz",
-    "require": "4.3",
-    "category": "security",
-    "hasDependency": false,
-    "hasOwnDeamon": false,
-    "maxDependancyInstallTime": 0,
-    "changelog_beta": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
-    "changelog": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
-    "documentation_beta": "https://sagitaz.github.io/plugin-frigate/#language#",
-    "documentation": "https://sagitaz.github.io/plugin-frigate/#language#",
-    "language": [
-        "fr_FR"
-    ],
-    "compatibility": [
-        "luna",
-        "atlas",
-        "rpi",
-        "docker",
-        "diy"
-    ]
+	"id": "frigate",
+	"name": "frigate",
+	"pluginVersion": "0.9.2",
+	"description": {
+		"fr_FR": "Plugin Frigate pour Jeedom. Ne fonctionne qu'avec les versions de Frigate > 0.13.0",
+		"en_US": "Frigate plugin for Jeedom. Works only with Frigate versions > 0.13.0",
+		"es_ES": "Plugin Frigate para Jeedom. Sólo funciona con versiones de Frigate > 0.13.0",
+		"de_DE": "Frigate-Plugin für Jeedom. Funktioniert nur mit Frigate-Versionen > 0.13.0",
+		"it_IT": "Plugin Frigate per Jeedom. Funziona solo con le versioni di Frigate > 0.13.0",
+		"pt_PT": "Plugin do Frigate para o Jeedom. Só funciona com as versões do Frigate > 0.13.0"
+	},
+	"licence": "AGPL",
+	"author": "Sagitaz et Noodom",
+	"require": "4.3",
+	"category": "security",
+	"hasDependency": false,
+	"hasOwnDeamon": true,
+	"maxDependancyInstallTime": 0,
+	"changelog_beta": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
+	"changelog": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
+	"documentation_beta": "https://sagitaz.github.io/plugin-frigate/#language#",
+	"documentation": "https://sagitaz.github.io/plugin-frigate/#language#",
+	"language": [
+		"de_DE",
+		"en_US",
+		"es_ES",
+		"fr_FR",
+		"it_IT",
+		"pt_PT"
+	],
+	"compatibility": [
+		"luna",
+		"atlas",
+		"rpi",
+		"docker",
+		"diy",
+		"mobile"
+	]
 }

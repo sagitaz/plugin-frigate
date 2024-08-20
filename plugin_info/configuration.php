@@ -37,7 +37,10 @@ if (!isConnect()) {
                 </select>
             </div>
         </div>
+    </fieldset>
+    <fieldset>
         <div class="form-group">
+          	<h5 class="col-sm-12"><b>{{Paramétrage Frigate}}</b></h5>
             <label class="col-md-4 control-label">{{URL Frigate}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{URL de Frigate}}"></i></sup>
             </label>
@@ -54,6 +57,17 @@ if (!isConnect()) {
             </div>
         </div>
         <div class="form-group">
+            <label class="col-md-4 control-label">{{Topic MQTT}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Topic MQTT de Frigate}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
+            </div>
+        </div>
+    </fieldset>
+    <fieldset>
+        <div class="form-group">
+          	<h5 class="col-sm-12"><b>{{Gestion des évènements}}</b></h5>
             <label class="col-md-4 control-label">{{Récupération des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
@@ -67,6 +81,65 @@ if (!isConnect()) {
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Taille des dossiers}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des données (en Mo)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500 Mo par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Durée de rafraîchissement}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Rafraichissement des captures des caméras (en secondes)}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5 secondes par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Vidéos en vignette dans la page des évènements}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
+			</div>
+		</div>
+    </fieldset>
+    <fieldset>
+        <div class="form-group">
+          	<h5 class="col-sm-12"><b>{{Paramétrage par défaut d'un évènement créé manuellement}}</b></h5>
+            <label class="col-md-4 control-label">{{Label}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Label par défaut d'un évènement créé manuellement}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="defaultLabel" placeholder="{{'manuel' par défaut}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Enregistrer une vidéo}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Enregistrement d une vidéo par défaut pour un évènement manuel}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="defaultVideo" />
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Durée de la vidéo}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Durée par défaut de la vidéo d un évènement manuel}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="defaultDuration" type="number" placeholder="40 secondes par défaut" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Score}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Score par défaut d un évènement manuel, entre 0 et 100%}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="defaultScore" type="number" placeholder="0 par défaut, de 0 à 100%" />
             </div>
         </div>
     </fieldset>
