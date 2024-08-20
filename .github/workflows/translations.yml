@@ -6,7 +6,6 @@ on:
     branches:
       - Dev
 
-
 jobs:
   auto-translate:
     runs-on: ubuntu-latest
