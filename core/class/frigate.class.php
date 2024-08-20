@@ -673,7 +673,7 @@ class frigate extends eqLogic
         $frigate->setSnapshot($infos["snapshot"]);
         $frigate->setStartTime($infos['startTime']);
         $frigate->setEndTime($infos["endTime"]);
-        $frigate->setFalsePositive($event['false_positive']);
+        // $frigate->setFalsePositive($event['false_positive']);
         $frigate->setEventId($event['id']);
         $frigate->setLabel($infos['label']);
         $frigate->setPlusId($event['plus_id']);
@@ -705,7 +705,7 @@ class frigate extends eqLogic
           'Snapshot' => $infos["snapshot"],
           'Box' => $event['box'],
           'Camera' => $event['camera'],
-          'FalsePositive' => $event['false_positive'],
+          // 'FalsePositive' => $event['false_positive'],
           'Label' => $infos['label'],
           'PlusId' => $event['plus_id'],
           'SubLabel' => $event['sub_label'],
@@ -719,21 +719,22 @@ class frigate extends eqLogic
         foreach ($fieldsToUpdate as $field => $value) {
           $getMethod = 'get' . $field;
           $setMethod = 'set' . $field;
+          //$currentValue = is_string($frigate->$getMethod()) ? json_decode($frigate->$getMethod(), true) : $frigate->$getMethod();
           $currentValue = $frigate->$getMethod();
+          //$newValue = is_string($value) ? json_decode($value, true) : $value;
+          $newValue = $value;
 
-          /*     // Si les deux valeurs sont des chaînes JSON, les décoder avant de les comparer
-          if (is_string($currentValue) && is_string($value)) {
-            $decodedCurrentValue = json_decode($currentValue, true);
-            $decodedValue = json_decode($value, true);
-
-            if (json_last_error() === JSON_ERROR_NONE && $decodedCurrentValue === $decodedValue) {
-              continue; // Les valeurs sont identiques après décodage
+          // soucis sur maj Box, "[]" != []
+          if ($field == 'Box') {
+            if ($value !== null) {
+              $newValue = json_encode($value);
             }
-          } */
+            // log::add(__CLASS__, 'debug', "| BOX, ancienne valeur: " . $currentValue . ", nouvelle valeur: " . $newValue);
+          }
 
-          if ((is_null($currentValue) || $currentValue === '' || $currentValue != $value) && !is_null($value) && $value !== '') {
-            log::add(__CLASS__, 'debug', "| Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($value));
-            $frigate->$setMethod($value);
+          if ((is_null($currentValue) || $currentValue === '' || $currentValue != $newValue) && !is_null($newValue) && $newValue !== '') {
+            log::add(__CLASS__, 'debug', "| Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
+            $frigate->$setMethod($newValue);
             $updated = true;
           }
         }
@@ -998,7 +999,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate_events::byEventId($id);
     if (!empty($frigate) && isset($frigate[0])) {
-            $frigate = $frigate[0];
+      $frigate = $frigate[0];
       // Vérifier si le fichier est un favori
       $isFavorite = $frigate->getIsFavorite() ?? 0;
       if (
