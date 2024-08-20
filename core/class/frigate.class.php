@@ -581,7 +581,7 @@ class frigate extends eqLogic
   public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
   {
     $urlfrigate = self::getUrlFrigate();
-    $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . $label . "/create";
+    $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . rawurlencode($label) . "/create";
 
     $score = max(0, min(100, floatval($score)));
     $score = $score / 100;
@@ -689,7 +689,6 @@ class frigate extends eqLogic
         self::majEventsCmds($frigate);
 
         log::add(__CLASS__, 'debug', "| Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
-        
       } else {
 
         if (is_array($frigate) && !empty($frigate)) {
@@ -838,13 +837,13 @@ class frigate extends eqLogic
     // nettoyer le label
     $label = $event['label'];
     // Détecter si la chaîne est déjà en UTF-8
-    if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
+    /*  if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
       // Si la chaîne est déjà en UTF-8, on la décodera à partir de UTF-8
       $label = utf8_decode($label);
     } else {
       // Sinon, on la convertit de ISO-8859-1 à UTF-8
       $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
-    }
+    } */
     // renvoyer les infos
     $infos = array(
       "image" => $img,
@@ -953,9 +952,7 @@ class frigate extends eqLogic
   {
     $maxSize = config::byKey('datas_weight', 'frigate');
     $size = self::getFolderSize();
-    log::add(__CLASS__, 'debug',
-      "| Taille du dossier : " . $size
-    );
+    log::add(__CLASS__, 'debug', "| Taille du dossier : " . $size);
     log::add(__CLASS__, 'debug', "| Taille maximale du dossier : " . $maxSize);
 
     while ($size > $maxSize) {
@@ -1000,12 +997,12 @@ class frigate extends eqLogic
   public static function cleanDbEvent($id)
   {
     $frigate = frigate_events::byEventId($id);
-    if (!empty($frigate) && isset($frigate[0])
-    ) {
-      $frigate = $frigate[0];
+    if (!empty($frigate) && isset($frigate[0])) {
+            $frigate = $frigate[0];
       // Vérifier si le fichier est un favori
       $isFavorite = $frigate->getIsFavorite() ?? 0;
-      if ($isFavorite == 1
+      if (
+        $isFavorite == 1
       ) {
         log::add(__CLASS__, 'debug', "| Événement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la base de données.");
       } else {
