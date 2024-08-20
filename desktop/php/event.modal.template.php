@@ -7,7 +7,7 @@
         <h2 id="mediaTitle"></h2>
         <div class="button-container">
           <button id="showVideo" class="hidden-btn custom-button">Voir la vidéo</button>
-          <button id="showImage" class="hidden-btn custom-button">Voir la snapshot</button>
+          <button id="showImage" class="hidden-btn custom-button">Voir la capture</button>
         </div>
       </div>
       <div class="media-container">
