@@ -40,7 +40,7 @@ var app_config = {
 
         // Gestion de la coloration des logs
       	this.processLogs = function(logs) {
-            logs = logs.split('\n');
+            logs = JSON.parse(logs).lines
             
             let result = '';
             logs.forEach(log => {
