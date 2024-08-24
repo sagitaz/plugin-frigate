@@ -179,7 +179,6 @@ function deleteAllEvents(eventId) {
 }
 
 function filterEvents() {
-  console.log('filterEvents');
   const selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function (checkbox) {
     return checkbox.value;
   });
