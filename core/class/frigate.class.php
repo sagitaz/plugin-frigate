@@ -78,6 +78,9 @@ class frigate extends eqLogic
     if (!config::byKey('event::displayVideo', 'frigate')) {
       config::save('event::displayVideo', true, 'frigate');
     }
+    if (!config::byKey('event::confirmDelete', 'frigate')) {
+      config::save('event::confirmDelete', true, 'frigate');
+    }
   }
   // configuration par defaut des crons
   public static function setConfigCron()
