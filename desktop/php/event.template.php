@@ -97,7 +97,7 @@
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
-      <button class="hover-button" onclick="deleteEvent('<?= $id ?>')"
+      <button class="hover-button" onclick="deleteEvent('<?= $id ?>', <?= config::byKey('event::confirmDelete', 'frigate', 1) == 1 ? 'true' : 'false' ?>)"
         title="Supprimer l'évènement sur votre serveur Frigate">
         <i class="fas fa-trash"></i>
       </button>
