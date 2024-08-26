@@ -107,6 +107,14 @@ if (!isConnect()) {
 				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
 			</div>
 		</div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Confirmation avant suppression d'un évènement}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="event::confirmDelete" />
+			</div>
+		</div>
     </fieldset>
     <fieldset>
         <div class="form-group">

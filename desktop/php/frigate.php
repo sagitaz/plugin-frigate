@@ -171,27 +171,27 @@ sendVarToJS('refresh', $refresh);
 
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{bbox}}</label>
+                                <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span></label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{timestamp}}</label>
+                                <label class="col-sm-4 control-label timestamp-configuration"><span>{{timestamp}}</span></label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{zones}}</label>
+                                <label class="col-sm-4 control-label zones-configuration"><span>{{zones}}</span></label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label">{{mask}}</label>
+                                <label class="col-sm-4 control-label mask-configuration"><span>{{mask}}</span></label>
                                 <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="mask">
+                                    <input type="checkbox" class="eqLogicAttr mask-checkbox" data-l1key="configuration" data-l2key="mask">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
@@ -206,6 +206,7 @@ sendVarToJS('refresh', $refresh);
                                     <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
+
                         </div>
 
                         <!-- Partie droite de l'onglet "Équipement" -->

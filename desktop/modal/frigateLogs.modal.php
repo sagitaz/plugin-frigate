@@ -51,7 +51,7 @@ if (!isConnect('admin')) {
     <button id="nginxLogsBtn" class="btn btn-success pull-center" title="{{Afficher les logs nginx}}"><i class="far fa-file-alt"></i> {{Logs nginx}}</button>
     <button id="downloadConfiguration" class="btn btn-success pull-right" title="Télécharger les logs affichés"><i class="fas fa-save"></i> {{Télécharger les logs}}</button>
     <br/><br/>
-    <div id='div_logsAlert' class="alert"></div>
+    <div id='div_logsAlert' class="alert alert-info"></div>
   </div>
   <div class="bound-config">
     <div id="logs"></div>

@@ -124,13 +124,19 @@ document.getElementById('createEvent').addEventListener('click', function () {
     .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
 });
 
-function deleteEvent(eventId) {
-  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ?<br/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
-    if (result) {
-      console.log("suppression de : " + eventId);
-      deleteAllEvents(eventId);
-    }
-  });
+function deleteEvent(eventId, askConfirm) {
+  if (askConfirm) {
+    jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ?<br/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+      if (result) {
+        console.log("suppression de : " + eventId);
+        deleteAllEvents(eventId);
+      }
+    });
+  }
+  else {
+    console.log("suppression directe de : " + eventId);
+    deleteAllEvents(eventId);
+  }
 }
 
 function deleteAllEvents(eventId) {
@@ -179,7 +185,6 @@ function deleteAllEvents(eventId) {
 }
 
 function filterEvents() {
-  console.log('filterEvents');
   const selectedCameras = Array.from(document.querySelectorAll('.cameraFilter:checked')).map(function (checkbox) {
     return checkbox.value;
   });

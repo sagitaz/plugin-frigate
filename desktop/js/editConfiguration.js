@@ -115,3 +115,8 @@ var app_config = {
       });
   }
 };
+
+
+$('body').off('frigate::config').on('frigate::config', function(_event, _options) {
+    app_config.show();
+})

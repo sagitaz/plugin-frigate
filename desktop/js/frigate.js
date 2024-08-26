@@ -238,6 +238,15 @@ function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }
 
+function updateMaskVisibility() {
+    const maskLabel = document.querySelector('.mask-configuration');
+    if (document.querySelector('.mask-checkbox').checked) {
+        maskLabel.classList.add('mask-border');
+    } else {
+        maskLabel.classList.remove('mask-border');
+    }
+}
+
 function updateMotionVisibility() {
     const motionLabel = document.querySelector('.motion-configuration');
     if (document.querySelector('.motion-checkbox').checked) {
@@ -256,6 +265,7 @@ function updateRegionsVisibility() {
     }
 }
 
+document.querySelector('.mask-checkbox').addEventListener('change', updateMaskVisibility);
 document.querySelector('.motion-checkbox').addEventListener('change', updateMotionVisibility);
 document.querySelector('.regions-checkbox').addEventListener('change', updateRegionsVisibility);
 

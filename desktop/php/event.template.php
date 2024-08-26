@@ -86,7 +86,7 @@
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
       echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
                echo 'data-video="' . $clip . '"'; ?>
-      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $formattedDurationTitle ?>">
+      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="Voir la capture">
           <i class="fas fa-camera"></i>
@@ -97,7 +97,7 @@
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
-      <button class="hover-button" onclick="deleteEvent('<?= $id ?>')"
+      <button class="hover-button" onclick="deleteEvent('<?= $id ?>', <?= config::byKey('event::confirmDelete', 'frigate', 1) == 1 ? 'true' : 'false' ?>)"
         title="Supprimer l'évènement sur votre serveur Frigate">
         <i class="fas fa-trash"></i>
       </button>
