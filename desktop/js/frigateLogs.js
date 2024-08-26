@@ -29,6 +29,7 @@ var app_config = {
       $divFrigateAlert.html(message);
     };
 
+
     // Gestion du contenu des logs
     this.updateContent = function (logs) {
       $("#logs").html(this.processLogs(logs));
