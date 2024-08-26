@@ -186,13 +186,21 @@ class frigate extends eqLogic
   }
   */
 
-  /*
-   * Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
-   * lors de la création semi-automatique d'un post sur le forum community
+  
+   // Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
+   // en lors de la création semi-automatique d'un post sur le forum community
    public static function getConfigForCommunity() {
-      return "les infos essentiel de mon plugin";
+    $system = system::getOsVersion();
+
+    $CommunityInfo = "```\n";
+    $CommunityInfo = $CommunityInfo . 'URL : ' . self::getUrlFrigate() . "\n";
+    $CommunityInfo = $CommunityInfo . 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
+    $CommunityInfo = $CommunityInfo . 'Debian : ' . $system . "\n";
+    $CommunityInfo = $CommunityInfo . 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
+    $CommunityInfo = $CommunityInfo . "```";
+    return $CommunityInfo;
    }
-   */
+   
 
   /*     * *********************Méthodes d'instance************************* */
 
@@ -1593,6 +1601,9 @@ class frigate extends eqLogic
     // Enregistrer la valeur de l'événement
     $cmd->event($version);
     $cmd->save();
+    if ($version != config::byKey('frigate_version', 'frigate')) {
+    config::save('frigate_version', $version, 'frigate');
+    }
   }
 
   private static function executeActionNewEvent($eqLogicId, $event)
@@ -1925,6 +1936,9 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
     $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
     $version = $cmd->execCmd();
+    if ($version != config::byKey('frigate_version', 'frigate')) {
+      config::save('frigate_version', $version, 'frigate');
+    }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
       log::add(__CLASS__, 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
