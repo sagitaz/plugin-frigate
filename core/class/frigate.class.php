@@ -1141,7 +1141,7 @@ class frigate extends eqLogic
         "date" => $date,
         "duree" => $duree,
         "startTime" => $event->getStartTime(),
-        "endtime" => $event->getEndTime(),
+        "endTime" => $event->getEndTime(),
         "snapshot" => $event->getSnapshot(),
         "clip" => $event->getClip(),
         "thumbnail" => $event->getthumbnail(),
