@@ -15,131 +15,143 @@
  */
 
 var app_config = {
-    init: function () {
-        this.textLogs = '';
-      	const $divLogsAlert = $("#div_logsAlert");
-        const $divFrigateLogsAlert = $('#div_frigateLogsAlert');
-        const $divFrigateAlert = $("#div_logsAlert");
+  init: function () {
+    this.textLogs = "";
+    const $divFrigateLogsAlert = $("#div_frigateLogsAlert");
+    const $divFrigateAlert = $("#div_logsAlert");
 
-        this.showAlert = function(message, level) {
-            $('#div_configFrigateAlert').showAlert({
-                message: message,
-                level: level
-            });
+    this.showAlert = function (message, level) {
+      $divFrigateLogsAlert.showAlert({ message, level });
+    };
+
+    // Gestion du titre des logs
+    this.updateTitle = function (message) {
+      $divFrigateAlert.html(message);
+    };
+
+
+    // Gestion du contenu des logs
+    this.updateContent = function (logs) {
+      $("#logs").html(this.processLogs(logs));
+      this.scrollToBottom();
+    };
+
+    this.displayLogs = function (logs, type) {
+      app_config.textLogs = logs;
+      app_config.showAlert(`{{Logs}} ${type} {{récupérés}}.`, "success");
+      app_config.updateTitle(`{{Logs}} ${type}`);
+      app_config.updateContent(logs);
+    };
+
+    // Gestion de la coloration des logs
+    this.processLogs = function (logs) {
+      const lines = JSON.parse(logs).lines;
+
+      let result = "";
+      lines.forEach((line) => {
+        let className;
+        if (line.includes("ERROR") || line.includes("ERR")) {
+          className = "danger";
+        } else if (line.includes("INFO") || line.includes("INF")) {
+          className = "info";
+        } else if (line.includes("WARNING") || line.includes("WRN")) {
+          className = "warning";
         }
 
-        // Gestion du titre des logs
-        this.updateTitle = function(isValid, message) {
-            if (isValid) {
-                $divFrigateAlert.removeClass('alert-danger alert-warning').addClass('alert-info');
-            } else {
-                $divFrigateAlert.removeClass('alert-warning alert-info').addClass('alert-danger');
-            }
-            $divFrigateAlert.html(message);
-        }
+        result += `<p class="${className}">${line}</p>\n`;
+      });
 
-        // Gestion de la coloration des logs
-      	this.processLogs = function(logs) {
-            logs = JSON.parse(logs).lines
-            
-            let result = '';
-            logs.forEach(log => {
-                let className;
-                if (log.includes('ERROR')) {
-                    className = 'danger';
-                } else if (log.includes('INFO')) {
-                    className = 'info';
-                } else if (log.includes('WARNING')) {
-                    className = 'warning';
-                }
-                
-                result += `<p class="${className}">${log}</p>\n`;
-            });
+      return result;
+    };
 
-            return result;
-        }
+    this.scrollToBottom = function () {
+      const $logs = $("#logs");
+      $logs.scrollTop($logs[0].scrollHeight);
+    };
 
-      	// Gestion des erreurs Ajax
-        function handleAjaxError(request, status, error) {
-          	console.error(`Error: ${status} - ${error}`);
-            app_config.showAlert(`Une erreur est survenue : ${status} - ${error}.`, 'danger');
-        }
-
-        // Gestion des appels Ajax
-        this.ajaxRequest = function(action, data, successCallback) {
-          	$.ajax({
-                type: 'POST',
-                url: 'plugins/frigate/core/ajax/frigate.ajax.php',
-                data: {
-                    action: action,
-                    ...data
-                },
-                dataType: 'json',
-                global: false,
-                error: handleAjaxError,
-                success: function (data) {
-                  if (data.state === 'ok') {
-                    try {
-                      const parsedResult = JSON.parse(data.result);
-                      if (parsedResult.success !== undefined) {
-                        if (parsedResult.success) {
-                          successCallback(parsedResult.result);
-                        } else {
-                          app_config.showAlert(parsedResult.message, 'danger');
-                        }
-                      } else {
-                        successCallback(data.result);
-                      }
-                    }
-                    catch (error) {
-                      successCallback(data.result);
-                    }
-                  } else {
-                    app_config.showAlert(data.result, 'danger');
-                  }
-                }
-            });
-        };
-
-        // Gestion des boutons
-        $("#frigateLogsBtn").click(() => {
-          	this.show();
-        });
-
-        $("#go2rtcLogsBtn").click(() => {
-            this.ajaxRequest('logs', { type: 'GET', service: 'go2rtc' }, (logs) => {
-                app_config.textLogs = logs;
-              	app_config.showAlert('{{Logs go2rtc récupérés.}}', 'success');
-            	app_config.updateTitle(true, '{{Logs go2rtc}}');
-              	$("#logs").html(app_config.processLogs(logs));
-            });
-        });
-
-        $("#nginxLogsBtn").click(() => {          
-          	this.ajaxRequest('logs', { type: 'GET', service: 'nginx' }, (logs) => {
-                app_config.textLogs = logs;
-              	app_config.showAlert('{{Logs nginx récupérés.}}', 'success');
-            	app_config.updateTitle(true, '{{Logs nginx}}');
-              	$("#logs").html(app_config.processLogs(logs));
-            });
-        });
-      
-        $("#downloadConfiguration").click(() => {
-            this.ajaxRequest('logs', { type: 'GET' }, () => {
-              	const now = new Date();
-              	const title = $divFrigateAlert.html().replace(/\s+/g, '');
-                const fileName = `${title}_${now.getFullYear()}-${String(now.getMonth() + 1).padStart(2, '0')}-${String(now.getDate()).padStart(2, '0')}_${String(now.getHours()).padStart(2, '0')}h${String(now.getMinutes()).padStart(2, '0')}.log`;
-                const blob = new Blob([app_config.textLogs], { type: "text/plain;charset=utf-8" });
-                saveAs(blob, fileName);
-            });
-        });      
-    },
-    show: function () {
-      	this.ajaxRequest('logs', { type: 'GET', service: 'frigate' }, (logs) => {
-            app_config.textLogs = logs;
-            app_config.showAlert('{{Logs Frigate récupérés.}}', 'success');
-          	app_config.updateTitle(true, '{{Logs Frigate}}');
-          	$("#logs").html(app_config.processLogs(logs));
-        });
+    // Gestion des erreurs Ajax
+    function handleAjaxError(request, status, error) {
+      console.error(`Error: ${status} - ${error}`);
+      app_config.showAlert(
+        `Une erreur est survenue : ${status} - ${error}.`,
+        "danger"
+      );
     }
+
+    // Gestion des appels Ajax
+    this.ajaxRequest = function (action, data, successCallback) {
+      $.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+          action: action,
+          ...data,
+        },
+        dataType: "json",
+        global: false,
+        error: handleAjaxError,
+        success: function (data) {
+          if (data.state === "ok") {
+            try {
+              const parsedResult = JSON.parse(data.result);
+              if (parsedResult.success !== undefined) {
+                if (parsedResult.success) {
+                  successCallback(parsedResult.result);
+                } else {
+                  app_config.showAlert(parsedResult.message, "danger");
+                }
+              } else {
+                successCallback(data.result);
+              }
+            } catch (error) {
+              successCallback(data.result);
+            }
+          } else {
+            app_config.showAlert(data.result, "danger");
+          }
+        },
+      });
+    };
+
+    // Gestion des boutons
+    $("#frigateLogsBtn").click(() => {
+      console.log("frigateLogsBtn");
+      this.show();
+    });
+
+    $("#go2rtcLogsBtn").click(() => {
+      console.log("go2rtcLogsBtn");
+      this.ajaxRequest("logs", { type: "GET", service: "go2rtc" }, (logs) => {
+        app_config.displayLogs(logs, "go2rtc");
+      });
+    });
+
+    $("#nginxLogsBtn").click(() => {
+      console.log("nginxLogsBtn");
+      this.ajaxRequest("logs", { type: "GET", service: "nginx" }, (logs) => {
+        app_config.displayLogs(logs, "nginx");
+      });
+    });
+
+    $("#downloadConfiguration").click(() => {
+      this.ajaxRequest("logs", { type: "GET" }, () => {
+        const now = new Date();
+        const title = $divFrigateAlert.html().replace(/\s+/g, "");
+        const fileName = `${title}_${now.getFullYear()}-${String(
+          now.getMonth() + 1
+        ).padStart(2, "0")}-${String(now.getDate()).padStart(2, "0")}_${String(
+          now.getHours()
+        ).padStart(2, "0")}h${String(now.getMinutes()).padStart(2, "0")}.log`;
+        const blob = new Blob([app_config.textLogs], {
+          type: "text/plain;charset=utf-8",
+        });
+        saveAs(blob, fileName);
+      });
+    });
+  },
+  show: function () {
+    this.ajaxRequest("logs", { type: "GET", service: "frigate" }, (logs) => {
+      app_config.displayLogs(logs, "Frigate");
+    });
+  },
 };
