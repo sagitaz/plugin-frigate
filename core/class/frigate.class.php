@@ -663,7 +663,7 @@ class frigate extends eqLogic
       if (!$frigate) {
         log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
         $frigate = new frigate_events();
-        $frigate->setBox($event['box']);
+        $frigate->setBox($event['data']['box']);
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
         $frigate->setLasted($infos["image"]);
@@ -703,7 +703,7 @@ class frigate extends eqLogic
           'Clip' => $infos["clip"],
           'HasSnapshot' => $infos["hasSnapshot"],
           'Snapshot' => $infos["snapshot"],
-          'Box' => $event['box'],
+          'Box' => $event['data']['box'],
           'Camera' => $event['camera'],
           // 'FalsePositive' => $event['false_positive'],
           'Label' => $infos['label'],
@@ -713,6 +713,7 @@ class frigate extends eqLogic
           'Type' => $type,
           'TopScore' => $infos["topScore"],
           'Score' => $infos["score"],
+          'Retain' => $event['retain_indefinitely'],
           'Zones' => $infos['zones']
         ];
 
@@ -1069,7 +1070,7 @@ class frigate extends eqLogic
   }
   public static function showEvents()
   {
-    $result = array();
+    $result = [];
     $events = frigate_events::all();
 
     foreach ($events as $event) {
@@ -1077,16 +1078,22 @@ class frigate extends eqLogic
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
       $result[] = array(
+        "id" => $event->getId(),
         "img" => $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
+        "box" => $event->getBox(),
         "date" => $date,
         "duree" => $duree,
+        "startTime" => $event->getStartTime(),
+        "endtime" => $event->getEndTime(),
         "snapshot" => $event->getSnapshot(),
         "clip" => $event->getClip(),
+        "thumbnail" => $event->getthumbnail(),
         "hasSnapshot" => $event->getHasSnapshot(),
         "hasClip" => $event->getHasClip(),
-        "id" => $event->getEventId(),
+        "eventId" => $event->getEventId(),
+        "score" => $event->getScore(),
         "top_score" => $event->getTopScore(),
         "type" => $event->getType(),
         "isFavorite" => $event->getIsFavorite() ?? 0,
