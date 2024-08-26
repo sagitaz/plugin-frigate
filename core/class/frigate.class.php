@@ -761,7 +761,6 @@ class frigate extends eqLogic
           'Type' => $type,
           'TopScore' => $infos["topScore"],
           'Score' => $infos["score"],
-          'Retain' => $event['retain_indefinitely'],
           'Zones' => $infos['zones']
         ];
 
@@ -1433,7 +1432,7 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "| ACTION: Toutes les actions caméra sont désactivées.");
       }
     } else {
-      log::add(__CLASS__, 'debug', "| ACTION: Aucune action confiurée.");
+      log::add(__CLASS__, 'debug', "| ACTION: Aucune action configurée.");
     }
 
     // Vérification des actions caméra existantes
