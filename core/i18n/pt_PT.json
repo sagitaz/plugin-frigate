@@ -14,6 +14,9 @@
         "Topic mqtt pour Frigate non défini.": "Tópico mqtt para Frigate não definido.",
         "Veuillez vérifier la configuration": "Verificar a configuração"
     },
+    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Ver eventos da câmara"
+    },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Configuração do servidor Frigate recuperada.",
         "Envoi de la configuration au serveur Frigate avec redémarrage réussi.": "Configuração enviada para o servidor Frigate com reinício bem sucedido.",
@@ -63,12 +66,8 @@
         "Unité": "Unidade"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
-        "Logs Frigate": "Fragata de toros",
-        "Logs Frigate récupérés.": "Recuperação dos registos da fragata.",
-        "Logs go2rtc": "Registos go2rtc",
-        "Logs go2rtc récupérés.": "Registos go2rtc recuperados.",
-        "Logs nginx": "Registos nginx",
-        "Logs nginx récupérés.": "Registos nginx recuperados."
+        "Logs": "Registos",
+        "récupérés": "recuperado"
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Criação de eventos com sucesso"
@@ -172,8 +171,10 @@
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "manual\" por defeito",
+        "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Visualização de um alerta de confirmação quando é feito um pedido de eliminação de um evento",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Mostrar vídeo em miniatura de um evento quando o rato passa sobre a sua captura",
         "Aucune": "Nenhuma",
+        "Confirmation avant suppression d'un évènement": "Confirmação antes de eliminar um evento",
         "Durée de la vidéo": "Duração do vídeo",
         "Durée de rafraîchissement": "Hora de atualizar",
         "Durée par défaut de la vidéo d un évènement manuel": "Duração predefinida do vídeo de um evento manual",
