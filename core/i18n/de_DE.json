@@ -14,6 +14,9 @@
         "Topic mqtt pour Frigate non défini.": "Topic mqtt für Frigate nicht definiert.",
         "Veuillez vérifier la configuration": "Bitte überprüfen Sie die Konfiguration"
     },
+    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen"
+    },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Konfiguration des Frigate-Servers abgerufen.",
         "Envoi de la configuration au serveur Frigate avec redémarrage réussi.": "Senden der Konfiguration an den Frigate-Server mit erfolgreichem Neustart.",
@@ -63,12 +66,8 @@
         "Unité": "Unit"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
-        "Logs Frigate": "Frigate-Logs",
-        "Logs Frigate récupérés.": "Abgerufene Frigate-Logs.",
-        "Logs go2rtc": "Logs go2rtc",
-        "Logs go2rtc récupérés.": "Wiederhergestellte go2rtc-Logs.",
-        "Logs nginx": "Nginx-Logs",
-        "Logs nginx récupérés.": "Nginx-Logs abgerufen."
+        "Logs": "Protokolle",
+        "récupérés": "abgerufen"
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Erfolgreiche Veranstaltungsgestaltung"
@@ -172,8 +171,10 @@
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "'manuell' als Standard",
+        "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Anzeige einer Bestätigungswarnung bei der Aufforderung, ein Ereignis zu löschen",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Anzeige des Miniaturvideos eines Ereignisses beim Überfahren seines Captures mit der Maus",
         "Aucune": "Irgendein",
+        "Confirmation avant suppression d'un évènement": "Bestätigung vor dem Löschen eines Ereignisses",
         "Durée de la vidéo": "Länge des Videos",
         "Durée de rafraîchissement": "Dauer der Auffrischung",
         "Durée par défaut de la vidéo d un évènement manuel": "Standarddauer des Videos eines manuellen Ereignisses",

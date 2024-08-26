@@ -14,6 +14,9 @@
         "Topic mqtt pour Frigate non défini.": "Topic mqtt for Frigate not defined.",
         "Veuillez vérifier la configuration": "Please check configuration"
     },
+    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "View camera events"
+    },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Frigate server configuration retrieved.",
         "Envoi de la configuration au serveur Frigate avec redémarrage réussi.": "Send configuration to Frigate server with successful restart.",
@@ -63,12 +66,8 @@
         "Unité": "Unit"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
-        "Logs Frigate": "Logs Frigate",
-        "Logs Frigate récupérés.": "Frigate logs recovered.",
-        "Logs go2rtc": "Logs go2rtc",
-        "Logs go2rtc récupérés.": "Recovered go2rtc logs.",
-        "Logs nginx": "Nginx logs",
-        "Logs nginx récupérés.": "Nginx logs recovered."
+        "Logs": "Logs",
+        "récupérés": "recovered"
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Successful event creation"
@@ -172,8 +171,10 @@
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "manual' by default",
+        "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Display of a confirmation alert when requesting event deletion",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Display thumbnail video of an event when mouse hovers over its capture",
         "Aucune": "None",
+        "Confirmation avant suppression d'un évènement": "Confirmation before deleting an event",
         "Durée de la vidéo": "Video length",
         "Durée de rafraîchissement": "Refresh time",
         "Durée par défaut de la vidéo d un évènement manuel": "Default video duration of a manual event",
