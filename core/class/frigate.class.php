@@ -19,8 +19,6 @@
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 require_once __DIR__ . '/frigate_events.class.php';
 
-
-
 class frigate extends eqLogic
 {
   /*     * *************************Attributs****************************** */
@@ -461,13 +459,14 @@ class frigate extends eqLogic
         $make_snapshot = $this->getCmd("action", 'action_make_api_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="{{Créer une capture}}" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
 
-
-      $html = $this->postToHtml($_version, template_replace($replace, getTemplate('core', $version, 'widgetCamera', 'frigate')));
+      $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
+      $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
+      $html = $this->postToHtml($_version, $html);
       cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
       return $html;
     } else {
