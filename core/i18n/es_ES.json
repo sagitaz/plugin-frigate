@@ -6,6 +6,7 @@
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
         "Arrêt du démon Frigate": "Detención del demonio Frigate",
+        "Créer une capture": "Crear una captura",
         "Informations reçues de MQTT Manager": "Información recibida de MQTT Manager",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "El evento es un favorito y no se puede borrar de la BD.",
         "Le démon MQTT Manager n\\'est pas démarré": "El demonio MQTT Manager no se ha iniciado",
@@ -13,6 +14,9 @@
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Gracias por instalar el plugin. Si necesita ayuda, póngase en contacto con el soporte en Discord o en la Comunidad.",
         "Topic mqtt pour Frigate non défini.": "Tema mqtt para Fragata no definido.",
         "Veuillez vérifier la configuration": "Compruebe la configuración"
+    },
+    "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Ver eventos de la cámara"
     },
     "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
         "Afficher les évènements de la caméra": "Ver eventos de la cámara"
@@ -73,8 +77,10 @@
         "Création d\\'évènement réussie": "Creación de eventos con éxito"
     },
     "plugins\/frigate\/desktop\/modal\/editConfiguration.modal.php": {
+        "Envoie et remplace le fichier de configuration Frigate": "Envía y sustituye el archivo de configuración de Frigate",
         "Envoie et remplace le fichier de configuration Frigate puis redémarre Frigate": "Envía y sustituye el archivo de configuración de Frigate y, a continuación, reinicia Frigate",
         "Envoie et remplace le fichier de configuration du serveur Frigate": "Envía y sustituye el archivo de configuración del servidor Frigate",
+        "Envoie et remplace le fichier de configuration du serveur Frigate puis redémarre Frigate": "Envía y sustituye el archivo de configuración del servidor Frigate y, a continuación, reinicia Frigate",
         "Envoyer la configuration": "Enviar configuración",
         "Envoyer la configuration et redémarrer Frigate": "Enviar configuración y reiniciar Frigate",
         "La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !": "La modificación de la configuración del servidor Frigate corre por su cuenta y riesgo No se prestará ningún tipo de asistencia",
@@ -103,11 +109,18 @@
         "Logs Frigate": "Fragata de troncos",
         "Logs go2rtc": "Registros go2rtc",
         "Logs nginx": "Registros nginx",
-        "Télécharger les logs": "Descargar registros"
+        "Télécharger les logs": "Descargar registros",
+        "Télécharger les logs affichés": "Descargar los registros mostrados"
     },
     "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
         "Aucun": "Ninguno",
         "Tout": "Todo"
+    },
+    "plugins\/frigate\/desktop\/php\/event.template.php": {
+        "Afficher la page de la caméra": "Mostrar la página de la cámara",
+        "Supprimer l'évènement sur votre serveur Frigate": "Borre el evento en su servidor Frigate",
+        "Voir la capture": "Ver la captura",
+        "Voir la vidéo": "Ver el vídeo"
     },
     "plugins\/frigate\/desktop\/php\/events.php": {
         "401 - Accès non autorisé": "401 - Acceso no autorizado",
@@ -171,6 +184,12 @@
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "manual\" por defecto",
+        "0 par défaut, de 0 à 100%": "0 por defecto, de 0 a 100%",
+        "40 secondes par défaut": "40 segundos por defecto",
+        "5 secondes par défaut": "5 segundos por defecto",
+        "500 Mo par défaut": "500 Mb por defecto",
+        "5000 par défaut": "5000 por defecto",
+        "7 jours par défaut": "7 días por defecto",
         "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Visualización de una alerta de confirmación cuando se solicita la eliminación de un evento",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Mostrar vídeo en miniatura de un evento cuando el ratón pasa por encima de su captura",
         "Aucune": "Alguna",
@@ -180,6 +199,7 @@
         "Durée par défaut de la vidéo d un évènement manuel": "Duración predeterminada del vídeo de un evento manual",
         "Enregistrement d une vidéo par défaut pour un évènement manuel": "Grabación de un vídeo predeterminado para un evento manual",
         "Enregistrer une vidéo": "Grabar un vídeo",
+        "Exemple: 192.168.1.20": "Ejemplo: 192.168.1.20",
         "Gestion des évènements": "Gestión de eventos",
         "Label": "Etiqueta",
         "Label par défaut d'un évènement créé manuellement": "Etiqueta por defecto para un evento creado manualmente",
