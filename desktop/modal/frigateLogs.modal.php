@@ -49,7 +49,7 @@ if (!isConnect('admin')) {
     <button id="frigateLogsBtn" class="btn btn-success pull-center" title="{{Afficher les logs Frigate}}"><i class="far fa-file-alt"></i> {{Logs Frigate}}</button>
     <button id="go2rtcLogsBtn" class="btn btn-success pull-center" title="{{Afficher les logs go2rtc}}"><i class="far fa-file-alt"></i> {{Logs go2rtc}}</button>
     <button id="nginxLogsBtn" class="btn btn-success pull-center" title="{{Afficher les logs nginx}}"><i class="far fa-file-alt"></i> {{Logs nginx}}</button>
-    <button id="downloadConfiguration" class="btn btn-success pull-right" title="Télécharger les logs affichés"><i class="fas fa-save"></i> {{Télécharger les logs}}</button>
+    <button id="downloadConfiguration" class="btn btn-success pull-right" title="{{Télécharger les logs affichés}}"><i class="fas fa-save"></i> {{Télécharger les logs}}</button>
     <br/><br/>
     <div id='div_logsAlert' class="alert alert-info"></div>
   </div>

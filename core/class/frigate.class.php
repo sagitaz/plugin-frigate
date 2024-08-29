@@ -19,12 +19,7 @@
 require_once __DIR__  . '/../../../../core/php/core.inc.php';
 require_once __DIR__ . '/frigate_events.class.php';
 
-use Log;
-use eqLogic;
-use cmd;
-use message;
-use config;
-use mqtt2;
+
 
 class frigate extends eqLogic
 {
@@ -466,7 +461,7 @@ class frigate extends eqLogic
         $make_snapshot = $this->getCmd("action", 'action_make_api_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="Créer event" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="{{Créer une capture}}" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -864,6 +859,14 @@ class frigate extends eqLogic
         if ($clip == "error") {
           $clip = "null";
           $hasClip = 0;
+        } else {
+          $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
+          $duration = self::getVideoDuration($filePath);
+          if ($duration !== false) {
+            log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+          } else {
+            log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
+          }
         }
       } else {
         log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
@@ -873,6 +876,13 @@ class frigate extends eqLogic
     } else {
       $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
       $hasClip = 1;
+      $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
+      $duration = self::getVideoDuration($filePath);
+      if ($duration !== false) {
+        log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+      } else {
+        log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
+      }
     }
 
     // verifier le endtime
@@ -927,6 +937,22 @@ class frigate extends eqLogic
     return $infos;
   }
 
+  public static function getVideoDuration($filePath)
+  {
+    $cmd = "ffmpeg -i " . escapeshellarg($filePath) . " 2>&1";
+    $output = shell_exec($cmd);
+
+    if (preg_match('/Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})/', $output, $matches)) {
+      $hours = $matches[1];
+      $minutes = $matches[2];
+      $seconds = $matches[3];
+      $duration = ($hours * 3600) + ($minutes * 60) + $seconds;
+
+      return $duration; // Durée en secondes
+    }
+
+    return false; // En cas d'erreur
+  }
   // Fonction de nettoyage du dossier data, suppression de tous les fichiers n'ayant pas d'event associé en DB Jeedom
   // Exécution en cronDaily
   public static function cleanFolderData()

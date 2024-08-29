@@ -70,7 +70,7 @@
       </span><br>
       <?php if ($cameraFound): ?>
         <div style='display: flex;align-items: center;gap: 10px;'>
-          <a class="container-text" onclick="gotoCamera('<?= $cameraId ?>')" title="Afficher la page de la caméra">
+          <a class="container-text" onclick="gotoCamera('<?= $cameraId ?>')" title="{{Afficher la page de la caméra}}">
           <?php endif; ?>
           <i class="fas fa-video"></i><span> <?= $camera ?></span>
           <?php if ($cameraFound): ?>
@@ -88,17 +88,17 @@
                echo 'data-video="' . $clip . '"'; ?>
       data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>">
       <?php if ($hasSnapshot == 1): ?>
-        <button class="hover-button snapshot-btn" title="Voir la capture">
+        <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
           <i class="fas fa-camera"></i>
         </button>
       <?php endif; ?>
       <?php if ($hasClip == 1): ?>
-        <button class="hover-button video-btn" title="Voir la vidéo">
+        <button class="hover-button video-btn" title="{{Voir la vidéo}}">
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
       <button class="hover-button" onclick="deleteEvent('<?= $id ?>', <?= config::byKey('event::confirmDelete', 'frigate', 1) == 1 ? 'true' : 'false' ?>)"
-        title="Supprimer l'évènement sur votre serveur Frigate">
+        title="{{Supprimer l'évènement sur votre serveur Frigate}}">
         <i class="fas fa-trash"></i>
       </button>
     </div>
