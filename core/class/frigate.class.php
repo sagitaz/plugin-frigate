@@ -179,10 +179,11 @@ class frigate extends eqLogic
   }
   */
 
-  
-   // Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
-   // en lors de la création semi-automatique d'un post sur le forum community
-   public static function getConfigForCommunity() {
+
+  // Permet d'indiquer des éléments supplémentaires à remonter dans les informations de configuration
+  // en lors de la création semi-automatique d'un post sur le forum community
+  public static function getConfigForCommunity()
+  {
     $system = system::getOsVersion();
 
     $CommunityInfo = "```\n";
@@ -192,8 +193,8 @@ class frigate extends eqLogic
     $CommunityInfo = $CommunityInfo . 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
     $CommunityInfo = $CommunityInfo . "```";
     return $CommunityInfo;
-   }
-   
+  }
+
 
   /*     * *********************Méthodes d'instance************************* */
 
@@ -527,20 +528,20 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
-    
+
     if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
       if ($method !== 'DELETE') {
-          $jsonParams = json_encode($params);
-          curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonParams);
-          curl_setopt($ch, CURLOPT_HTTPHEADER, [
-              'Content-Type: application/json',
-              'Content-Length: ' . strlen($jsonParams)
-          ]);
+        $jsonParams = json_encode($params);
+        curl_setopt($ch, CURLOPT_POSTFIELDS, $jsonParams);
+        curl_setopt($ch, CURLOPT_HTTPHEADER, [
+          'Content-Type: application/json',
+          'Content-Length: ' . strlen($jsonParams)
+        ]);
       }
 
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
     }
-    
+
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
@@ -632,19 +633,19 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/config/set?{$config}";
 
-  	log::add(__CLASS__, 'debug', "| url : {$resultURL}");
-    $response = self::putcURL("saveConfig", $resultURL);//, $params);
+    log::add(__CLASS__, 'debug', "| url : {$resultURL}");
+    $response = self::putcURL("saveConfig", $resultURL); //, $params);
 
     event::add('frigate::config', array('message' => 'api_config_update', 'type' => 'config'));
 
     log::add(__CLASS__, 'debug', "----------------------END SAVE CONFIG----------------------------------");
     return $response;
   }
-  
+
   public static function saveCameraConfig($camera, $config)
   {
     $response = self::saveConfig("cameras.{$camera}.{$config}");
-    
+
     return $response;
   }
 
@@ -655,7 +656,7 @@ class frigate extends eqLogic
   {
     $enabled = $enable == 1 ? 'true' : 'false';
     $response = self::saveCameraConfig($camera, "enabled={$enabled}");
-    
+
     return $response;
   }
 
@@ -792,7 +793,7 @@ class frigate extends eqLogic
               $frigate->setClip($infos["clip"]);
               log::add(__CLASS__, 'debug', "| Mise à jour forcé des champs snapshot et clip pour event ID: " . $event['id']);
               $frigate->save();
-            }  
+            }
           }
         }
 
@@ -1243,6 +1244,9 @@ class frigate extends eqLogic
       }
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
+
+
+      self::createCamerasCmds($frigate->getId());
     }
     return $n;
   }
@@ -1331,7 +1335,7 @@ class frigate extends eqLogic
     $cmd->save();
     $cmd = self::createCmd($eqlogicId, "(Config) Inverser activation caméra", "other", "", "action_toggle_camera", "", 0, $infoCmd, 0, "action");
     $cmd->save();
-    
+
     /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
     $cmd->save(); */
   }
@@ -1565,7 +1569,12 @@ class frigate extends eqLogic
           // Mise à jour de l'activité de la caméra en fonction de pid
           if ($key === 'pid') {
             $cameraEnabled = $value != 0;
-            $eqCamera->getCmd(null, 'enable_camera')->event($cameraEnabled);
+            $cmd = $eqCamera->getCmd(null, 'enable_camera');
+            if (is_object($cmd)) {
+              $cmd->event($cameraEnabled);
+            } else {
+              log::add(__CLASS__, 'debug', "L'équipement camera " . $cameraName . " n'a pas de commande enable_camera.");
+            }
           }
         }
       } else {
@@ -1627,7 +1636,7 @@ class frigate extends eqLogic
     $cmd->event($version);
     $cmd->save();
     if ($version != config::byKey('frigate_version', 'frigate')) {
-    config::save('frigate_version', $version, 'frigate');
+      config::save('frigate_version', $version, 'frigate');
     }
   }
 
