@@ -2005,7 +2005,7 @@ class frigate extends eqLogic
         default:
           $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $key, "frigate");
           if (!is_object($eqCamera)) {
-            continue;
+            continue 2;
           }
 
           log::add(__CLASS__, 'info', ' => Traitement mqtt camera ' . $key);
