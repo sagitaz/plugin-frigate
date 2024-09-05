@@ -754,7 +754,7 @@ class frigate extends eqLogic
           'Clip' => $infos["clip"],
           'HasSnapshot' => $infos["hasSnapshot"],
           'Snapshot' => $infos["snapshot"],
-          'Box' => $event['data']['box'],
+          'Box' => $event['data']['box'] ?? null,
           'Camera' => $event['camera'],
           // 'FalsePositive' => $event['false_positive'],
           'Label' => $infos['label'],
@@ -851,7 +851,7 @@ class frigate extends eqLogic
     // verifier si le fichier clip existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if ($event['type'] == "end") {
+      if (isset($event['type']) && $event['type'] == "end") {
         if ($event['has_clip'] == "true") {
           log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
           sleep(5);
@@ -928,8 +928,8 @@ class frigate extends eqLogic
       "thumbnail" => $img,
       "snapshot" => $snapshot,
       "hasSnapshot" => $hasSnapshot,
-      "clip" => $clip,
-      "hasClip" => $hasClip,
+      "clip" => $clip ?? "",
+      "hasClip" => $hasClip ?? 0,
       "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
       "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
       "topScore" => $newTopScore,
