@@ -1331,7 +1331,9 @@ class frigate extends eqLogic
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_event", "", 1, null, 0, "action");
+    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "url_capture", "", 0);
+    $infoCmd->save();
+    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_event", "", 1, $infoCmd, 0, "action");
     $cmd->save();
 
     // commande action enable/disable camera
@@ -1835,16 +1837,16 @@ class frigate extends eqLogic
     //$urlClip = frigate::saveURL($uniqueId, null, $camera, 4, $rtsp);
     $urlClip = "";
     // mise a jour des commandes
-    log::add(__CLASS__, 'debug', "| Mise à jour des commandes.");
-    $eqLogic->getCmd(null, 'info_url_snapshot')->event($url);
-    $eqLogic->getCmd(null, 'info_url_clip')->event($urlClip);
+    log::add(__CLASS__, 'debug', "| Mise à jour de la commande.");
+    $eqLogic->getCmd(null, 'info_url_capture')->event("/var/www/html" . $url);
+  /*  $eqLogic->getCmd(null, 'info_url_clip')->event($urlClip);
     $eqLogic->getCmd(null, 'info_url_thumbnail')->event($url);
     $eqLogic->getCmd(null, 'info_timestamp')->event($startTime);
     $eqLogic->getCmd(null, 'info_label')->event("manuel");
     $eqLogic->getCmd(null, 'info_score')->event(0);
     $eqLogic->getCmd(null, 'info_topscore')->event(0);
-    $eqLogic->getCmd(null, 'info_duree')->event(0);
-
+    $eqLogic->getCmd(null, 'info_duree')->event(0); */
+/*
     // Creation de l'evenement  dans la DB
     log::add(__CLASS__, 'debug', "| Creéation d'un nouveau évènement Frigate pour l'event ID: " . $uniqueId);
     $frigate = new frigate_events();
@@ -1864,7 +1866,7 @@ class frigate extends eqLogic
     $frigate->setType("end");
     $frigate->setIsFavorite(0);
     $frigate->save();
-    log::add(__CLASS__, 'debug', "---------------------------------------------------");
+    log::add(__CLASS__, 'debug', "---------------------------------------------------"); */
   }
 
   public static function createUniqueId($timestamp)
