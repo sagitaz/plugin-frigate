@@ -1331,7 +1331,7 @@ class frigate extends eqLogic
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_api", "", 1, null, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_event", "", 1, null, 0, "action");
     $cmd->save();
 
     // commande action enable/disable camera
