@@ -148,7 +148,7 @@ Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du tem
 
 Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
 
-Pour ceux n'utilisant pas MQTT ou en version < 0.14, les évènements créés ne seront remontés qu'au **cron**.
+Pour ceux n'utilisant pas MQTT le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
 
 # <u>Configuration Frigate</u>
 > **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
