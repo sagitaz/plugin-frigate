@@ -2369,7 +2369,12 @@ class frigateCmd extends cmd
       case 'action_make_api_event':
         //score=12|video=1|duration=20
         $eventParams = self::parseEventParameters($_options);
-        frigate::createEvent($camera, $eventParams['label'], $eventParams['video'], $eventParams['duration'], $eventParams['score']);
+        $result = frigate::createEvent($camera, $eventParams['label'], $eventParams['video'], $eventParams['duration'], $eventParams['score']);
+        $deamon_info = frigate::deamon_info();
+        if ($deamon_info['launchable'] === 'nok') {
+          log::add('frigate', 'debug', "| action_make_api_event result = " . json_encode($result));
+          frigate::getEvent($result['event_id']);
+        }
         break;
       case 'action_make_event':
         frigate::createSnapshot($frigate);
