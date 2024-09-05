@@ -709,12 +709,14 @@ class frigate extends eqLogic
 
       log::add(__CLASS__, 'debug', "----------------------:fg-success:START EVENT:/fg:----------------------------------");
 
-      $infos = self::getEventinfos($mqtt, $event);
+      $infos = self::getEventinfos($mqtt, $event, false, $type);
 
       if (!$frigate) {
         log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
+        $box = $event['data']['box'] ?? "null";
+
         $frigate = new frigate_events();
-        $frigate->setBox($event['data']['box']);
+        $frigate->setBox($box);
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
         $frigate->setLasted($infos["image"]);
@@ -811,7 +813,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function getEventinfos($mqtt, $event, $force = false)
+  public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     // verifier si le fichier thumbnail existe avant de le telecharger
@@ -851,7 +853,7 @@ class frigate extends eqLogic
     // verifier si le fichier clip existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if (isset($event['type']) && $event['type'] == "end") {
+      if ($type == "end") {
         if ($event['has_clip'] == "true") {
           log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
           sleep(5);
@@ -875,7 +877,7 @@ class frigate extends eqLogic
           $hasClip = 0;
         }
       } else {
-        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end'");
+        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
       }
     } else {
       $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';

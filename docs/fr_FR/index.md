@@ -57,6 +57,7 @@ Je vous invite à lire la documentation de Frigate pour la configuration de votr
 - **Snapshot** : état, on, off, toggle
 - **Recording** : état, on, off, toggle
 - **Motion** : état, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
+- **Camera** : Etat, activer, désactiver, toggle (Un redemarrage du serveur est necessaire pour la prise en compte car le fichier configuration est modifié).
 Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ. Il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
 N'ayant pas de caméra PTZ, merci de me fournir un fichier de configuration afin que je mette la création de ces boutons en automatique.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
