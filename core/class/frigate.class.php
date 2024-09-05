@@ -1331,7 +1331,7 @@ class frigate extends eqLogic
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
-    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "url_capture", "", 0);
+    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0);
     $infoCmd->save();
     $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_event", "", 1, $infoCmd, 0, "action");
     $cmd->save();
