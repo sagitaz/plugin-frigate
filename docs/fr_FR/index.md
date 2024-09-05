@@ -120,6 +120,10 @@ ou
 - **snapshot** : dans le champ titre : **``title=votre titre | files=#snapshot_path#``**
 - **clip** : dans le champ titre : **``title=votre titre | files=#clip_path#``**
 
+#### Plugin NTFY
+- **snapshot** : dans le champ options : **``Title:votre titre;Attach:#snapshot#``**
+- **clip** : dans le champ options : **``Title:votre titre;Attach:#clip#``**
+
 # <u>Page Events</u>
 
 De nombreux filtres sont disponibles pour l'affichage de votre liste d'évènements.
@@ -146,6 +150,8 @@ title : ``Indiquer le label``
 message : ``score=80 | video=1 | duration=20``
 
 Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5 sec. par defaut, donc en paramétrant à 20 sec. vous obtiendrez une vidéo de 30 sec.
+
+Attention sur les évènements créés manuellement, si dans votre configuration Frigate pour ``record -> retain -> mode`` vous avez **motion** alors les clips ne seront disponibles que s'il y a du mouvement de detecté, mettre à **all** si vous voulez tout avoir.
 
 Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
 

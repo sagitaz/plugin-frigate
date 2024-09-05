@@ -1331,6 +1331,8 @@ class frigate extends eqLogic
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_api", "", 1, null, 0, "action");
+    $cmd->save();
 
     // commande action enable/disable camera
     $infoCmd = self::createCmd($eqlogicId, "(Config) Etat activation caméra", "binary", "", "enable_camera", "", 0);
@@ -1830,7 +1832,8 @@ class frigate extends eqLogic
     // create snapshot
     $url = frigate::saveURL($uniqueId, null, $camera, 3, $file);
     // create clip
-    $urlClip = frigate::saveURL($uniqueId, null, $camera, 4, $rtsp);
+    //$urlClip = frigate::saveURL($uniqueId, null, $camera, 4, $rtsp);
+    $urlClip = "";
     // mise a jour des commandes
     log::add(__CLASS__, 'debug', "| Mise à jour des commandes.");
     $eqLogic->getCmd(null, 'info_url_snapshot')->event($url);
@@ -1840,7 +1843,7 @@ class frigate extends eqLogic
     $eqLogic->getCmd(null, 'info_label')->event("manuel");
     $eqLogic->getCmd(null, 'info_score')->event(0);
     $eqLogic->getCmd(null, 'info_topscore')->event(0);
-    $eqLogic->getCmd(null, 'info_duree')->event(10);
+    $eqLogic->getCmd(null, 'info_duree')->event(0);
 
     // Creation de l'evenement  dans la DB
     log::add(__CLASS__, 'debug', "| Creéation d'un nouveau évènement Frigate pour l'event ID: " . $uniqueId);
