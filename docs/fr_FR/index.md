@@ -4,7 +4,7 @@
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 **Le plugin est compatible avec les versions de Frigate supérieures à 0.13.0**
 
-La version 0.14 du serveur Frigate apporte son lots de nouveautées et de breaking change, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter), par contre on ne fera pas plusieurs dévellopements pour rester oppérationnel avec les anciennes version, donc si quelques choses ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
+La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
 # <u>Configuration</u>
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
@@ -12,11 +12,11 @@ La version 0.14 du serveur Frigate apporte son lots de nouveautées et de breaki
 - **Topic MQTT** : le topic de votre serveur Frigate (frigate par défaut)
 - **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquez ici le nombre de jours souhaités.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
-- **Taille des dossiers** : Taille maximum du dossier datas.
+- **Taille des dossiers** : Taille maximum du dossier data.
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
 - **Cron** : Choisir dans la partie fonctionnalités, le cron souhaité.
 
-Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire alors ce sera le nombre de jours de récupération qui sera utilisé.
+Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
 # <u>Demon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
@@ -24,7 +24,7 @@ Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre 
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Deamon NOK :**
-Si vous n'avez pas mqtt-manager, il est normal que le deamon reste sur NOK. Aucun problème le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
+Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
 ## Equipement Events
@@ -53,12 +53,12 @@ L'information sur détection en cours
 #### actions
 Pour avoir les commandes actions, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées.
 Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
-- **Detect** : etat, on, off, toggle
-- **Snapshot** : etat, on, off, toggle
-- **Recording** : etat, on, off, toggle
-- **Motion** : etat, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
+- **Detect** : état, on, off, toggle
+- **Snapshot** : état, on, off, toggle
+- **Recording** : état, on, off, toggle
+- **Motion** : état, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
 Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ. Il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
-N'ayant pas de caméra PTZ, merci de me fournir un fichier configuration afin que je mette la création de ces boutons en automatique.
+N'ayant pas de caméra PTZ, merci de me fournir un fichier de configuration afin que je mette la création de ces boutons en automatique.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
 ### Actions
 #### Conditions
@@ -144,11 +144,11 @@ Cette commande est de type message, si vous laissez vide alors les paramètres p
 title : ``Indiquer le label``
 message : ``score=80 | video=1 | duration=20``
 
-Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5sc par defaut, donc en paramétrant à 20sc vous obtiendrez une vidéo de 30sc.
+Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5 sec. par defaut, donc en paramétrant à 20 sec. vous obtiendrez une vidéo de 30 sec.
 
 Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
 
-Pour ceux n'utilisant pas MQTT ou en version < 0.14, les évènements créés ne seront remontés qu'au **cron**.
+Pour ceux n'utilisant pas MQTT le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
 
 # <u>Configuration Frigate</u>
 > **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !

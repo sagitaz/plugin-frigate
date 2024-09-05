@@ -58,10 +58,10 @@ if (!isConnect('admin')) {
         </div>
     </div>
 <div>
-<button id="synchroConfiguration" class="btn btn-success pull-left" title="Recharge le fichier de configuration depuis le serveur Frigate"><i class="fas fa-cloud-download-alt"></i> {{Récupérer la configuration}}</button>
-<button id="downloadConfiguration" class="btn btn-success pull-left" title="Télécharger le fichier de configuration depuis le serveur Frigate"><i class="fas fa-save"></i> {{Télécharger la configuration}}</button>
-<button id="sendConfigurationAndRestart" class="btn btn-warning pull-right" title="Envoie et remplace le fichier de configuration du serveur Frigate puis redémarre Frigate"><i class="fas fa-redo"></i> {{Envoyer la configuration et redémarrer Frigate}}</button>
-<button id="sendConfiguration" class="btn btn-warning pull-right" title="Envoie et remplace le fichier de configuration Frigate"><i class="fas fa-cloud-upload-alt"></i> {{Envoyer la configuration}}</button>
+<button id="synchroConfiguration" class="btn btn-success pull-left" title="{{Recharge le fichier de configuration depuis le serveur Frigate}}"><i class="fas fa-cloud-download-alt"></i> {{Récupérer la configuration}}</button>
+<button id="downloadConfiguration" class="btn btn-success pull-left" title="{{Télécharger le fichier de configuration depuis le serveur Frigate}}"><i class="fas fa-save"></i> {{Télécharger la configuration}}</button>
+<button id="sendConfigurationAndRestart" class="btn btn-warning pull-right" title="{{Envoie et remplace le fichier de configuration du serveur Frigate puis redémarre Frigate}}"><i class="fas fa-redo"></i> {{Envoyer la configuration et redémarrer Frigate}}</button>
+<button id="sendConfiguration" class="btn btn-warning pull-right" title="{{Envoie et remplace le fichier de configuration Frigate}}"><i class="fas fa-cloud-upload-alt"></i> {{Envoyer la configuration}}</button>
 <br/>
 <br/>
 <div id='div_yamlAlert' class="alert"></div>

@@ -3,6 +3,13 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 05/09/2024
+- Ajout du mask sur la visualisation des caméras.
+- Mise à jour des snapshots lors des receptions end.
+- Diverses modifications et améliorations sur la page Events.
+- recuperation de l'event sur createEvent plus rapide si mqtt pas installé.
+- traductions
+
 # 19/08/2024 Beta 0.9.2
 - Correction des actions du type "mots clés".
 - Correction du filtre "type" sur l'exécution des actions.

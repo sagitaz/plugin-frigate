@@ -57,7 +57,7 @@ function addCmdToTable(_cmd) {
     tr += '<div style="margin-top:7px;">'
     tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="minValue" placeholder="{{Min}}" title="{{Min}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
     tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="configuration" data-l2key="maxValue" placeholder="{{Max}}" title="{{Max}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
-    tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="unite" placeholder="Unité" title="{{Unité}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
+    tr += '<input class="tooltips cmdAttr form-control input-sm" data-l1key="unite" placeholder="{{Unité}}" title="{{Unité}}" style="width:30%;max-width:80px;display:inline-block;margin-right:2px;">'
     tr += '</div>'
     tr += '</td>'
     tr += '<td>';
@@ -238,6 +238,15 @@ function gotoCameraEvents(cameraName) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + cameraName);
 }
 
+function updateMaskVisibility() {
+    const maskLabel = document.querySelector('.mask-configuration');
+    if (document.querySelector('.mask-checkbox').checked) {
+        maskLabel.classList.add('mask-border');
+    } else {
+        maskLabel.classList.remove('mask-border');
+    }
+}
+
 function updateMotionVisibility() {
     const motionLabel = document.querySelector('.motion-configuration');
     if (document.querySelector('.motion-checkbox').checked) {
@@ -256,6 +265,7 @@ function updateRegionsVisibility() {
     }
 }
 
+document.querySelector('.mask-checkbox').addEventListener('change', updateMaskVisibility);
 document.querySelector('.motion-checkbox').addEventListener('change', updateMotionVisibility);
 document.querySelector('.regions-checkbox').addEventListener('change', updateRegionsVisibility);
 

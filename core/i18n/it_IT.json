@@ -6,6 +6,7 @@
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
         "Arrêt du démon Frigate": "Arresto del demone Frigate",
+        "Créer une capture": "Creare una cattura",
         "Informations reçues de MQTT Manager": "Informazioni ricevute da MQTT Manager",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "L'evento è un preferito e non può essere cancellato dal DB.",
         "Le démon MQTT Manager n\\'est pas démarré": "Il demone MQTT Manager non è avviato",
@@ -13,6 +14,12 @@
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Grazie per aver installato il plugin. Se avete bisogno di aiuto, contattate il supporto su Discord o sulla Community.",
         "Topic mqtt pour Frigate non défini.": "Argomento mqtt per Frigate non definito.",
         "Veuillez vérifier la configuration": "Controllare la configurazione"
+    },
+    "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Visualizzazione degli eventi della telecamera"
+    },
+    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Visualizzazione degli eventi della telecamera"
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Recupero della configurazione del server Frigate.",
@@ -63,19 +70,17 @@
         "Unité": "Unità"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
-        "Logs Frigate": "Tronchi Frigate",
-        "Logs Frigate récupérés.": "Recuperati i registri della Fregata.",
-        "Logs go2rtc": "Registri go2rtc",
-        "Logs go2rtc récupérés.": "Registri go2rtc recuperati.",
-        "Logs nginx": "Log di nginx",
-        "Logs nginx récupérés.": "Recuperati i log di nginx."
+        "Logs": "Logs",
+        "récupérés": "recuperato"
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Creazione di eventi di successo"
     },
     "plugins\/frigate\/desktop\/modal\/editConfiguration.modal.php": {
+        "Envoie et remplace le fichier de configuration Frigate": "Invia e sostituisce il file di configurazione di Frigate",
         "Envoie et remplace le fichier de configuration Frigate puis redémarre Frigate": "Invia e sostituisce il file di configurazione di Frigate, quindi riavvia Frigate",
         "Envoie et remplace le fichier de configuration du serveur Frigate": "Invio e sostituzione del file di configurazione del server Frigate",
+        "Envoie et remplace le fichier de configuration du serveur Frigate puis redémarre Frigate": "Invia e sostituisce il file di configurazione del server Frigate, quindi riavvia Frigate",
         "Envoyer la configuration": "Inviare la configurazione",
         "Envoyer la configuration et redémarrer Frigate": "Inviare la configurazione e riavviare Frigate",
         "La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !": "Modificare la configurazione del server Frigate è a proprio rischio e pericolo! Non verrà fornito alcun supporto!",
@@ -104,11 +109,18 @@
         "Logs Frigate": "Tronchi Frigate",
         "Logs go2rtc": "Registri go2rtc",
         "Logs nginx": "Log di nginx",
-        "Télécharger les logs": "Scarica i log"
+        "Télécharger les logs": "Scarica i log",
+        "Télécharger les logs affichés": "Scaricare i log visualizzati"
     },
     "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
         "Aucun": "Nessuno",
         "Tout": "Tutto"
+    },
+    "plugins\/frigate\/desktop\/php\/event.template.php": {
+        "Afficher la page de la caméra": "Visualizzare la pagina della telecamera",
+        "Supprimer l'évènement sur votre serveur Frigate": "Cancellare l'evento sul server Frigate",
+        "Voir la capture": "Vedere l'acquisizione",
+        "Voir la vidéo": "Guarda il video"
     },
     "plugins\/frigate\/desktop\/php\/events.php": {
         "401 - Accès non autorisé": "401 - Accesso non autorizzato",
@@ -172,13 +184,22 @@
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "manuale\" per impostazione predefinita",
+        "0 par défaut, de 0 à 100%": "0 di default, da 0 a 100%",
+        "40 secondes par défaut": "40 secondi per impostazione predefinita",
+        "5 secondes par défaut": "5 secondi per impostazione predefinita",
+        "500 Mo par défaut": "500 Mb di default",
+        "5000 par défaut": "5000 di default",
+        "7 jours par défaut": "7 giorni per impostazione predefinita",
+        "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Visualizzazione di un avviso di conferma quando viene richiesta la cancellazione di un evento",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Visualizzazione di miniature video di un evento quando il mouse passa sopra la sua cattura",
         "Aucune": "Aucune",
+        "Confirmation avant suppression d'un évènement": "Conferma prima di cancellare un evento",
         "Durée de la vidéo": "Durata del video",
         "Durée de rafraîchissement": "Tempo di aggiornamento",
         "Durée par défaut de la vidéo d un évènement manuel": "Durata predefinita del video di un evento manuale",
         "Enregistrement d une vidéo par défaut pour un évènement manuel": "Registrazione di un video predefinito per un evento manuale",
         "Enregistrer une vidéo": "Registrare un video",
+        "Exemple: 192.168.1.20": "Esempio: 192.168.1.20",
         "Gestion des évènements": "Gestione degli eventi",
         "Label": "Etichetta",
         "Label par défaut d'un évènement créé manuellement": "Etichetta predefinita per un evento creato manualmente",
