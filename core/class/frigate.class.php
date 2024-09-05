@@ -851,27 +851,31 @@ class frigate extends eqLogic
     // verifier si le fichier clip existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if ($event['has_clip'] == "true") {
-        log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
-        sleep(5);
-        $clip = self::saveURL($event['id'], "clip", $event['camera']);
-        $hasClip = 1;
-        if ($clip == "error") {
+      if ($event['type'] == "end") {
+        if ($event['has_clip'] == "true") {
+          log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
+          sleep(5);
+          $clip = self::saveURL($event['id'], "clip", $event['camera']);
+          $hasClip = 1;
+          if ($clip == "error") {
+            $clip = "null";
+            $hasClip = 0;
+          } else {
+            $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
+            $duration = self::getVideoDuration($filePath);
+            if ($duration !== false) {
+              log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+            } else {
+              log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
+            }
+          }
+        } else {
+          log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
           $clip = "null";
           $hasClip = 0;
-        } else {
-          $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-          $duration = self::getVideoDuration($filePath);
-          if ($duration !== false) {
-            log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-          } else {
-            log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-          }
         }
       } else {
-        log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
-        $clip = "null";
-        $hasClip = 0;
+        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end'");
       }
     } else {
       $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
