@@ -101,9 +101,13 @@ window.addEventListener('click', function (event) {
   }
 });
 
-document.getElementById('gotoHome').addEventListener('click', function () {
-  jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
-});
+var gotoHomeButton = document.getElementById('gotoHome');
+if (gotoHomeButton) {
+  gotoHomeButton.addEventListener('click', function () {
+    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
+  });
+}
+
 
 
 document.getElementById('deleteAll').addEventListener('click', function () {

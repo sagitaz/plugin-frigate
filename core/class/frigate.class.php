@@ -460,7 +460,17 @@ class frigate extends eqLogic
         $make_snapshot = $this->getCmd("action", 'action_make_api_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera-retro iconActionOff' . $this->getId() . '" title="' . __("Créer un évènement", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '</div>';
+        }
+      }
+
+      // commandes create capture
+      if (is_object($this->getCmd('action', 'action_create_snapshot'))) {
+        $make_snapshot = $this->getCmd("action", 'action_create_snapshot');
+        if ($make_snapshot->getIsVisible() == 1) {
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-image iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -709,12 +719,14 @@ class frigate extends eqLogic
 
       log::add(__CLASS__, 'debug', "----------------------:fg-success:START EVENT:/fg:----------------------------------");
 
-      $infos = self::getEventinfos($mqtt, $event);
+      $infos = self::getEventinfos($mqtt, $event, false, $type);
 
       if (!$frigate) {
         log::add(__CLASS__, 'debug', "| Events (type=" . $type . ") => " . json_encode($event));
+        $box = $event['data']['box'] ?? "null";
+
         $frigate = new frigate_events();
-        $frigate->setBox($event['data']['box']);
+        $frigate->setBox($box);
         $frigate->setCamera($event['camera']);
         $frigate->setData($event['data']);
         $frigate->setLasted($infos["image"]);
@@ -754,7 +766,7 @@ class frigate extends eqLogic
           'Clip' => $infos["clip"],
           'HasSnapshot' => $infos["hasSnapshot"],
           'Snapshot' => $infos["snapshot"],
-          'Box' => $event['data']['box'],
+          'Box' => $event['data']['box'] ?? null,
           'Camera' => $event['camera'],
           // 'FalsePositive' => $event['false_positive'],
           'Label' => $infos['label'],
@@ -811,7 +823,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function getEventinfos($mqtt, $event, $force = false)
+  public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     // verifier si le fichier thumbnail existe avant de le telecharger
@@ -851,27 +863,31 @@ class frigate extends eqLogic
     // verifier si le fichier clip existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if ($event['has_clip'] == "true") {
-        log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
-        sleep(5);
-        $clip = self::saveURL($event['id'], "clip", $event['camera']);
-        $hasClip = 1;
-        if ($clip == "error") {
+      if ($type == "end") {
+        if ($event['has_clip'] == "true") {
+          log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
+          sleep(5);
+          $clip = self::saveURL($event['id'], "clip", $event['camera']);
+          $hasClip = 1;
+          if ($clip == "error") {
+            $clip = "null";
+            $hasClip = 0;
+          } else {
+            $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
+            $duration = self::getVideoDuration($filePath);
+            if ($duration !== false) {
+              log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+            } else {
+              log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
+            }
+          }
+        } else {
+          log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
           $clip = "null";
           $hasClip = 0;
-        } else {
-          $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-          $duration = self::getVideoDuration($filePath);
-          if ($duration !== false) {
-            log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-          } else {
-            log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-          }
         }
       } else {
-        log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
-        $clip = "null";
-        $hasClip = 0;
+        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
       }
     } else {
       $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
@@ -924,8 +940,8 @@ class frigate extends eqLogic
       "thumbnail" => $img,
       "snapshot" => $snapshot,
       "hasSnapshot" => $hasSnapshot,
-      "clip" => $clip,
-      "hasClip" => $hasClip,
+      "clip" => $clip ?? "",
+      "hasClip" => $hasClip ?? 0,
       "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
       "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
       "topScore" => $newTopScore,
@@ -1325,6 +1341,10 @@ class frigate extends eqLogic
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
+    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0);
+    $infoCmd->save();
+    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_create_snapshot", "", 1, $infoCmd, 0, "action");
+    $cmd->save();
 
     // commande action enable/disable camera
     $infoCmd = self::createCmd($eqlogicId, "(Config) Etat activation caméra", "binary", "", "enable_camera", "", 0);
@@ -1335,9 +1355,6 @@ class frigate extends eqLogic
     $cmd->save();
     $cmd = self::createCmd($eqlogicId, "(Config) Inverser activation caméra", "other", "", "action_toggle_camera", "", 0, $infoCmd, 0, "action");
     $cmd->save();
-
-    /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
-    $cmd->save(); */
   }
   public static function createMQTTcmds($eqlogicId)
   {
@@ -1812,50 +1829,14 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "---------------------------------------------------");
     log::add(__CLASS__, 'debug', "| Créer snapshot");
-    //$frigate = eqLogic::byId($eqLogicId);
     $camera = $eqLogic->getConfiguration('name');
     $file = $eqLogic->getConfiguration('img');
-    $rtsp = $eqLogic->getConfiguration('rtsp');
     $timestamp = microtime(true);
     $formattedTimestamp = sprintf('%.6f', $timestamp);
-    $startTime = time();
-    $endTime = $startTime + 10;
     $uniqueId = self::createUniqueId($formattedTimestamp);
     // create snapshot
     $url = frigate::saveURL($uniqueId, null, $camera, 3, $file);
-    // create clip
-    $urlClip = frigate::saveURL($uniqueId, null, $camera, 4, $rtsp);
-    // mise a jour des commandes
-    log::add(__CLASS__, 'debug', "| Mise à jour des commandes.");
-    $eqLogic->getCmd(null, 'info_url_snapshot')->event($url);
-    $eqLogic->getCmd(null, 'info_url_clip')->event($urlClip);
-    $eqLogic->getCmd(null, 'info_url_thumbnail')->event($url);
-    $eqLogic->getCmd(null, 'info_timestamp')->event($startTime);
-    $eqLogic->getCmd(null, 'info_label')->event("manuel");
-    $eqLogic->getCmd(null, 'info_score')->event(0);
-    $eqLogic->getCmd(null, 'info_topscore')->event(0);
-    $eqLogic->getCmd(null, 'info_duree')->event(10);
-
-    // Creation de l'evenement  dans la DB
-    log::add(__CLASS__, 'debug', "| Creéation d'un nouveau évènement Frigate pour l'event ID: " . $uniqueId);
-    $frigate = new frigate_events();
-    $frigate->setCamera($camera);
-    $frigate->setLasted($url);
-    $frigate->setHasClip(1);
-    $frigate->setClip($urlClip);
-    $frigate->setHasSnapshot(1);
-    $frigate->setSnapshot($url);
-    $frigate->setStartTime($startTime);
-    $frigate->setEndTime($endTime);
-    $frigate->setEventId($timestamp);
-    $frigate->setLabel("manuel");
-    $frigate->setThumbnail($url);
-    $frigate->setTopScore(0);
-    $frigate->setScore(0);
-    $frigate->setType("end");
-    $frigate->setIsFavorite(0);
-    $frigate->save();
-    log::add(__CLASS__, 'debug', "---------------------------------------------------");
+    $eqLogic->getCmd(null, 'info_url_capture')->event($url);
   }
 
   public static function createUniqueId($timestamp)
@@ -2376,7 +2357,7 @@ class frigateCmd extends cmd
           frigate::getEvent($result['event_id']);
         }
         break;
-      case 'action_make_event':
+      case 'action_create_snapshot':
         frigate::createSnapshot($frigate);
         break;
       default:
