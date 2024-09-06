@@ -460,7 +460,17 @@ class frigate extends eqLogic
         $make_snapshot = $this->getCmd("action", 'action_make_api_event');
         if ($make_snapshot->getIsVisible() == 1) {
           $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="' . __("Créer un évènement", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
+          $replace['#actions#'] = $replace['#actions#'] . '</div>';
+        }
+      }
+
+      // commandes create capture
+      if (is_object($this->getCmd('action', 'action_create_snapshot'))) {
+        $make_snapshot = $this->getCmd("action", 'action_create_snapshot');
+        if ($make_snapshot->getIsVisible() == 1) {
+          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-photo iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
@@ -1333,7 +1343,7 @@ class frigate extends eqLogic
     $cmd->save();
     $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0);
     $infoCmd->save();
-    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_make_event", "", 1, $infoCmd, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_create_snapshot", "", 1, $infoCmd, 0, "action");
     $cmd->save();
 
     // commande action enable/disable camera
@@ -1346,8 +1356,6 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "(Config) Inverser activation caméra", "other", "", "action_toggle_camera", "", 0, $infoCmd, 0, "action");
     $cmd->save();
 
-    /*  $cmd = self::createCmd($eqlogicId, "Créer un évènement", "other", "", "action_make_event", "", 1, null, 0, "action");
-    $cmd->save(); */
   }
   public static function createMQTTcmds($eqlogicId)
   {
@@ -2350,7 +2358,7 @@ class frigateCmd extends cmd
           frigate::getEvent($result['event_id']);
         }
         break;
-      case 'action_make_event':
+      case 'action_create_snapshot':
         frigate::createSnapshot($frigate);
         break;
       default:
