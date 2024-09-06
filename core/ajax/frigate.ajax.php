@@ -85,20 +85,20 @@ try {
     }
 
     if (init('action') == 'getFrigateConfiguration') {
-        log::add(__CLASS__, 'info', "getFrigateConfiguration");
+        log::add("frigate", 'info', "getFrigateConfiguration");
         $result = frigate::getFrigateConfiguration();
         ajax::success($result);
     }
     
     if (init('action') == 'sendFrigateConfiguration') {
-        log::add(__CLASS__, 'info', "sendFrigateConfiguration");
+        log::add("frigate", 'info', "sendFrigateConfiguration");
         $config = init('data');
         $result = frigate::sendFrigateConfiguration($config);
         ajax::success($result);
     }
     
     if (init('action') == 'sendFrigateConfigurationAndRestart') {
-        log::add(__CLASS__, 'info', "sendFrigateConfigurationAndRestart");
+        log::add("frigate", 'info', "sendFrigateConfigurationAndRestart");
         $config = init('data');
         $result = frigate::sendFrigateConfiguration($config, true);
         ajax::success($result);

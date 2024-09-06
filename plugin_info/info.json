@@ -1,7 +1,7 @@
 {
 	"id": "frigate",
-	"name": "frigate",
-	"pluginVersion": "0.9.2",
+	"name": "Frigate",
+	"pluginVersion": "0.9.4",
 	"description": {
 		"fr_FR": "Plugin Frigate pour Jeedom. Ne fonctionne qu'avec les versions de Frigate > 0.13.0",
 		"en_US": "Frigate plugin for Jeedom. Works only with Frigate versions > 0.13.0",
@@ -13,7 +13,12 @@
 	"licence": "AGPL",
 	"author": "Sagitaz et Noodom",
 	"require": "4.3",
+	"os": {
+		"min": 10,
+		"max": 12
+	},
 	"category": "security",
+	"display": "panel",
 	"hasDependency": false,
 	"hasOwnDeamon": true,
 	"maxDependancyInstallTime": 0,

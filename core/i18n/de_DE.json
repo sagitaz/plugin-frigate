@@ -6,6 +6,8 @@
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
         "Arrêt du démon Frigate": "Beenden des Frigate-Daemons",
+        "Créer un évènement": "Eine Veranstaltung erstellen",
+        "Créer une capture": "Erstellen eines Captures",
         "Informations reçues de MQTT Manager": "Von MQTT Manager erhaltene Informationen",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "Das Ereignis ist ein Favorit, es kann nicht aus der DB gelöscht werden.",
         "Le démon MQTT Manager n\\'est pas démarré": "Der MQTT Manager-Daemon wurde nicht gestartet",
@@ -13,6 +15,12 @@
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Vielen Dank, dass Sie das Plugin installiert haben. Bei allen Hilfeanfragen wenden Sie sich bitte an den Support in Discord oder Community.",
         "Topic mqtt pour Frigate non défini.": "Topic mqtt für Frigate nicht definiert.",
         "Veuillez vérifier la configuration": "Bitte überprüfen Sie die Konfiguration"
+    },
+    "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen"
+    },
+    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen"
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Konfiguration des Frigate-Servers abgerufen.",
@@ -63,19 +71,17 @@
         "Unité": "Unit"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
-        "Logs Frigate": "Frigate-Logs",
-        "Logs Frigate récupérés.": "Abgerufene Frigate-Logs.",
-        "Logs go2rtc": "Logs go2rtc",
-        "Logs go2rtc récupérés.": "Wiederhergestellte go2rtc-Logs.",
-        "Logs nginx": "Nginx-Logs",
-        "Logs nginx récupérés.": "Nginx-Logs abgerufen."
+        "Logs": "Protokolle",
+        "récupérés": "abgerufen"
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Erfolgreiche Veranstaltungsgestaltung"
     },
     "plugins\/frigate\/desktop\/modal\/editConfiguration.modal.php": {
+        "Envoie et remplace le fichier de configuration Frigate": "Sendet und ersetzt die Frigate-Konfigurationsdatei",
         "Envoie et remplace le fichier de configuration Frigate puis redémarre Frigate": "Sendet und ersetzt die Frigate-Konfigurationsdatei und startet dann Frigate neu",
         "Envoie et remplace le fichier de configuration du serveur Frigate": "Sendet und ersetzt die Konfigurationsdatei des Frigate-Servers",
+        "Envoie et remplace le fichier de configuration du serveur Frigate puis redémarre Frigate": "Sendet und ersetzt die Konfigurationsdatei des Frigate-Servers und startet Frigate dann neu",
         "Envoyer la configuration": "Konfiguration senden",
         "Envoyer la configuration et redémarrer Frigate": "Konfiguration senden und Frigate neu starten",
         "La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !": "Das Ändern der Konfiguration des Frigate-Servers erfolgt auf eigene Gefahr! Es wird keine Unterstützung gegeben!",
@@ -104,11 +110,18 @@
         "Logs Frigate": "Frigate-Logs",
         "Logs go2rtc": "Logs go2rtc",
         "Logs nginx": "Nginx-Logs",
-        "Télécharger les logs": "Logs herunterladen"
+        "Télécharger les logs": "Logs herunterladen",
+        "Télécharger les logs affichés": "Herunterladen der angezeigten Logs"
     },
     "plugins\/frigate\/desktop\/php\/event.filters.template.php": {
         "Aucun": "Nein",
         "Tout": "Alles"
+    },
+    "plugins\/frigate\/desktop\/php\/event.template.php": {
+        "Afficher la page de la caméra": "Anzeigen der Kameraseite",
+        "Supprimer l'évènement sur votre serveur Frigate": "Löschen Sie das Ereignis auf Ihrem Frigate-Server",
+        "Voir la capture": "Siehe die Aufnahme",
+        "Voir la vidéo": "Video ansehen"
     },
     "plugins\/frigate\/desktop\/php\/events.php": {
         "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff",
@@ -170,15 +183,32 @@
         "timestamp": "zeitstempel",
         "zones": "zonen"
     },
+    "plugins\/frigate\/desktop\/php\/panel.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff",
+        "Caméras": "Kameras",
+        "Evènements": "Veranstaltungen",
+        "Santé": "Gesundheit",
+        "créer un nouvel évènement": "eine neue Veranstaltung erstellen",
+        "supprimer tous les évènements visibles": "alle sichtbaren Ereignisse löschen"
+    },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "'manuell' als Standard",
+        "0 par défaut, de 0 à 100%": "0 Standard, von 0 bis 100%",
+        "40 secondes par défaut": "40 Sekunden Standard",
+        "5 secondes par défaut": "5 Sekunden Standard",
+        "500 Mo par défaut": "500 MB Standard",
+        "5000 par défaut": "5000 Standard",
+        "7 jours par défaut": "7 Tage standardmäßig",
+        "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Anzeige einer Bestätigungswarnung bei der Aufforderung, ein Ereignis zu löschen",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Anzeige des Miniaturvideos eines Ereignisses beim Überfahren seines Captures mit der Maus",
         "Aucune": "Irgendein",
+        "Confirmation avant suppression d'un évènement": "Bestätigung vor dem Löschen eines Ereignisses",
         "Durée de la vidéo": "Länge des Videos",
         "Durée de rafraîchissement": "Dauer der Auffrischung",
         "Durée par défaut de la vidéo d un évènement manuel": "Standarddauer des Videos eines manuellen Ereignisses",
         "Enregistrement d une vidéo par défaut pour un évènement manuel": "Aufnahme eines Standardvideos für ein manuelles Ereignis",
         "Enregistrer une vidéo": "Ein Video aufnehmen",
+        "Exemple: 192.168.1.20": "Beispiel: 192.168.1.20",
         "Gestion des évènements": "Verwaltung von Ereignissen",
         "Label": "Label",
         "Label par défaut d'un évènement créé manuellement": "Standardlabel eines manuell erstellten Ereignisses",

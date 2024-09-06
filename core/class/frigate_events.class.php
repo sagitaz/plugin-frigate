@@ -11,12 +11,12 @@
  * @license      GNU General Public License v3.0 and later; see license.txt
  */
 /* * ***************************Includes********************************* */
-
+/*
 use DB;
 use Exception;
 use PDO;
 use Log;
-
+*/
 class frigate_events
 {
 	/*     * *************************Attributs****************************** */

@@ -45,7 +45,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{URL de Frigate}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="URL" placeholder="Exemple: 192.168.1.20" />
+                <input class="configKey form-control" data-l1key="URL" placeholder="{{Exemple: 192.168.1.20}}" />
             </div>
         </div>
         <div class="form-group">
@@ -53,7 +53,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{port de Frigate (5000 par défaut)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="port" type="number" placeholder="5000 par défaut" />
+                <input class="configKey form-control" data-l1key="port" type="number" placeholder="{{5000 par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -72,7 +72,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="recovery_days" type="number" placeholder="7 jours par défaut" />
+                <input class="configKey form-control" data-l1key="recovery_days" type="number" placeholder="{{7 jours par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -80,7 +80,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à garder}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="7 jours par défaut" />
+                <input class="configKey form-control" data-l1key="remove_days" type="number" placeholder="{{7 jours par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -88,7 +88,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des données (en Mo)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="500 Mo par défaut" />
+                <input class="configKey form-control" data-l1key="datas_weight" type="number" placeholder="{{500 Mo par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -96,7 +96,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Rafraichissement des captures des caméras (en secondes)}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="5 secondes par défaut" />
+                <input class="configKey form-control" data-l1key="refresh_snapshot" type="number" placeholder="{{5 secondes par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -105,6 +105,14 @@ if (!isConnect()) {
             </label>
 			<div class="col-md-4">
 				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
+			</div>
+		</div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Confirmation avant suppression d'un évènement}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement}}"></i></sup>
+            </label>
+			<div class="col-md-4">
+				<input type="checkbox" class="configKey form-control" data-l1key="event::confirmDelete" />
 			</div>
 		</div>
     </fieldset>
@@ -131,7 +139,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Durée par défaut de la vidéo d un évènement manuel}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="defaultDuration" type="number" placeholder="40 secondes par défaut" />
+                <input class="configKey form-control" data-l1key="defaultDuration" type="number" placeholder="{{40 secondes par défaut}}" />
             </div>
         </div>
         <div class="form-group">
@@ -139,7 +147,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Score par défaut d un évènement manuel, entre 0 et 100%}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input class="configKey form-control" data-l1key="defaultScore" type="number" placeholder="0 par défaut, de 0 à 100%" />
+                <input class="configKey form-control" data-l1key="defaultScore" type="number" placeholder="{{0 par défaut, de 0 à 100%}}" />
             </div>
         </div>
     </fieldset>

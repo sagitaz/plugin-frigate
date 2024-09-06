@@ -224,14 +224,14 @@
 
 .zones {
   display: inline-block;
-  background-color: var(--link-color);
+  background-color: var(--placeholder-color);
   border-radius: 3px;
   overflow: hidden;
   text-overflow: ellipsis;
   white-space: nowrap;
   max-width: 100%;
   line-height: 16px;
-  color: #000000;
+  color: var(--sc-lightTxt-color);;
   padding: 0 3px 0 3px;
 }
 

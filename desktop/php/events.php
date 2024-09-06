@@ -1,8 +1,5 @@
 <?php
 
-use frigate;
-use log;
-
 if (!isConnect('admin')) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
@@ -123,7 +120,7 @@ if (!isConnect('admin')) {
   echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {
     // event variables
-    $id = $event['id'];
+    $id = $event['eventId'];
     $camera = $event['camera'];
     $label = $event['label'];
     $type = $event['type'];

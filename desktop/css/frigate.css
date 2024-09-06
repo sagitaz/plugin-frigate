@@ -1,27 +1,39 @@
-.motion-configuration {
-    position: relative;
-    display: inline-block;
-  }
-  .motion-border span {
-    border: 1px solid #EF0B01 !important;
-  }
-  .motion-configuration span {
-    border: 1px solid transparent;
-  }
-  
-  .regions-configuration {
-    position: relative;
-    display: inline-block;
-  }
-  
-  .regions-border span {
-    border-color: #0DEF09 !important;
-  }
-  
-  .regions-configuration span {
-    border: 1px solid transparent;
-  }
-  
-  span.select2.select2-container.select2-container--default{
-    width: 100% !important;
-  }
+.bbox-configuration, .timestamp-configuration, .zones-configuration,
+.mask-configuration, .motion-configuration, .regions-configuration {
+  position: relative;
+  display: inline-block;
+}
+
+.bbox-configuration span, .timestamp-configuration span, .zones-configuration span{
+  padding: 0 2px 0 2px;
+}
+
+.mask-border span {
+  background-color: black !important;
+  padding: 0 2px 0 2px;
+}
+
+.mask-configuration span {
+  background-color: transparent;
+  padding: 0 2px 0 2px;
+}
+
+.motion-border span {
+  border: 1px solid #EF0B01 !important;
+}
+
+.motion-configuration span {
+  border: 1px solid transparent;
+}
+
+.regions-border span {
+  border-color: #0DEF09 !important;
+}
+
+.regions-configuration span {
+  border: 1px solid transparent;
+}
+
+span.select2.select2-container.select2-container--default{
+  width: 100% !important;
+}
