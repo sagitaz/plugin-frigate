@@ -19,14 +19,14 @@ if (init('object_id') == '') {
 ?>
 
 <ul class="nav nav-tabs" role="tablist">
-  <li role="presentation"><a href="#Cameras" aria-controls="home" role="tab" data-toggle="tab"> {{Caméras}}</a></li>
-  <li role="presentation" class="active"><a href="#Events" aria-controls="home" role="tab" data-toggle="tab"> {{Evènements}}</a></li>
+  <li role="presentation" class="active"><a href="#Cameras" aria-controls="home" role="tab" data-toggle="tab"> {{Caméras}}</a></li>
+  <li role="presentation"><a href="#Events" aria-controls="home" role="tab" data-toggle="tab"> {{Evènements}}</a></li>
   <li role="presentation"><a href="#Health" aria-controls="home" role="tab" data-toggle="tab"> {{Santé}}</a></li>
 </ul>
 
 
 <div class="tab-content" id="div_configuration" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
-  <div role="tabpanel" class="tab-pane" id="Cameras">
+  <div role="tabpanel" class="tab-pane active" id="Cameras">
     <?php
     echo '<div class="col-lg-12" style="width: 100%;">';
     foreach ($frigate_widgets as $widget) {
