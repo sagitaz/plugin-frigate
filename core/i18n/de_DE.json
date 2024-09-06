@@ -6,6 +6,7 @@
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
         "Arrêt du démon Frigate": "Beenden des Frigate-Daemons",
+        "Créer un évènement": "Eine Veranstaltung erstellen",
         "Créer une capture": "Erstellen eines Captures",
         "Informations reçues de MQTT Manager": "Von MQTT Manager erhaltene Informationen",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "Das Ereignis ist ein Favorit, es kann nicht aus der DB gelöscht werden.",
@@ -181,6 +182,14 @@
         "régions": "regionen",
         "timestamp": "zeitstempel",
         "zones": "zonen"
+    },
+    "plugins\/frigate\/desktop\/php\/panel.php": {
+        "401 - Accès non autorisé": "401 - Nicht autorisierter Zugriff",
+        "Caméras": "Kameras",
+        "Evènements": "Veranstaltungen",
+        "Santé": "Gesundheit",
+        "créer un nouvel évènement": "eine neue Veranstaltung erstellen",
+        "supprimer tous les évènements visibles": "alle sichtbaren Ereignisse löschen"
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
         "'manuel' par défaut": "'manuell' als Standard",
