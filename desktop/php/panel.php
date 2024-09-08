@@ -19,11 +19,19 @@ if (init('object_id') == '') {
 ?>
 
 <ul class="nav nav-tabs" role="tablist">
-  <li role="presentation" class="active"><a href="#Cameras" aria-controls="home" role="tab" data-toggle="tab"> {{Caméras}}</a></li>
-  <li role="presentation"><a href="#Events" aria-controls="home" role="tab" data-toggle="tab"> {{Evènements}}</a></li>
-  <li role="presentation"><a href="#Health" aria-controls="home" role="tab" data-toggle="tab"> {{Santé}}</a></li>
+  <li role="presentation" class="active">
+    <a href="#Cameras" aria-controls="Cameras" role="tab" data-toggle="tab" data-url="/get-cameras-content">Caméras</a>
+  </li>
+  <li role="presentation">
+    <a href="#Events" aria-controls="Events" role="tab" data-toggle="tab" data-url="/get-events-content">Evènements</a>
+  </li>
+  <li role="presentation">
+    <a href="#Health" aria-controls="Health" role="tab" data-toggle="tab" data-url="/get-health-content">Santé</a>
+  </li>
+  <li role="presentation">
+    <a href="#Snapshots" aria-controls="Snapshots" role="tab" data-toggle="tab" data-url="/get-snapshots-content">Captures</a>
+  </li>
 </ul>
-
 
 <div class="tab-content" id="div_configuration" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
   <div role="tabpanel" class="tab-pane active" id="Cameras">
@@ -204,7 +212,58 @@ if (init('object_id') == '') {
   <div role="tabpanel" class="tab-pane" id="Health">
   </div>
 
+  <div role="tabpanel" class="tab-pane" id="Snapshots">
+    <?php
+    // Définit le chemin du dossier
+    $dir = dirname(__FILE__, 3) . "/data/snapshots/";
+
+    // Initialise une variable pour le HTML
+    $div = '<div class="row gallery-container" style="padding-top: 10px;">';
+
+    // Vérifie si le répertoire existe
+    if (is_dir($dir)) {
+      // Scanne le répertoire et récupère tous les fichiers
+      $files = array_diff(scandir($dir), array('..', '.')); // Exclut les dossiers parent et courant
+
+      // Parcourt les fichiers dans l'ordre inverse
+      foreach (array_reverse($files) as $val) {
+        // Construit le chemin du fichier complet
+        $file = str_replace("/var/www/html/", "", $dir . $val);
+        $timestamp = explode('.', $val)[0];
+        $timestamp = (int) $timestamp;
+        $name = date('Y-m-d H:i:s', $timestamp);
+
+        // Vérifie si c'est bien un fichier avant de l'afficher
+        if (is_file($file)) {
+          // Construit le contenu HTML pour chaque fichier
+          $div .= '<div class="col-12 col-sm-6 col-md-4 col-lg-3 gallery-item">';
+          $div .= '<div class="img-container">';
+          $div .= '<img src="' . $file . '" alt="" class="img-fluid gallery-img" onclick="openModal(this)" />';
+          $div .= '<div class="image-caption"><label>' . $name . '</label></div>';
+          $div .= '<a class="btn btn-xs btn-danger delete-btn" id="' . $file . '" onclick="removeImg(this)"><i class="fas fa-trash"></i> {{supprimer}}</a>';
+          $div .= '</div>';
+          $div .= '</div>';
+        }
+      }
+    }
+
+    $div .= '</div>'; // Fermeture de la rangée
+    // Affiche la div contenant toutes les images
+    echo $div;
+    ?>
+  </div>
+
+  <!-- Modal Structure -->
+  <div id="modalSnap" class="modal" onclick="closeModal()">
+    <span class="close">&times;</span>
+    <img class="modal-content" id="modalSnapImg">
+    <div id="caption"></div>
+  </div>
+
+
 </div>
 
 <?php include_file('desktop', 'events', 'css', 'frigate'); ?>
 <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
+<?php include_file('desktop', 'panel', 'js', 'frigate'); ?>
+<?php include_file('desktop', 'panel', 'css', 'frigate'); ?>
