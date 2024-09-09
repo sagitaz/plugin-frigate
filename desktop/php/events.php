@@ -13,14 +13,14 @@ if (!isConnect('admin')) {
     <span class="input-group-btn">
       <a class="btn roundedLeft" id="gotoHome"><i class="fa fa-arrow-circle-left"></i> {{retour}} </a>
       <a class="btn btn-danger roundedRight" id="deleteAll"><i class="fa fa-trash"></i> {{supprimer tous les évènements visibles}} </a>
-  	  <a class="btn btn-warning roundedRight" id="createEvent"><i class="fas fa-plus-circle"></i> {{créer un nouvel évènement}} </a>
+      <a class="btn btn-warning roundedRight" id="createEvent"><i class="fas fa-plus-circle"></i> {{créer un nouvel évènement}} </a>
     </span>
   </div>
 
   <?php
 
   // functions
-  function getPercentageClass($score) 
+  function getPercentageClass($score)
   {
     $score = (int) $score;
     if ($score === 100) return 'percentage-100';
@@ -34,10 +34,10 @@ if (!isConnect('admin')) {
     if ($score >= 20) return 'percentage-29';
     if ($score >= 10) return 'percentage-19';
     if ($score > 0) return 'percentage-9';
-    
+
     return 'percentage-0';
   }
-  
+
   function formatDuration($seconds)
   {
     $hours = floor($seconds / 3600);
@@ -104,18 +104,18 @@ if (!isConnect('admin')) {
   // filters variables
   $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
   $timeFilters = [
-    '' => 'Toutes les dates',
-    '1h' => 'Moins d\'une heure',
-    '2h' => 'Moins de deux heures',
-    '6h' => 'Moins de six heures',
-    '12h' => 'Moins de douze heures',
-    '1j' => 'Moins d\'un jour',
-    '2j' => 'Moins de deux jours',
-    '1s' => 'Moins d\'une semaine'
+    '' => 'Toutes',
+    '1h' => '- 1h',
+    '2h' => '- 2h',
+    '6h' => '- 6h',
+    '12h' => '- 12h',
+    '1j' => '- 1 jour',
+    '2j' => '- 2 jour',
+    '1s' => '- 1 semaine'
   ];
 
   // events filters (template)
-  include 'event.filters.template.php';
+  include 'event.filters.template2.php';
 
   echo '<div class="frigateEventList col-lg-12">';
   foreach ($events as $event) {

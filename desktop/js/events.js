@@ -1,20 +1,102 @@
-/* This file is part of Jeedom.
-*
-* Jeedom is free software: you can redistribute it and/or modify
-* it under the terms of the GNU General Public License as published by
-* the Free Software Foundation, either version 3 of the License, or
-* (at your option) any later version.
-*
-* Jeedom is distributed in the hope that it will be useful,
-* but WITHOUT ANY WARRANTY; without even the implied warranty of
-* MERCHANTABILITY or FITNESS FOR A PARTICULAR PURPOSE. See the
-* GNU General Public License for more details.
-*
-* You should have received a copy of the GNU General Public License
-* along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
-*/
+document.addEventListener('DOMContentLoaded', function () {
 
-/* Permet la réorganisation des commandes dans l'équipement */
+  // Gestion des médias
+  document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button) {
+    button.addEventListener('click', function () {
+      const eventBtns = this.parentElement;
+      const snapshotSrc = eventBtns.getAttribute('data-snapshot');
+      const videoSrc = eventBtns.getAttribute('data-video');
+      const title = eventBtns.getAttribute('data-title');
+      const hasVideo = !!videoSrc;
+      const hasSnapshot = !!snapshotSrc;
+
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+
+      document.getElementById('showVideo').onclick = function () {
+        showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+      };
+      document.getElementById('showImage').onclick = function () {
+        showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+      };
+    });
+  });
+
+  document.querySelector('.close').addEventListener('click', function () {
+    var mediaModal = document.getElementById('mediaModal');
+    mediaModal.style.display = 'none';
+  });
+
+  window.addEventListener('click', function (event) {
+    var mediaModal = document.getElementById('mediaModal');
+    if (event.target == mediaModal) {
+      mediaModal.style.display = 'none';
+    }
+  });
+
+  // Gestion des sélecteurs
+  const cameraButton = document.getElementById('cameraSelectButton');
+  const cameraDropdown = document.getElementById('cameraSelectDropdown');
+  const labelButton = document.getElementById('labelSelectButton');
+  const labelDropdown = document.getElementById('labelSelectDropdown');
+  const timeFilterButton = document.getElementById('timeFilterButton');
+  const timeFilterDropdown = document.getElementById('timeFilterDropdown');
+
+  cameraButton.addEventListener('click', function () {
+    cameraDropdown.style.display = cameraDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+
+  labelButton.addEventListener('click', function () {
+    labelDropdown.style.display = labelDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+
+  timeFilterButton.addEventListener('click', function () {
+    timeFilterDropdown.style.display = timeFilterDropdown.style.display === 'block' ? 'none' : 'block';
+  });
+
+  window.addEventListener('click', function (e) {
+    if (!e.target.matches('.select-button') && !e.target.matches('input[type="checkbox"]')) {
+      cameraDropdown.style.display = 'none';
+      labelDropdown.style.display = 'none';
+      timeFilterDropdown.style.display = 'none';
+    }
+  });
+
+  // Gestion du filtre d'événements
+  document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
+    checkbox.addEventListener('change', filterEvents);
+  });
+
+  document.getElementById('startDate').addEventListener('change', filterEvents);
+  document.getElementById('endDate').addEventListener('change', filterEvents);
+  document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
+    radio.addEventListener('change', filterEvents);
+  });
+
+  document.getElementById('deleteAll').addEventListener('click', function () {
+    const visibleEvents = getVisibleEvents();
+    jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ?<br/>Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
+      if (result) {
+        visibleEvents.forEach(function (event) {
+          const eventId = event.getAttribute('data-id');
+          console.log("suppression de : " + eventId);
+          deleteAllEvents(eventId);
+        });
+      }
+    });
+  });
+
+  document.getElementById('createEvent').addEventListener('click', function () {
+    $('#md_modal').dialog({ title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400 })
+      .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
+  });
+
+  document.body.addEventListener('frigate::events', function () {
+    window.location.reload();
+  });
+  // Ajouter d'autres écouteurs ici si nécessaire
+});
+
+// Fonctions externes (en dehors du DOMContentLoaded)
 
 function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   const mediaModal = document.getElementById('mediaModal');
@@ -29,14 +111,12 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
 
   mediaTitle.innerHTML = title;
 
-
   if (mediaType === 'video') {
     videoSource.src = src;
     videoPlayer.load();
     videoContainer.classList.add('active');
     imageContainer.classList.remove('active');
-  }
-  else if (mediaType === 'snapshot') {
+  } else if (mediaType === 'snapshot') {
     snapshotImage.src = src;
     imageContainer.classList.add('active');
     videoContainer.classList.remove('active');
@@ -48,85 +128,12 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   mediaModal.style.display = 'block';
 }
 
-document.querySelectorAll('.snapshot-btn').forEach(function (button) {
-  button.addEventListener('click', function () {
-    const eventBtns = this.parentElement;
-    const snapshotSrc = eventBtns.getAttribute('data-snapshot');
-    const videoSrc = eventBtns.getAttribute('data-video');
-    const title = eventBtns.getAttribute('data-title');
-    const hasVideo = !!videoSrc;
-    const hasSnapshot = !!snapshotSrc;
-
-    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
-
-    document.getElementById('showVideo').onclick = function () {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
-    };
-    document.getElementById('showImage').onclick = function () {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
-    };
-  });
-});
-
-document.querySelectorAll('.video-btn').forEach(function (button) {
-  button.addEventListener('click', function () {
-    const eventBtns = this.parentElement;
-    const videoSrc = eventBtns.getAttribute('data-video');
-    const snapshotSrc = eventBtns.getAttribute('data-snapshot');
-    const title = eventBtns.getAttribute('data-title');
-    const hasVideo = !!videoSrc;
-    const hasSnapshot = !!snapshotSrc;
-
-    showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
-
-    document.getElementById('showVideo').onclick = function () {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
-    };
-    document.getElementById('showImage').onclick = function () {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
-    };
-  });
-});
-
-
-document.querySelector('.close').addEventListener('click', function () {
-  var mediaModal = document.getElementById('mediaModal');
-  mediaModal.style.display = 'none';
-});
-
-window.addEventListener('click', function (event) {
-  var mediaModal = document.getElementById('mediaModal');
-  if (event.target == mediaModal) {
-    mediaModal.style.display = 'none';
-  }
-});
-
 var gotoHomeButton = document.getElementById('gotoHome');
 if (gotoHomeButton) {
   gotoHomeButton.addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
   });
 }
-
-
-
-document.getElementById('deleteAll').addEventListener('click', function () {
-  const visibleEvents = getVisibleEvents();
-  jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer ces évènements ?<br/>Cela les supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
-    if (result) {
-      visibleEvents.forEach(function (event) {
-        const eventId = event.getAttribute('data-id');
-        console.log("suppression de : " + eventId);
-        deleteAllEvents(eventId);
-      });
-    }
-  });
-});
-
-document.getElementById('createEvent').addEventListener('click', function () {
-  $('#md_modal').dialog({ title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400 })
-    .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
-});
 
 function deleteEvent(eventId, askConfirm) {
   if (askConfirm) {
@@ -142,7 +149,6 @@ function deleteEvent(eventId, askConfirm) {
     deleteAllEvents(eventId);
   }
 }
-
 function deleteAllEvents(eventId) {
   $.ajax({
     type: "POST",
@@ -261,22 +267,13 @@ function getVisibleEvents() {
 
 function gotoCamera(cameraId) {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
-}
-
-document.addEventListener('DOMContentLoaded', function () {
-  // Sélectionnez tous les éléments avec les classes .cameraFilter et .labelFilter
-  document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
-    checkbox.addEventListener('change', function () {
-      filterEvents();  // Appeler la fonction filterEvents lorsque la checkbox change
-    });
-  });
-});
 
 document.getElementById('startDate').addEventListener('change', filterEvents);
 document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
   radio.addEventListener('change', filterEvents);
 });
+}
 
 function toggleFavorite(button) {
   const eventId = button.getAttribute('data-id');
@@ -322,10 +319,6 @@ function setFavorite(eventId, isFav) {
     }
   })
 }
-
-$('body').off('frigate::events').on('frigate::events', function (_event, _options) {
-  window.location.reload()
-})
 
 function loadAndPlayVideo(video) {
   const src = video.getAttribute('data-src');
