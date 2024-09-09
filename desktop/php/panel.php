@@ -28,9 +28,9 @@ if (init('object_id') == '') {
   <li role="presentation">
     <a href="#Health" aria-controls="Health" role="tab" data-toggle="tab" data-url="/get-health-content">Santé</a>
   </li>
-  <li role="presentation">
+  <!--<li role="presentation">
     <a href="#Snapshots" aria-controls="Snapshots" role="tab" data-toggle="tab" data-url="/get-snapshots-content">Captures</a>
-  </li>
+  </li>-->
 </ul>
 
 <div class="tab-content" id="div_configuration" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
@@ -144,18 +144,18 @@ if (init('object_id') == '') {
       // filters variables
       $selectedTimeFilter = isset($_GET['delai']) ? $_GET['delai'] : '';
       $timeFilters = [
-        '' => 'Toutes les dates',
-        '1h' => 'Moins d\'une heure',
-        '2h' => 'Moins de deux heures',
-        '6h' => 'Moins de six heures',
-        '12h' => 'Moins de douze heures',
-        '1j' => 'Moins d\'un jour',
-        '2j' => 'Moins de deux jours',
-        '1s' => 'Moins d\'une semaine'
+        '' => 'Toutes',
+        '1h' => '- 1h',
+        '2h' => '- 2h',
+        '6h' => '- 6h',
+        '12h' => '- 12h',
+        '1j' => '- 1 jour',
+        '2j' => '- 2 jour',
+        '1s' => '- 1 semaine'
       ];
 
       // events filters (template)
-      include 'event.filters.template.php';
+      include 'event.filters.template2.php';
 
       echo '<div class="frigateEventList col-lg-12">';
       foreach ($events as $event) {

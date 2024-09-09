@@ -124,7 +124,7 @@ document.getElementById('deleteAll').addEventListener('click', function () {
 });
 
 document.getElementById('createEvent').addEventListener('click', function () {
-  $('#md_modal').dialog({title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400})
+  $('#md_modal').dialog({ title: "{{Configuration d'un nouvel évènement}}", width: 600, height: 400 })
     .load('index.php?v=d&plugin=frigate&modal=event.modal').dialog('open');
 });
 
@@ -263,36 +263,13 @@ function gotoCamera(cameraId) {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
 }
 
-document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
-  checkbox.addEventListener('change', filterEvents);
-});
-
-document.getElementById('selectAllCameras').addEventListener('click', function () {
-  document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
-    checkbox.checked = true;
+document.addEventListener('DOMContentLoaded', function () {
+  // Sélectionnez tous les éléments avec les classes .cameraFilter et .labelFilter
+  document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
+    checkbox.addEventListener('change', function () {
+      filterEvents();  // Appeler la fonction filterEvents lorsque la checkbox change
+    });
   });
-  filterEvents();
-});
-
-document.getElementById('deselectAllCameras').addEventListener('click', function () {
-  document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
-    checkbox.checked = false;
-  });
-  filterEvents();
-});
-
-document.getElementById('selectAllLabels').addEventListener('click', function () {
-  document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
-    checkbox.checked = true;
-  });
-  filterEvents();
-});
-
-document.getElementById('deselectAllLabels').addEventListener('click', function () {
-  document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
-    checkbox.checked = false;
-  });
-  filterEvents();
 });
 
 document.getElementById('startDate').addEventListener('change', filterEvents);
@@ -346,7 +323,7 @@ function setFavorite(eventId, isFav) {
   })
 }
 
-$('body').off('frigate::events').on('frigate::events', function(_event, _options) {
+$('body').off('frigate::events').on('frigate::events', function (_event, _options) {
   window.location.reload()
 })
 
@@ -372,5 +349,5 @@ function handleHover(event) {
     loadAndPlayVideo(video);
   }
 }
-  
+
 filterEvents();

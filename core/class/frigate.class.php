@@ -1833,10 +1833,41 @@ class frigate extends eqLogic
     $file = $eqLogic->getConfiguration('img');
     $timestamp = microtime(true);
     $formattedTimestamp = sprintf('%.6f', $timestamp);
+    $startTime = time();
+    $endTime = $startTime;
     $uniqueId = self::createUniqueId($formattedTimestamp);
     // create snapshot
     $url = frigate::saveURL($uniqueId, null, $camera, 3, $file);
-    $eqLogic->getCmd(null, 'info_url_capture')->event($url);
+    $urlClip = "";
+    // mise a jour des commandes
+    log::add(__CLASS__, 'debug', "| Mise à jour de la commande.");
+    $eqLogic->getCmd(null, 'info_url_capture')->event("/var/www/html" . $url);
+    $eqLogic->getCmd(null, 'info_label')->event("capture");
+    $eqLogic->getCmd(null, 'info_score')->event(0);
+    $eqLogic->getCmd(null, 'info_topscore')->event(0);
+    $eqLogic->getCmd(null, 'info_duree')->event(0);
+    
+    // Creation de l'evenement  dans la DB
+    log::add(__CLASS__, 'debug', "| Creéation d'un nouveau évènement Frigate pour l'event ID: " . $uniqueId);
+    $frigate = new frigate_events();
+    $frigate->setCamera($camera);
+    $frigate->setLasted($url);
+    $frigate->setHasClip(0);
+    $frigate->setClip($urlClip);
+    $frigate->setHasSnapshot(1);
+    $frigate->setSnapshot($url);
+    $frigate->setStartTime($startTime);
+    $frigate->setEndTime($endTime);
+    $frigate->setEventId($timestamp);
+    $frigate->setLabel("capture");
+    $frigate->setThumbnail($url);
+    $frigate->setTopScore(0);
+    $frigate->setScore(0);
+    $frigate->setType("end");
+    $frigate->setIsFavorite(0);
+    $frigate->save();
+    log::add(__CLASS__, 'debug', "---------------------------------------------------");
+  
   }
 
   public static function createUniqueId($timestamp)
