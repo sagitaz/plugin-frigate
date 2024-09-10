@@ -15,7 +15,7 @@
 	"require": "4.3",
 	"os": {
 		"min": 10,
-		"max": 12
+		"max": 12.99
 	},
 	"category": "security",
 	"display": "panel",
