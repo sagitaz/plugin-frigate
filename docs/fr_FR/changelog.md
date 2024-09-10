@@ -3,6 +3,11 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 06/09/2024 Beta 0.9.5
+- Modification sur la création des commandes.
+- Commandes audio (etat, on, off et toggle) disponibles si présent dans votre configuration.
+- Verification de la version Frigate une seule fois par jour (si cronDaily activé).
+
 # 06/09/2024 Beta 0.9.4
 - Ajout commande "créer capture" (voir doc)
 - Ajout Panel

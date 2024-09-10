@@ -158,6 +158,7 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
+    self::checkFriagetVersion();
     self::execCron('functionality::cronDaily::enable');
   }
 
@@ -1682,10 +1683,7 @@ class frigate extends eqLogic
 
     // Créer ou récupérer la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
-    $latestVersion = $stats['service']['latest_version'];
-    if (version_compare($version, $latestVersion, "<")) {
-      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
-    }
+
     $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
     // Enregistrer la valeur de l'événement
     $cmd->event($version);
@@ -2275,6 +2273,17 @@ class frigate extends eqLogic
     // Convertir le tableau PHP en JSON
     $jsonContent = json_encode($yamlArray, JSON_PRETTY_PRINT);
     return $jsonContent;
+  }
+
+  private static function checkFriagetVersion() {
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/stats";
+    $stats = self::getcURL("Stats", $resultURL);
+    $version = strstr($stats['service']['version'], '-', true);
+    $latestVersion = $stats['service']['latest_version'];
+    if (version_compare($version, $latestVersion, "<")) {
+      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
+    }
   }
 }
 class frigateCmd extends cmd

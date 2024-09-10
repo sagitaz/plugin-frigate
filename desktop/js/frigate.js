@@ -458,13 +458,21 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     message: '{{Aucune nouvelle caméra trouvée}}',
                     level: 'success'
                 });
+                $('#div_alert').showAlert({
+                    message: '{{Mise à jour des commandes et statistiques.}}',
+                    level: 'success'
+                });
             } else {
-                window.location.reload(true);
-                // Ici le message ne reste pas affiché assez longtemps a cause du reload
                 $('#div_alert').showAlert({
                     message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
                     level: 'success'
                 });
+                $('#div_alert').showAlert({
+                    message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
+                    level: 'success'
+                });
+                sleep(5000);
+                window.location.reload(true);
             }
         }
     })
@@ -488,31 +496,6 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
             });
         }
     })
-});
-
-document.getElementById('add-ptz').addEventListener('click', function () {
-
-    const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
-
-    $.ajax({
-        type: "POST",
-        url: "plugins/frigate/core/ajax/frigate.ajax.php",
-        data: {
-            action: "addPTZ",
-            eqlogicId: eqlogicId
-        },
-        dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
-        },
-        success: function (data) {
-            $('#div_alert').showAlert({
-                message: '{{Les commandes PTZ sont ajoutées à l\'équipement.}}',
-                level: 'info'
-            });
-        }
-    })
-    window.location.reload(true);
 });
 
 $(document).ready(function() {
