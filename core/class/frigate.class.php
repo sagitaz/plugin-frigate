@@ -241,9 +241,15 @@ class frigate extends eqLogic
     if ($this->getConfiguration('cameraStreamAccessUrl') == '') {
       $this->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $url . ':8554/' . $this->getConfiguration('name'));
     }
-    if ($this->getConfiguration('urlStream') == '') {
-      $this->setConfiguration('urlStream', '/plugins/frigate/core/ajax/frigate.proxy.php?url=' . $urlLatest);
+    $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
     }
+    $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
+    $this->setConfiguration('urlStream', $urlStream);
+    $cmd = cmd::byEqLogicIdCmdName($this->getId(), "SNAPSHOT LIVE");
+    $cmd->event($urlJeedom . $urlStream);
+    $cmd->save();
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
@@ -1365,7 +1371,7 @@ class frigate extends eqLogic
   }
   public static function createAndRefreshURLcmd($eqlogicId, $url)
   {
-    $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "GENERIC_INFO");
+    $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "");
     $cmd->save();
     $cmd->event($url);
     $cmd->save();
@@ -1391,16 +1397,24 @@ class frigate extends eqLogic
   public static function createCamerasCmds($eqlogicId)
   {
     $eqlogic = eqLogic::byId($eqlogicId);
+    // Récupération des URLs externes et internes
+    $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
+    }
+    $url = config::byKey('URL', 'frigate');
+    $port = config::byKey('port', 'frigate');
+    $name = $eqlogic->getConfiguration('name');
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
     $cmd->save();
-    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0);
+    $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0, null, 0);
     $infoCmd->save();
     $cmd = self::createCmd($eqlogicId, "Capturer une image", "other", "", "action_create_snapshot", "", 1, $infoCmd, 0, "action");
     $cmd->save();
 
     // commande des liens rtsp et snapshot live
-    $infoCmd = self::createCmd($eqlogicId, "RTSP", "string", "", "link_rtsp", "CAMERA_URL", 0);
+    $infoCmd = self::createCmd($eqlogicId, "RTSP", "string", "", "link_rtsp", "", 0, null, 0);
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
@@ -1408,11 +1422,11 @@ class frigate extends eqLogic
       $infoCmd->event($link);
       $infoCmd->save();
     }
-    $infoCmd = self::createCmd($eqlogicId, "SNAPSHOT LIVE", "string", "", "link_snapshot", "", 0);
+    $infoCmd = self::createCmd($eqlogicId, "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
-      $link = $eqlogic->getConfiguration("urlStream");
+      $link = $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg";
       $infoCmd->event($link);
       $infoCmd->save();
     }
@@ -1607,19 +1621,19 @@ class frigate extends eqLogic
 
     foreach ($eqlogicIds as $eqlogicId) {
       // Creation des commandes infos
-      $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0, null, 0);
       $cmd->event($event->getCamera());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "JEEMATE_CAMERA_DETECT_TYPE_STATE");
+      $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label","JEEMATE_CAMERA_DETECT_TYPE_STATE", 0, null, 0);
       $cmd->event($event->getLabel());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "");
       $cmd->event($event->getHasClip());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "");
       $cmd->event($event->getHasSnapshot());
       $cmd->save();
 
@@ -1627,15 +1641,15 @@ class frigate extends eqLogic
       $cmd->event($event->getTopScore());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "");
       $cmd->event($event->getScore());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones","", 0, null, 0);
       $cmd->event($event->getZones());
       $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id","", 0, null, 0);
       $cmd->event($event->getEventId());
       $cmd->save();
 
@@ -1652,17 +1666,17 @@ class frigate extends eqLogic
       $cmd2->save();
 
 
-      $cmd = self::createCmd($eqlogicId, "URL snapshot", "string", "", "info_url_snapshot", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "URL snapshot", "string", "", "info_url_snapshot","", 0, null, 0);
       $cmd->event($event->getSnapshot());
       $cmd->save();
 
 
-      $cmd = self::createCmd($eqlogicId, "URL clip", "string", "", "info_url_clip", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "URL clip", "string", "", "info_url_clip","", 0, null, 0);
       $cmd->event($event->getClip());
       $cmd->save();
 
 
-      $cmd = self::createCmd($eqlogicId, "URL thumbnail", "string", "", "info_url_thumbnail", "GENERIC_INFO");
+      $cmd = self::createCmd($eqlogicId, "URL thumbnail", "string", "", "info_url_thumbnail","", 0, null, 0);
       $cmd->event($event->getThumbnail());
       $cmd->save();
     }
@@ -1745,7 +1759,7 @@ class frigate extends eqLogic
     // Créer ou récupérer la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
 
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
+    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version","", 0, null, 0);
     // Enregistrer la valeur de l'événement
     $cmd->event($version);
     $cmd->save();
@@ -2076,7 +2090,7 @@ class frigate extends eqLogic
     }
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $eqlogicId = $frigate->getId();
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "GENERIC_INFO");
+    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version","", 0, null, 0);
     $version = $cmd->execCmd();
     if ($version != config::byKey('frigate_version', 'frigate')) {
       config::save('frigate_version', $version, 'frigate');
