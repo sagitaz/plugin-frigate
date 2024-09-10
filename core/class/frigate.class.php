@@ -241,10 +241,7 @@ class frigate extends eqLogic
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
-  public function postSave()
-  {
-    self::createCamerasCmds($this->getId());
-  }
+  public function postSave() {}
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
   public function preRemove() {}
@@ -686,7 +683,7 @@ class frigate extends eqLogic
     self::getEvents(false, array(), $type, $id);
   }
 
-  public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null)
+  public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null)
   {
     if ($id !== null) {
       $urlFrigate = self::getUrlFrigate();
@@ -701,10 +698,12 @@ class frigate extends eqLogic
       // Traiter les evenements du plus ancien au plus recent
       $events = array_reverse($events);
     }
-    // Nombre de jours a filtrer et enregistrer en DB
-    $recoveryDays = config::byKey('recovery_days', 'frigate');
-    if (empty($recoveryDays)) {
-      $recoveryDays = 7;
+    if ($recoveryDays != 1) {
+      // Nombre de jours a filtrer et enregistrer en DB
+      $recoveryDays = config::byKey('recovery_days', 'frigate');
+      if (empty($recoveryDays)) {
+        $recoveryDays = 7;
+      }
     }
     // vérification de la taille du dossier et nettoyage
     self::cleanFolderDataIfFull();
@@ -1219,18 +1218,25 @@ class frigate extends eqLogic
 
   public static function generateEqCameras()
   {
-    $urlfrigate = self::getUrlFrigate();
-    $resultURL = $urlfrigate . "/api/stats";
 
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES EQUIPEMENTS:/fg:----------------------------------");
+    $urlfrigate = self::getUrlFrigate();
+    //  $resultURL = $urlfrigate . "/api/stats";
+    // décoder le yaml de configuration
+    $configuration = self::yamlToJsonFromUrl("http://" . $urlfrigate . "/api/config/raw");
+    // Décoder la chaîne JSON en tableau PHP
+    $configurationArray = json_decode($configuration, true);
+    log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
+    $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
+    $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
     $exist = 0;
     $addToName = "";
     $create = 1;
-    $stats = self::getcURL("create eqCameras", $resultURL);
+    //  $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
-    log::add(__CLASS__, 'debug', "Liste des caméras : " . json_encode($stats['cameras']));
 
-    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+    foreach ($configurationArray['cameras'] as $cameraName => $cameraConfig) {
       $eqlogics = eqLogic::byObjectId($defaultRoom);
       foreach ($eqlogics as $eqlogic) {
         $name = $eqlogic->getname();
@@ -1240,7 +1246,7 @@ class frigate extends eqLogic
         }
       }
       if ($exist) {
-        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
+        log::add(__CLASS__, 'debug', "| L'équipement : " . json_encode($cameraName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
         $addToName = " by frigate plugin";
       }
       // Recherche équipement caméra
@@ -1254,16 +1260,39 @@ class frigate extends eqLogic
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
-        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName . $addToName) . " est créé.");
+        log::add(__CLASS__, 'debug', "| L'équipement : " . json_encode($cameraName . $addToName) . " est créé.");
       } else {
-        log::add(__CLASS__, 'debug', "L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
+        log::add(__CLASS__, 'debug', "| L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
-
-
+      // commandes identique pour toutes les caméras
+      log::add(__CLASS__, 'debug', "| Création des commandes génèrales pour : " . json_encode($cameraName));
       self::createCamerasCmds($frigate->getId());
+      // commandes MQTT s'il est configuré
+      if ($mqttCmds) {
+        log::add(__CLASS__, 'debug', "| Création des commandes MQTT pour : " . json_encode($cameraName));
+        self::createMqttCmds($frigate->getId());
+        // commande PTZ si onvif est configuré
+        if (isset($cameraConfig['onvif']['host']) && !empty($cameraConfig['onvif']['host']) && $cameraConfig['onvif']['host'] !== '0.0.0.0') {
+          log::add(__CLASS__, 'debug', "| Création des commandes PTZ pour : " . json_encode($cameraName));
+          self::createPTZcmds($frigate->getId());
+        }
+      }
+      // commandes audio s'il est configuré
+      if ($audioCmds) {
+        log::add(__CLASS__, 'debug', "| Création des commandes audio pour : " . json_encode($cameraName));
+        self::createAudioCmds($frigate->getId());
+      }
     }
+    message::add('frigate', 'Frigate : ' . $n . ' cameras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
+    // commandes de statisque
+    self::getStats();
+    // commandes des events
+    self::getEvents(false, array(), 'end', null, 1);
+    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminé.');
+
+    log::add(__CLASS__, 'debug', "----------------------END CREATION DES EQUIPEMENTS----------------------------------");
     return $n;
   }
 
@@ -1336,6 +1365,18 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  public static function createAudioCmds($eqlogicId)
+  {
+    $infoCmd = self::createCmd($eqlogicId, "audio Etat", "binary", "", "info_audio", "JEEMATE_CAMERA_AUDIO_STATE", 0);
+    $infoCmd->save();
+    // commande action
+    $cmd = self::createCmd($eqlogicId, "audio off", "other", "", "action_stop_audio", "JEEMATE_CAMERA_AUDIO_SET_OFF", 1, $infoCmd, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "audio on", "other", "", "action_start_audio", "JEEMATE_CAMERA_AUDIO_SET_ON", 1, $infoCmd, 0, "action");
+    $cmd->save();
+    $cmd = self::createCmd($eqlogicId, "audio toggle", "other", "", "action_toggle_audio", "JEEMATE_CAMERA_AUDIO_SET_TOGGLE", 0, $infoCmd, 0, "action");
+    $cmd->save();
+  }
   public static function createCamerasCmds($eqlogicId)
   {
 
@@ -1574,9 +1615,6 @@ class frigate extends eqLogic
       $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
       if (is_object($eqCamera)) {
         $eqlogicCameraId = $eqCamera->getId();
-        if ($mqtt) {
-          self::createMQTTcmds($eqlogicCameraId);
-        }
         foreach ($cameraStats as $key => $value) {
           // Créer ou récupérer la commande
           $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO");
@@ -1846,7 +1884,7 @@ class frigate extends eqLogic
     $eqLogic->getCmd(null, 'info_score')->event(0);
     $eqLogic->getCmd(null, 'info_topscore')->event(0);
     $eqLogic->getCmd(null, 'info_duree')->event(0);
-    
+
     // Creation de l'evenement  dans la DB
     log::add(__CLASS__, 'debug', "| Creéation d'un nouveau évènement Frigate pour l'event ID: " . $uniqueId);
     $frigate = new frigate_events();
@@ -1867,7 +1905,6 @@ class frigate extends eqLogic
     $frigate->setIsFavorite(0);
     $frigate->save();
     log::add(__CLASS__, 'debug', "---------------------------------------------------");
-  
   }
 
   public static function createUniqueId($timestamp)
@@ -2215,6 +2252,29 @@ class frigate extends eqLogic
       'message' => $curlResponse
     );
     return $response;
+  }
+
+
+
+  private static function yamlToJsonFromUrl($yamlUrl)
+  {
+    // Télécharger le contenu YAML depuis l'URL
+    $yamlContent = file_get_contents($yamlUrl);
+    // Vérifier si le téléchargement a réussi
+    if ($yamlContent === false) {
+      log::add(__CLASS__, 'error', "yamlToJsonFromUrl : Failed to retrieve YAML from URL");
+      return json_encode(["error" => "Failed to retrieve YAML from URL: $yamlUrl"]);
+    }
+    // Parser le contenu YAML
+    $yamlArray = yaml_parse($yamlContent);
+    // Vérifier si le parsing est réussi
+    if ($yamlArray === false) {
+      log::add(__CLASS__, 'error', "yamlToJsonFromUrl : Invalid YAML content or file not found");
+      return json_encode(["error" => "Invalid YAML content or file not found"]);
+    }
+    // Convertir le tableau PHP en JSON
+    $jsonContent = json_encode($yamlArray, JSON_PRETTY_PRINT);
+    return $jsonContent;
   }
 }
 class frigateCmd extends cmd

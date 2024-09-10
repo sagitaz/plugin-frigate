@@ -78,12 +78,6 @@ try {
         ajax::success($result);
     }
 
-    if (init('action') == 'addPTZ') {
-        // Ajout d'un PTZ
-        $result = frigate::createPTZcmds(init('eqlogicId'));
-        ajax::success($result);
-    }
-
     if (init('action') == 'getFrigateConfiguration') {
         log::add("frigate", 'info', "getFrigateConfiguration");
         $result = frigate::getFrigateConfiguration();
