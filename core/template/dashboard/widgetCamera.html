@@ -106,6 +106,8 @@
             var modal = document.getElementById("myModal#id#");
             modal.style.display = "none";
         }
+
+
     </script>
 
     <style>
@@ -114,8 +116,8 @@
         }
 
         .frigate_widget {
-            min-height: 100px;
-            min-width: 100px;
+            min-width: 480px !important;
+            min-height: 300px !important;
         }
 
         .frigate_widget .column {
@@ -151,16 +153,15 @@
 
         /* Boutons en bas de l'image */
         .frigate_widget .btn-container {
-            padding-top: 2px;
             width: 100%;
-            position: absolute;
+            position: relative !important;
             bottom: 0;
             left: 0;
             right: 0;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
-            background-color: rgba(0, 0, 0, 0.4);
+            background-color: rgb(var(--defaultBkg-color)) !important;
             z-index: 98;
         }
 
@@ -172,8 +173,9 @@
 
         .frigate_widget .btn-actions {
             border-top: solid !important;
-            border-color: rgba(230, 230, 230, 0.1) !important;
+            border-color: rgb(var(--defaultText-color)) !important;
             border-width: 2px !important;
+            min-width: 40px;
         }
 
         .frigate_widget .btn-detect {
