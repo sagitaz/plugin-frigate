@@ -1,6 +1,6 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
-    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;width: #width#;height: #height#;#style#;">
+    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#;">
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
@@ -116,8 +116,8 @@
         }
 
         .frigate_widget {
-            min-width: 480px !important;
-            min-height: 300px !important;
+            width: 435px !important;
+            height: 315px !important;
         }
 
         .frigate_widget .column {
@@ -154,6 +154,7 @@
         /* Boutons en bas de l'image */
         .frigate_widget .btn-container {
             width: 100%;
+            height: auto !important;
             position: relative !important;
             bottom: 0;
             left: 0;
@@ -175,7 +176,7 @@
             border-top: solid !important;
             border-color: rgb(var(--defaultText-color)) !important;
             border-width: 2px !important;
-            min-width: 40px;
+            height: auto !important;
         }
 
         .frigate_widget .btn-detect {
