@@ -168,7 +168,12 @@ sendVarToJS('refresh', $refresh);
                                     <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
                                 </div>
                             </div>
-
+                            <div class="form-group">
+                                <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="eqLogicAttr form-control" data-l1key="presetNumber" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                </div>
+                            </div>
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
                             <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span></label>
