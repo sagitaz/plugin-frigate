@@ -168,10 +168,10 @@ sendVarToJS('refresh', $refresh);
                                     <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
                                 </div>
                             </div>
-                            <div class="form-group">
+                            <div class="form-group eqFrigate ptz-options">
                                 <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
                                 <div class="col-sm-6">
-                                    <input type="number" class="eqLogicAttr form-control" data-l1key="presetNumber" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                    <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetNumber" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
                                 </div>
                             </div>
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
@@ -275,8 +275,6 @@ sendVarToJS('refresh', $refresh);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
-                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
-                <a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_cmd" class="table table-bordered table-condensed">

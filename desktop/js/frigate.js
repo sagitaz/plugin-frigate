@@ -300,6 +300,17 @@ function printEqLogic(_eqLogic) {
         addOrRemoveClass('eqActions', 'jeedisable', false);
     }
 
+    let ptz = _eqLogic.configuration.ptz;
+    if (ptz === undefined) {
+        ptz = false;
+    }
+    if (ptz) {
+        addOrRemoveClass('ptz-options', 'jeedisable', false);
+    } else {
+        addOrRemoveClass('ptz-options', 'jeedisable', false);
+    }
+
+
 
     if (_eqLogic.logicalId != "eqFrigateStats") {
 
