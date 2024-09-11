@@ -502,9 +502,6 @@ class frigate extends eqLogic
         }
       }
 
-
-
-      $replace['#actionsModal#'] = $replace['#actions#'];
       $hasPresets = false; // Variable pour vérifier si des presets sont disponibles
 
       // Créer la structure HTML du select
@@ -1606,15 +1603,15 @@ class frigate extends eqLogic
     $cmd->save();
     $cmd = self::createCmd($eqlogicId, "PTZ move right", "other", "", "action_ptz_right", "CAMERA_RIGHT", 1, "", 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move up", "other", "", "action_ptz_up", "CAMERA_UP", 0, "", 0, "action");
+    $cmd = self::createCmd($eqlogicId, "PTZ move up", "other", "", "action_ptz_up", "CAMERA_UP", 1, "", 0, "action");
     $cmd->save();
     $cmd = self::createCmd($eqlogicId, "PTZ move down", "other", "", "action_ptz_down", "CAMERA_DOWN", 1, "", 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move stop", "other", "", "action_ptz_stop", "CAMERA_STOP", 1, "", 0, "action");
+    $cmd = self::createCmd($eqlogicId, "PTZ move stop", "other", "", "action_ptz_stop", "CAMERA_STOP", 0, "", 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom in", "other", "", "action_ptz_zoom_in", "CAMERA_ZOOM", 0, "", 0, "action");
+    $cmd = self::createCmd($eqlogicId, "PTZ zoom in", "other", "", "action_ptz_zoom_in", "CAMERA_ZOOM", 1, "", 0, "action");
     $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom out", "other", "", "action_ptz_zoom_out", "CAMERA_DEZOOM", 0, "", 0, "action");
+    $cmd = self::createCmd($eqlogicId, "PTZ zoom out", "other", "", "action_ptz_zoom_out", "CAMERA_DEZOOM", 1, "", 0, "action");
     $cmd->save();
 
     return true;
@@ -1655,7 +1652,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "| PRESET CREE . " . $presetName); // Utiliser le nom du preset correspondant
       // Vérifier que le nom du preset est une chaîne de caractères valide
       if (is_string($presetName) && !empty($presetName)) {
-        $cmd = self::createCmd($eqlogicId, $presetName, "other", "", "action_preset_" . $i, "CAMERA_PRESET", 0, "", 0, "action");
+        $cmd = self::createCmd($eqlogicId, $presetName, "other", "", "action_preset_" . $i, "CAMERA_PRESET", 1, "", 0, "action");
         $cmd->save();
       }
     }
@@ -2628,24 +2625,36 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_right':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_RIGHT');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_up':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_UP');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_down':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_DOWN');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_stop':
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_zoom_in':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_IN');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
+        sleep(1);
+        $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_preset_1':
         $this->publishCameraMessage($camera, 'ptz', 'preset_'.$cmdName);
