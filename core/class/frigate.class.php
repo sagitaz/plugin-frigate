@@ -214,16 +214,18 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
   {
-
     $url = config::byKey('URL', 'frigate');
     $port = config::byKey('port', 'frigate');
 
-    if ($this->getConfiguration('localApiKey') == '') {
-      $this->setConfiguration('localApiKey', config::genKey());
-    }
-
 
     if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
+      if ($this->getConfiguration('ptz') == '') {
+        $this->setConfiguration('ptz', '0');
+      }
+      // on verifie le preset et on le save
+      $preset = ($this->getConfiguration('presetNumber') <= "10") ? $this->getConfiguration('presetNumber') : "10";
+      $this->setConfiguration('presetNumber', $preset);
+
       $name = $this->getConfiguration('name');
       $bbox = $this->getConfiguration('bbox', 0);
       $timestamp = $this->getConfiguration('timestamp', 1);
@@ -620,6 +622,16 @@ class frigate extends eqLogic
     $stats = self::getcURL("Stats", $resultURL);
     self::majStatsCmds($stats);
     log::add(__CLASS__, 'debug', "----------------------END STATS----------------------------------");
+  }
+
+  public static function getPresets($camera)
+  {
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:START IMPORT PRESETS:/fg:----------------------------------");
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/" . $camera . "/ptz/info";
+    $presets = self::getcURL("Presets", $resultURL);
+    return $presets;
+    log::add(__CLASS__, 'debug', "----------------------END IMPORT PRESET----------------------------------");
   }
 
   public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
@@ -1238,7 +1250,8 @@ class frigate extends eqLogic
     return $b['top_score'] <=> $a['top_score'];
   }
 
-  public static function generateAllEqs() {
+  public static function generateAllEqs()
+  {
 
     log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES EQUIPEMENTS:/fg:----------------------------------");
     frigate::generateEqEvents();
@@ -1309,6 +1322,9 @@ class frigate extends eqLogic
         if (isset($cameraConfig['onvif']['host']) && !empty($cameraConfig['onvif']['host']) && $cameraConfig['onvif']['host'] !== '0.0.0.0') {
           log::add(__CLASS__, 'debug', "| Création des commandes PTZ pour : " . json_encode($cameraName));
           self::createPTZcmds($frigate->getId());
+          self::createPresetPTZcmds($frigate->getId());
+          $frigate->setConfiguration("ptz", 1);
+          $frigate->save();
         }
       }
       // commandes audio s'il est configuré
@@ -1558,6 +1574,36 @@ class frigate extends eqLogic
 
     return true;
   }
+
+  public static function createPresetPTZcmds($eqlogicId)
+  {
+    $eqlogic = eqLogic::byId($eqlogicId);
+    $camera = $eqlogic->getConfiguration("name");
+    $presets = self::getPresets($camera);
+    $presetMaxforEqloc = $eqlogic->getConfiguration("presetNumber") ?? 0;
+    $presetMaxforall = config::byKey("presetNumber") ?? 1;
+    if ($presetMaxforEqloc > 0) {
+      $max = $presetMaxforEqloc;
+    } else {
+      $max = $presetMaxforall;
+    }
+    if ($max == 0) {
+      return;
+    }
+    if ($max > 10) {
+      $max = 10;
+    }
+    // Limitation du nombre de presets à la taille réelle du tableau reçu
+    $presetList = $presets['presets'];
+
+    // Création des commandes jusqu'au nombre max de presets configurés
+    for ($i = 0; $i < $max && $i < count($presetList); $i++) {
+      $presetName = $presetList[$i];  // Utiliser le nom du preset correspondant
+      $cmd = self::createCmd($eqlogicId, $presetName,"other","","action_ptz_".$presetName,"CAMERA_PRESET",0,"",0,"action");
+      $cmd->save();
+    }
+  }
+
 
   public static function setCmdsCron()
   {
