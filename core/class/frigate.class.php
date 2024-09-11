@@ -509,13 +509,13 @@ class frigate extends eqLogic
       $selectHtml .= '<select id="presetSelect" onchange="execSelectedPreset()">';
 
       // Boucle sur les presets disponibles
-      for ($i = 1; $i <= 10; $i++) {
+      for ($i = 0; $i <= 10; $i++) {
         $presetCmd = 'action_preset_' . $i;
         if (is_object($this->getCmd('action', $presetCmd))) {
           $preset = $this->getCmd("action", $presetCmd);
           if ($preset->getIsVisible() == 1) {
             $hasPresets = true; // Des presets sont disponibles
-            $selectHtml .= '<option value="3160">Preset ' . $i . '</option>';
+            $selectHtml .= '<option value="3160">' . $preset->getName() . '</option>';
           }
         }
       }
@@ -2666,7 +2666,7 @@ class frigateCmd extends cmd
       case 'action_preset_9':
         $this->publishCameraMessage($camera, 'ptz', $cmdName);
         break;
-      case 'action_preset_10':
+      case 'action_preset_0':
         $this->publishCameraMessage($camera, 'ptz', $cmdName);
         break;
       case 'action_make_api_event':
