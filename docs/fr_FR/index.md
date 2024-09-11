@@ -7,16 +7,31 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
 # <u>Configuration</u>
+- **Pièce par défaut** : Les caméras créées seront automatiquement placées dans cette pièce.
+#### Paramétrage Frigate
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
 - **Port** : le port du serveur Frigate (5000 par défaut)
 - **Topic MQTT** : le topic de votre serveur Frigate (frigate par défaut)
+
+#### Gestion des évènements
 - **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquez ici le nombre de jours souhaités.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
+
+>Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
+
 - **Taille des dossiers** : Taille maximum du dossier data.
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
-- **Cron** : Choisir dans la partie fonctionnalités, le cron souhaité.
+- **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement la vidéo sera jouée.
+- **Confirmation avant suppression** : Affiche une alerte avant la suppréssion d'un évènement.
+#### Paramétrage par défaut d'un évènement créé manuellement
+- **Label** : le nom de l'évènement créé (manuel par défaut).
+- **Enregistrer une vidéo** : oui par défaut.
+- **Durée de la vidéo** : 40 secondes par défaut.
+- **Score** : 0 par défaut.
 
-Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
+#### Fonctionnalités
+- **Cron** : sélectionner le cron voulu.
+
 
 # <u>Demon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
@@ -27,45 +42,54 @@ Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
-## Equipement Events
+## <u>Equipement Events</u>
 L'équipement est créé de manière automatique à l'installation du plugin.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
 Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveaux évènements.
+Il est possible de crééer des actions communes a toutes les caméras (voir la section dédiée)
 J'en ajouterai suivant les demandes et besoins de chacun.
 
 
-## Equipement Statistiques
+## <u>Equipement Statistiques</u>
 L'équipement est créé de manière automatique à l'installation du plugin.
 Celui-ci comporte des commandes infos avec quelques statistiques disponibles.
 Il comporte aussi la commande action permettant de redémarrer le serveur Frigate.
 J'en ajouterai suivant les demandes et besoins de chacun.
 
-## Equipement Caméra
+## <u>Equipement Caméra</u>
 Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton rechercher. Les caméras trouvées seront automatiquement créées.
 ### Equipement
 A gauche, les quelques paramètres disponibles pour la visualisation présente à droite. Refresh de l'image suivant votre configuration.
-### Commandes
-#### infos
+- bbox
+- timestamp : la date
+- zones
+- mask : la zone sera masquée
+- motion : la zone est avec un contour rouge
+- region : la zone est avec un contour vert
+### Commandes infos
 ##### toutes les cameras
 Les informations sur le dernier évènement de la caméra et sur ses statistiques.
 ##### MQTT
 L'information sur détection en cours
-#### actions
 
+### Commandes actions
 - **Capture** :état, capture
 - **Camera** : état, activer, désactiver, toggle (Un redemarrage du serveur est necessaire pour la prise en compte car le fichier configuration est modifié).
 
-Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées.
-Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
+>Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
+
 - **Detect** : état, on, off, toggle
 - **Snapshot** : état, on, off, toggle
 - **Recording** : état, on, off, toggle
 - **Motion** : état, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
 
-Depuis la page des commandes, un bouton vous permet d'ajouter les commandes PTZ. Il faut bien entendu que votre configuration Frigate soit faite pour pouvoir les utiliser.
-N'ayant pas de caméra PTZ, merci de me fournir un fichier de configuration afin que je mette la création de ces boutons en automatique.
+> Les commandes PTZ et audio ne sont créées que si la configuration de votre serveur Frigate possède les informations.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
-### Actions
+- **Audio** : état, on, off, toggle
+
+### Action(s) sur évènement
+Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipements **caméras**.
+Les actions configurées sur l'équipement **Events** seront éxécutées par les évènements provenant de toutes les caméras sauf si elles possédent des actions configurées et activées.
 #### Conditions
 Indiquer ici dans quel cas les actions NE DOIVENT PAS être exécutées.
 #### Actions
@@ -186,14 +210,15 @@ Visualiser tous les logs de votre serveur Frigate
 
 Dans tous les cas, laisser au moins un cron actif car il sera vérifié à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire, ils seront supprimés.
 
+Le cronDaily est le seul à vérifier la version de votre serveur frigate, si une maj est disponible vous aurez un message.
+
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 
 # <u>Panel</u>
-Identique à la page Events.
-
-# <u>Page santé</u>
-En cours de création.
+- visualisation des caméras.
+- page évènements
+- page santé (à venir)
 
 # <u>Support</u>
 - Community Jeedom

@@ -1,6 +1,6 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
-    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;width: #width#;height: #height#;#style#;">
+    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#;">
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
@@ -9,17 +9,19 @@
     <div class="column">
         <div class="img-container">
             #detectNow#
-            <img id="imgFrigate#id#" class="img-responsive" src="" />
+            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
         </div>
         <div class="btn-container">
             <div class="btn-actions">
-                <div class="btn-icon">
-                    <i class="fas fa-minus-circle iconActionOff0" onclick="gotoCameraEvents()"
-                        title="{{Afficher les évènements de la caméra}}"></i>
-                </div>
                 #actions#
             </div>
         </div>
+    </div>
+
+    <!-- Modal Structure -->
+    <div id="myModal#id#" class="modal">
+        <img class="modal-content" id="modalImg#id#" onclick="closeModal#id#()">
+        <div id="caption"></div>
     </div>
 
     <script>
@@ -66,14 +68,20 @@
                 let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
                 console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
                 imgElement.src = newSrc;
+                // Vérifiez si la modal est ouverte et rafraîchissez l'image dans la modal également
+                var modal = document.getElementById("myModal#id#");
+                var modalImg = document.getElementById("modalImg#id#");
+                if (modal.style.display === "block") {
+                    modalImg.src = newSrc;
+                }
             }
 
             // setInterval(refreshImage, 2000); // Refresh every 20 seconds
             refreshImage(); // Initial call to display the image immediately            
 
         }
-        function gotoCameraEvents() {
-            const camera = #cameraName#;
+        function gotoCameraEvents#id#() {
+            const camera = '#cameraName#';
             jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
         }
         function execAction(cmdid) {
@@ -81,6 +89,21 @@
                 id: cmdid
             })
         }
+
+        function openModal#id#(imgElement) {
+            var modal = document.getElementById("myModal#id#");
+            var modalImg = document.getElementById("modalImg#id#");
+
+            modal.style.display = "block";
+            modalImg.src = imgElement.src;  // Assurez-vous que l'image de la modal utilise l'URL actuelle
+        }
+
+        function closeModal#id#() {
+            var modal = document.getElementById("myModal#id#");
+            modal.style.display = "none";
+        }
+
+
     </script>
 
     <style>
@@ -89,8 +112,10 @@
         }
 
         .frigate_widget {
-            min-height: 25%;
-            min-width: 25%;
+            min-width: 280px !important;
+            min-height: 280px !important;
+            height: 310px !important;
+
         }
 
         .frigate_widget .column {
@@ -100,6 +125,7 @@
             height: auto;
         }
 
+        /* Container de l'image */
         .frigate_widget .img-container {
             position: relative;
             flex-grow: 1;
@@ -111,31 +137,50 @@
             background-position: center;
         }
 
+        /* Image responsive */
         .frigate_widget .img-container img {
             position: relative;
             z-index: 1;
-            min-width: 100%;
             width: 100%;
+            /* L'image occupe toute la largeur disponible */
             height: auto;
+            object-fit: cover;
+            /* S'assure que l'image reste proportionnelle */
+            object-position: top;
         }
 
+        /* Boutons en bas de l'image */
         .frigate_widget .btn-container {
-            border-collapse: collapse;
-            padding-top: 10px;
-            width: 90%;
-            position: absolute;
+            width: 100%;
+            position: relative !important;
             bottom: 0;
             left: 0;
             right: 0;
             margin-left: auto;
             margin-right: auto;
             text-align: center;
+            background-color: rgb(var(--defaultBkg-color)) !important;
+            z-index: 98;
         }
+
+        /* Boutons d'action */
+        .frigate_widget .btn-icon {
+            display: inline-flex;
+            text-align: right;
+        }
+
+        .frigate_widget .btn-actions {
+            border-top: solid !important;
+            border-color: orange !important;
+            border-width: 2px !important;
+            min-width: 40px;
+        }
+
         .frigate_widget .btn-detect {
             position: absolute;
             bottom: 5px;
             right: 5px;
-            z-index: 2;
+            z-index: 100;
             text-align: right;
         }
 
@@ -150,20 +195,10 @@
             font-size: 20px;
             color: var(--txt-color) !important;
         }
-        .frigate_widget .btn-actions {
-            border-top: solid !important;
-            border-color: rgba(230, 230, 230, 0.1) !important;
-            border-width: 2px !important;
-        }
-
-        .frigate_widget .btn-icon {
-            display: inline-flex;
-            text-align: right;
-        }
 
         .frigate_widget .iconAction#id# {
             padding: 10px;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--frigate-icone-color#id#) !important;
             transition: transform 1s ease;
         }
@@ -174,13 +209,89 @@
 
         .frigate_widget .iconActionOff#id# {
             padding: 10px;
-            font-size: 18px;
+            font-size: 20px;
             color: var(--txt-color) !important;
             transition: transform 1s ease;
         }
 
         .frigate_widget .iconActionOff#id#:hover {
             transform: scale(1.5);
-        }     
+        }
+
+        /* Modal */
+        .frigate_widget .modal {
+            display: none;
+            position: fixed;
+            z-index: 1000;
+            padding-top: 60px;
+            left: 0;
+            top: 0;
+            width: 100%;
+            height: 100%;
+            overflow: auto;
+            background-color: rgba(0, 0, 0, 0.9);
+            /* Fond noir transparent */
+        }
+
+        /* Contenu de la modal (image) */
+        .frigate_widget .modal-content {
+            margin: auto;
+            display: block;
+            max-width: 90%;
+            max-height: 80%;
+        }
+
+        /* Animation de zoom */
+        .frigate_widget .modal-content,
+        .close {
+            animation-name: zoom;
+            animation-duration: 0.6s;
+        }
+
+        @keyframes zoom {
+            from {
+                transform: scale(0)
+            }
+
+            to {
+                transform: scale(1)
+            }
+        }
+
+        /* Bouton fermer la modal */
+        .frigate_widget .close {
+            position: absolute;
+            top: 15px;
+            right: 35px;
+            color: white;
+            font-size: 40px;
+            font-weight: bold;
+            transition: 0.3s;
+        }
+
+        .frigate_widget .close:hover,
+        .frigate_widget .close:focus {
+            color: #bbb;
+            text-decoration: none;
+            cursor: pointer;
+        }
+
+        /* Responsiveness pour mobiles */
+        @media (max-width: 768px) {
+            .frigate_widget .img-container img {
+                width: 100%;
+                height: auto;
+            }
+
+            .frigate_widget .btn-container {
+                bottom: 0;
+                width: 100%;
+            }
+
+            .frigate_widget .modal-content {
+                max-width: 100%;
+                max-height: 100%;
+            }
+        }
     </style>
 </div>

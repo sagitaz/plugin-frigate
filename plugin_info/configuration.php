@@ -40,7 +40,7 @@ if (!isConnect()) {
     </fieldset>
     <fieldset>
         <div class="form-group">
-          	<h5 class="col-sm-12"><b>{{Paramétrage Frigate}}</b></h5>
+            <h5 class="col-sm-12"><b>{{Paramétrage Frigate}}</b></h5>
             <label class="col-md-4 control-label">{{URL Frigate}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{URL de Frigate}}"></i></sup>
             </label>
@@ -64,10 +64,18 @@ if (!isConnect()) {
                 <input class="configKey form-control" data-l1key="topic" placeholder="frigate" />
             </div>
         </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Preset}}
+                <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de preset à importer}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input type="number" class="configKey form-control" data-l1key="presetMax" placeholder="frigate" />
+            </div>
+        </div>
     </fieldset>
     <fieldset>
         <div class="form-group">
-          	<h5 class="col-sm-12"><b>{{Gestion des évènements}}</b></h5>
+            <h5 class="col-sm-12"><b>{{Gestion des évènements}}</b></h5>
             <label class="col-md-4 control-label">{{Récupération des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours à récupérer}}"></i></sup>
             </label>
@@ -103,22 +111,22 @@ if (!isConnect()) {
             <label class="col-md-4 control-label">{{Vidéos en vignette dans la page des évènements}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture}}"></i></sup>
             </label>
-			<div class="col-md-4">
-				<input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
-			</div>
-		</div>
+            <div class="col-md-4">
+                <input type="checkbox" class="configKey form-control" data-l1key="event::displayVideo" />
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Confirmation avant suppression d'un évènement}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement}}"></i></sup>
             </label>
-			<div class="col-md-4">
-				<input type="checkbox" class="configKey form-control" data-l1key="event::confirmDelete" />
-			</div>
-		</div>
+            <div class="col-md-4">
+                <input type="checkbox" class="configKey form-control" data-l1key="event::confirmDelete" />
+            </div>
+        </div>
     </fieldset>
     <fieldset>
         <div class="form-group">
-          	<h5 class="col-sm-12"><b>{{Paramétrage par défaut d'un évènement créé manuellement}}</b></h5>
+            <h5 class="col-sm-12"><b>{{Paramétrage par défaut d'un évènement créé manuellement}}</b></h5>
             <label class="col-md-4 control-label">{{Label}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Label par défaut d'un évènement créé manuellement}}"></i></sup>
             </label>
@@ -130,10 +138,10 @@ if (!isConnect()) {
             <label class="col-md-4 control-label">{{Enregistrer une vidéo}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Enregistrement d une vidéo par défaut pour un évènement manuel}}"></i></sup>
             </label>
-			<div class="col-md-4">
-				<input type="checkbox" class="configKey form-control" data-l1key="defaultVideo" />
-			</div>
-		</div>
+            <div class="col-md-4">
+                <input type="checkbox" class="configKey form-control" data-l1key="defaultVideo" />
+            </div>
+        </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Durée de la vidéo}}
                 <sup><i class="fas fa-question-circle tooltips" title="{{Durée par défaut de la vidéo d un évènement manuel}}"></i></sup>

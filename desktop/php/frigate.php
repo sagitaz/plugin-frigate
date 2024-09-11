@@ -70,7 +70,7 @@ sendVarToJS('refresh', $refresh);
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
         if (count($eqLogics) == 0) {
-            echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Frigate trouvé, cliquer sur "Ajouter" pour commencer}}</div>';
+            echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Frigate trouvé, cliquer sur "Rechercher" et patienter, cela peu être long si beaucoup de caméras}}</div>';
         } else {
             // Champ de recherche
             echo '<div class="input-group" style="margin:5px;">';
@@ -168,7 +168,12 @@ sendVarToJS('refresh', $refresh);
                                     <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
                                 </div>
                             </div>
-
+                            <div class="form-group eqFrigate ptz-options">
+                                <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
+                                <div class="col-sm-6">
+                                    <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                </div>
+                            </div>
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
                             <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span></label>
@@ -270,19 +275,17 @@ sendVarToJS('refresh', $refresh);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
-                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-ptz" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter les commandes PTZ}}</a>
-                <a class="btn btn-default btn-sm pull-right cmdAction" data-action="add" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_cmd" class="table table-bordered table-condensed">
                         <thead>
                             <tr>
-                                <th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
-                                <th style="min-width:200px;width:350px;">{{Nom}}</th>
-                                <th>{{Type}}</th>
-                                <th style="min-width:260px;">{{Options}}</th>
-                                <th>{{Etat}}</th>
-                                <th style="min-width:80px;width:200px;">{{Actions}}</th>
+                                <th class="col-xs-1">{{ID}}</th>
+                                <th class="col-xs-5">{{Nom}}</th>
+                                <th class="col-xs-1">{{Paramètres}}</th>
+                                <th class="col-xs-1"></th>
+                                <th class="col-xs-3">{{Valeur}}</th>
+                                <th class="col-xs-1">{{Action}}</th>
                             </tr>
                         </thead>
                         <tbody>

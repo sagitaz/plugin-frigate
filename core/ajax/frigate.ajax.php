@@ -48,8 +48,9 @@ try {
     }
     
     if (init('action') == 'searchAndCreate') {
+
         // Recherche et creation de cameras
-        $result = frigate::generateEqCameras();
+        $result = frigate::generateAllEqs();
         ajax::success($result);
     }
 
@@ -75,12 +76,6 @@ try {
     if (init('action') == 'setFavorite') {
         // Changement de favori
         $result = frigate::setFavorite(init('eventId'), init('isFav'));
-        ajax::success($result);
-    }
-
-    if (init('action') == 'addPTZ') {
-        // Ajout d'un PTZ
-        $result = frigate::createPTZcmds(init('eqlogicId'));
         ajax::success($result);
     }
 
