@@ -25,7 +25,15 @@
     <!-- Modal Structure -->
     <div id="myModal#id#" class="modal">
         <img class="modal-content" id="modalImg#id#" onclick="closeModal#id#()">
-        <div id="caption"></div>
+        <div id="caption">
+            <div class="btn-actions">
+                <div class="btn-icon">
+                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents#id#()"
+                        title="{{Afficher les évènements de la caméra}}"></i>
+                </div>
+                #actionsModal#
+            </div>
+        </div>
     </div>
 
     <script>
@@ -107,7 +115,13 @@
             modal.style.display = "none";
         }
 
-
+        function execSelectedPreset() {
+            var presetId = document.getElementById("presetSelect").value;
+            console.log(presetId);
+            if (presetId) {
+                execAction(presetId);
+            }
+        }
     </script>
 
     <style>
@@ -226,13 +240,16 @@
             display: none;
             position: fixed;
             z-index: 1000;
-            padding-top: 60px;
+            padding-top: 50px;
+            padding-bottom: 30px !important;
             left: 0;
             top: 0;
             width: 100%;
             height: 100%;
             overflow: auto;
             background-color: rgba(0, 0, 0, 0.9);
+            border-color: rgb(var(--defaultText-color)) !important;
+            border-width: 1px !important;
             /* Fond noir transparent */
         }
 
@@ -240,8 +257,10 @@
         .frigate_widget .modal-content {
             margin: auto;
             display: block;
-            max-width: 90%;
-            max-height: 80%;
+            z-index: 1000;
+            max-width: 100%;
+            max-height: 90%;
+            padding: 10px !important;
         }
 
         /* Animation de zoom */
@@ -259,6 +278,13 @@
             to {
                 transform: scale(1)
             }
+        }
+
+        .frigate_widget .modal .btn-actions {
+            border-top: solid !important;
+            border-color: rgb(var(--defaultText-color)) !important;
+            border-width: 1px !important;
+            height: auto !important;
         }
 
         /* Bouton fermer la modal */

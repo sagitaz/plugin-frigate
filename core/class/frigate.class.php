@@ -406,75 +406,6 @@ class frigate extends eqLogic
           }
         }
       }
-      // commandes PTZ down
-      if (is_object($this->getCmd('action', 'action_ptz_down'))) {
-        $down = $this->getCmd("action", 'action_ptz_down');
-        if ($down->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ up
-      if (is_object($this->getCmd('action', 'action_ptz_up'))) {
-        $up = $this->getCmd("action", 'action_ptz_up');
-        if ($up->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ left
-      if (is_object($this->getCmd('action', 'action_ptz_left'))) {
-        $left = $this->getCmd("action", 'action_ptz_left');
-        if ($left->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ right
-      if (is_object($this->getCmd('action', 'action_ptz_right'))) {
-        $right = $this->getCmd("action", 'action_ptz_right');
-        if ($right->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ stop
-      if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
-        $stop = $this->getCmd("action", 'action_ptz_stop');
-        if ($stop->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom in
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
-        $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
-        if ($zoom_in->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom out
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
-        $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
-        if ($zoom_out->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
 
       // commandes make snapshot
       if (is_object($this->getCmd('action', 'action_make_api_event'))) {
@@ -495,6 +426,111 @@ class frigate extends eqLogic
           $replace['#actions#'] = $replace['#actions#'] . '</div>';
         }
       }
+
+      // commandes dispo sur la modale
+      $replace['#actionsModal#'] = $replace['#actions#'];
+      // commandes PTZ down
+      if (is_object($this->getCmd('action', 'action_ptz_down'))) {
+        $down = $this->getCmd("action", 'action_ptz_down');
+        if ($down->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ up
+      if (is_object($this->getCmd('action', 'action_ptz_up'))) {
+        $up = $this->getCmd("action", 'action_ptz_up');
+        if ($up->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ left
+      if (is_object($this->getCmd('action', 'action_ptz_left'))) {
+        $left = $this->getCmd("action", 'action_ptz_left');
+        if ($left->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ right
+      if (is_object($this->getCmd('action', 'action_ptz_right'))) {
+        $right = $this->getCmd("action", 'action_ptz_right');
+        if ($right->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ stop
+      if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
+        $stop = $this->getCmd("action", 'action_ptz_stop');
+        if ($stop->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ zoom in
+      if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
+        $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
+        if ($zoom_in->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+      // commandes PTZ zoom out
+      if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
+        $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
+        if ($zoom_out->getIsVisible() == 1) {
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
+          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
+        }
+      }
+
+
+
+      $replace['#actionsModal#'] = $replace['#actions#'];
+      $hasPresets = false; // Variable pour vérifier si des presets sont disponibles
+
+      // Créer la structure HTML du select
+      $selectHtml = '<div class="btn-icon">';
+      $selectHtml .= '<select id="presetSelect" onchange="execSelectedPreset()">';
+
+      // Boucle sur les presets disponibles
+      for ($i = 1; $i <= 10; $i++) {
+        $presetCmd = 'action_preset_' . $i;
+        if (is_object($this->getCmd('action', $presetCmd))) {
+          $preset = $this->getCmd("action", $presetCmd);
+          if ($preset->getIsVisible() == 1) {
+            $hasPresets = true; // Des presets sont disponibles
+            $selectHtml .= '<option value="3160">Preset ' . $i . '</option>';
+          }
+        }
+      }
+      $selectHtml .= '</select>';
+      $selectHtml .= '</div>';
+
+      // Fermer le select si des presets sont disponibles
+      if ($hasPresets) {
+        $replace['#actionsModal#'] = $replace['#actionsModal#'] . $selectHtml;
+      }
+
+
+
+
+
 
       $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
       $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
@@ -1212,7 +1248,7 @@ class frigate extends eqLogic
         "img" => $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
-        "box" => $event->getBox(),
+        "box" => json_decode($event->getBox(), true),
         "date" => $date,
         "duree" => $duree,
         "startTime" => $event->getStartTime(),
@@ -1611,7 +1647,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "| PRESET CREE . " . $presetName); // Utiliser le nom du preset correspondant
       // Vérifier que le nom du preset est une chaîne de caractères valide
       if (is_string($presetName) && !empty($presetName)) {
-        $cmd = self::createCmd($eqlogicId, $presetName, "other", "", "action_ptz_" . $presetName, "CAMERA_PRESET", 0, "", 0, "action");
+        $cmd = self::createCmd($eqlogicId, $presetName, "other", "", "action_preset_" . $i, "CAMERA_PRESET", 0, "", 0, "action");
         $cmd->save();
       }
     }
@@ -2511,6 +2547,7 @@ class frigateCmd extends cmd
     $camera = $frigate->getConfiguration('name');
     $file = $frigate->getConfiguration('img');
     $logicalId = $this->getLogicalId();
+    $cmdName = $this->getName();
 
     switch ($logicalId) {
       case 'action_startCron':
@@ -2601,6 +2638,36 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
+        break;
+      case 'action_preset_1':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_2':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_3':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_4':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_5':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_6':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_7':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_8':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_9':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        break;
+      case 'action_preset_10':
+        $this->publishCameraMessage($camera, 'ptz', $cmdName);
         break;
       case 'action_make_api_event':
         //score=12|video=1|duration=20

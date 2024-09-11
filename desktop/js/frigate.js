@@ -49,7 +49,7 @@ function addCmdToTable(_cmd) {
         tr += '<td>';
         tr += '</td>';
     }
-    if (!isset(_cmd.type) || _cmd.type == 'info') {
+    if (!isset(_cmd.type) || _cmd.type == 'info' && _cmd.subType != 'string') {
         tr += '<td>';
         tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</span>';
         tr += '</td>';
@@ -58,22 +58,25 @@ function addCmdToTable(_cmd) {
         tr += '</td>';
     }
 
+    if (_cmd.type == 'info' && _cmd.subType == 'string') {
+        tr += '<td>';
+        tr += '<span><input type="checkbox" class="cmdAttr" data-l1key="isVisible" checked/>{{Afficher}}</span>';
+        tr += '</td>';
+        tr += '<td>';
+        tr += '</td>';
+    }
+
 
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="htmlstate"></span>';
     tr += '</td>';
     tr += '<td>';
-    tr += '<div class="input-group" style="display:inline-flex">';
-    tr += '<span class="input-group-btn">';
     if (is_numeric(_cmd.id)) {
-        tr += '<a class="btn btn-primary btn-xs roundedLeft cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
+        tr += '<a class="btn btn-primary btn-xs cmdAction" data-action="configure"><i class="fa fa-cogs"></i></a> ';
         tr += '<a class="btn btn-success btn-xs cmdAction" data-action="test"><i class="fa fa-rss"></i> {{Tester}}</a>';
-        tr += '<a class="btn btn-danger btn-xs roundedRight cmdAction" data-action="remove"><i class="fa fa-minus-circle"></i></a>';
-    } else {
-        tr += '<a class="btn btn-default btn-xs cmdAction" data-action="remove"><i class="fa fa-minus-circle"></i></a>';
     }
-    tr += '</span>';
-    tr += '</div>';
+
+    tr += '<i class="fas fa-minus-circle pull-right cmdAction cursor" data-action="remove" title="{{Supprimer la commande}}"></i>'
     tr += '</td>';
     tr += '</tr>';
 
