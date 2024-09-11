@@ -42,7 +42,7 @@ class frigate extends eqLogic
   {
     // Configuration par défaut
     if (!config::byKey('URL', 'frigate')) {
-      config::save('URL', '127.0.0.1', 'frigate');
+      config::save('URL', '', 'frigate');
     }
     if (!config::byKey('port', 'frigate')) {
       config::save('port', '5000', 'frigate');
@@ -66,6 +66,9 @@ class frigate extends eqLogic
     if (class_exists('mqtt2')) {
       if (!config::byKey('topic', 'frigate')) {
         config::save('topic', 'frigate', 'frigate');
+      }
+      if (!config::byKey('presetMax', 'frigate')) {
+        config::save('presetMax', '0', 'frigate');
       }
     }
     if (!config::byKey('event::displayVideo', 'frigate')) {
@@ -1208,7 +1211,12 @@ class frigate extends eqLogic
     }
   }
 
-
+  public static function deleteEvents($ids) {
+    foreach ($ids as $id) {
+      self::deleteEvent($id);
+    } 
+    return true;
+  }
   public static function deleteEvent($id, $all = false)
   {
     $frigate = frigate_events::byEventId($id);
@@ -2640,34 +2648,34 @@ class frigateCmd extends cmd
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
         break;
       case 'action_preset_1':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_'.$cmdName);
         break;
       case 'action_preset_2':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_3':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_4':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_5':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_6':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_7':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_8':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_9':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_0':
-        $this->publishCameraMessage($camera, 'ptz', $cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_make_api_event':
         //score=12|video=1|duration=20

@@ -69,7 +69,7 @@ if (!isConnect()) {
                 <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de preset à importer}}"></i></sup>
             </label>
             <div class="col-md-4">
-                <input type="number" class="configKey form-control" data-l1key="presetMax" placeholder="frigate" />
+                <input type="number" class="configKey form-control" data-l1key="presetMax" placeholder="5" />
             </div>
         </div>
     </fieldset>
