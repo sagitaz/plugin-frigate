@@ -19,9 +19,6 @@
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
         "Afficher les évènements de la caméra": "Ver eventos da câmara"
     },
-    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
-        "Afficher les évènements de la caméra": "Ver eventos da câmara"
-    },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Configuração do servidor Frigate recuperada.",
         "Envoi de la configuration au serveur Frigate avec redémarrage réussi.": "Configuração enviada para o servidor Frigate com reinício bem sucedido.",
@@ -43,32 +40,25 @@
     "plugins\/frigate\/desktop\/js\/frigate.js": {
         "Affichage des logs du serveur Frigate": "Visualização dos registos do servidor Frigate",
         "Afficher": "Mostrar",
-        "Aucune": "Nenhuma",
         "Aucune nouvelle caméra trouvée": "Não foram encontradas novas câmaras",
-        "Choisir une icône": "Escolha um ícone",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Assinale a caixa para que o comando seja executado em paralelo com as outras acções",
-        "Commande info liée": "Comando de informação relacionado",
         "Configuration avancée, à vos propres risques ! Aucun support ne sera donné !": "Configuração avançada por sua conta e risco! Não será prestado qualquer apoio!",
         "Décocher la case pour désactiver l\\'action": "Desmarque a caixa para desativar a ação",
         "Découverte de ": "Descobrir",
         "Edition du fichier de configuration Frigate": "Editar o ficheiro de configuração do Frigate",
         "Historiser": "Histórico",
-        "Inverser": "Inverter",
         "L\\'URL n\\'est pas configurée.": "O URL não está configurado.",
         "L\\'image n\\'est pas disponible.": "A imagem não está disponível.",
         "Label": "Etiqueta",
         "Le port n\\'est pas configuré.": "A porta não está configurada.",
         "Le redémarrage de Frigate est en cours.": "A fragata está a ser reiniciada.",
-        "Les commandes PTZ sont ajoutées à l\\'équipement.": "Os controlos PTZ são adicionados ao equipamento.",
-        "Max": "Máx.",
-        "Min": "Mínimo",
-        "Nom de la commande": "Nome do comando",
+        "Mise à jour des commandes et statistiques.": "Atualização de encomendas e estatísticas.",
+        "Mise à jour des commandes et statistiques. Cela peut prendre du temps.": "Atualização de encomendas e estatísticas. Isto pode demorar algum tempo.",
         "Supprimer la commande": "Apagar comando",
         "Sélectionner la commande": "Selecionar o comando",
         "Sélectionner un mot-clé": "Selecione uma palavra-chave",
         "Tester": "Testar",
-        "Type": "Tipo",
-        "Unité": "Unidade"
+        "Type": "Tipo"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Registos",
@@ -76,6 +66,10 @@
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Criação de eventos com sucesso"
+    },
+    "plugins\/frigate\/desktop\/js\/panel.js": {
+        "Fichier supprimé avec succès": "Ficheiro eliminado com sucesso",
+        "Êtes-vous sûr de vouloir supprimer cette image": "Tem certeza de que deseja excluir esta imagem"
     },
     "plugins\/frigate\/desktop\/modal\/editConfiguration.modal.php": {
         "Envoie et remplace le fichier de configuration Frigate": "Envia e substitui o ficheiro de configuração do Frigate",
@@ -131,15 +125,13 @@
     },
     "plugins\/frigate\/desktop\/php\/frigate.php": {
         "401 - Accès non autorisé": "401 - Acesso não autorizado",
+        "Action": "Ação",
         "Action(s)": "Ação(ões)",
-        "Actions": "Ações",
         "Activer": "Ativar",
         "Afficher les évènements de la caméra": "Ver eventos da câmara",
-        "Ajouter les commandes PTZ": "Adicionar controlos PTZ",
         "Ajouter une action": "Adicionar uma ação",
-        "Ajouter une commande": "Adicionar comando",
         "Aucun": "Nenhum",
-        "Aucun équipement Frigate trouvé, cliquer sur \"Ajouter\" pour commencer": "Não foi encontrado nenhum equipamento Frigate, clique em \"Adicionar\" para iniciar",
+        "Aucun équipement Frigate trouvé, cliquer sur \"Rechercher\" et patienter, cela peu être long si beaucoup de caméras": "Não foi encontrado nenhum equipamento Frigate, clique em \"Procurar\" e aguarde, pode demorar algum tempo se houver muitas câmaras",
         "Catégorie": "Categoria",
         "Commandes": "Comandos",
         "Configuration": "Configuração",
@@ -151,17 +143,20 @@
         "Equipement": "Equipamento",
         "Equipement non visible": "Equipamento não visível",
         "Equipement visible": "Equipamentos visíveis",
-        "Etat": "Estado",
         "Etat actuel : ": "Situação atual :",
         "Events": "Eventos",
         "Gestion": "Gestão",
+        "ID": "EU IRIA",
         "Logs Frigate": "Fragata de toros",
         "Mes équipements": "O meu equipamento",
         "Ne rien faire si": "Não fazer nada se",
         "Nom": "Nome",
         "Nom de l'équipement": "Nome do equipamento",
+        "Nombre de preset": "Número de predefinições",
+        "Nombre de preset à importer": "Número de predefinições a importar",
         "Objet parent": "Objeto pai",
         "Options": "Opções",
+        "Paramètres": "Parâmetros",
         "Paramètres de la caméra": "Definições da câmara",
         "Paramètres généraux": "Parâmetros gerais",
         "Posez vos questions dans le salon dédié, support officiel": "Faça as suas perguntas na sala de estar dedicada, apoio oficial",
@@ -170,7 +165,7 @@
         "Sauvegarder": "Guardar",
         "Serveur Frigate": "Servidor Frigate",
         "Supprimer": "Eliminar",
-        "Type": "Tipo",
+        "Valeur": "Valor",
         "Visible": "Visível",
         "Visualisation": "Vista",
         "Voir les différents logs du serveur  Frigate": "Ver os registos do servidor Frigate",
@@ -185,10 +180,8 @@
     },
     "plugins\/frigate\/desktop\/php\/panel.php": {
         "401 - Accès non autorisé": "401 - Acesso não autorizado",
-        "Caméras": "Câmaras",
-        "Evènements": "Eventos",
-        "Santé": "Estado",
         "créer un nouvel évènement": "criar um novo evento",
+        "supprimer": "eliminar",
         "supprimer tous les évènements visibles": "eliminar todos os eventos visíveis"
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
@@ -214,10 +207,12 @@
         "Label par défaut d'un évènement créé manuellement": "Etiqueta predefinida para um evento criado manualmente",
         "Nombre de jours à garder": "Número de dias para guardar",
         "Nombre de jours à récupérer": "Número de dias para recuperar",
+        "Nombre de preset à importer": "Número de predefinições a importar",
         "Paramétrage Frigate": "Definições da fragata",
         "Paramétrage par défaut d'un évènement créé manuellement": "Definição predefinida para um evento criado manualmente",
         "Pièce par défaut pour les équipements": "Peça por defeito para equipamento",
         "Port": "Porta",
+        "Preset": "Predefinição",
         "Rafraichissement des captures des caméras (en secondes)": "Atualização das capturas da câmara (em segundos)",
         "Récupération des évènements": "Recuperação de eventos",
         "Score": "Pontuação",

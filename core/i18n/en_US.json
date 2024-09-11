@@ -19,9 +19,6 @@
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
         "Afficher les évènements de la caméra": "View camera events"
     },
-    "plugins\/frigate\/core\/template\/mobile\/widgetCamera.html": {
-        "Afficher les évènements de la caméra": "View camera events"
-    },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Frigate server configuration retrieved.",
         "Envoi de la configuration au serveur Frigate avec redémarrage réussi.": "Send configuration to Frigate server with successful restart.",
@@ -43,32 +40,25 @@
     "plugins\/frigate\/desktop\/js\/frigate.js": {
         "Affichage des logs du serveur Frigate": "View Frigate server logs",
         "Afficher": "Show",
-        "Aucune": "None",
         "Aucune nouvelle caméra trouvée": "No new cameras found",
-        "Choisir une icône": "Choose an icon",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Check the box if you want the command to run in parallel with other actions",
-        "Commande info liée": "Related info command",
         "Configuration avancée, à vos propres risques ! Aucun support ne sera donné !": "Advanced configuration at your own risk! No support will be provided!",
         "Décocher la case pour désactiver l\\'action": "Uncheck the box to deactivate the action",
         "Découverte de ": "Discover",
         "Edition du fichier de configuration Frigate": "Editing the Frigate configuration file",
         "Historiser": "Historize",
-        "Inverser": "Invert",
         "L\\'URL n\\'est pas configurée.": "The URL is not configured.",
         "L\\'image n\\'est pas disponible.": "The image is not available.",
         "Label": "Label",
         "Le port n\\'est pas configuré.": "The port is not configured.",
         "Le redémarrage de Frigate est en cours.": "Frigate is being restarted.",
-        "Les commandes PTZ sont ajoutées à l\\'équipement.": "PTZ commands are added to the equipment.",
-        "Max": "Maximum",
-        "Min": "Minimum",
-        "Nom de la commande": "Command name",
+        "Mise à jour des commandes et statistiques.": "Update commands and statistics.",
+        "Mise à jour des commandes et statistiques. Cela peut prendre du temps.": "Update commands and statistics. This may take some time.",
         "Supprimer la commande": "Delete command",
         "Sélectionner la commande": "Select command",
         "Sélectionner un mot-clé": "Select a keyword",
         "Tester": "Test",
-        "Type": "Kind",
-        "Unité": "Unit"
+        "Type": "Kind"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",
@@ -76,6 +66,10 @@
     },
     "plugins\/frigate\/desktop\/js\/modal_event.js": {
         "Création d\\'évènement réussie": "Successful event creation"
+    },
+    "plugins\/frigate\/desktop\/js\/panel.js": {
+        "Fichier supprimé avec succès": "File successfully deleted",
+        "Êtes-vous sûr de vouloir supprimer cette image": "Are you sure you want to delete this picture"
     },
     "plugins\/frigate\/desktop\/modal\/editConfiguration.modal.php": {
         "Envoie et remplace le fichier de configuration Frigate": "Sends and replaces Frigate configuration file",
@@ -131,15 +125,13 @@
     },
     "plugins\/frigate\/desktop\/php\/frigate.php": {
         "401 - Accès non autorisé": "401 - Unauthorized access",
+        "Action": "Action",
         "Action(s)": "Action(s)",
-        "Actions": "Actions",
         "Activer": "Enable",
         "Afficher les évènements de la caméra": "View camera events",
-        "Ajouter les commandes PTZ": "Add PTZ commands",
         "Ajouter une action": "Add an action",
-        "Ajouter une commande": "Add a command",
         "Aucun": "None",
-        "Aucun équipement Frigate trouvé, cliquer sur \"Ajouter\" pour commencer": "No Frigate equipment found, click on \"Add\" to begin",
+        "Aucun équipement Frigate trouvé, cliquer sur \"Rechercher\" et patienter, cela peu être long si beaucoup de caméras": "No Frigate equipment found, click on \"Search\" and wait, it may take a while if there are many cameras",
         "Catégorie": "Category",
         "Commandes": "Commands",
         "Configuration": "Configuration",
@@ -151,17 +143,20 @@
         "Equipement": "Equipment",
         "Equipement non visible": "Equipment not visible",
         "Equipement visible": "Visible equipment",
-        "Etat": "State",
         "Etat actuel : ": "Current status :",
         "Events": "Events",
         "Gestion": "Management",
+        "ID": "ID",
         "Logs Frigate": "Logs Frigate",
         "Mes équipements": "My equipment",
         "Ne rien faire si": "Do nothing if",
         "Nom": "Name",
         "Nom de l'équipement": "Equipment name",
+        "Nombre de preset": "Number of presets",
+        "Nombre de preset à importer": "Number of presets to import",
         "Objet parent": "Parent object",
         "Options": "Options",
+        "Paramètres": "Settings",
         "Paramètres de la caméra": "Camera settings",
         "Paramètres généraux": "General settings",
         "Posez vos questions dans le salon dédié, support officiel": "Ask your questions in the dedicated lounge, official support",
@@ -170,7 +165,7 @@
         "Sauvegarder": "Save",
         "Serveur Frigate": "Frigate server",
         "Supprimer": "Delete",
-        "Type": "Kind",
+        "Valeur": "Value",
         "Visible": "Visible",
         "Visualisation": "Visualization",
         "Voir les différents logs du serveur  Frigate": "View Frigate server logs",
@@ -185,10 +180,8 @@
     },
     "plugins\/frigate\/desktop\/php\/panel.php": {
         "401 - Accès non autorisé": "401 - Unauthorized access",
-        "Caméras": "Cameras",
-        "Evènements": "Events",
-        "Santé": "Health",
         "créer un nouvel évènement": "create a new event",
+        "supprimer": "delete",
         "supprimer tous les évènements visibles": "delete all visible events"
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
@@ -214,10 +207,12 @@
         "Label par défaut d'un évènement créé manuellement": "Default label for a manually created event",
         "Nombre de jours à garder": "Number of days to keep",
         "Nombre de jours à récupérer": "Number of days to recover",
+        "Nombre de preset à importer": "Number of presets to import",
         "Paramétrage Frigate": "Frigate settings",
         "Paramétrage par défaut d'un évènement créé manuellement": "Default setting for a manually created event",
         "Pièce par défaut pour les équipements": "Default room for equipment",
         "Port": "Harbor",
+        "Preset": "Preset",
         "Rafraichissement des captures des caméras (en secondes)": "Camera capture refresh (in seconds)",
         "Récupération des évènements": "Event retrieval",
         "Score": "Score",
