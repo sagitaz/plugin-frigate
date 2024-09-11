@@ -14,7 +14,8 @@
 	"author": "Sagitaz et Noodom",
 	"require": "4.3",
 	"os": {
-		"min": 10
+		"min": "",
+		"max": ""
 	},
 	"category": "security",
 	"display": "panel",
