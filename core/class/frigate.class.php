@@ -1238,10 +1238,20 @@ class frigate extends eqLogic
     return $b['top_score'] <=> $a['top_score'];
   }
 
+  public static function generateAllEqs() {
+
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES EQUIPEMENTS:/fg:----------------------------------");
+    frigate::generateEqEvents();
+    frigate::generateEqStats();
+    frigate::generateEqCameras();
+
+    frigate::setCmdsCron();
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:FIN CREATION DES EQUIPEMENTS:/fg:----------------------------------");
+  }
   public static function generateEqCameras()
   {
 
-    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES EQUIPEMENTS:/fg:----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
     //  $resultURL = $urlfrigate . "/api/stats";
     // décoder le yaml de configuration
@@ -1314,7 +1324,7 @@ class frigate extends eqLogic
     self::getEvents(false, array(), 'end', null, 1);
     message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminé.');
 
-    log::add(__CLASS__, 'debug', "----------------------END CREATION DES EQUIPEMENTS----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------END CREATION DES CAMERAS----------------------------------");
     return $n;
   }
 

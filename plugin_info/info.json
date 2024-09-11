@@ -26,6 +26,9 @@
 	"changelog": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
 	"documentation_beta": "https://sagitaz.github.io/plugin-frigate/#language#",
 	"documentation": "https://sagitaz.github.io/plugin-frigate/#language#",
+	"link": {
+		"forum": "https://community.jeedom.com/tags/plugin-frigate"
+	},
 	"language": [
 		"de_DE",
 		"en_US",
