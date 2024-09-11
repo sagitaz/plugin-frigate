@@ -223,8 +223,8 @@ class frigate extends eqLogic
         $this->setConfiguration('ptz', '0');
       }
       // on verifie le preset et on le save
-      $preset = ($this->getConfiguration('presetNumber') <= "10") ? $this->getConfiguration('presetNumber') : "10";
-      $this->setConfiguration('presetNumber', $preset);
+      $preset = ($this->getConfiguration('presetMax') <= "10") ? $this->getConfiguration('presetMax') : "10";
+      $this->setConfiguration('presetMax', $preset);
 
       $name = $this->getConfiguration('name');
       $bbox = $this->getConfiguration('bbox', 0);
@@ -1581,8 +1581,18 @@ class frigate extends eqLogic
     $eqlogic = eqLogic::byId($eqlogicId);
     $camera = $eqlogic->getConfiguration("name");
     $presets = self::getPresets($camera);
-    $presetMaxforEqloc = $eqlogic->getConfiguration("presetNumber") ?? 0;
-    $presetMaxforall = config::byKey("presetNumber") ?? 1;
+
+    $presetList = $presets['presets'];
+
+    if (!is_array($presetList) || count($presetList) == 0) {
+      log::add(__CLASS__, 'debug', "| PRESET VIDE . ");
+      return;
+    } else {
+      log::add(__CLASS__, 'debug', "| PRESET OK ALL IS GOOD . ");
+    }
+
+    $presetMaxforEqloc = $eqlogic->getConfiguration("presetMax") ?? 0;
+    $presetMaxforall = config::byKey("presetMax", "frigate") ?? 0;
     if ($presetMaxforEqloc > 0) {
       $max = $presetMaxforEqloc;
     } else {
@@ -1594,14 +1604,16 @@ class frigate extends eqLogic
     if ($max > 10) {
       $max = 10;
     }
-    // Limitation du nombre de presets à la taille réelle du tableau reçu
-    $presetList = $presets['presets'];
 
     // Création des commandes jusqu'au nombre max de presets configurés
     for ($i = 0; $i < $max && $i < count($presetList); $i++) {
-      $presetName = $presetList[$i];  // Utiliser le nom du preset correspondant
-      $cmd = self::createCmd($eqlogicId, $presetName,"other","","action_ptz_".$presetName,"CAMERA_PRESET",0,"",0,"action");
-      $cmd->save();
+      $presetName = $presetList[$i];
+      log::add(__CLASS__, 'debug', "| PRESET CREE . " . $presetName); // Utiliser le nom du preset correspondant
+      // Vérifier que le nom du preset est une chaîne de caractères valide
+      if (is_string($presetName) && !empty($presetName)) {
+        $cmd = self::createCmd($eqlogicId, $presetName, "other", "", "action_ptz_" . $presetName, "CAMERA_PRESET", 0, "", 0, "action");
+        $cmd->save();
+      }
     }
   }
 

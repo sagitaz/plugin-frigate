@@ -171,7 +171,7 @@ sendVarToJS('refresh', $refresh);
                             <div class="form-group eqFrigate ptz-options">
                                 <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
                                 <div class="col-sm-6">
-                                    <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetNumber" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                    <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
                                 </div>
                             </div>
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
@@ -280,12 +280,12 @@ sendVarToJS('refresh', $refresh);
                     <table id="table_cmd" class="table table-bordered table-condensed">
                         <thead>
                             <tr>
-                                <th class="hidden-xs" style="min-width:50px;width:70px;">ID</th>
-                                <th style="min-width:200px;width:350px;">{{Nom}}</th>
-                                <th>{{Type}}</th>
-                                <th style="min-width:260px;">{{Options}}</th>
-                                <th>{{Etat}}</th>
-                                <th style="min-width:80px;width:200px;">{{Actions}}</th>
+                                <th class="col-xs-1">{{ID}}</th>
+                                <th class="col-xs-5">{{Nom}}</th>
+                                <th class="col-xs-1">{{Paramètres}}</th>
+                                <th class="col-xs-1"></th>
+                                <th class="col-xs-3">{{Valeur}}</th>
+                                <th class="col-xs-1">{{Action}}</th>
                             </tr>
                         </thead>
                         <tbody>
