@@ -1274,7 +1274,6 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
-    $exist = 0;
     $addToName = "";
     $create = 1;
     //  $stats = self::getcURL("create eqCameras", $resultURL);
@@ -1282,10 +1281,12 @@ class frigate extends eqLogic
     $n = 0;
 
     foreach ($configurationArray['cameras'] as $cameraName => $cameraConfig) {
-      $eqlogics = eqLogic::byObjectId($defaultRoom);
+      $exist = 0;
+      $eqlogics = eqLogic::byObjectId($defaultRoom, false);
       foreach ($eqlogics as $eqlogic) {
-        $name = $eqlogic->getname();
-        if ($name === $cameraName) {
+        $name = $eqlogic->getName();
+        // Utilisation de strcasecmp pour une comparaison insensible à la casse
+        if (strcasecmp($name, $cameraName) === 0) {
           $exist = 1;
           break;
         }
