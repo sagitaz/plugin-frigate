@@ -1208,7 +1208,12 @@ class frigate extends eqLogic
     }
   }
 
-
+  public static function deleteEvents($ids) {
+    foreach ($ids as $id) {
+      self::deleteEvent($id);
+    } 
+    return true;
+  }
   public static function deleteEvent($id, $all = false)
   {
     $frigate = frigate_events::byEventId($id);
