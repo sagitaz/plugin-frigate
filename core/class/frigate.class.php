@@ -584,7 +584,7 @@ class frigate extends eqLogic
           $preset = $this->getCmd("action", $presetCmd);
           if ($preset->getIsVisible() == 1) {
             $hasPresets = true; // Des presets sont disponibles
-            $selectHtml .= '<option value="3160">' . $preset->getName() . '</option>';
+            $selectHtml .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
           }
         }
       }
@@ -2023,6 +2023,15 @@ class frigate extends eqLogic
     $end = $event->getEndTime() ? date("d-m-Y H:i:s", $event->getEndTime()) : $start;
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
+    $jeemate = [
+      "eventId" => $eventId,
+      'start' => $start,
+      'end' => $end,
+      'clip' => $clip,
+      'snapshot' => $snapshot,
+      'thumbnail' => $thumbnail,
+      'score' => $score
+    ];
 
     $eqLogic = eqLogic::byId($eqLogicId);
 
@@ -2048,8 +2057,8 @@ class frigate extends eqLogic
       }
 
       $options = str_replace(
-        ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#'],
-        [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type],
+        ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
+        [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
         $options
       );
 

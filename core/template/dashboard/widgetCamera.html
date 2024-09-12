@@ -1,16 +1,16 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
     style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#;">
-    <div class="widget-name">
-        <span class="centered-name">
-            #name_display# <span class="object_name">#object_name#</span>
+
+    <center class="widget-name">
+        <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
+        <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+
+        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#" onclick="gotoCameraEvents#id#()"
+            title="{{Afficher les évènements de la caméra}}">
+            <i class="fas fa-photo-video iconGotoCameraEvents#id#"></i>
         </span>
-        <a href="#eqLink#" class="reportModeHidden">
-            #name_display# <span class="object_name">#object_name#</span>
-        </a>
-        <i class="fas fa-photo-video iconGotoCameraEvents#id#" onclick="gotoCameraEvents#id#()"
-            title="{{Afficher les évènements de la caméra}}"></i>
-    </div>
+    </center>
 
     <div class="column">
         <div class="img-container">
@@ -140,24 +140,7 @@
             height: 315px !important;
         }
 
-        .frigate_widget .widget-name {
-            display: flex;
-            align-items: center;
-            justify-content: space-between;
-            position: relative;
-            font-size: 16px;
-            color: var(--eqTitle-color) !important;
-        }
 
-        .frigate_widget .centered-name {
-            position: absolute;
-            left: 50%;
-            transform: translateX(-50%);
-        }
-
-        .frigate_widget .reportModeHidden {
-            visibility: hidden;
-        }
 
         .frigate_widget .iconGotoCameraEvents#id# {
             font-size: 12px;
