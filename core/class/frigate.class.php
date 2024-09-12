@@ -1596,8 +1596,15 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
-  public static function createPTZcmds($eqlogicId)
+  public static function createPTZdebug($eqlogicId) {
+    log::add("frigate", 'debug', '| création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
+    self::createPTZcmds($eqlogicId);
+    self::createPresetPTZcmds($eqlogicId, 1);
+    log::add("frigate", 'debug', '| penser à supprimer les commandes après le debug... ');
+  }
+  private static function createPTZcmds($eqlogicId)
   {
+    log::add("frigate", 'debug', '| création des commandes PTZ move et zoom pour ' . $eqlogicId);
     // commande action
     $cmd = self::createCmd($eqlogicId, "PTZ move left", "other", "", "action_ptz_left", "CAMERA_LEFT", 1, "", 0, "action");
     $cmd->save();
@@ -1617,19 +1624,46 @@ class frigate extends eqLogic
     return true;
   }
 
-  public static function createPresetPTZcmds($eqlogicId)
+  private static function createPresetPTZcmds($eqlogicId, $debug = false)
   {
+    log::add("frigate", 'debug', '| Création des commandes Preset PTZ pour ' . $eqlogicId);
     $eqlogic = eqLogic::byId($eqlogicId);
     $camera = $eqlogic->getConfiguration("name");
-    $presets = self::getPresets($camera);
+    if (!$debug) {
+      $presets = self::getPresets($camera);
+    } else {
+      $presets = [
+        "features" => [
+          "pt",
+          "zoom",
+          "pt-r",
+          "zoom-r",
+          "zoom-a"
+        ],
+        "name" => "entree",
+        "presets" => [
+          "preset1",
+          "preset2",
+          "preset3",
+          "preset4",
+          "preset5",
+          "preset6",
+          "preset7",
+          "preset8",
+          "preset9",
+          "preset10",
+          "preset11",
+          "preset12",
+          "preset13"
+        ]
+      ];
+    }
 
     $presetList = $presets['presets'];
 
     if (!is_array($presetList) || count($presetList) == 0) {
-      log::add(__CLASS__, 'debug', "| PRESET VIDE . ");
       return;
     } else {
-      log::add(__CLASS__, 'debug', "| PRESET OK ALL IS GOOD . ");
     }
 
     $presetMaxforEqloc = $eqlogic->getConfiguration("presetMax") ?? 0;
@@ -1659,7 +1693,7 @@ class frigate extends eqLogic
   }
 
 
-  public static function setCmdsCron()
+  private static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
