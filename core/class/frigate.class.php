@@ -1573,7 +1573,7 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
     $cmd->save();
 
-    $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+    $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 1);
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
@@ -2299,7 +2299,7 @@ class frigate extends eqLogic
     if (isset($innerValue) && !is_array($innerValue)) {
       $state = ($innerValue == 'ON') ? "1" : "0";
       //   log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $state);
-      $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 0);
+      $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 1);
       $infoCmd->event($state);
       $infoCmd->save();
       $eqCamera->refreshWidget();
@@ -2478,7 +2478,10 @@ class frigate extends eqLogic
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
+      config::save('frigate_maj', 1, 'frigate');
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
+    } else {
+      config::save('frigate_maj', 0, 'frigate');
     }
   }
 }

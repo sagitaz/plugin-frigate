@@ -67,6 +67,20 @@ sendVarToJS('refresh', $refresh);
                 <span>{{Logs Frigate}}</span>
             </div>
         </div>
+
+        <?php
+        if (count($eqLogics) != 0) {
+            $version = config::byKey('frigate_version', 'frigate') ?? "version non trouvée";
+            $maj = config::byKey('frigate_maj', 'frigate') ?? 0;
+            echo '<legend>';
+            if (!$maj) {
+                echo 'Frigate <span class="success" style="font-size:1.2em;font-weight:bold;">' . $version . '</span>';
+            } else {
+                echo 'Frigate <span class="warning" style="font-size:1.2em;font-weight:bold;" title="{{une mise à jour est disponible}}">' . $version . '</span>';
+            }
+            echo '</legend>';
+        }
+        ?>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
         if (count($eqLogics) == 0) {
