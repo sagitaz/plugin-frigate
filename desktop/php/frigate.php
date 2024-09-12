@@ -289,6 +289,7 @@ sendVarToJS('refresh', $refresh);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-cmd-http" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_cmd" class="table table-bordered table-condensed">

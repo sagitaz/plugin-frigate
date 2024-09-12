@@ -1667,6 +1667,16 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  public static function createHTTPcmd($eqlogicId, $name, $link)
+  {
+    log::add("frigate", 'debug', '| création de la commande HTTP pour ' . $eqlogicId);
+    // commande action
+    $cmd = self::createCmd($eqlogicId,$name, "other", "", "action_http_" . $name, "", 0, "", 0, "action");
+    $cmd->save();
+    $cmd->setConfiguration("request", $link);
+    $cmd->save();
+    return true;
+  }
   public static function createPTZdebug($eqlogicId)
   {
     log::add("frigate", 'debug', '| création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
@@ -2023,15 +2033,7 @@ class frigate extends eqLogic
     $end = $event->getEndTime() ? date("d-m-Y H:i:s", $event->getEndTime()) : $start;
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
-    $jeemate = [
-      "eventId" => $eventId,
-      'start' => $start,
-      'end' => $end,
-      'clip' => $clip,
-      'snapshot' => $snapshot,
-      'thumbnail' => $thumbnail,
-      'score' => $score
-    ];
+    $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
 
     $eqLogic = eqLogic::byId($eqLogicId);
 
