@@ -2049,14 +2049,13 @@ class frigate extends eqLogic
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
     $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
-
+    $conditionIsActived = false;
     $eqLogic = eqLogic::byId($eqLogicId);
 
     // Vérification de la condition d'exécution
     $conditionIf = $eqLogic->getConfiguration('conditionIf');
     if ($conditionIf && jeedom::evaluateExpression($conditionIf)) {
-      log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-      return;
+      $conditionIsActived = true;
     }
 
     $actions = $eqLogic->getConfiguration('actions')[0];
@@ -2067,10 +2066,20 @@ class frigate extends eqLogic
       $cmdTypeName = $action['cmdTypeName'] ?: "end";
       $options = $action['options'];
       $enable = $action['options']['enable'] ?? false;
+      $actionForced = $action['options']['actionForced'] ?? false;
 
       if (!$enable) {
         log::add(__CLASS__, 'debug', "| Commande(s) désactivée(s)");
         continue;
+      }
+
+      if (!$conditionIsActived) {
+        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s)");
+      } elseif ($conditionIsActived && $actionForced) {
+        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
+      } else {
+        log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
+        return;
       }
 
       $options = str_replace(

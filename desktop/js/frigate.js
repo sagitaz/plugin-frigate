@@ -110,6 +110,7 @@ function addAction(_action, _type) {
     div += '<div class="col-sm-1">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="enable" checked title="{{Décocher la case pour désactiver l\'action}}">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
+    div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="actionForced" title="{{Cocher la case pour que la commande s\'exécute malgré la condition}}">'
     div += '</div>'
     div += '<div class="col-sm-1">'
     div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" placeholder="{{Label}}" data-type="' + _type + '" />'
