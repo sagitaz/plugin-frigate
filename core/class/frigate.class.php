@@ -1000,16 +1000,12 @@ class frigate extends eqLogic
     );
 
 
-    event::add(
-      'frigate::event',
-      array(
-        'pluginId' => 'frigate',
+    event::add(['pluginId' => 'frigate',
         'type' => 'pluginEvent',
         'value' => array(
           'eqlogicId' => $eqLogicId,
           'value' => $result
-        )
-      )
+    )]
     );
   }
 
