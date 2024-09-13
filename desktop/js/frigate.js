@@ -554,6 +554,9 @@ document.getElementById('add-cmd-http').addEventListener('click', function () {
 
         }
     })
+    window.setTimeout(function () {
+        window.location.reload();
+    }, 10000);
 });
 
 $(document).ready(function () {

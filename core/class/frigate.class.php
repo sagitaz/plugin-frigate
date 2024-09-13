@@ -1680,7 +1680,7 @@ class frigate extends eqLogic
   {
     log::add("frigate", 'debug', '| création de la commande ' . $name . ' pour ' . $eqlogicId . ' liens : ' . $link);
 
-    $infoCmd = self::createCmd($eqlogicId, "Etat HTTP command", "string", "", "info_http", "", 0);
+    $infoCmd = self::createCmd($eqlogicId, "Etat HTTP command", "string", "", "info_http", "", 0, null, 0, "info");
     $infoCmd->save();
 
     // commande action
