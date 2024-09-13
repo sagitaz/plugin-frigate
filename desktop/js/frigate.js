@@ -520,6 +520,45 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
     })
 });
 
+document.getElementById('add-cmd-http').addEventListener('click', function () {
+    jeedomUtils.hideAlert()
+    const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
+    let content = '<input class="promptAttr" data-l1key="newCmdName" autocomplete="off" type="text" placeholder="{{Nom de la commande}}">'
+    content += '<input class="promptAttr" data-l1key="newLinkHTTP" autocomplete="off" type="text" placeholder="{{URL HTTP de votre commande}}">'
+    jeeDialog.prompt({
+        title: "{{Ajouter une commande HTTP}}",
+        message: content,
+        inputType: false,
+        callback: function (result) {
+            $.ajax({
+                type: "POST",
+                url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                data: {
+                    action: "addCmdHttp",
+                    id: eqlogicId,
+                    name: result.newCmdName,
+                    link: result.newLinkHTTP
+
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    $('#div_alert').showAlert({
+                        message: '{{Création de la commande réussi.}}',
+                        level: 'info'
+                    });
+                }
+            })
+
+        }
+    })
+    window.setTimeout(function () {
+        window.location.reload();
+    }, 10000);
+});
+
 $(document).ready(function () {
     $('.eqLogicAttr[data-l1key=object_id]').select2();
 });

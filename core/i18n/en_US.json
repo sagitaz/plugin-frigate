@@ -40,9 +40,11 @@
     "plugins\/frigate\/desktop\/js\/frigate.js": {
         "Affichage des logs du serveur Frigate": "View Frigate server logs",
         "Afficher": "Show",
+        "Ajouter une commande HTTP": "Add an HTTP command",
         "Aucune nouvelle caméra trouvée": "No new cameras found",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Check the box if you want the command to run in parallel with other actions",
         "Configuration avancée, à vos propres risques ! Aucun support ne sera donné !": "Advanced configuration at your own risk! No support will be provided!",
+        "Création de la commande réussi.": "Successful command creation.",
         "Décocher la case pour désactiver l\\'action": "Uncheck the box to deactivate the action",
         "Découverte de ": "Discover",
         "Edition du fichier de configuration Frigate": "Editing the Frigate configuration file",
@@ -54,11 +56,13 @@
         "Le redémarrage de Frigate est en cours.": "Frigate is being restarted.",
         "Mise à jour des commandes et statistiques.": "Update commands and statistics.",
         "Mise à jour des commandes et statistiques. Cela peut prendre du temps.": "Update commands and statistics. This may take some time.",
+        "Nom de la commande": "Command name",
         "Supprimer la commande": "Delete command",
         "Sélectionner la commande": "Select command",
         "Sélectionner un mot-clé": "Select a keyword",
         "Tester": "Test",
-        "Type": "Kind"
+        "Type": "Kind",
+        "URL HTTP de votre commande": "HTTP URL of your command"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",
@@ -130,6 +134,7 @@
         "Activer": "Enable",
         "Afficher les évènements de la caméra": "View camera events",
         "Ajouter une action": "Add an action",
+        "Ajouter une commande HTTP": "Add an HTTP command",
         "Aucun": "None",
         "Aucun équipement Frigate trouvé, cliquer sur \"Rechercher\" et patienter, cela peu être long si beaucoup de caméras": "No Frigate equipment found, click on \"Search\" and wait, it may take a while if there are many cameras",
         "Catégorie": "Category",
@@ -147,8 +152,12 @@
         "Events": "Events",
         "Gestion": "Management",
         "ID": "ID",
+        "Identifiant": "ID",
+        "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Camera access ID, for HTTP commands only",
         "Logs Frigate": "Logs Frigate",
         "Mes équipements": "My equipment",
+        "Mot de passe": "Password",
+        "Mot de passe d'accès a votre caméra, seulement pour les commandes HTTP": "Camera access password, only for HTTP commands",
         "Ne rien faire si": "Do nothing if",
         "Nom": "Name",
         "Nom de l'équipement": "Equipment name",
@@ -175,7 +184,9 @@
         "mask": "mask",
         "motion": "motion",
         "régions": "regions",
+        "sauvegarder après tout changement": "save after any change",
         "timestamp": "timestamp",
+        "une mise à jour est disponible": "an update is available",
         "zones": "zones"
     },
     "plugins\/frigate\/desktop\/php\/panel.php": {

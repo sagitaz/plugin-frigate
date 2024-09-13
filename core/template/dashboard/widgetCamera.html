@@ -1,23 +1,29 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
     style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#;">
+
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
+
+        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#" onclick="gotoCameraEvents#id#()"
+            title="{{Afficher les évènements de la caméra}}">
+            <i class="fas fa-photo-video iconGotoCameraEvents#id#"></i>
+        </span>
     </center>
 
     <div class="column">
         <div class="img-container">
-            #detectNow#
             <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
+            #detectNow#
+            #ptzWidget#
+            #ptzZoom#
         </div>
         <div class="btn-container">
             <div class="btn-actions">
-                <div class="btn-icon">
-                    <i class="fas fa-photo-video iconActionOff#id#" onclick="gotoCameraEvents#id#()"
-                        title="{{Afficher les évènements de la caméra}}"></i>
-                </div>
+
                 #actions#
+                #actionsPreset#
             </div>
         </div>
     </div>
@@ -134,6 +140,14 @@
             height: 315px !important;
         }
 
+
+
+        .frigate_widget .iconGotoCameraEvents#id# {
+            font-size: 12px;
+            color: var(--eqTitle-color) !important;
+            margin-right: 5px;
+        }
+
         .frigate_widget .column {
             display: flex;
             flex-direction: column;
@@ -186,6 +200,25 @@
             text-align: right;
         }
 
+        .preset-select {
+            width: 100px !important;
+            height: 32px;
+            padding: 0px;
+            font-size: 14px;
+            color: rgb(var(--defaultText-color)) !important;
+            background-color: rgb(var(--defaultBkg-color)) !important;
+            border: 1px solid orange !important;
+            border-radius: 5px;
+        }
+
+        .preset-select:focus {
+            outline: none;
+        }
+
+        .preset-select option {
+            padding: 10px;
+        }
+
         .frigate_widget .btn-actions {
             border-top: solid !important;
             border-color: rgb(var(--defaultText-color)) !important;
@@ -199,6 +232,122 @@
             right: 5px;
             z-index: 100;
             text-align: right;
+        }
+
+        .circle-overlay {
+            position: absolute;
+            bottom: 4px;
+            /* Ajuster selon l'espacement voulu */
+            left: 4px;
+            /* Ajuster selon l'espacement voulu */
+            width: 60px;
+            height: 60px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+            z-index: 1;
+        }
+
+        .frigate_widget .btn-ptz-left,
+        .frigate_widget .btn-ptz-right,
+        .frigate_widget .btn-ptz-up,
+        .frigate_widget .btn-ptz-down,
+        .frigate_widget .btn-ptz-stop {
+            position: absolute;
+            text-align: center;
+            z-index: 100;
+        }
+
+        .frigate_widget .btn-ptz-left {
+            bottom: 21px;
+            /* Positionné au-dessus du cercle */
+            left: 6px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .btn-ptz-right {
+            bottom: 21px;
+            /* Positionné au-dessus du cercle */
+            left: 50px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .btn-ptz-up {
+            bottom: 44px;
+            /* Positionné au-dessus du cercle */
+            left: 25px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .btn-ptz-down {
+            bottom: 1px;
+            /* Positionné au-dessus du cercle */
+            left: 25px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .btn-ptz-stop {
+            bottom: 24px;
+            /* Positionné au-dessus du cercle */
+            left: 28px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .iconPTZleft#id#,
+        .frigate_widget .iconPTZright#id#,
+        .frigate_widget .iconPTZup#id#,
+        .frigate_widget .iconPTZdown#id# {
+            color: var(--eqTitle-color) !important;
+            font-size: 20px;
+            transition: transform 1s ease !important;
+        }
+
+        .frigate_widget .iconPTZstop#id# {
+            color: var(--eqTitle-color) !important;
+            font-size: 14px;
+            transition: transform 1s ease !important;
+        }
+
+        .frigate_widget .iconPTZleft#id#:hover,
+        .frigate_widget .iconPTZright#id#:hover,
+        .frigate_widget .iconPTZup#id#:hover,
+        .frigate_widget .iconPTZdown#id#:hover,
+        .frigate_widget .iconPTZstop#id#:hover,
+        .frigate_widget .iconZoomIn#id#:hover,
+        .frigate_widget .iconZoomOut#id#:hover {
+            color: orange !important;
+            transform: scale(1.5) !important;
+        }
+
+        .frigate_widget .btn-ptz-zoom-in,
+        .frigate_widget .btn-ptz-zoom-out {
+            position: absolute;
+            text-align: center;
+            z-index: 100;
+            width: 20px;
+            height: 20px;
+            background-color: rgba(0, 0, 0, 0.5);
+            border-radius: 50%;
+        }
+
+        .frigate_widget .btn-ptz-zoom-in {
+            top: 2px;
+            /* Positionné au-dessus du cercle */
+            left: 2px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .btn-ptz-zoom-out {
+            top: 24px;
+            /* Positionné au-dessus du cercle */
+            left: 2px;
+            /* Ajuster pour aligner avec le cercle */
+        }
+
+        .frigate_widget .iconZoomIn#id#,
+        .frigate_widget .iconZoomOut#id# {
+            color: var(--eqTitle-color) !important;
+            font-size: 12px;
+            transition: transform 1s ease !important;
         }
 
         .frigate_widget .iconDetect#id# {
@@ -292,7 +441,7 @@
             position: absolute;
             top: 15px;
             right: 35px;
-            color: white;
+            color: var(--eqTitle-color) !important;
             font-size: 40px;
             font-weight: bold;
             transition: 0.3s;

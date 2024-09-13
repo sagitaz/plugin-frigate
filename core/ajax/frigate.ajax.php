@@ -59,6 +59,14 @@ try {
         frigate::restartFrigate();
         ajax::success();
     }
+    if (init('action') == 'addCmdHttp') {
+        // Ajout d'une commande HTTP
+        $eqlogicId = init('id');
+        $name = init('name');
+        $link = init('link');
+        $result = frigate::createHTTPcmd($eqlogicId, $name, $link);
+        ajax::success($result);
+    }
 
     if (init('action') == 'refreshCameras') {
         // Rafraichit la visualisation

@@ -376,6 +376,23 @@ class frigate extends eqLogic
           }
         }
       }
+      // commandes audio
+      if (is_object($this->getCmd('action', 'action_start_audio')) && is_object($this->getCmd('action', 'action_stop_audio'))) {
+        $on = $this->getCmd("action", 'action_start_audio');
+        $off = $this->getCmd("action", 'action_stop_audio');
+        $etat = $this->getCmd("info", 'info_audio');
+        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
+          if ($etat->execCmd() == 0) {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume iconActionOff' . $this->getId() . '" title="audio ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          } else {
+            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-off iconAction' . $this->getId() . '" title="audio OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '</div>';
+          }
+        }
+      }
       // commantes motions
       $replace['#detectNow#'] = "";
       if (is_object($this->getCmd('info', 'info_detectNow'))) {
@@ -432,10 +449,29 @@ class frigate extends eqLogic
 
       // commandes dispo sur la modale
       $replace['#actionsModal#'] = $replace['#actions#'];
+      $replace['#ptzWidget#'] = "";
+      $replace['#ptzZoom#'] = "";
+
+
+      if (
+        is_object($this->getCmd('action', 'action_ptz_down')) ||
+        is_object($this->getCmd('action', 'action_ptz_up')) ||
+        is_object($this->getCmd('action', 'action_ptz_left')) ||
+        is_object($this->getCmd('action', 'action_ptz_right')) ||
+        is_object($this->getCmd('action', 'action_ptz_stop'))
+      ) {
+        $replace['#ptzWidget#'] = '<div class="circle-overlay"></div>';
+      }
+
       // commandes PTZ down
       if (is_object($this->getCmd('action', 'action_ptz_down'))) {
         $down = $this->getCmd("action", 'action_ptz_down');
         if ($down->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-down">';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -446,6 +482,11 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_up'))) {
         $up = $this->getCmd("action", 'action_ptz_up');
         if ($up->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-up">';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -456,6 +497,11 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_left'))) {
         $left = $this->getCmd("action", 'action_ptz_left');
         if ($left->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-left">';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -466,6 +512,11 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_right'))) {
         $right = $this->getCmd("action", 'action_ptz_right');
         if ($right->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-right">';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -476,6 +527,11 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
         $stop = $this->getCmd("action", 'action_ptz_stop');
         if ($stop->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-stop">';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-stop iconPTZstop' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -486,6 +542,11 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
         $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
         if ($zoom_in->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-in">';
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-plus iconZoomIn' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
@@ -496,17 +557,25 @@ class frigate extends eqLogic
       if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
         $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
         if ($zoom_out->getIsVisible() == 1) {
+          // config pour le widget
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-out">';
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-minus iconZoomOut' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
+          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
+          // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
         }
       }
 
+
+
+      $replace['#actionsPreset#'] = '';
       $hasPresets = false; // Variable pour vérifier si des presets sont disponibles
 
       // Créer la structure HTML du select
       $selectHtml = '<div class="btn-icon">';
-      $selectHtml .= '<select id="presetSelect" onchange="execSelectedPreset()">';
+      $selectHtml .= '<select class="preset-select" id="presetSelect" onchange="execSelectedPreset()">';
 
       // Boucle sur les presets disponibles
       for ($i = 0; $i <= 10; $i++) {
@@ -515,16 +584,26 @@ class frigate extends eqLogic
           $preset = $this->getCmd("action", $presetCmd);
           if ($preset->getIsVisible() == 1) {
             $hasPresets = true; // Des presets sont disponibles
-            $selectHtml .= '<option value="3160">' . $preset->getName() . '</option>';
+            $selectHtml .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
           }
         }
       }
+      // Boucle pour ajouter les commandes HTTP
+      $httpCommands = cmd::byLogicalId("action_http");
+      foreach ($httpCommands as $httpCmd) {
+        if ($httpCmd && $httpCmd->getIsVisible() == 1) {
+          $hasPresets = true; // Des presets sont disponibles
+          $selectHtml .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
+        }
+      }
+
       $selectHtml .= '</select>';
       $selectHtml .= '</div>';
 
       // Fermer le select si des presets sont disponibles
       if ($hasPresets) {
         $replace['#actionsModal#'] = $replace['#actionsModal#'] . $selectHtml;
+        $replace['#actionsPreset#'] = $selectHtml;
       }
 
 
@@ -1208,10 +1287,11 @@ class frigate extends eqLogic
     }
   }
 
-  public static function deleteEvents($ids) {
+  public static function deleteEvents($ids)
+  {
     foreach ($ids as $id) {
       self::deleteEvent($id);
-    } 
+    }
     return true;
   }
   public static function deleteEvent($id, $all = false)
@@ -1573,7 +1653,7 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
     $cmd->save();
 
-    $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
+    $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_SNAPSHOT_STATE", 1);
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
@@ -1596,8 +1676,33 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
-  public static function createPTZcmds($eqlogicId)
+  public static function createHTTPcmd($eqlogicId, $name, $link)
   {
+    log::add("frigate", 'debug', '| création de la commande ' . $name . ' pour ' . $eqlogicId . ' liens : ' . $link);
+
+    $infoCmd = self::createCmd($eqlogicId, "Etat HTTP command", "string", "", "info_http", "", 0, null, 0, "info");
+    $infoCmd->save();
+
+    // commande action
+    $cmd = self::createCmd($eqlogicId, $name, "other", "", "action_http", "", 0, $infoCmd, 0, "action");
+    $cmd->save();
+    log::add("frigate", 'debug', '| commande crée');
+    $cmd->setConfiguration("request", $link);
+    $cmd->save();
+    log::add("frigate", 'debug', '| commande mise à jour');
+    return true;
+  }
+  public static function createPTZdebug($eqlogicId)
+  {
+    log::add("frigate", 'debug', '| création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
+    self::createPTZcmds($eqlogicId);
+    self::createPresetPTZcmds($eqlogicId, 1);
+    self::createAudioCmds($eqlogicId);
+    log::add("frigate", 'debug', '| penser à supprimer les commandes après le debug... ');
+  }
+  private static function createPTZcmds($eqlogicId)
+  {
+    log::add("frigate", 'debug', '| création des commandes PTZ move et zoom pour ' . $eqlogicId);
     // commande action
     $cmd = self::createCmd($eqlogicId, "PTZ move left", "other", "", "action_ptz_left", "CAMERA_LEFT", 1, "", 0, "action");
     $cmd->save();
@@ -1617,19 +1722,46 @@ class frigate extends eqLogic
     return true;
   }
 
-  public static function createPresetPTZcmds($eqlogicId)
+  private static function createPresetPTZcmds($eqlogicId, $debug = false)
   {
+    log::add("frigate", 'debug', '| Création des commandes Preset PTZ pour ' . $eqlogicId);
     $eqlogic = eqLogic::byId($eqlogicId);
     $camera = $eqlogic->getConfiguration("name");
-    $presets = self::getPresets($camera);
+    if (!$debug) {
+      $presets = self::getPresets($camera);
+    } else {
+      $presets = [
+        "features" => [
+          "pt",
+          "zoom",
+          "pt-r",
+          "zoom-r",
+          "zoom-a"
+        ],
+        "name" => "entree",
+        "presets" => [
+          "preset1",
+          "preset2",
+          "preset3",
+          "preset4",
+          "preset5",
+          "preset6",
+          "preset7",
+          "preset8",
+          "preset9",
+          "preset10",
+          "preset11",
+          "preset12",
+          "preset13"
+        ]
+      ];
+    }
 
     $presetList = $presets['presets'];
 
     if (!is_array($presetList) || count($presetList) == 0) {
-      log::add(__CLASS__, 'debug', "| PRESET VIDE . ");
       return;
     } else {
-      log::add(__CLASS__, 'debug', "| PRESET OK ALL IS GOOD . ");
     }
 
     $presetMaxforEqloc = $eqlogic->getConfiguration("presetMax") ?? 0;
@@ -1659,7 +1791,7 @@ class frigate extends eqLogic
   }
 
 
-  public static function setCmdsCron()
+  private static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
@@ -1916,6 +2048,7 @@ class frigate extends eqLogic
     $end = $event->getEndTime() ? date("d-m-Y H:i:s", $event->getEndTime()) : $start;
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
+    $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
 
     $eqLogic = eqLogic::byId($eqLogicId);
 
@@ -1941,8 +2074,8 @@ class frigate extends eqLogic
       }
 
       $options = str_replace(
-        ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#'],
-        [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type],
+        ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
+        [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
         $options
       );
 
@@ -2299,7 +2432,7 @@ class frigate extends eqLogic
     if (isset($innerValue) && !is_array($innerValue)) {
       $state = ($innerValue == 'ON') ? "1" : "0";
       //   log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $state);
-      $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 0);
+      $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 1);
       $infoCmd->event($state);
       $infoCmd->save();
       $eqCamera->refreshWidget();
@@ -2478,7 +2611,10 @@ class frigate extends eqLogic
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
+      config::save('frigate_maj', 1, 'frigate');
       message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
+    } else {
+      config::save('frigate_maj', 0, 'frigate');
     }
   }
 }
@@ -2553,6 +2689,9 @@ class frigateCmd extends cmd
     $file = $frigate->getConfiguration('img');
     $logicalId = $this->getLogicalId();
     $cmdName = $this->getName();
+    $link = $this->getConfiguration('request') ?? "";
+    $user = $frigate->getConfiguration('userName');
+    $password = $frigate->getConfiguration('password');
 
     switch ($logicalId) {
       case 'action_startCron':
@@ -2657,7 +2796,7 @@ class frigateCmd extends cmd
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_preset_1':
-        $this->publishCameraMessage($camera, 'ptz', 'preset_'.$cmdName);
+        $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_preset_2':
         $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
@@ -2699,10 +2838,58 @@ class frigateCmd extends cmd
       case 'action_create_snapshot':
         frigate::createSnapshot($frigate);
         break;
+      case 'action_http':
+        $response = self::getCurlcmd($link, $user, $password);
+        if ($response !== false) {
+          $frigate->getCmd(null, 'info_http')->event($response);
+        } else {
+          log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+        }
+        break;
       default:
-        log::add(__CLASS__, 'error', "Action inconnue. Action: $logicalId");
+        // Gérer les actions HTTP dynamiques
+        if (strpos($logicalId, 'action_http_') === 0) {
+          $response = self::getCurlcmd($link, $user, $password);
+          if ($response !== false) {
+            $frigate->getCmd(null, 'info_http')->event($response);
+          } else {
+            log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+          }
+        }
     }
   }
+  private function getCurlcmd($link, $username, $password)
+  {
+
+    $ch = curl_init();
+    $verbose = fopen('php://temp', 'w+'); // Flux temporaire pour verbose
+
+    curl_setopt($ch, CURLOPT_URL, $link);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt($ch, CURLOPT_STDERR, $verbose); // Rediriger verbose vers ce flux temporaire
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST); // Utiliser l'authentification Digest
+    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password"); // Nom d'utilisateur et mot de passe
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+      log::add('frigate', 'error', "Erreur cURL: " . curl_error($ch));
+    } else {
+      log::add('frigate', 'debug', "| Resultat de la commande HTTP : " . $response);
+    }
+
+    // Récupérer les informations verbose
+    rewind($verbose);
+    $verboseLog = stream_get_contents($verbose);
+    log::add('frigate', 'debug', "| cURL verbose log: " . $verboseLog);
+
+    fclose($verbose);
+    curl_close($ch);
+    return $response;
+  }
+
   private function updateCronStatus($frigate, $status, $message)
   {
     $frigate->getCmd(null, 'info_Cron')->event($status);

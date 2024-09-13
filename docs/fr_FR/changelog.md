@@ -3,6 +3,11 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 13/09/2024 Beta 0.9.6
+- Corrections des commandes PTZ
+- Ajout sur le widget des bouton PTZ
+- Ajout d'un bouton pour créer des commandes HTTP (user et mot de passe à renseigner sur page caméra)
+
 # 11/09/2024 Beta 0.9.5
 - Modification sur la création des commandes.
 - Commandes audio (etat, on, off et toggle) disponibles si présent dans votre configuration.
