@@ -1606,7 +1606,7 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
     $name = $eqlogic->getConfiguration('name');
 
-    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "CAMERA_TAKE", 1, null, 0, "action");
     $cmd->save();
     $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0, null, 0);
     $infoCmd->save();
