@@ -898,7 +898,6 @@ class frigate extends eqLogic
         $frigate->setIsFavorite(0);
         $frigate->save();
         self::majEventsCmds($frigate);
-
         log::add(__CLASS__, 'debug', "| Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
       } else {
 
@@ -969,6 +968,49 @@ class frigate extends eqLogic
       }
       log::add(__CLASS__, 'debug', "----------------------END EVENT----------------------------------");
     }
+  }
+
+  private static function eventAdd($event, $eqLogicId)
+  {
+
+    $date = date("d-m-Y H:i:s", $event->getStartTime());
+    $duree = round($event->getEndTime() - $event->getStartTime(), 0);
+
+    $result[] = array(
+      "id" => $event->getId(),
+      "img" => $event->getLasted(),
+      "camera" => $event->getCamera(),
+      "label" => $event->getLabel(),
+      "box" => json_decode($event->getBox(), true),
+      "date" => $date,
+      "duree" => $duree,
+      "startTime" => $event->getStartTime(),
+      "endTime" => $event->getEndTime(),
+      "snapshot" => $event->getSnapshot(),
+      "clip" => $event->getClip(),
+      "thumbnail" => $event->getthumbnail(),
+      "hasSnapshot" => $event->getHasSnapshot(),
+      "hasClip" => $event->getHasClip(),
+      "eventId" => $event->getEventId(),
+      "score" => $event->getScore(),
+      "top_score" => $event->getTopScore(),
+      "type" => $event->getType(),
+      "isFavorite" => $event->getIsFavorite() ?? 0,
+      "zones" => $event->getZones() ?? ''
+    );
+
+
+    event::add(
+      'frigate::event',
+      array(
+        'pluginId' => 'frigate',
+        'type' => 'plugin',
+        'value' => array(
+          'eqlogicId' => $eqLogicId,
+          'value' => $result
+        )
+      )
+    );
   }
 
   public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
@@ -1828,9 +1870,12 @@ class frigate extends eqLogic
       $cameraActions = $eqCamera->getConfiguration('actions')[0];
       // Vérifier si la liste d'actions est vide
       $cameraActionsExist = !empty($cameraActions);
+      log::add(__CLASS__, 'debug', "| EVENT :: ADD.");
+      self::eventAdd($event, $eqCamera->getId());
+      log::add(__CLASS__, 'debug', "| EVENT :: END. = "  . json_encode($event));
     }
 
-
+    $eqCamera->getId();
 
     if ($cameraActionsExist) {
       log::add(__CLASS__, 'debug', "| ACTION: Vérification des actions caméra.");
