@@ -40,9 +40,11 @@
     "plugins\/frigate\/desktop\/js\/frigate.js": {
         "Affichage des logs du serveur Frigate": "Visualización de los registros del servidor Frigate",
         "Afficher": "Mostrar",
+        "Ajouter une commande HTTP": "Añadir un comando HTTP",
         "Aucune nouvelle caméra trouvée": "No se han encontrado cámaras nuevas",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Marque la casilla para que el comando se ejecute en paralelo con las demás acciones",
         "Configuration avancée, à vos propres risques ! Aucun support ne sera donné !": "Configuración avanzada bajo su propia responsabilidad No se proporcionará asistencia técnica",
+        "Création de la commande réussi.": "Creación del mando con éxito.",
         "Décocher la case pour désactiver l\\'action": "Desmarque la casilla para desactivar la acción",
         "Découverte de ": "Descubra",
         "Edition du fichier de configuration Frigate": "Edición del archivo de configuración de Frigate",
@@ -54,11 +56,13 @@
         "Le redémarrage de Frigate est en cours.": "La fragata se está reiniciando.",
         "Mise à jour des commandes et statistiques.": "Actualización de pedidos y estadísticas.",
         "Mise à jour des commandes et statistiques. Cela peut prendre du temps.": "Actualización de pedidos y estadísticas. Esto puede llevar algún tiempo.",
+        "Nom de la commande": "Nombre del comando",
         "Supprimer la commande": "Eliminar comando",
         "Sélectionner la commande": "Seleccione el comando",
         "Sélectionner un mot-clé": "Seleccionar una palabra clave",
         "Tester": "Probar",
-        "Type": "Tipo"
+        "Type": "Tipo",
+        "URL HTTP de votre commande": "URL HTTP de su pedido"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Registros",
@@ -130,6 +134,7 @@
         "Activer": "Activar",
         "Afficher les évènements de la caméra": "Ver eventos de la cámara",
         "Ajouter une action": "Añadir una acción",
+        "Ajouter une commande HTTP": "Añadir un comando HTTP",
         "Aucun": "Ninguno",
         "Aucun équipement Frigate trouvé, cliquer sur \"Rechercher\" et patienter, cela peu être long si beaucoup de caméras": "No se han encontrado equipos Frigate, haga clic en \"Buscar\" y espere, puede tardar un poco si hay muchas cámaras",
         "Catégorie": "Categoría",
@@ -147,8 +152,12 @@
         "Events": "Eventos",
         "Gestion": "Administración",
         "ID": "IDENTIFICACIÓN",
+        "Identifiant": "IDENTIFICACIÓN",
+        "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acceso para su cámara, sólo para comandos HTTP",
         "Logs Frigate": "Fragata de troncos",
         "Mes équipements": "Mi equipo",
+        "Mot de passe": "Contraseña",
+        "Mot de passe d'accès a votre caméra, seulement pour les commandes HTTP": "Contraseña de acceso a su cámara, sólo para comandos HTTP",
         "Ne rien faire si": "No hacer nada si",
         "Nom": "Nombre",
         "Nom de l'équipement": "Nombre del equipo",
@@ -175,7 +184,9 @@
         "mask": "máscara",
         "motion": "movimiento",
         "régions": "regiones",
+        "sauvegarder après tout changement": "guardar después de cualquier cambio",
         "timestamp": "marca de tiempo",
+        "une mise à jour est disponible": "disponible una actualización",
         "zones": "zonas"
     },
     "plugins\/frigate\/desktop\/php\/panel.php": {
