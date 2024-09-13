@@ -588,6 +588,15 @@ class frigate extends eqLogic
           }
         }
       }
+      // Boucle pour ajouter les commandes HTTP
+      $httpCommands = cmd::byLogicalId("action_http");
+      foreach ($httpCommands as $httpCmd) {
+        if ($httpCmd && $httpCmd->getIsVisible() == 1) {
+          $hasPresets = true; // Des presets sont disponibles
+          $selectHtml .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
+        }
+      }
+
       $selectHtml .= '</select>';
       $selectHtml .= '</div>';
 
@@ -1674,9 +1683,8 @@ class frigate extends eqLogic
     $infoCmd = self::createCmd($eqlogicId, "Etat HTTP command", "string", "", "info_http", "", 0);
     $infoCmd->save();
 
-    $output = strtolower(str_replace(' ', '', $name));
     // commande action
-    $cmd = self::createCmd($eqlogicId, $name, "other", "", "action_http_" . $output, "", 0, $infoCmd, 0, "action");
+    $cmd = self::createCmd($eqlogicId, $name, "other", "", "action_http", "", 0, $infoCmd, 0, "action");
     $cmd->save();
     log::add("frigate", 'debug', '| commande crée');
     $cmd->setConfiguration("request", $link);
@@ -2829,6 +2837,14 @@ class frigateCmd extends cmd
         break;
       case 'action_create_snapshot':
         frigate::createSnapshot($frigate);
+        break;
+      case 'action_http':
+        $response = self::getCurlcmd($link, $user, $password);
+        if ($response !== false) {
+          $frigate->getCmd(null, 'info_http')->event($response);
+        } else {
+          log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+        }
         break;
       default:
         // Gérer les actions HTTP dynamiques

@@ -530,38 +530,31 @@ document.getElementById('add-cmd-http').addEventListener('click', function () {
         message: content,
         inputType: false,
         callback: function (result) {
-            if (result) {
-                var cmd = [{
+            $.ajax({
+                type: "POST",
+                url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                data: {
+                    action: "addCmdHttp",
+                    id: eqlogicId,
                     name: result.newCmdName,
                     link: result.newLinkHTTP
-                }]
-                $.ajax({
-                    type: "POST",
-                    url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                    data: {
-                        action: "addCmdHttp",
-                        id: eqlogicId,
-                        name: cmd.name,
-                        link: cmd.link
 
-                    },
-                    dataType: 'json',
-                    error: function (request, status, error) {
-                        handleAjaxError(request, status, error);
-                    },
-                    success: function (data) {
-                        $('#div_alert').showAlert({
-                            message: '{{Création de la commande réussi.}}',
-                            level: 'info'
-                        });
-                    }
-                })
+                },
+                dataType: 'json',
+                error: function (request, status, error) {
+                    handleAjaxError(request, status, error);
+                },
+                success: function (data) {
+                    $('#div_alert').showAlert({
+                        message: '{{Création de la commande réussi.}}',
+                        level: 'info'
+                    });
+                }
+            })
 
-            }
         }
     })
-
-})
+});
 
 $(document).ready(function () {
     $('.eqLogicAttr[data-l1key=object_id]').select2();
