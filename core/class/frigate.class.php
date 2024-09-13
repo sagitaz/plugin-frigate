@@ -976,7 +976,7 @@ class frigate extends eqLogic
     $date = date("d-m-Y H:i:s", $event->getStartTime());
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
 
-    $result[] = array(
+    $result = array(
       "id" => $event->getId(),
       "img" => $event->getLasted(),
       "camera" => $event->getCamera(),
@@ -1004,7 +1004,7 @@ class frigate extends eqLogic
       'frigate::event',
       array(
         'pluginId' => 'frigate',
-        'type' => 'plugin',
+        'type' => 'pluginEvent',
         'value' => array(
           'eqlogicId' => $eqLogicId,
           'value' => $result
