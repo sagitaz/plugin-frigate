@@ -61,7 +61,7 @@ try {
     }
     if (init('action') == 'addCmdHttp') {
         // Ajout d'une commande HTTP
-        $eqlogicId = init('eqlogicId');
+        $eqlogicId = init('id');
         $name = init('name');
         $link = init('link');
         $result = frigate::createHTTPcmd($eqlogicId, $name, $link);

@@ -1669,12 +1669,19 @@ class frigate extends eqLogic
 
   public static function createHTTPcmd($eqlogicId, $name, $link)
   {
-    log::add("frigate", 'debug', '| création de la commande HTTP pour ' . $eqlogicId);
+    log::add("frigate", 'debug', '| création de la commande ' . $name . ' pour ' . $eqlogicId . ' liens : ' . $link);
+
+    $infoCmd = self::createCmd($eqlogicId, "Etat HTTP command", "string", "", "info_http", "", 0);
+    $infoCmd->save();
+
+    $output = strtolower(str_replace(' ', '', $name));
     // commande action
-    $cmd = self::createCmd($eqlogicId,$name, "other", "", "action_http_" . $name, "", 0, "", 0, "action");
+    $cmd = self::createCmd($eqlogicId, $name, "other", "", "action_http_" . $output, "", 0, $infoCmd, 0, "action");
     $cmd->save();
+    log::add("frigate", 'debug', '| commande crée');
     $cmd->setConfiguration("request", $link);
     $cmd->save();
+    log::add("frigate", 'debug', '| commande mise à jour');
     return true;
   }
   public static function createPTZdebug($eqlogicId)
@@ -2674,6 +2681,9 @@ class frigateCmd extends cmd
     $file = $frigate->getConfiguration('img');
     $logicalId = $this->getLogicalId();
     $cmdName = $this->getName();
+    $link = $this->getConfiguration('request') ?? "";
+    $user = $frigate->getConfiguration('userName');
+    $password = $frigate->getConfiguration('password');
 
     switch ($logicalId) {
       case 'action_startCron':
@@ -2821,9 +2831,49 @@ class frigateCmd extends cmd
         frigate::createSnapshot($frigate);
         break;
       default:
-        log::add(__CLASS__, 'error', "Action inconnue. Action: $logicalId");
+        // Gérer les actions HTTP dynamiques
+        if (strpos($logicalId, 'action_http_') === 0) {
+          $response = self::getCurlcmd($link, $user, $password);
+          if ($response !== false) {
+            $frigate->getCmd(null, 'info_http')->event($response);
+          } else {
+            log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+          }
+        }
     }
   }
+  private function getCurlcmd($link, $username, $password)
+  {
+
+    $ch = curl_init();
+    $verbose = fopen('php://temp', 'w+'); // Flux temporaire pour verbose
+
+    curl_setopt($ch, CURLOPT_URL, $link);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    curl_setopt($ch, CURLOPT_VERBOSE, true);
+    curl_setopt($ch, CURLOPT_STDERR, $verbose); // Rediriger verbose vers ce flux temporaire
+    curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST); // Utiliser l'authentification Digest
+    curl_setopt($ch, CURLOPT_USERPWD, "$username:$password"); // Nom d'utilisateur et mot de passe
+
+    $response = curl_exec($ch);
+
+    if (curl_errno($ch)) {
+      log::add('frigate', 'error', "Erreur cURL: " . curl_error($ch));
+    } else {
+      log::add('frigate', 'debug', "| Resultat de la commande HTTP : " . $response);
+    }
+
+    // Récupérer les informations verbose
+    rewind($verbose);
+    $verboseLog = stream_get_contents($verbose);
+    log::add('frigate', 'debug', "| cURL verbose log: " . $verboseLog);
+
+    fclose($verbose);
+    curl_close($ch);
+    return $response;
+  }
+
   private function updateCronStatus($frigate, $status, $message)
   {
     $frigate->getCmd(null, 'info_Cron')->event($status);

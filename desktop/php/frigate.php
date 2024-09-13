@@ -190,6 +190,21 @@ sendVarToJS('refresh', $refresh);
                             </div>
                             <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
                             <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Identifiant}}</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="userName" placeholder="{{Identifiant}}">
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Mot de passe}}</label>
+                                <div class="col-sm-6 input-group">
+                                    <input type="text" class="inputPassword eqLogicAttr form-control roundedLeft" data-l1key="configuration" data-l2key="password" placeholder="Mot de passe" />
+                                    <span class="input-group-btn">
+                                        <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
+                                    </span>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span></label>
                                 <div class="col-sm-8">
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox">
