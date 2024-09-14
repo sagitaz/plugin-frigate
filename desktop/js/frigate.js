@@ -113,7 +113,7 @@ function addCmdToTable(_cmd) {
     let subtype = logical[1];
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
-    } else if (type === 'cameras') {
+    } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
         printTable(_cmd, tr, "table_stats");
     } else if (type === 'info' || type === 'enable') {
         printTable(_cmd, tr, "table_infos");
@@ -123,12 +123,7 @@ function addCmdToTable(_cmd) {
         } else {
             printTable(_cmd, tr, "table_cmd");
         }
-    } else if (type === 'cameras') {
-        printTable(_cmd, tr, "table_stats");
-    } else {
-        printTable(_cmd, tr, "table_" + type);
-    }
-
+    } 
 }
 
 function printTable(_cmd, tr, tableName) {
