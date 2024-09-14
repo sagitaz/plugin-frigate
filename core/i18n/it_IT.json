@@ -118,6 +118,9 @@
         "Aucun": "Nessuno",
         "Tout": "Tutto"
     },
+    "plugins\/frigate\/desktop\/php\/event.filters.template2.php": {
+        "Effacer les dates sélectionnées": "Cancellare le date selezionate"
+    },
     "plugins\/frigate\/desktop\/php\/event.template.php": {
         "Afficher la page de la caméra": "Visualizzare la pagina della telecamera",
         "Supprimer l'évènement sur votre serveur Frigate": "Cancellare l'evento sul server Frigate",
@@ -157,6 +160,7 @@
         "ID": "ID",
         "Identifiant": "Identifiant",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID di accesso per la telecamera, solo per i comandi HTTP",
+        "Infos events": "Info eventi",
         "Logs Frigate": "Tronchi Frigate",
         "Mes équipements": "Le mie apparecchiature",
         "Mot de passe": "Password",
@@ -168,6 +172,7 @@
         "Nombre de preset à importer": "Numero di preset da importare",
         "Objet parent": "Oggetto padre",
         "Options": "Opzioni",
+        "PTZ & HTTP": "PTZ E HTTP",
         "Paramètres": "Impostazioni",
         "Paramètres de la caméra": "Impostazioni della telecamera",
         "Paramètres généraux": "Parametri generali",
@@ -176,6 +181,7 @@
         "Redémarrer Frigate": "Riavviare Frigate",
         "Sauvegarder": "Sauvegarder",
         "Serveur Frigate": "Server Frigate",
+        "Statistiques": "Statistiche",
         "Supprimer": "Supprimer",
         "Valeur": "Valore",
         "Visible": "Visibile",
