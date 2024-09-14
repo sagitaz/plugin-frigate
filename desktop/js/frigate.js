@@ -32,9 +32,20 @@ function addCmdToTable(_cmd) {
     if (!isset(_cmd.configuration)) {
         _cmd.configuration = {}
     }
+
+    if (isset(_cmd.logicalId) && _cmd.logicalId == 'action_http') {
+        var editHTTP = true;
+    } else {
+        var editHTTP = false;
+    }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
+    if (editHTTP) {
+        console.log("data-request= " + init(_cmd.configuration['request']));
+        let request = init(_cmd.configuration['request']);
+        tr += '<a class="btn btn-primary btn-xs cmdAction pull-right" onclick="editHTTP(this)" id="' + init(_cmd.id) + '" data-request="' + request + '"><i class="fa fa-edit"></i></a> ';
+    }
     tr += '</td>';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
@@ -81,21 +92,47 @@ function addCmdToTable(_cmd) {
     tr += '</tr>';
 
 
-    $('#table_cmd tbody').append(tr)
-    var tr = $('#table_cmd tbody tr').last()
-    jeedom.eqLogic.buildSelectCmd({
-        id: $('.eqLogicAttr[data-l1key=id]').value(),
-        filter: { type: 'info' },
-        error: function (error) {
-            $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-        },
-        success: function (result) {
-            tr.find('.cmdAttr[data-l1key=value]').append(result)
-            tr.setValues(_cmd, '.cmdAttr')
-            jeedom.cmd.changeType(tr, init(_cmd.subType))
-        }
-    })
+    /*   $('#table_cmd tbody').append(tr)
+       var tr = $('#table_cmd tbody tr').last()
+       jeedom.eqLogic.buildSelectCmd({
+           id: $('.eqLogicAttr[data-l1key=id]').value(),
+           filter: { type: 'info' },
+           error: function (error) {
+               $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+           },
+           success: function (result) {
+               tr.find('.cmdAttr[data-l1key=value]').append(result)
+               tr.setValues(_cmd, '.cmdAttr')
+               jeedom.cmd.changeType(tr, init(_cmd.subType))
+           }
+       }) */
 
+
+    let logical = _cmd.logicalId.split('_');
+    let type = logical[0];
+    let subtype = logical[1];
+    if (type === 'hide') {
+        // Actions spécifiques pour le type 'hide'
+    } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
+        printTable(_cmd, tr, "table_stats");
+    } else if (type === 'info' || type === 'enable') {
+        printTable(_cmd, tr, "table_infos");
+    } else if (type === 'action') {
+        if (subtype === 'ptz' || subtype === 'preset' || subtype === 'http') {
+            printTable(_cmd, tr, "table_ptz");
+        } else {
+            printTable(_cmd, tr, "table_cmd");
+        }
+    } 
+}
+
+function printTable(_cmd, tr, tableName) {
+    $('#' + tableName + ' tbody').append(tr);
+    $('#' + tableName + ' tbody tr:last').setValues(_cmd, '.cmdAttr');
+    if (isset(_cmd.type)) {
+        $('#' + tableName + ' tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
+    }
+    jeedom.cmd.changeType($('#' + tableName + ' tbody tr:last'), init(_cmd.subType));
 }
 
 function addAction(_action, _type) {
@@ -110,6 +147,7 @@ function addAction(_action, _type) {
     div += '<div class="col-sm-1">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="enable" checked title="{{Décocher la case pour désactiver l\'action}}">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que la commande s\'exécute en parallèle des autres actions}}">'
+    div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="actionForced" title="{{Cocher la case pour que la commande s\'exécute malgré la condition}}">'
     div += '</div>'
     div += '<div class="col-sm-1">'
     div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdLabelName" placeholder="{{Label}}" data-type="' + _type + '" />'
@@ -530,34 +568,79 @@ document.getElementById('add-cmd-http').addEventListener('click', function () {
         message: content,
         inputType: false,
         callback: function (result) {
-            $.ajax({
-                type: "POST",
-                url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                data: {
-                    action: "addCmdHttp",
-                    id: eqlogicId,
-                    name: result.newCmdName,
-                    link: result.newLinkHTTP
+            if (result !== null) {
+                $.ajax({
+                    type: "POST",
+                    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                    data: {
+                        action: "addCmdHttp",
+                        id: eqlogicId,
+                        name: result.newCmdName,
+                        link: result.newLinkHTTP
 
-                },
-                dataType: 'json',
-                error: function (request, status, error) {
-                    handleAjaxError(request, status, error);
-                },
-                success: function (data) {
-                    $('#div_alert').showAlert({
-                        message: '{{Création de la commande réussi.}}',
-                        level: 'info'
-                    });
-                }
-            })
+                    },
+                    dataType: 'json',
+                    error: function (request, status, error) {
+                        handleAjaxError(request, status, error);
+                    },
+                    success: function (data) {
+                        $('#div_alert').showAlert({
+                            message: '{{Création de la commande réussi.}}',
+                            level: 'info'
+                        });
 
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 10000);
+                    }
+                })
+            }
         }
     })
-    window.setTimeout(function () {
-        window.location.reload();
-    }, 10000);
 });
+
+function editHTTP(cmd) {
+    var id = cmd.id; // Récupère l'id
+    var data = cmd.getAttribute('data-request'); // Récupère la valeur de data-request
+
+    console.log('ID:', id);
+    console.log('Data:', data);
+
+    jeeDialog.prompt({
+        title: "{{Modifier la commande HTTP}}",
+        inputType: 'input',
+        value: data,
+        callback: function (result) {
+            if (result !== null) {
+                $.ajax({
+                    type: "POST",
+                    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                    data: {
+                        action: "editHTTP",
+                        id: id,
+                        link: result
+
+                    },
+                    dataType: 'json',
+                    error: function (request, status, error) {
+                        handleAjaxError(request, status, error);
+                    },
+                    success: function (data) {
+                        $('#div_alert').showAlert({
+                            message: '{{Modification de la commande réussi.}}',
+                            level: 'info'
+                        });
+
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 10000);
+                    }
+                })
+            }
+        }
+    })
+}
+
 
 $(document).ready(function () {
     $('.eqLogicAttr[data-l1key=object_id]').select2();

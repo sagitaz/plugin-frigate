@@ -50,7 +50,10 @@
     <label for="endDate">
       <i class="fa fa-calendar"></i> Fin 
       <input type="datetime-local" id="endDate" class="datetime-input">
-    </label>
+    </label>  
+      <button id="clearDates" class="select-button" title="{{Effacer les dates sélectionnées}}">
+    <i class="fas fa-redo"></i>
+  </button>
   </div>
 </div>
 

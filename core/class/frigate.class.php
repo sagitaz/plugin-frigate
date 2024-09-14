@@ -469,7 +469,7 @@ class frigate extends eqLogic
         if ($down->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-down">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -484,7 +484,7 @@ class frigate extends eqLogic
         if ($up->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-up">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -499,7 +499,7 @@ class frigate extends eqLogic
         if ($left->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-left">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -514,7 +514,7 @@ class frigate extends eqLogic
         if ($right->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-right">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -589,7 +589,7 @@ class frigate extends eqLogic
         }
       }
       // Boucle pour ajouter les commandes HTTP
-      $httpCommands = cmd::byLogicalId("action_http");
+      $httpCommands = cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true);
       foreach ($httpCommands as $httpCmd) {
         if ($httpCmd && $httpCmd->getIsVisible() == 1) {
           $hasPresets = true; // Des presets sont disponibles
@@ -898,7 +898,6 @@ class frigate extends eqLogic
         $frigate->setIsFavorite(0);
         $frigate->save();
         self::majEventsCmds($frigate);
-
         log::add(__CLASS__, 'debug', "| Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
       } else {
 
@@ -969,6 +968,49 @@ class frigate extends eqLogic
       }
       log::add(__CLASS__, 'debug', "----------------------END EVENT----------------------------------");
     }
+  }
+
+  private static function eventAdd($event, $eqLogicId)
+  {
+
+    $date = date("d-m-Y H:i:s", $event->getStartTime());
+    $duree = round($event->getEndTime() - $event->getStartTime(), 0);
+
+    $result = array(
+      "id" => $event->getId(),
+      "img" => $event->getLasted(),
+      "camera" => $event->getCamera(),
+      "label" => $event->getLabel(),
+      "box" => json_decode($event->getBox(), true),
+      "date" => $date,
+      "duree" => $duree,
+      "startTime" => $event->getStartTime(),
+      "endTime" => $event->getEndTime(),
+      "snapshot" => $event->getSnapshot(),
+      "clip" => $event->getClip(),
+      "thumbnail" => $event->getthumbnail(),
+      "hasSnapshot" => $event->getHasSnapshot(),
+      "hasClip" => $event->getHasClip(),
+      "eventId" => $event->getEventId(),
+      "score" => $event->getScore(),
+      "top_score" => $event->getTopScore(),
+      "type" => $event->getType(),
+      "isFavorite" => $event->getIsFavorite() ?? 0,
+      "zones" => $event->getZones() ?? ''
+    );
+
+
+    event::add(
+      'frigate::event',
+      [
+        'pluginId' => 'frigate',
+        'type' => 'pluginEvent',
+        'value' => [
+          'eqlogicId' => $eqLogicId,
+          'value' => $result
+        ]
+      ]
+    );
   }
 
   public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
@@ -1564,7 +1606,7 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
     $name = $eqlogic->getConfiguration('name');
 
-    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "", 1, null, 0, "action");
+    $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "CAMERA_TAKE", 1, null, 0, "action");
     $cmd->save();
     $infoCmd = self::createCmd($eqlogicId, "URL image", "string", "", "info_url_capture", "", 0, null, 0);
     $infoCmd->save();
@@ -1692,6 +1734,16 @@ class frigate extends eqLogic
     log::add("frigate", 'debug', '| commande mise à jour');
     return true;
   }
+
+  public static function editHTTP($cmdId, $link)
+  {
+    $cmd = cmd::byid($cmdId);
+    $cmd->setConfiguration("request", $link);
+    $cmd->save();
+    log::add("frigate", 'debug', '| commande mise à jour');
+    return true;
+  }
+
   public static function createPTZdebug($eqlogicId)
   {
     log::add("frigate", 'debug', '| création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
@@ -1828,9 +1880,12 @@ class frigate extends eqLogic
       $cameraActions = $eqCamera->getConfiguration('actions')[0];
       // Vérifier si la liste d'actions est vide
       $cameraActionsExist = !empty($cameraActions);
+      log::add(__CLASS__, 'debug', "| EVENT :: ADD.");
+      self::eventAdd($event, $eqCamera->getId());
+      log::add(__CLASS__, 'debug', "| EVENT :: END. = "  . json_encode($event));
     }
 
-
+    $eqCamera->getId();
 
     if ($cameraActionsExist) {
       log::add(__CLASS__, 'debug', "| ACTION: Vérification des actions caméra.");
@@ -2049,14 +2104,13 @@ class frigate extends eqLogic
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
     $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
-
+    $conditionIsActived = false;
     $eqLogic = eqLogic::byId($eqLogicId);
 
     // Vérification de la condition d'exécution
     $conditionIf = $eqLogic->getConfiguration('conditionIf');
     if ($conditionIf && jeedom::evaluateExpression($conditionIf)) {
-      log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-      return;
+      $conditionIsActived = true;
     }
 
     $actions = $eqLogic->getConfiguration('actions')[0];
@@ -2067,10 +2121,20 @@ class frigate extends eqLogic
       $cmdTypeName = $action['cmdTypeName'] ?: "end";
       $options = $action['options'];
       $enable = $action['options']['enable'] ?? false;
+      $actionForced = $action['options']['actionForced'] ?? false;
 
       if (!$enable) {
         log::add(__CLASS__, 'debug', "| Commande(s) désactivée(s)");
         continue;
+      }
+
+      if (!$conditionIsActived) {
+        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s)");
+      } elseif ($conditionIsActived && $actionForced) {
+        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
+      } else {
+        log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
+        return;
       }
 
       $options = str_replace(

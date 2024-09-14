@@ -129,8 +129,11 @@ sendVarToJS('refresh', $refresh);
         <ul class="nav nav-tabs" role="tablist">
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
-            <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
             <li role="presentation" class="eqActions"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
+            <li role="presentation"><a href="#infostab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Infos events}}</a></li>
+            <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
+            <li role="presentation"><a href="#ptztab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{PTZ & HTTP}}</a></li>
+            <li role="presentation"><a href="#statstab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Statistiques}}</a></li>
         </ul>
         <div class="tab-content">
             <!-- Onglet de configuration de l'équipement -->
@@ -291,7 +294,6 @@ sendVarToJS('refresh', $refresh);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
-                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-cmd-http" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_cmd" class="table table-bordered table-condensed">
@@ -310,6 +312,68 @@ sendVarToJS('refresh', $refresh);
                     </table>
                 </div>
             </div><!-- /.tabpanel #commandtab-->
+
+            <div role="tabpanel" class="tab-pane" id="infostab">
+                <br><br>
+                <div class="table-responsive">
+                    <table id="table_infos" class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th class="col-xs-1">{{ID}}</th>
+                                <th class="col-xs-5">{{Nom}}</th>
+                                <th class="col-xs-1">{{Paramètres}}</th>
+                                <th class="col-xs-1"></th>
+                                <th class="col-xs-3">{{Valeur}}</th>
+                                <th class="col-xs-1">{{Action}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /.tabpanel #infostab-->
+
+            <div role="tabpanel" class="tab-pane" id="ptztab">
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-cmd-http" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
+                <br><br>
+                <div class="table-responsive">
+                    <table id="table_ptz" class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th class="col-xs-1">{{ID}}</th>
+                                <th class="col-xs-5">{{Nom}}</th>
+                                <th class="col-xs-1">{{Paramètres}}</th>
+                                <th class="col-xs-1"></th>
+                                <th class="col-xs-3">{{Valeur}}</th>
+                                <th class="col-xs-1">{{Action}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /.tabpanel #ptztab-->
+
+            <div role="tabpanel" class="tab-pane" id="statstab">
+                <br><br>
+                <div class="table-responsive">
+                    <table id="table_stats" class="table table-bordered table-condensed">
+                        <thead>
+                            <tr>
+                                <th class="col-xs-1">{{ID}}</th>
+                                <th class="col-xs-5">{{Nom}}</th>
+                                <th class="col-xs-1">{{Paramètres}}</th>
+                                <th class="col-xs-1"></th>
+                                <th class="col-xs-3">{{Valeur}}</th>
+                                <th class="col-xs-1">{{Action}}</th>
+                            </tr>
+                        </thead>
+                        <tbody>
+                        </tbody>
+                    </table>
+                </div>
+            </div><!-- /.tabpanel #statstab-->
+
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>

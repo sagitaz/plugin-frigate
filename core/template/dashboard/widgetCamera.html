@@ -1,6 +1,6 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
     data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
-    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#;">
+    style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#; width: #width#;height: #height#">
 
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
@@ -137,7 +137,10 @@
 
         .frigate_widget {
             width: 435px !important;
-            height: 315px !important;
+            /*      height: 315px !important;*/
+            display: flex;
+            flex-direction: column;
+            justify-content: flex-start;
         }
 
 
@@ -172,11 +175,10 @@
             position: relative;
             z-index: 1;
             width: 100%;
-            /* L'image occupe toute la largeur disponible */
             height: auto;
-            object-fit: cover;
-            /* S'assure que l'image reste proportionnelle */
             object-position: top;
+            /* object-fit: cover; */
+            object-fit: contain;
         }
 
         /* Boutons en bas de l'image */
@@ -184,14 +186,17 @@
             width: 100%;
             height: auto !important;
             position: relative !important;
+            text-align: center;
+            background-color: rgb(var(--defaultBkg-color)) !important;
+            z-index: 98;
+            /*
             bottom: 0;
             left: 0;
             right: 0;
             margin-left: auto;
             margin-right: auto;
-            text-align: center;
-            background-color: rgb(var(--defaultBkg-color)) !important;
-            z-index: 98;
+            */
+            margin-top: 0px;
         }
 
         /* Boutons d'action */
@@ -267,21 +272,21 @@
         .frigate_widget .btn-ptz-right {
             bottom: 21px;
             /* Positionné au-dessus du cercle */
-            left: 50px;
+            left: 55px;
             /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-up {
-            bottom: 44px;
+            bottom: 46px;
             /* Positionné au-dessus du cercle */
-            left: 25px;
+            left: 28px;
             /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-down {
-            bottom: 1px;
+            bottom: -1px;
             /* Positionné au-dessus du cercle */
-            left: 25px;
+            left: 28px;
             /* Ajuster pour aligner avec le cercle */
         }
 

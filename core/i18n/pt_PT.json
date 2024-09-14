@@ -43,6 +43,7 @@
         "Ajouter une commande HTTP": "Adicionar um comando HTTP",
         "Aucune nouvelle caméra trouvée": "Não foram encontradas novas câmaras",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Assinale a caixa para que o comando seja executado em paralelo com as outras acções",
+        "Cocher la case pour que la commande s\\'exécute malgré la condition": "Marque a caixa para que o comando seja executado apesar da condição",
         "Configuration avancée, à vos propres risques ! Aucun support ne sera donné !": "Configuração avançada por sua conta e risco! Não será prestado qualquer apoio!",
         "Création de la commande réussi.": "Criação do comando bem sucedido.",
         "Décocher la case pour désactiver l\\'action": "Desmarque a caixa para desativar a ação",
@@ -56,6 +57,8 @@
         "Le redémarrage de Frigate est en cours.": "A fragata está a ser reiniciada.",
         "Mise à jour des commandes et statistiques.": "Atualização de encomendas e estatísticas.",
         "Mise à jour des commandes et statistiques. Cela peut prendre du temps.": "Atualização de encomendas e estatísticas. Isto pode demorar algum tempo.",
+        "Modification de la commande réussi.": "Modificação do comando bem sucedido.",
+        "Modifier la commande HTTP": "Modificar o comando HTTP",
         "Nom de la commande": "Nome do comando",
         "Supprimer la commande": "Apagar comando",
         "Sélectionner la commande": "Selecionar o comando",
@@ -115,6 +118,9 @@
         "Aucun": "Nenhum",
         "Tout": "Tudo"
     },
+    "plugins\/frigate\/desktop\/php\/event.filters.template2.php": {
+        "Effacer les dates sélectionnées": "Eliminar datas selecionadas"
+    },
     "plugins\/frigate\/desktop\/php\/event.template.php": {
         "Afficher la page de la caméra": "Apresentar a página da câmara",
         "Supprimer l'évènement sur votre serveur Frigate": "Eliminar o evento no seu servidor Frigate",
@@ -154,6 +160,7 @@
         "ID": "EU IRIA",
         "Identifiant": "EU IRIA",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acesso para a sua câmara, apenas para comandos HTTP",
+        "Infos events": "Informações sobre eventos",
         "Logs Frigate": "Fragata de toros",
         "Mes équipements": "O meu equipamento",
         "Mot de passe": "Password",
@@ -165,6 +172,7 @@
         "Nombre de preset à importer": "Número de predefinições a importar",
         "Objet parent": "Objeto pai",
         "Options": "Opções",
+        "PTZ & HTTP": "PTZ E HTTP",
         "Paramètres": "Parâmetros",
         "Paramètres de la caméra": "Definições da câmara",
         "Paramètres généraux": "Parâmetros gerais",
@@ -173,6 +181,7 @@
         "Redémarrer Frigate": "Reiniciar a Fragata",
         "Sauvegarder": "Guardar",
         "Serveur Frigate": "Servidor Frigate",
+        "Statistiques": "Estatísticas",
         "Supprimer": "Eliminar",
         "Valeur": "Valor",
         "Visible": "Visível",
