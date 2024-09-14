@@ -123,7 +123,7 @@ function addCmdToTable(_cmd) {
         } else {
             printTable(_cmd, tr, "table_cmd");
         }
-    } 
+    }
 }
 
 function printTable(_cmd, tr, tableName) {
@@ -558,7 +558,7 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
     })
 });
 
-document.getElementById('add-cmd-http').addEventListener('click', function () {
+document.getElementById('addCmdHttp').addEventListener('click', function () {
     jeedomUtils.hideAlert()
     const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
     let content = '<input class="promptAttr" data-l1key="newCmdName" autocomplete="off" type="text" placeholder="{{Nom de la commande}}">'
