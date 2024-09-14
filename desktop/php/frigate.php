@@ -67,6 +67,20 @@ sendVarToJS('refresh', $refresh);
                 <span>{{Logs Frigate}}</span>
             </div>
         </div>
+
+        <?php
+        if (count($eqLogics) != 0) {
+            $version = config::byKey('frigate_version', 'frigate') ?? "version non trouvée";
+            $maj = config::byKey('frigate_maj', 'frigate') ?? 0;
+            echo '<legend>';
+            if (!$maj) {
+                echo 'Frigate <span class="success" style="font-size:1.2em;font-weight:bold;">' . $version . '</span>';
+            } else {
+                echo 'Frigate <span class="warning" style="font-size:1.2em;font-weight:bold;" title="{{une mise à jour est disponible}}">' . $version . '</span>';
+            }
+            echo '</legend>';
+        }
+        ?>
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
         if (count($eqLogics) == 0) {
@@ -168,47 +182,32 @@ sendVarToJS('refresh', $refresh);
                                     <label class="checkbox-inline"><input type="checkbox" class="eqLogicAttr" data-l1key="isVisible" checked>{{Visible}}</label>
                                 </div>
                             </div>
+                            <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Identifiant}}
+
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Identifiant d'accès a votre caméra, seulement pour les commandes HTTP}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="userName" placeholder="{{Identifiant}}">
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Mot de passe}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Mot de passe d'accès a votre caméra, seulement pour les commandes HTTP}}"></i></sup>
+
+                                </label>
+                                <div class="col-sm-6 input-group">
+                                    <input type="text" class="inputPassword eqLogicAttr form-control roundedLeft" data-l1key="configuration" data-l2key="password" placeholder="Mot de passe" />
+                                    <span class="input-group-btn">
+                                        <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
+                                    </span>
+                                </div>
+                            </div>
                             <div class="form-group eqFrigate ptz-options">
                                 <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
                                 <div class="col-sm-6">
                                     <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
-                                </div>
-                            </div>
-                            <legend class="eqFrigate"><i class="fas fa-cogs"></i> {{Paramètres de la caméra}}</legend>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label timestamp-configuration"><span>{{timestamp}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label zones-configuration"><span>{{zones}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label mask-configuration"><span>{{mask}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr mask-checkbox" data-l1key="configuration" data-l2key="mask">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label motion-configuration"><span>{{motion}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion">
-                                </div>
-                            </div>
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label regions-configuration"><span>{{régions}}</span></label>
-                                <div class="col-sm-8">
-                                    <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions">
                                 </div>
                             </div>
 
@@ -217,10 +216,27 @@ sendVarToJS('refresh', $refresh);
                         <!-- Partie droite de l'onglet "Équipement" -->
                         <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
                         <div class="col-lg-6 eqFrigate">
+                            <div class="col-lg-12 pull-left">
+                                <legend><i class="fas fa-info" title="{{sauvegarder après tout changement}}"></i> {{Visualisation}}</legend>
+                            </div>
+
+
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span>
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox"></label>
+                                <label class="col-sm-4 control-label timestamp-configuration"><span>{{timestamp}}</span>
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp"></label>
+                                <label class="col-sm-4 control-label zones-configuration"><span>{{zones}}</span>
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones"></label>
+                                <label class="col-sm-4 control-label mask-configuration"><span>{{mask}}</span>
+                                    <input type="checkbox" class="eqLogicAttr mask-checkbox" data-l1key="configuration" data-l2key="mask"></label>
+                                <label class="col-sm-4 control-label motion-configuration"><span>{{motion}}</span>
+                                    <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion"></label>
+                                <label class="col-sm-4 control-label regions-configuration"><span>{{régions}}</span>
+                                    <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions"></label>
+                            </div>
+
                             <div>
-                                <div class="pull-left">
-                                    <legend><i class="fas fa-info"></i> {{Visualisation}}</legend>
-                                </div>
                                 <?php
 
                                 $name = '';
@@ -255,8 +271,8 @@ sendVarToJS('refresh', $refresh);
                                 }
 
                                 ?>
-                            </div>
 
+                            </div>
                             <div class="form-group">
                                 <div class="col-sm-12" style="display: none;">
                                     <input type="text" id="cameraUrlInput" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="img">
@@ -275,6 +291,7 @@ sendVarToJS('refresh', $refresh);
 
             <!-- Onglet des commandes de l'équipement -->
             <div role="tabpanel" class="tab-pane" id="commandtab">
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-cmd-http" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_cmd" class="table table-bordered table-condensed">
@@ -315,7 +332,7 @@ sendVarToJS('refresh', $refresh);
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
                         #time#, #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
                         <br>
-                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#
+                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">

@@ -118,6 +118,7 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#start#** : heure de début
 - **#end#** : heure de fin
 - **#duree#** : durée de l'évènement
+- **#jeemate#** : voir explications plus bas
 
 Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
@@ -133,6 +134,11 @@ En MQTT, ils peuvent être de type **new**, **update** et **end**.
 #### Plugin JeeMate
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
+
+Pour une notification automatique, ajouter frigate=#jeemate#
+
+- **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#;;frigate=#jeemate#``**
+- **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#;;frigate=#jeemate#``**
 
 #### Plugin Telegram
 - **snapshot** : dans le champ titre : **``title=votre titre | snapshot=#snapshot#``**
