@@ -118,6 +118,9 @@
         "Aucun": "Nenhum",
         "Tout": "Tudo"
     },
+    "plugins\/frigate\/desktop\/php\/event.filters.template2.php": {
+        "Effacer les dates sélectionnées": "Eliminar datas selecionadas"
+    },
     "plugins\/frigate\/desktop\/php\/event.template.php": {
         "Afficher la page de la caméra": "Apresentar a página da câmara",
         "Supprimer l'évènement sur votre serveur Frigate": "Eliminar o evento no seu servidor Frigate",
@@ -157,6 +160,7 @@
         "ID": "EU IRIA",
         "Identifiant": "EU IRIA",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acesso para a sua câmara, apenas para comandos HTTP",
+        "Infos events": "Informações sobre eventos",
         "Logs Frigate": "Fragata de toros",
         "Mes équipements": "O meu equipamento",
         "Mot de passe": "Password",
@@ -168,6 +172,7 @@
         "Nombre de preset à importer": "Número de predefinições a importar",
         "Objet parent": "Objeto pai",
         "Options": "Opções",
+        "PTZ & HTTP": "PTZ E HTTP",
         "Paramètres": "Parâmetros",
         "Paramètres de la caméra": "Definições da câmara",
         "Paramètres généraux": "Parâmetros gerais",
@@ -176,6 +181,7 @@
         "Redémarrer Frigate": "Reiniciar a Fragata",
         "Sauvegarder": "Guardar",
         "Serveur Frigate": "Servidor Frigate",
+        "Statistiques": "Estatísticas",
         "Supprimer": "Eliminar",
         "Valeur": "Valor",
         "Visible": "Visível",
