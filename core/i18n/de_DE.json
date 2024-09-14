@@ -118,6 +118,9 @@
         "Aucun": "Nein",
         "Tout": "Alles"
     },
+    "plugins\/frigate\/desktop\/php\/event.filters.template2.php": {
+        "Effacer les dates sélectionnées": "Ausgewählte Daten löschen"
+    },
     "plugins\/frigate\/desktop\/php\/event.template.php": {
         "Afficher la page de la caméra": "Anzeigen der Kameraseite",
         "Supprimer l'évènement sur votre serveur Frigate": "Löschen Sie das Ereignis auf Ihrem Frigate-Server",
@@ -157,6 +160,7 @@
         "ID": "Identifikation",
         "Identifiant": "ICH WÜRDE",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Zugangskennung zu Ihrer Kamera, nur für HTTP-Befehle",
+        "Infos events": "Infos zu Veranstaltungen",
         "Logs Frigate": "Frigate-Logs",
         "Mes équipements": "Meine Geräte",
         "Mot de passe": "Passwort",
@@ -168,6 +172,7 @@
         "Nombre de preset à importer": "Anzahl der zu importierenden Presets",
         "Objet parent": "Übergeordnetes Objekt",
         "Options": "Optionen",
+        "PTZ & HTTP": "PTZ & HTTP",
         "Paramètres": "Die Einstellungen",
         "Paramètres de la caméra": "Kameraeinstellungen",
         "Paramètres généraux": "Allgemeine Einstellungen",
@@ -176,6 +181,7 @@
         "Redémarrer Frigate": "Frigate neu starten",
         "Sauvegarder": "Zu schützen",
         "Serveur Frigate": "Frigate-Server",
+        "Statistiques": "Statistiken",
         "Supprimer": "Entfernen",
         "Valeur": "Wert",
         "Visible": "Sichtbar",
