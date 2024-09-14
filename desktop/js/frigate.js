@@ -92,21 +92,52 @@ function addCmdToTable(_cmd) {
     tr += '</tr>';
 
 
-    $('#table_cmd tbody').append(tr)
-    var tr = $('#table_cmd tbody tr').last()
-    jeedom.eqLogic.buildSelectCmd({
-        id: $('.eqLogicAttr[data-l1key=id]').value(),
-        filter: { type: 'info' },
-        error: function (error) {
-            $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-        },
-        success: function (result) {
-            tr.find('.cmdAttr[data-l1key=value]').append(result)
-            tr.setValues(_cmd, '.cmdAttr')
-            jeedom.cmd.changeType(tr, init(_cmd.subType))
-        }
-    })
+    /*   $('#table_cmd tbody').append(tr)
+       var tr = $('#table_cmd tbody tr').last()
+       jeedom.eqLogic.buildSelectCmd({
+           id: $('.eqLogicAttr[data-l1key=id]').value(),
+           filter: { type: 'info' },
+           error: function (error) {
+               $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+           },
+           success: function (result) {
+               tr.find('.cmdAttr[data-l1key=value]').append(result)
+               tr.setValues(_cmd, '.cmdAttr')
+               jeedom.cmd.changeType(tr, init(_cmd.subType))
+           }
+       }) */
 
+
+    let logical = _cmd.logicalId.split('_');
+    let type = logical[0];
+    let subtype = logical[1];
+    if (type === 'hide') {
+        // Actions spécifiques pour le type 'hide'
+    } else if (type === 'cameras') {
+        printTable(_cmd, tr, "table_stats");
+    } else if (type === 'info' || type === 'enable') {
+        printTable(_cmd, tr, "table_infos");
+    } else if (type === 'action') {
+        if (subtype === 'ptz' || subtype === 'preset' || subtype === 'http') {
+            printTable(_cmd, tr, "table_ptz");
+        } else {
+            printTable(_cmd, tr, "table_cmd");
+        }
+    } else if (type === 'cameras') {
+        printTable(_cmd, tr, "table_stats");
+    } else {
+        printTable(_cmd, tr, "table_" + type);
+    }
+
+}
+
+function printTable(_cmd, tr, tableName) {
+    $('#' + tableName + ' tbody').append(tr);
+    $('#' + tableName + ' tbody tr:last').setValues(_cmd, '.cmdAttr');
+    if (isset(_cmd.type)) {
+        $('#' + tableName + ' tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
+    }
+    jeedom.cmd.changeType($('#' + tableName + ' tbody tr:last'), init(_cmd.subType));
 }
 
 function addAction(_action, _type) {
