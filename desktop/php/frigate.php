@@ -130,7 +130,7 @@ sendVarToJS('refresh', $refresh);
             <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation" class="eqActions"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
-            <li role="presentation"><a href="#infostab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Infos events}}</a></li>
+            <li role="presentation"><a href="#infostab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Infos}}</a></li>
             <li role="presentation"><a href="#commandtab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Commandes}}</a></li>
             <li role="presentation"><a href="#ptztab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{PTZ & HTTP}}</a></li>
             <li role="presentation"><a href="#statstab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Statistiques}}</a></li>
@@ -334,7 +334,7 @@ sendVarToJS('refresh', $refresh);
             </div><!-- /.tabpanel #infostab-->
 
             <div role="tabpanel" class="tab-pane" id="ptztab">
-                <a class="btn btn-primary btn-sm pull-right cmdAction" id="add-cmd-http" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
+                <a class="btn btn-primary btn-sm pull-right cmdAction" id="addCmdHttp" style="margin-top:5px;"><i class="fas fa-plus-circle"></i> {{Ajouter une commande HTTP}}</a>
                 <br><br>
                 <div class="table-responsive">
                     <table id="table_ptz" class="table table-bordered table-condensed">
