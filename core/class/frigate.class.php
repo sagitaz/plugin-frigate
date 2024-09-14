@@ -975,13 +975,19 @@ class frigate extends eqLogic
 
     $date = date("d-m-Y H:i:s", $event->getStartTime());
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
+    $box = $event->getBox();
+    if (is_array($box)) {
+      $boxArray = $box;
+    } else {
+      $boxArray = json_decode($box, true);
+    }
 
     $result = array(
       "id" => $event->getId(),
       "img" => $event->getLasted(),
       "camera" => $event->getCamera(),
       "label" => $event->getLabel(),
-      "box" => json_decode($event->getBox(), true),
+      "box" => $boxArray,
       "date" => $date,
       "duree" => $duree,
       "startTime" => $event->getStartTime(),
@@ -1877,9 +1883,14 @@ class frigate extends eqLogic
     if (is_object($eqCamera)) {
       $eqlogicIds[] = $eqCamera->getId();
       // Récupération de la configuration des actions de la caméra
-      $cameraActions = $eqCamera->getConfiguration('actions')[0];
+      $cameraActions = $eqCamera->getConfiguration('actions');
+      if (is_array($cameraActions) && isset($cameraActions[0])) {
+        $cameraAction = $cameraActions[0];
+      } else {
+        $cameraAction = null;
+      }
       // Vérifier si la liste d'actions est vide
-      $cameraActionsExist = !empty($cameraActions);
+      $cameraActionsExist = !empty($cameraAction);
       log::add(__CLASS__, 'debug', "| EVENT :: ADD.");
       self::eventAdd($event, $eqCamera->getId());
       log::add(__CLASS__, 'debug', "| EVENT :: END. = "  . json_encode($event));
@@ -1892,7 +1903,7 @@ class frigate extends eqLogic
 
       // Vérifier si toutes les actions sont désactivées
       $allActionsDisabled = true;
-      foreach ($cameraActions as $action) {
+      foreach ($cameraAction as $action) {
         // Vérifier si l'action est activée
         $enable = $action['options']['enable'] ?? false;
 
@@ -2113,69 +2124,80 @@ class frigate extends eqLogic
       $conditionIsActived = true;
     }
 
-    $actions = $eqLogic->getConfiguration('actions')[0];
+    $actionsArray = $eqLogic->getConfiguration('actions');
 
-    foreach ($actions as $action) {
-      $cmd = $action['cmd'];
-      $cmdLabelName = $action['cmdLabelName'] ?: "all";
-      $cmdTypeName = $action['cmdTypeName'] ?: "end";
-      $options = $action['options'];
-      $enable = $action['options']['enable'] ?? false;
-      $actionForced = $action['options']['actionForced'] ?? false;
+    // Vérifie que $cameraActions est bien un tableau et qu'il contient un élément à l'indice 0
+    if (is_array($actionsArray) && isset($actionsArray[0])) {
+      $actions = $actionsArray[0];
+    } else {
+      // Gérer le cas où $cameraActions n'est pas un tableau ou est vide
+      // Par exemple, loguer un message d'erreur ou initialiser $cameraAction avec une valeur par défaut
+      $actions = null;
+      // Ou afficher un message d'erreur
+    }
+    if (is_array($actions)) {
+      foreach ($actions as $action) {
+        $cmd = $action['cmd'];
+        $cmdLabelName = $action['cmdLabelName'] ?: "all";
+        $cmdTypeName = $action['cmdTypeName'] ?: "end";
+        $options = $action['options'];
+        $enable = $action['options']['enable'] ?? false;
+        $actionForced = $action['options']['actionForced'] ?? false;
 
-      if (!$enable) {
-        log::add(__CLASS__, 'debug', "| Commande(s) désactivée(s)");
-        continue;
-      }
+        if (!$enable) {
+          log::add(__CLASS__, 'debug', "| Commande(s) désactivée(s)");
+          continue;
+        }
 
-      if (!$conditionIsActived) {
-        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s)");
-      } elseif ($conditionIsActived && $actionForced) {
-        log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
-      } else {
-        log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-        return;
-      }
+        if (!$conditionIsActived) {
+          log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s)");
+        } elseif ($conditionIsActived && $actionForced) {
+          log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
+        } else {
+          log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
+          return;
+        }
 
-      $options = str_replace(
-        ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
-        [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
-        $options
-      );
+        $options = str_replace(
+          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
+          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
+          $options
+        );
 
-      // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
-      if ($event->getStartTime() <= time() - 10800) {
-        log::add(__CLASS__, 'debug', "| ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
-        continue;
-      }
+        // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
+        if ($event->getStartTime() <= time() - 10800) {
+          log::add(__CLASS__, 'debug', "| ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
+          continue;
+        }
 
-      // Vérifie si le label de commande ne correspond pas au label attendu
-      if ($cmdLabelName !== $label && $cmdLabelName !== "all") {
-        log::add(__CLASS__, 'debug', "| ACTION: Label de commande ('{$cmdLabelName}') ne correspond pas au label attendu ('{$label}') et n'est pas 'all', l'action sera ignoré.");
-        continue;
-      }
+        // Vérifie si le label de commande ne correspond pas au label attendu
+        if ($cmdLabelName !== $label && $cmdLabelName !== "all") {
+          log::add(__CLASS__, 'debug', "| ACTION: Label de commande ('{$cmdLabelName}') ne correspond pas au label attendu ('{$label}') et n'est pas 'all', l'action sera ignoré.");
+          continue;
+        }
 
-      // Vérifie si le type de commande ne correspond pas au type attendu
-      if ($cmdTypeName !== $type) {
-        log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}'), l'action sera ignoré.");
-        continue;
-      }
+        // Vérifie si le type de commande ne correspond pas au type attendu
+        if ($cmdTypeName !== $type) {
+          log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}'), l'action sera ignoré.");
+          continue;
+        }
 
-      // Exécuter l'action selon le contenu des options
-      $optionsJson = json_encode($action['options']);
-      if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
-        if ($hasClip == 1) {
-          log::add(__CLASS__, 'debug', "| ACTION CLIP : " . $optionsJson);
+        // Exécuter l'action selon le contenu des options
+        $optionsJson = json_encode($action['options']);
+        if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
+          if ($hasClip == 1) {
+            log::add(__CLASS__, 'debug', "| ACTION CLIP : " . $optionsJson);
+            scenarioExpression::createAndExec('action', $cmd, $options);
+          }
+        } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
+          if ($hasSnapshot == 1) {
+            log::add(__CLASS__, 'debug', "| ACTION SNAPSHOT : " . $optionsJson);
+            scenarioExpression::createAndExec('action', $cmd, $options);
+          }
+        } else {
+          log::add(__CLASS__, 'debug', "| ACTION : " . $optionsJson);
           scenarioExpression::createAndExec('action', $cmd, $options);
         }
-      } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
-        if ($hasSnapshot == 1) {
-          log::add(__CLASS__, 'debug', "| ACTION SNAPSHOT : " . $optionsJson);
-          scenarioExpression::createAndExec('action', $cmd, $options);
-        }
-      } else {
-        log::add(__CLASS__, 'debug', "| ACTION : " . $optionsJson);
-        scenarioExpression::createAndExec('action', $cmd, $options);
       }
     }
   }
