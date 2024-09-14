@@ -40,9 +40,12 @@ const labelDropdown = document.getElementById('labelSelectDropdown');
 const timeFilterButton = document.getElementById('timeFilterButton');
 const timeFilterDropdown = document.getElementById('timeFilterDropdown');
 
-cameraButton.addEventListener('click', function () {
+function toggleDropdown() {
   cameraDropdown.style.display = cameraDropdown.style.display === 'block' ? 'none' : 'block';
-});
+}
+
+cameraButton.removeEventListener('click', toggleDropdown);
+cameraButton.addEventListener('click', toggleDropdown);
 
 labelButton.addEventListener('click', function () {
   labelDropdown.style.display = labelDropdown.style.display === 'block' ? 'none' : 'block';

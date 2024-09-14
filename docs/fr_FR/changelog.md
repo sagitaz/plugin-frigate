@@ -3,6 +3,18 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 14/09/2024 Stable 1.0.0
+- Tout ce qui est dans les betas précèdente.
+
+# 14/09/2024 Beta 0.9.7
+- Corrections d'erreur HTTP_ERROR et JS
+- Bouton pour editer l'url de la commande HTTP
+- Amélioration du panel
+- Variable #user# et #password# si necessaire dans les commandes HTTP
+- Réorganisation des commandes infos et actions
+- Mise en place pour intégration automatique dans JeeMate v3
+- checkbox afin d'ignorer la condition sur le declenchement d'actions
+
 # 13/09/2024 Beta 0.9.6
 - Corrections des commandes PTZ
 - Ajout sur le widget des bouton PTZ

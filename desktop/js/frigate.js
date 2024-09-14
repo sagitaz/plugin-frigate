@@ -142,6 +142,9 @@ function addAction(_action, _type) {
     if (!isset(_action.options)) {
         _action.options = {}
     }
+    if (typeof actionOptions === 'undefined') {
+        var actionOptions = [];
+    }
     var div = '<div class="' + _type + '">'
     div += '<div class="form-group ">'
     div += '<div class="col-sm-1">'
@@ -173,7 +176,7 @@ function addAction(_action, _type) {
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
 
-    if (is_array(actionOptions)) {
+    if (Array.isArray(actionOptions)) {
         actionOptions.push({
             expression: init(_action.cmd),
             options: _action.options,
