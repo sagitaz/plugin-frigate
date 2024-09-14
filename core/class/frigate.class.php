@@ -469,7 +469,7 @@ class frigate extends eqLogic
         if ($down->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-down">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -484,7 +484,7 @@ class frigate extends eqLogic
         if ($up->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-up">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -499,7 +499,7 @@ class frigate extends eqLogic
         if ($left->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-left">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -514,7 +514,7 @@ class frigate extends eqLogic
         if ($right->getIsVisible() == 1) {
           // config pour le widget
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-right">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-chevron-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
+          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
           $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
           // config pour la modal
           $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
@@ -1735,7 +1735,7 @@ class frigate extends eqLogic
     return true;
   }
 
-    public static function editHTTP($cmdId, $link)
+  public static function editHTTP($cmdId, $link)
   {
     $cmd = cmd::byid($cmdId);
     $cmd->setConfiguration("request", $link);
