@@ -32,9 +32,20 @@ function addCmdToTable(_cmd) {
     if (!isset(_cmd.configuration)) {
         _cmd.configuration = {}
     }
+
+    if (isset(_cmd.logicalId) && _cmd.logicalId == 'action_http') {
+        var editHTTP = true;
+    } else {
+        var editHTTP = false;
+    }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
+    if (editHTTP) {
+        console.log("data-request= " + init(_cmd.configuration['request']));
+        let request = init(_cmd.configuration['request']);
+        tr += '<a class="btn btn-primary btn-xs cmdAction pull-right" onclick="editHTTP(this)" id="' + init(_cmd.id) + '" data-request="' + request + '"><i class="fa fa-edit"></i></a> ';
+    }
     tr += '</td>';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
@@ -531,34 +542,79 @@ document.getElementById('add-cmd-http').addEventListener('click', function () {
         message: content,
         inputType: false,
         callback: function (result) {
-            $.ajax({
-                type: "POST",
-                url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                data: {
-                    action: "addCmdHttp",
-                    id: eqlogicId,
-                    name: result.newCmdName,
-                    link: result.newLinkHTTP
+            if (result !== null) {
+                $.ajax({
+                    type: "POST",
+                    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                    data: {
+                        action: "addCmdHttp",
+                        id: eqlogicId,
+                        name: result.newCmdName,
+                        link: result.newLinkHTTP
 
-                },
-                dataType: 'json',
-                error: function (request, status, error) {
-                    handleAjaxError(request, status, error);
-                },
-                success: function (data) {
-                    $('#div_alert').showAlert({
-                        message: '{{Création de la commande réussi.}}',
-                        level: 'info'
-                    });
-                }
-            })
+                    },
+                    dataType: 'json',
+                    error: function (request, status, error) {
+                        handleAjaxError(request, status, error);
+                    },
+                    success: function (data) {
+                        $('#div_alert').showAlert({
+                            message: '{{Création de la commande réussi.}}',
+                            level: 'info'
+                        });
 
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 10000);
+                    }
+                })
+            }
         }
     })
-    window.setTimeout(function () {
-        window.location.reload();
-    }, 10000);
 });
+
+function editHTTP(cmd) {
+    var id = cmd.id; // Récupère l'id
+    var data = cmd.getAttribute('data-request'); // Récupère la valeur de data-request
+
+    console.log('ID:', id);
+    console.log('Data:', data);
+
+    jeeDialog.prompt({
+        title: "{{Modifier la commande HTTP}}",
+        inputType: 'input',
+        value: data,
+        callback: function (result) {
+            if (result !== null) {
+                $.ajax({
+                    type: "POST",
+                    url: "plugins/frigate/core/ajax/frigate.ajax.php",
+                    data: {
+                        action: "editHTTP",
+                        id: id,
+                        link: result
+
+                    },
+                    dataType: 'json',
+                    error: function (request, status, error) {
+                        handleAjaxError(request, status, error);
+                    },
+                    success: function (data) {
+                        $('#div_alert').showAlert({
+                            message: '{{Modification de la commande réussi.}}',
+                            level: 'info'
+                        });
+
+                        window.setTimeout(function () {
+                            window.location.reload();
+                        }, 10000);
+                    }
+                })
+            }
+        }
+    })
+}
+
 
 $(document).ready(function () {
     $('.eqLogicAttr[data-l1key=object_id]').select2();

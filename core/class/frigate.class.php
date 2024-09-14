@@ -589,7 +589,7 @@ class frigate extends eqLogic
         }
       }
       // Boucle pour ajouter les commandes HTTP
-      $httpCommands = cmd::byLogicalId("action_http");
+      $httpCommands = cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true);
       foreach ($httpCommands as $httpCmd) {
         if ($httpCmd && $httpCmd->getIsVisible() == 1) {
           $hasPresets = true; // Des presets sont disponibles
@@ -1000,12 +1000,16 @@ class frigate extends eqLogic
     );
 
 
-    event::add(['pluginId' => 'frigate',
+    event::add(
+      'frigate::event',
+      [
+        'pluginId' => 'frigate',
         'type' => 'pluginEvent',
-        'value' => array(
+        'value' => [
           'eqlogicId' => $eqLogicId,
           'value' => $result
-    )]
+        ]
+      ]
     );
   }
 
@@ -1730,6 +1734,16 @@ class frigate extends eqLogic
     log::add("frigate", 'debug', '| commande mise à jour');
     return true;
   }
+
+    public static function editHTTP($cmdId, $link)
+  {
+    $cmd = cmd::byid($cmdId);
+    $cmd->setConfiguration("request", $link);
+    $cmd->save();
+    log::add("frigate", 'debug', '| commande mise à jour');
+    return true;
+  }
+
   public static function createPTZdebug($eqlogicId)
   {
     log::add("frigate", 'debug', '| création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
