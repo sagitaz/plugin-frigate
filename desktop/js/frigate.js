@@ -51,7 +51,7 @@ function addCmdToTable(_cmd) {
     let subtype = logical[1];
     let editName = false;
 
-    if (type === "action" && subtype === "preset" || subtype === "http") {
+    if (subtype === "preset" || subtype === "http") {
         editName = true;
     }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
@@ -66,7 +66,7 @@ function addCmdToTable(_cmd) {
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
     if (editName) {
-        tr += '<input class="cmdAttr form-control input-sm roundedLeft" data-l1key="name" placeholder="{{Nom de la commande}}">'
+        tr += '<input class="cmdAttr input-xs col-xs-6" data-l1key="name" placeholder="{{Nom de la commande}}">'
     } else {
         tr += '<span class="cmdAttr" data-l1key="name" ></span>';
     }
@@ -159,9 +159,7 @@ function addAction(_action, _type) {
     if (!isset(_action.options)) {
         _action.options = {}
     }
-    if (typeof actionOptions === 'undefined') {
-        var actionOptions = [];
-    }
+
     var div = '<div class="' + _type + '">'
     div += '<div class="form-group ">'
     div += '<div class="col-sm-1">'
@@ -193,7 +191,7 @@ function addAction(_action, _type) {
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
 
-    if (Array.isArray(actionOptions)) {
+    if (is_array(actionOptions)) {
         actionOptions.push({
             expression: init(_action.cmd),
             options: _action.options,
