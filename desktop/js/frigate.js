@@ -54,7 +54,13 @@ function addCmdToTable(_cmd) {
     if (subtype === "preset" || subtype === "http") {
         editName = true;
     }
-    var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+
+    if (type === 'link') {
+        var tr = '<tr class="cmd hidden" data-cmd_id="' + init(_cmd.id) + '">';
+    } else {
+
+        var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+    }
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
     if (editHTTP) {
@@ -111,28 +117,11 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '</tr>';
 
-
-    /*   $('#table_cmd tbody').append(tr)
-       var tr = $('#table_cmd tbody tr').last()
-       jeedom.eqLogic.buildSelectCmd({
-           id: $('.eqLogicAttr[data-l1key=id]').value(),
-           filter: { type: 'info' },
-           error: function (error) {
-               $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-           },
-           success: function (result) {
-               tr.find('.cmdAttr[data-l1key=value]').append(result)
-               tr.setValues(_cmd, '.cmdAttr')
-               jeedom.cmd.changeType(tr, init(_cmd.subType))
-           }
-       }) */
-
-
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
     } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
         printTable(_cmd, tr, "table_stats");
-    } else if (type === 'info' || type === 'enable') {
+    } else if (type === 'info' || type === 'enable' || type === 'link') {
         printTable(_cmd, tr, "table_infos");
     } else if (type === 'action') {
         if (subtype === 'ptz' || subtype === 'preset' || subtype === 'http') {
