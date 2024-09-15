@@ -15,14 +15,21 @@
 */
 
 /* Permet la réorganisation des commandes dans l'équipement */
-$("#table_cmd").sortable({
-    axis: "y",
-    cursor: "move",
-    items: ".cmd",
-    placeholder: "ui-state-highlight",
-    tolerance: "intersect",
-    forcePlaceholderSize: true
-})
+function makeTableSortable(tableId) {
+    $(tableId).sortable({
+        axis: "y",
+        cursor: "move",
+        items: ".cmd",
+        placeholder: "ui-state-highlight",
+        tolerance: "intersect",
+        forcePlaceholderSize: true
+    });
+}
+
+makeTableSortable("#table_cmd");
+makeTableSortable("#table_infos");
+makeTableSortable("#table_ptz");
+makeTableSortable("#table_stats");
 
 /* Fonction permettant l'affichage des commandes dans l'équipement */
 function addCmdToTable(_cmd) {
@@ -38,7 +45,22 @@ function addCmdToTable(_cmd) {
     } else {
         var editHTTP = false;
     }
-    var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+
+    let logical = _cmd.logicalId.split('_');
+    let type = logical[0];
+    let subtype = logical[1];
+    let editName = false;
+
+    if (subtype === "preset" || subtype === "http") {
+        editName = true;
+    }
+
+    if (type === 'link') {
+        var tr = '<tr class="cmd hidden" data-cmd_id="' + init(_cmd.id) + '">';
+    } else {
+
+        var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+    }
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
     if (editHTTP) {
@@ -49,7 +71,11 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
-    tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    if (editName) {
+        tr += '<input class="cmdAttr input-xs col-xs-6" data-l1key="name" placeholder="{{Nom de la commande}}">'
+    } else {
+        tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    }
     tr += '<span class="type hidden" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
     tr += '<span class="subType hidden" subType="' + init(_cmd.subType) + '"></span>';
     tr += '</td>';
@@ -91,31 +117,11 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '</tr>';
 
-
-    /*   $('#table_cmd tbody').append(tr)
-       var tr = $('#table_cmd tbody tr').last()
-       jeedom.eqLogic.buildSelectCmd({
-           id: $('.eqLogicAttr[data-l1key=id]').value(),
-           filter: { type: 'info' },
-           error: function (error) {
-               $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-           },
-           success: function (result) {
-               tr.find('.cmdAttr[data-l1key=value]').append(result)
-               tr.setValues(_cmd, '.cmdAttr')
-               jeedom.cmd.changeType(tr, init(_cmd.subType))
-           }
-       }) */
-
-
-    let logical = _cmd.logicalId.split('_');
-    let type = logical[0];
-    let subtype = logical[1];
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
     } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
         printTable(_cmd, tr, "table_stats");
-    } else if (type === 'info' || type === 'enable') {
+    } else if (type === 'info' || type === 'enable' || type === 'link') {
         printTable(_cmd, tr, "table_infos");
     } else if (type === 'action') {
         if (subtype === 'ptz' || subtype === 'preset' || subtype === 'http') {
@@ -142,9 +148,7 @@ function addAction(_action, _type) {
     if (!isset(_action.options)) {
         _action.options = {}
     }
-    if (typeof actionOptions === 'undefined') {
-        var actionOptions = [];
-    }
+
     var div = '<div class="' + _type + '">'
     div += '<div class="form-group ">'
     div += '<div class="col-sm-1">'
@@ -176,7 +180,7 @@ function addAction(_action, _type) {
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')
 
-    if (Array.isArray(actionOptions)) {
+    if (is_array(actionOptions)) {
         actionOptions.push({
             expression: init(_action.cmd),
             options: _action.options,

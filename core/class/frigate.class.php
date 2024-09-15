@@ -2155,7 +2155,7 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
         } else {
           log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-          return;
+          continue;
         }
 
         $options = str_replace(
@@ -2735,37 +2735,42 @@ class frigateCmd extends cmd
       'score' => (int)config::byKey('defaultScore', 'frigate')
     ];
 
-    // Récupération du label
-    if ($_options['title'] != '') $defaults['label'] = $_options['title'];
+    // Vérification de l'existence de la clé 'title'
+    if (isset($_options['title']) && $_options['title'] != '') {
+      $defaults['label'] = $_options['title'];
+    }
 
-    // Récupération des paramètres dans $_options['message']
-    $params = explode('|', $_options['message']);
-    foreach ($params as $param) {
-      list($key, $value) = explode('=', $param);
-      $key = trim($key);
-      $value = trim($value);
+    // Vérification de l'existence de la clé 'message'
+    if (isset($_options['message'])) {
+      $params = explode('|', $_options['message']);
+      foreach ($params as $param) {
+        $keyValue = explode('=', $param);
 
-      if ($key === 'video') {
-        if (is_numeric($value)) {
-          $defaults['video'] = (int)$value;
-        }
-      }
+        // Vérification de l'existence d'un couple clé=valeur
+        if (count($keyValue) === 2
+        ) {
+          $key = trim($keyValue[0]);
+          $value = trim($keyValue[1]);
 
-      if ($key === 'duration') {
-        if (is_numeric($value) && $value > 0) {
-          $defaults['duration'] = (int)$value;
-        }
-      }
+          if ($key === 'video' && is_numeric($value)) {
+            $defaults['video'] = (int)$value;
+          }
 
-      if ($key === 'score') {
-        if (is_numeric($value) && $value >= 0 && $value <= 100) {
-          $defaults['score'] = (int)$value;
+          if ($key === 'duration' && is_numeric($value) && $value > 0
+          ) {
+            $defaults['duration'] = (int)$value;
+          }
+
+          if ($key === 'score' && is_numeric($value) && $value >= 0 && $value <= 100) {
+            $defaults['score'] = (int)$value;
+          }
         }
       }
     }
 
     return $defaults;
   }
+
 
   // Exécution d'une commande
   public function execute($_options = array())
