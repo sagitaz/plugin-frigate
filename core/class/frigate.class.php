@@ -2155,7 +2155,7 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'debug', "| Commande(s) exécutée(s) car la condition est ignorée");
         } else {
           log::add(__CLASS__, 'info', "| " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-          return;
+          continue;
         }
 
         $options = str_replace(
