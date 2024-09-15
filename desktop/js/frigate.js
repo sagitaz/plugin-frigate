@@ -38,6 +38,15 @@ function addCmdToTable(_cmd) {
     } else {
         var editHTTP = false;
     }
+
+    let logical = _cmd.logicalId.split('_');
+    let type = logical[0];
+    let subtype = logical[1];
+    let editName = false;
+
+    if (subtype === "preset" || subtype === "http") {
+        editName = true;
+    }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
@@ -49,7 +58,11 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
-    tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    if (editName) {
+        tr += '<input class="cmdAttr form-control input-sm roundedLeft" data-l1key="name" placeholder="{{Nom de la commande}}">'
+    } else {
+        tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    }
     tr += '<span class="type hidden" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
     tr += '<span class="subType hidden" subType="' + init(_cmd.subType) + '"></span>';
     tr += '</td>';
@@ -108,9 +121,6 @@ function addCmdToTable(_cmd) {
        }) */
 
 
-    let logical = _cmd.logicalId.split('_');
-    let type = logical[0];
-    let subtype = logical[1];
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
     } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
