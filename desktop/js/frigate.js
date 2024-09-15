@@ -15,14 +15,21 @@
 */
 
 /* Permet la réorganisation des commandes dans l'équipement */
-$("#table_cmd").sortable({
-    axis: "y",
-    cursor: "move",
-    items: ".cmd",
-    placeholder: "ui-state-highlight",
-    tolerance: "intersect",
-    forcePlaceholderSize: true
-})
+function makeTableSortable(tableId) {
+    $(tableId).sortable({
+        axis: "y",
+        cursor: "move",
+        items: ".cmd",
+        placeholder: "ui-state-highlight",
+        tolerance: "intersect",
+        forcePlaceholderSize: true
+    });
+}
+
+makeTableSortable("#table_cmd");
+makeTableSortable("#table_infos");
+makeTableSortable("#table_ptz");
+makeTableSortable("#table_stats");
 
 /* Fonction permettant l'affichage des commandes dans l'équipement */
 function addCmdToTable(_cmd) {
@@ -44,7 +51,7 @@ function addCmdToTable(_cmd) {
     let subtype = logical[1];
     let editName = false;
 
-    if (subtype === "preset" || subtype === "http") {
+    if (type === "action" && subtype === "preset" || subtype === "http") {
         editName = true;
     }
     var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
