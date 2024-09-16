@@ -1443,11 +1443,8 @@ class frigate extends eqLogic
 
     log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
-    //  $resultURL = $urlfrigate . "/api/stats";
-    // décoder le yaml de configuration
-    $configuration = self::yamlToJsonFromUrl("http://" . $urlfrigate . "/api/config/raw");
-    // Décoder la chaîne JSON en tableau PHP
-    $configurationArray = json_decode($configuration, true);
+    // récupérer le json de configuration
+	  $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
@@ -2675,6 +2672,28 @@ class frigate extends eqLogic
   }
 
 
+  private static function jsonFromUrl($jsonUrl)
+  {
+      // Télécharger le contenu JSON depuis l'URL
+      $jsonContent = file_get_contents($jsonUrl);
+
+      // Vérifier si le téléchargement a réussi
+      if ($jsonContent === false) {
+          log::add(__CLASS__, 'error', "jsonFromUrl : Failed to retrieve JSON from URL");
+          return json_encode(["error" => "Failed to retrieve JSON from URL: $jsonUrl"]);
+      }
+
+      // Décoder le JSON en tableau PHP
+      $jsonArray = json_decode($jsonContent, true);
+
+      // Vérifier si la conversion a réussi
+      if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
+          log::add(__CLASS__, 'error', "jsonFromUrl : Failed to decode JSON content");
+          return json_encode(["error" => "Failed to decode JSON content from URL: $jsonUrl"]);
+      }
+    
+      return $jsonArray;
+  }
 
   private static function yamlToJsonFromUrl($yamlUrl)
   {
