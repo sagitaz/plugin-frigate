@@ -58,7 +58,7 @@ if (!isConnect()) {
         </div>
         <div class="form-group">
             <label class="col-md-4 control-label">{{Adresse externe}}
-                <sup><i class="fas fa-question-circle tooltips inputPassword" title=" {{ne sers que pour le bouton vers votre serveur Frigate}}"></i></sup>
+                <sup><i class="fas fa-question-circle tooltips inputPassword" title=" {{ne sert que pour le bouton vers votre serveur Frigate}}"></i></sup>
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="URLexterne" type="text" placeholder="{{Adresse externe de votre serveur}}" />

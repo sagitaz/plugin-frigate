@@ -262,7 +262,7 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 });
 
 document.getElementById('gotoFrigate').addEventListener('click', function () {
-    if (estConnexionInterne()) {
+    if (isConnexionInterne()) {
         window.open(frigateURL, '_blank');
     } else {
         if (urlExterne) {
