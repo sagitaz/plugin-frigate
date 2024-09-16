@@ -199,7 +199,7 @@ sendVarToJS('refresh', $refresh);
                             </div>
                             <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{Mot de passe}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{Mot de passe d'accès a votre caméra, seulement pour les commandes HTTP}}"></i></sup>
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Mot de passe d'accès à votre caméra, seulement pour les commandes HTTP}}"></i></sup>
 
                                 </label>
                                 <div class="col-sm-6 input-group">
