@@ -28,11 +28,13 @@ if (!isConnect()) {
             <label class="col-md-4 control-label">{{Pièce par défaut pour les équipements}}</label>
             <div class="col-md-4">
                 <select id="sel_object" class="configKey form-control" data-l1key="parentObject">
-                    <option value="">{{Aucune}}</option>
+                    <option value="">{{Aucun}}</option>
                     <?php
-                    foreach (jeeObject::all() as $object) {
-                        echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+                    $options = '';
+                    foreach ((jeeObject::buildTree(null, false)) as $object) {
+                        $options .= '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
                     }
+                    echo $options;
                     ?>
                 </select>
             </div>
