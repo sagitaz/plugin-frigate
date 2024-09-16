@@ -76,6 +76,9 @@ Refresh de l'image suivant votre configuration.
 ### Commandes infos
 ##### toutes les cameras
 Les informations sur le dernier évènement de la caméra et sur ses statistiques.
+
+> L'info **LABEL** correspond à l'object qui a déclenché la détection (person, vehicle, cat, dog, etc...)
+
 ##### MQTT
 L'information sur détection en cours
 
@@ -130,14 +133,16 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 
 Une checkbox vous permet de désactiver la verification de la condition. 
 
+- <u>**LABEL**</u>
+**Pour rappel le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 
-
+- <u>**TYPE**</u>
+**Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
+**Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 
-En configuration sans MQTT, ce n'est pas utile, tous les évènements sont de type **end**.
-En MQTT, ils peuvent être de type **new**, **update** et **end**.
 
 
 ### Exemple de notifications :

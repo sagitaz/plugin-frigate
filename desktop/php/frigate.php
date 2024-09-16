@@ -11,6 +11,8 @@ $url = config::byKey('URL', 'frigate');
 $port = config::byKey('port', 'frigate');
 $urlFrigate = "http://" . $url . ":" . $port;
 sendVarToJS('frigateURL', $urlFrigate);
+$urlExterne = config::byKey('URLexterne', 'frigate');
+sendVarToJS('frigateURLexterne', $urlExterne);
 
 $refresh = config::byKey('refresh_snapshot', 'frigate') * 1000;
 sendVarToJS('refresh', $refresh);

@@ -262,8 +262,24 @@ document.getElementById('gotoHome').addEventListener('click', function () {
 });
 
 document.getElementById('gotoFrigate').addEventListener('click', function () {
-    window.open(frigateURL, '_blank');
+    if (estConnexionInterne()) {
+        window.open(frigateURL, '_blank');
+    } else {
+        if (urlExterne) {
+            window.open(frigateURLexterne, '_blank');
+        } else {
+            $('#div_alert').showAlert({
+                message: '{{Aucune URL externe n\'estconfigurée.}}',
+                level: 'warning'
+            });
+        }
+    }
 });
+
+function isConnexionInterne() {
+    return window.location.hostname.startsWith('192.168') ||
+        window.location.hostname === 'localhost';
+}
 
 document.getElementById('editConfiguration').addEventListener('click', function () {
     bootbox.confirm('{{Configuration avancée, à vos propres risques ! Aucun support ne sera donné !}}', function (result) {
