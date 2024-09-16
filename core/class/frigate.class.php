@@ -105,23 +105,30 @@ class frigate extends eqLogic
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
-    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
-    log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
-    self::cleanFolderData();
-    log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
-    self::cleanAllOldestFiles();
+    if (class_exists('mqtt2')) {
+      $deamon_info = self::deamon_info();
+      if ($deamon_info['launchable'] === 'ok' && $frequence === "functionality::cron::enable" || $frequence === "functionality::cron5::enable" || $frequence === "functionality::cron10::enable" || $frequence === "functionality::cron15::enable") {
+        log::add(__CLASS__, 'debug', "| les crons 1, 5, 1 et 15 sont désactivés avec MQTT et ne sont pas utilisés");
+      }
+    } else {
+      log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+      log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
+      self::cleanFolderData();
+      log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
+      self::cleanAllOldestFiles();
 
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (empty($frigate)) {
-      return;
-    }
+      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+      if (empty($frigate)) {
+        return;
+      }
 
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
 
-    if (config::byKey($frequence, 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      if (config::byKey($frequence, 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
     log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
@@ -946,7 +953,7 @@ class frigate extends eqLogic
             log::add(__CLASS__, 'debug', "| Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
             $frigate->$setMethod($newValue);
             $updated = true;
-            if ($field == 'Type' && $newValue == 'end') {
+            if ($field == 'Type' && $newValue != $frigate->getType()) {
               $infos = self::getEventinfos($mqtt, $event, true);
               $frigate->setSnapshot($infos["snapshot"]);
               $frigate->setClip($infos["clip"]);
@@ -1025,6 +1032,7 @@ class frigate extends eqLogic
     // verifier si le fichier thumbnail existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_thumbnail.jpg')) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_thumbnail.jpg, téléchargement');
+      sleep(5);
       $img = self::saveURL($event['id'], null, $event['camera'], 1);
       if ($img == "error") {
         $img = "null";
@@ -1039,6 +1047,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       if ($event['has_snapshot'] == "true") {
         log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
+        sleep(5);
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
         $hasSnapshot = 1;
         if ($snapshot == "error") {
@@ -1427,7 +1436,6 @@ class frigate extends eqLogic
     frigate::generateEqStats();
     frigate::generateEqCameras();
 
-    frigate::setCmdsCron();
     log::add(__CLASS__, 'debug', "----------------------:fg-success:FIN CREATION DES EQUIPEMENTS:/fg:----------------------------------");
   }
   public static function generateEqCameras()
@@ -1551,7 +1559,7 @@ class frigate extends eqLogic
       $frigate->save();
     }
   }
-  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 1, $type = "info")
+  private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
 
@@ -1849,7 +1857,7 @@ class frigate extends eqLogic
   }
 
 
-  private static function setCmdsCron()
+  public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
@@ -2747,7 +2755,8 @@ class frigateCmd extends cmd
         $keyValue = explode('=', $param);
 
         // Vérification de l'existence d'un couple clé=valeur
-        if (count($keyValue) === 2
+        if (
+          count($keyValue) === 2
         ) {
           $key = trim($keyValue[0]);
           $value = trim($keyValue[1]);
@@ -2756,7 +2765,8 @@ class frigateCmd extends cmd
             $defaults['video'] = (int)$value;
           }
 
-          if ($key === 'duration' && is_numeric($value) && $value > 0
+          if (
+            $key === 'duration' && is_numeric($value) && $value > 0
           ) {
             $defaults['duration'] = (int)$value;
           }

@@ -32,20 +32,33 @@ window.addEventListener('click', function (event) {
   }
 });
 
-// Gestion des sélecteurs
-const cameraButton = document.getElementById('cameraSelectButton');
-const cameraDropdown = document.getElementById('cameraSelectDropdown');
-const labelButton = document.getElementById('labelSelectButton');
-const labelDropdown = document.getElementById('labelSelectDropdown');
-const timeFilterButton = document.getElementById('timeFilterButton');
-const timeFilterDropdown = document.getElementById('timeFilterDropdown');
+var cameraDropdown = document.getElementById('cameraSelectDropdown');
+var labelButton = document.getElementById('labelSelectButton');
+var labelDropdown = document.getElementById('labelSelectDropdown');
+var timeFilterButton = document.getElementById('timeFilterButton');
+var timeFilterDropdown = document.getElementById('timeFilterDropdown');
 
+// Fonction pour gérer les événements de bouton
 function toggleDropdown() {
   cameraDropdown.style.display = cameraDropdown.style.display === 'block' ? 'none' : 'block';
 }
 
-cameraButton.removeEventListener('click', toggleDropdown);
-cameraButton.addEventListener('click', toggleDropdown);
+// Fonction pour configurer les écouteurs d'événements
+function setupEventListeners() {
+  const cameraButton = document.getElementById('cameraSelectButton');
+
+  // Assurez-vous que les écouteurs sont correctement configurés
+  cameraButton.removeEventListener('click', toggleDropdown);
+  cameraButton.addEventListener('click', toggleDropdown);
+  cameraDropdown.removeEventListener('click', toggleDropdown);
+  cameraDropdown.addEventListener('click', toggleDropdown);
+
+}
+
+
+// Appel de la fonction au chargement du DOM
+document.addEventListener('DOMContentLoaded', setupEventListeners);
+
 
 labelButton.addEventListener('click', function () {
   labelDropdown.style.display = labelDropdown.style.display === 'block' ? 'none' : 'block';
@@ -206,7 +219,7 @@ function filterEvents() {
   const selectedLabels = Array.from(document.querySelectorAll('.labelFilter:checked')).map(function (checkbox) {
     return checkbox.value;
   });
-  const startDate = document.getElementById('startDate').value;
+  var startDate = document.getElementById('startDate').value;
   const endDate = document.getElementById('endDate').value;
   const timeFilter = document.querySelector('input[name="timeFilter"]:checked').value;
   const now = new Date();
@@ -276,12 +289,26 @@ function getVisibleEvents() {
 function gotoCamera(cameraId) {
   jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate&id=" + cameraId);
 
-  document.getElementById('startDate').addEventListener('change', filterEvents);
-  document.getElementById('endDate').addEventListener('change', filterEvents);
-  document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
+  const startDateElement = document.getElementById('startDate');
+  const endDateElement = document.getElementById('endDate');
+  const timeFilterElements = document.querySelectorAll('input[name="timeFilter"]');
+
+  if (startDateElement) {
+    startDateElement.removeEventListener('change', filterEvents);
+    startDateElement.addEventListener('change', filterEvents);
+  }
+
+  if (endDateElement) {
+    endDateElement.removeEventListener('change', filterEvents);
+    endDateElement.addEventListener('change', filterEvents);
+  }
+
+  timeFilterElements.forEach(function (radio) {
+    radio.removeEventListener('change', filterEvents);
     radio.addEventListener('change', filterEvents);
   });
 }
+
 
 function toggleFavorite(button) {
   const eventId = button.getAttribute('data-id');

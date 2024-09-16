@@ -11,6 +11,8 @@ $url = config::byKey('URL', 'frigate');
 $port = config::byKey('port', 'frigate');
 $urlFrigate = "http://" . $url . ":" . $port;
 sendVarToJS('frigateURL', $urlFrigate);
+$urlExterne = config::byKey('URLexterne', 'frigate');
+sendVarToJS('frigateURLexterne', $urlExterne);
 
 $refresh = config::byKey('refresh_snapshot', 'frigate') * 1000;
 sendVarToJS('refresh', $refresh);
@@ -127,7 +129,7 @@ sendVarToJS('refresh', $refresh);
         </div>
         <!-- Onglets -->
         <ul class="nav nav-tabs" role="tablist">
-            <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" id="gotoHome"><i class="fas fa-arrow-circle-left"></i></a></li>
+            <li role="presentation"><a href="#" class="eqLogicAction" aria-controls="home" role="tab" data-toggle="tab" data-action="returnToThumbnailDisplay"><i class="fas fa-arrow-circle-left"></i></a></li>
             <li role="presentation" class="active"><a href="#eqlogictab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-tachometer-alt"></i> {{Equipement}}</a></li>
             <li role="presentation" class="eqActions"><a href="#actionsTab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-flag"></i> {{Action(s)}}</a></li>
             <li role="presentation"><a href="#infostab" aria-controls="home" role="tab" data-toggle="tab"><i class="fas fa-list"></i> {{Infos}}</a></li>
