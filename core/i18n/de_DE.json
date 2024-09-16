@@ -41,6 +41,7 @@
         "Affichage des logs du serveur Frigate": "Anzeige der Logs des Frigate-Servers",
         "Afficher": "Anzeige",
         "Ajouter une commande HTTP": "HTTP-Befehl hinzufügen",
+        "Aucune URL externe n\\'est configurée.": "Es ist keine externe URL konfiguriert.",
         "Aucune nouvelle caméra trouvée": "Keine neuen Kameras gefunden",
         "Cocher la case pour que la commande s\\'exécute en parallèle des autres actions": "Aktivieren Sie das Kontrollkästchen, wenn der Befehl parallel zu anderen Aktionen ausgeführt werden soll",
         "Cocher la case pour que la commande s\\'exécute malgré la condition": "Aktivieren Sie das Kontrollkästchen, wenn der Befehl trotz der Bedingung ausgeführt werden soll",
@@ -51,7 +52,6 @@
         "Edition du fichier de configuration Frigate": "Bearbeiten der Frigate-Konfigurationsdatei",
         "Historiser": "Chronik",
         "L\\'URL n\\'est pas configurée.": "Die URL ist nicht konfiguriert.",
-        "L\\'image n\\'est pas disponible.": "Das Bild ist nicht verfügbar.",
         "Label": "Label",
         "Le port n\\'est pas configuré.": "Der Port ist nicht konfiguriert.",
         "Le redémarrage de Frigate est en cours.": "Der Neustart von Frigate wird durchgeführt.",
@@ -212,6 +212,8 @@
         "500 Mo par défaut": "500 MB Standard",
         "5000 par défaut": "5000 Standard",
         "7 jours par défaut": "7 Tage standardmäßig",
+        "Adresse externe": "Externe Adresse",
+        "Adresse externe de votre serveur": "Externe Adresse Ihres Servers",
         "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Anzeige einer Bestätigungswarnung bei der Aufforderung, ein Ereignis zu löschen",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Anzeige des Miniaturvideos eines Ereignisses beim Überfahren seines Captures mit der Maus",
         "Aucune": "Irgendein",
@@ -245,6 +247,7 @@
         "URL Frigate": "Frigate-URL",
         "URL de Frigate": "URL von Frigate",
         "Vidéos en vignette dans la page des évènements": "Videos als Thumbnail auf der Veranstaltungsseite",
+        "ne sert que pour le bouton vers votre serveur Frigate": "wird nur für die Schaltfläche zu Ihrem Frigate-Server verwendet",
         "port de Frigate (5000 par défaut)": "frigate-Port (standardmäßig 5000)"
     }
 }
