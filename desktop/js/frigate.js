@@ -256,11 +256,6 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-document.getElementById('gotoHome').addEventListener('click', function () {
-    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
-    window.location.reload(true);
-});
-
 document.getElementById('gotoFrigate').addEventListener('click', function () {
     if (isConnexionInterne()) {
         window.open(frigateURL, '_blank');
