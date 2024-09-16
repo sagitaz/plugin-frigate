@@ -455,42 +455,6 @@ function printEqLogic(_eqLogic) {
             console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
             imgElement.src = newSrc;
         }
-        /*       function refreshImage() {
-                   const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
-                   const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
-                   const name = extractFrigatePart(img);
-                   const imgElement = document.getElementById('imgFrigate');
-       
-                   $.ajax({
-                       type: "POST",
-                       url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                       data: {
-                           action: "refreshCameras",
-                           img: img,
-                           name: name,
-                           eqlogicId: eqlogicId
-                       },
-                       dataType: 'json',
-                       error: function (request, status, error) {
-                           handleAjaxError(request, status, error);
-                       },
-                       success: function (data) {
-                           if (data.result == 'KO' || data.result == 'error') {
-                               $('#div_alert').showAlert({
-                                   message: '{{L\'image n\'est pas disponible.}}',
-                                   level: 'warning'
-                               });
-                               return;
-                           } else {
-                               imgUrl = data.result
-                               imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                           }
-       
-                           // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
-                       }
-                   })
-               } */
-
         refreshImage();
     }
 
@@ -595,10 +559,6 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
                             message: '{{Création de la commande réussi.}}',
                             level: 'info'
                         });
-
-                        window.setTimeout(function () {
-                            window.location.reload();
-                        }, 10000);
                     }
                 })
             }
@@ -637,10 +597,6 @@ function editHTTP(cmd) {
                             message: '{{Modification de la commande réussi.}}',
                             level: 'info'
                         });
-
-                        window.setTimeout(function () {
-                            window.location.reload();
-                        }, 10000);
                     }
                 })
             }
