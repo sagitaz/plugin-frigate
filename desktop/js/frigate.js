@@ -265,17 +265,27 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
     if (isConnexionInterne()) {
         window.open(frigateURL, '_blank');
     } else {
-        if (urlExterne) {
+        if (frigateURLexterne) {
             window.open(frigateURLexterne, '_blank');
         } else {
             $('#div_alert').showAlert({
-                message: '{{Aucune URL externe n\'estconfigurée.}}',
+                message: '{{Aucune URL externe n\'est configurée.}}',
                 level: 'warning'
             });
         }
     }
 });
+// Vérifier la visibilité du bouton au chargement de la page
+window.addEventListener('load', function () {
+    const boutonFrigate = document.getElementById('gotoFrigate');
 
+    // Si connexion interne ou URL externe configurée, montrer le bouton
+    if (isConnexionInterne() || frigateURLexterne) {
+        boutonFrigate.style.display = 'block';
+    } else {
+        boutonFrigate.style.display = 'none';
+    }
+});
 function isConnexionInterne() {
     return window.location.hostname.startsWith('192.168') ||
         window.location.hostname === 'localhost';
