@@ -1429,7 +1429,6 @@ class frigate extends eqLogic
     frigate::generateEqStats();
     frigate::generateEqCameras();
 
-    frigate::setCmdsCron();
     log::add(__CLASS__, 'debug', "----------------------:fg-success:FIN CREATION DES EQUIPEMENTS:/fg:----------------------------------");
   }
   public static function generateEqCameras()
@@ -1851,7 +1850,7 @@ class frigate extends eqLogic
   }
 
 
-  private static function setCmdsCron()
+  public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     // Création des commandes Crons pour l'equipement général
