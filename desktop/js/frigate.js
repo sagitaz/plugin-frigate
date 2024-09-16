@@ -15,14 +15,21 @@
 */
 
 /* Permet la réorganisation des commandes dans l'équipement */
-$("#table_cmd").sortable({
-    axis: "y",
-    cursor: "move",
-    items: ".cmd",
-    placeholder: "ui-state-highlight",
-    tolerance: "intersect",
-    forcePlaceholderSize: true
-})
+function makeTableSortable(tableId) {
+    $(tableId).sortable({
+        axis: "y",
+        cursor: "move",
+        items: ".cmd",
+        placeholder: "ui-state-highlight",
+        tolerance: "intersect",
+        forcePlaceholderSize: true
+    });
+}
+
+makeTableSortable("#table_cmd");
+makeTableSortable("#table_infos");
+makeTableSortable("#table_ptz");
+makeTableSortable("#table_stats");
 
 /* Fonction permettant l'affichage des commandes dans l'équipement */
 function addCmdToTable(_cmd) {
@@ -38,7 +45,22 @@ function addCmdToTable(_cmd) {
     } else {
         var editHTTP = false;
     }
-    var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+
+    let logical = _cmd.logicalId.split('_');
+    let type = logical[0];
+    let subtype = logical[1];
+    let editName = false;
+
+    if (subtype === "preset" || subtype === "http") {
+        editName = true;
+    }
+
+    if (type === 'link') {
+        var tr = '<tr class="cmd hidden" data-cmd_id="' + init(_cmd.id) + '">';
+    } else {
+
+        var tr = '<tr class="cmd" data-cmd_id="' + init(_cmd.id) + '">';
+    }
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="id" ></span>';
     if (editHTTP) {
@@ -49,7 +71,11 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '<td>';
     tr += '<span class="cmdAttr" data-l1key="display" data-l2key="icon" style="font-size:19px;padding:0 5px 0 0!important;"></span>'
-    tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    if (editName) {
+        tr += '<input class="cmdAttr input-xs col-xs-6" data-l1key="name" placeholder="{{Nom de la commande}}">'
+    } else {
+        tr += '<span class="cmdAttr" data-l1key="name" ></span>';
+    }
     tr += '<span class="type hidden" type="' + init(_cmd.type) + '">' + jeedom.cmd.availableType() + '</span>';
     tr += '<span class="subType hidden" subType="' + init(_cmd.subType) + '"></span>';
     tr += '</td>';
@@ -91,22 +117,28 @@ function addCmdToTable(_cmd) {
     tr += '</td>';
     tr += '</tr>';
 
-
-    $('#table_cmd tbody').append(tr)
-    var tr = $('#table_cmd tbody tr').last()
-    jeedom.eqLogic.buildSelectCmd({
-        id: $('.eqLogicAttr[data-l1key=id]').value(),
-        filter: { type: 'info' },
-        error: function (error) {
-            $('#div_alert').showAlert({ message: error.message, level: 'danger' })
-        },
-        success: function (result) {
-            tr.find('.cmdAttr[data-l1key=value]').append(result)
-            tr.setValues(_cmd, '.cmdAttr')
-            jeedom.cmd.changeType(tr, init(_cmd.subType))
+    if (type === 'hide') {
+        // Actions spécifiques pour le type 'hide'
+    } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
+        printTable(_cmd, tr, "table_stats");
+    } else if (type === 'info' || type === 'enable' || type === 'link') {
+        printTable(_cmd, tr, "table_infos");
+    } else if (type === 'action') {
+        if (subtype === 'ptz' || subtype === 'preset' || subtype === 'http') {
+            printTable(_cmd, tr, "table_ptz");
+        } else {
+            printTable(_cmd, tr, "table_cmd");
         }
-    })
+    }
+}
 
+function printTable(_cmd, tr, tableName) {
+    $('#' + tableName + ' tbody').append(tr);
+    $('#' + tableName + ' tbody tr:last').setValues(_cmd, '.cmdAttr');
+    if (isset(_cmd.type)) {
+        $('#' + tableName + ' tbody tr:last .cmdAttr[data-l1key=type]').value(init(_cmd.type));
+    }
+    jeedom.cmd.changeType($('#' + tableName + ' tbody tr:last'), init(_cmd.subType));
 }
 
 function addAction(_action, _type) {
@@ -116,6 +148,7 @@ function addAction(_action, _type) {
     if (!isset(_action.options)) {
         _action.options = {}
     }
+
     var div = '<div class="' + _type + '">'
     div += '<div class="form-group ">'
     div += '<div class="col-sm-1">'
@@ -223,14 +256,35 @@ document.getElementById('gotoEvents').addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events");
 });
 
-document.getElementById('gotoHome').addEventListener('click', function () {
-    jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
-    window.location.reload(true);
-});
-
 document.getElementById('gotoFrigate').addEventListener('click', function () {
-    window.open(frigateURL, '_blank');
+    if (isConnexionInterne()) {
+        window.open(frigateURL, '_blank');
+    } else {
+        if (frigateURLexterne) {
+            window.open(frigateURLexterne, '_blank');
+        } else {
+            $('#div_alert').showAlert({
+                message: '{{Aucune URL externe n\'est configurée.}}',
+                level: 'warning'
+            });
+        }
+    }
 });
+// Vérifier la visibilité du bouton au chargement de la page
+window.addEventListener('load', function () {
+    const boutonFrigate = document.getElementById('gotoFrigate');
+
+    // Si connexion interne ou URL externe configurée, montrer le bouton
+    if (isConnexionInterne() || frigateURLexterne) {
+        boutonFrigate.style.display = 'block';
+    } else {
+        boutonFrigate.style.display = 'none';
+    }
+});
+function isConnexionInterne() {
+    return window.location.hostname.startsWith('192.168') ||
+        window.location.hostname === 'localhost';
+}
 
 document.getElementById('editConfiguration').addEventListener('click', function () {
     bootbox.confirm('{{Configuration avancée, à vos propres risques ! Aucun support ne sera donné !}}', function (result) {
@@ -422,42 +476,6 @@ function printEqLogic(_eqLogic) {
             console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
             imgElement.src = newSrc;
         }
-        /*       function refreshImage() {
-                   const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val().replace(/&amp;/g, '&');
-                   const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
-                   const name = extractFrigatePart(img);
-                   const imgElement = document.getElementById('imgFrigate');
-       
-                   $.ajax({
-                       type: "POST",
-                       url: "plugins/frigate/core/ajax/frigate.ajax.php",
-                       data: {
-                           action: "refreshCameras",
-                           img: img,
-                           name: name,
-                           eqlogicId: eqlogicId
-                       },
-                       dataType: 'json',
-                       error: function (request, status, error) {
-                           handleAjaxError(request, status, error);
-                       },
-                       success: function (data) {
-                           if (data.result == 'KO' || data.result == 'error') {
-                               $('#div_alert').showAlert({
-                                   message: '{{L\'image n\'est pas disponible.}}',
-                                   level: 'warning'
-                               });
-                               return;
-                           } else {
-                               imgUrl = data.result
-                               imgElement.src = imgUrl + "?timestamp=" + new Date().getTime();
-                           }
-       
-                           // TODO : rafraichir l'affichage de la configuration (récupérer les valeurs de la configuration et rafraichir les éléments de la page avec ces valeurs)
-                       }
-                   })
-               } */
-
         refreshImage();
     }
 
@@ -532,7 +550,7 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
     })
 });
 
-document.getElementById('add-cmd-http').addEventListener('click', function () {
+document.getElementById('addCmdHttp').addEventListener('click', function () {
     jeedomUtils.hideAlert()
     const eqlogicId = $('.eqLogicAttr[data-l1key=id]').val();
     let content = '<input class="promptAttr" data-l1key="newCmdName" autocomplete="off" type="text" placeholder="{{Nom de la commande}}">'
@@ -559,13 +577,9 @@ document.getElementById('add-cmd-http').addEventListener('click', function () {
                     },
                     success: function (data) {
                         $('#div_alert').showAlert({
-                            message: '{{Création de la commande réussi.}}',
+                            message: '{{Création de la commande réussie.}}',
                             level: 'info'
                         });
-
-                        window.setTimeout(function () {
-                            window.location.reload();
-                        }, 10000);
                     }
                 })
             }
@@ -601,13 +615,9 @@ function editHTTP(cmd) {
                     },
                     success: function (data) {
                         $('#div_alert').showAlert({
-                            message: '{{Modification de la commande réussi.}}',
+                            message: '{{Modification de la commande réussie.}}',
                             level: 'info'
                         });
-
-                        window.setTimeout(function () {
-                            window.location.reload();
-                        }, 10000);
                     }
                 })
             }

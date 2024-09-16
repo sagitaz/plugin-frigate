@@ -28,11 +28,13 @@ if (!isConnect()) {
             <label class="col-md-4 control-label">{{Pièce par défaut pour les équipements}}</label>
             <div class="col-md-4">
                 <select id="sel_object" class="configKey form-control" data-l1key="parentObject">
-                    <option value="">{{Aucune}}</option>
+                    <option value="">{{Aucun}}</option>
                     <?php
-                    foreach (jeeObject::all() as $object) {
-                        echo '<option value="' . $object->getId() . '">' . $object->getName() . '</option>';
+                    $options = '';
+                    foreach ((jeeObject::buildTree(null, false)) as $object) {
+                        $options .= '<option value="' . $object->getId() . '">' . str_repeat('&nbsp;&nbsp;', $object->getConfiguration('parentNumber')) . $object->getName() . '</option>';
                     }
+                    echo $options;
                     ?>
                 </select>
             </div>
@@ -54,6 +56,14 @@ if (!isConnect()) {
             </label>
             <div class="col-md-4">
                 <input class="configKey form-control" data-l1key="port" type="number" placeholder="{{5000 par défaut}}" />
+            </div>
+        </div>
+        <div class="form-group">
+            <label class="col-md-4 control-label">{{Adresse externe}}
+                <sup><i class="fas fa-question-circle tooltips inputPassword" title=" {{ne sert que pour le bouton vers votre serveur Frigate}}"></i></sup>
+            </label>
+            <div class="col-md-4">
+                <input class="configKey form-control" data-l1key="URLexterne" type="text" placeholder="{{Adresse externe de votre serveur}}" />
             </div>
         </div>
         <div class="form-group">

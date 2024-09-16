@@ -3,6 +3,28 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+# 16/09/2024 Beta 1.0.1
+- Correction selecteur preset sur widget
+- Corrections de diverses erreur JS
+- Ajout de la configuration d'un lien externe pour accèder à Frigate
+- Si utilisation de MQTT les cron < 30 minutes ne seront pas lancés
+- Aucune commandes infos ne sera coché historiser sur les nouvelles installations (pour les autres penser à les décocher)
+- Ajout d'un wait avant la récupération des snapshots (a voir !)
+- Edition du nom des commandes preset et http possible
+- Correction de la checkbox d'execption de condition qui était appliqué que sur la première action
+
+# 14/09/2024 Stable 1.0.0
+- Tout ce qui est dans les betas précèdente.
+
+# 14/09/2024 Beta 0.9.7
+- Corrections d'erreur HTTP_ERROR et JS
+- Bouton pour editer l'url de la commande HTTP
+- Amélioration du panel
+- Variable #user# et #password# si necessaire dans les commandes HTTP
+- Réorganisation des commandes infos et actions
+- Mise en place pour intégration automatique dans JeeMate v3
+- checkbox afin d'ignorer la condition sur le declenchement d'actions
+
 # 13/09/2024 Beta 0.9.6
 - Corrections des commandes PTZ
 - Ajout sur le widget des bouton PTZ
