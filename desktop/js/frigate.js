@@ -577,7 +577,7 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
                     },
                     success: function (data) {
                         $('#div_alert').showAlert({
-                            message: '{{Création de la commande réussi.}}',
+                            message: '{{Création de la commande réussie.}}',
                             level: 'info'
                         });
                     }
@@ -615,7 +615,7 @@ function editHTTP(cmd) {
                     },
                     success: function (data) {
                         $('#div_alert').showAlert({
-                            message: '{{Modification de la commande réussi.}}',
+                            message: '{{Modification de la commande réussie.}}',
                             level: 'info'
                         });
                     }
