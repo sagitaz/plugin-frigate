@@ -121,8 +121,8 @@
             modal.style.display = "none";
         }
 
-        function execSelectedPreset() {
-            var presetId = document.getElementById("presetSelect").value;
+        function execSelectedPreset#id#() {
+            var presetId = document.getElementById("presetSelect#id#").value;
             console.log(presetId);
             if (presetId) {
                 execAction(presetId);
@@ -205,7 +205,7 @@
             text-align: right;
         }
 
-        .preset-select {
+        .preset-select#id# {
             width: 100px !important;
             height: 32px;
             padding: 0px;
@@ -216,11 +216,11 @@
             border-radius: 5px;
         }
 
-        .preset-select:focus {
+        .preset-select#id#:focus {
             outline: none;
         }
 
-        .preset-select option {
+        .preset-select#id# option {
             padding: 10px;
         }
 
