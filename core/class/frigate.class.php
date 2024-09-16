@@ -105,23 +105,30 @@ class frigate extends eqLogic
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
-    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
-    log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
-    self::cleanFolderData();
-    log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
-    self::cleanAllOldestFiles();
+    if (class_exists('mqtt2')) {
+      $deamon_info = self::deamon_info();
+      if ($deamon_info['launchable'] === 'ok' && $frequence === "functionality::cron::enable" || $frequence === "functionality::cron5::enable" || $frequence === "functionality::cron10::enable" || $frequence === "functionality::cron15::enable") {
+        log::add(__CLASS__, 'debug', "| les crons 1, 5, 1 et 15 sont désactivés avec MQTT et ne sont pas utilisés");
+      }
+    } else {
+      log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+      log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
+      self::cleanFolderData();
+      log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
+      self::cleanAllOldestFiles();
 
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (empty($frigate)) {
-      return;
-    }
+      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+      if (empty($frigate)) {
+        return;
+      }
 
-    $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
 
-    if (config::byKey($frequence, 'frigate', 0) == 1) {
-      if ($execute == "1") {
-        self::getEvents();
-        self::getStats();
+      if (config::byKey($frequence, 'frigate', 0) == 1) {
+        if ($execute == "1") {
+          self::getEvents();
+          self::getStats();
+        }
       }
     }
     log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
@@ -2748,7 +2755,8 @@ class frigateCmd extends cmd
         $keyValue = explode('=', $param);
 
         // Vérification de l'existence d'un couple clé=valeur
-        if (count($keyValue) === 2
+        if (
+          count($keyValue) === 2
         ) {
           $key = trim($keyValue[0]);
           $value = trim($keyValue[1]);
@@ -2757,7 +2765,8 @@ class frigateCmd extends cmd
             $defaults['video'] = (int)$value;
           }
 
-          if ($key === 'duration' && is_numeric($value) && $value > 0
+          if (
+            $key === 'duration' && is_numeric($value) && $value > 0
           ) {
             $defaults['duration'] = (int)$value;
           }
