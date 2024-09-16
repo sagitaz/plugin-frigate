@@ -946,7 +946,7 @@ class frigate extends eqLogic
             log::add(__CLASS__, 'debug', "| Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
             $frigate->$setMethod($newValue);
             $updated = true;
-            if ($field == 'Type' && $newValue == 'end') {
+            if ($field == 'Type' && $newValue != $frigate->getType()) {
               $infos = self::getEventinfos($mqtt, $event, true);
               $frigate->setSnapshot($infos["snapshot"]);
               $frigate->setClip($infos["clip"]);
@@ -1025,6 +1025,7 @@ class frigate extends eqLogic
     // verifier si le fichier thumbnail existe avant de le telecharger
     if (!file_exists($dir . '/' . $event['id'] . '_thumbnail.jpg')) {
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_thumbnail.jpg, téléchargement');
+      sleep(5);
       $img = self::saveURL($event['id'], null, $event['camera'], 1);
       if ($img == "error") {
         $img = "null";
@@ -1039,6 +1040,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       if ($event['has_snapshot'] == "true") {
         log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
+        sleep(5);
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
         $hasSnapshot = 1;
         if ($snapshot == "error") {
