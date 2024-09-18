@@ -1039,137 +1039,109 @@ class frigate extends eqLogic
     );
   }
 
-  public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
+  public static function getEventInfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
-    // verifier si le fichier thumbnail existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_thumbnail.jpg')) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_thumbnail.jpg, téléchargement');
-      sleep(5);
-      $img = self::saveURL($event['id'], null, $event['camera'], 1);
-      if ($img == "error") {
-        $img = "null";
-      }
-    } else {
-      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg');
-      $img = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_thumbnail.jpg';
-    }
 
-    // verifier si le fichier snapshot existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_snapshot.jpg') || $force) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
-      if ($event['has_snapshot'] == "true") {
-        log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
-        sleep(5);
-        $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
-        $hasSnapshot = 1;
-        if ($snapshot == "error") {
-          $snapshot = "null";
-          $hasSnapshot = 0;
-        }
-      } else {
-        log::add(__CLASS__, 'debug', "| Has Snapshot: false, téléchargement annulé");
-        $snapshot = "null";
-        $hasSnapshot = 0;
-      }
-    } else {
-      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
-      $snapshot = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_snapshot.jpg';
-      $hasSnapshot = 1;
-    }
+    // Fonction de vérification et téléchargement
+    $img = self::processMedia($dir, $event['id'], '_thumbnail.jpg', $event['camera'], 1);
+    $snapshot = self::processSnapshot($dir, $event, $force);
+    $clip = self::processClip($dir, $event, $type, $force);
+    $preview = self::processPreview($dir, $event, $type, $force);
 
-    // verifier si le fichier clip existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if ($type == "end") {
-        if ($event['has_clip'] == "true") {
-          log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
-          sleep(5);
-          $clip = self::saveURL($event['id'], "clip", $event['camera']);
-          $hasClip = 1;
-          if ($clip == "error") {
-            $clip = "null";
-            $hasClip = 0;
-          } else {
-            $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-            $duration = self::getVideoDuration($filePath);
-            if ($duration !== false) {
-              log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-            } else {
-              log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-            }
-          }
-        } else {
-          log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
-          $clip = "null";
-          $hasClip = 0;
-        }
-      } else {
-        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
-      }
-    } else {
-      $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
-      $hasClip = 1;
-      $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-      $duration = self::getVideoDuration($filePath);
-      if ($duration !== false) {
-        log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-      } else {
-        log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-      }
-    }
+    // Gestion du end_time
+    $endTime = !empty($event['end_time']) ? ceil($event['end_time']) : 0;
 
-    // verifier le endtime
-    $endTime = $event['end_time'];
-    if (empty($event['end_time'])) {
-      log::add(__CLASS__, 'debug', "| Evénement sans end_time, il est forcé à 0 : " . json_encode($event));
-      $endTime = 0;
-    }
+    // Calcul des scores
+    $newTopScore = round(($mqtt ? $event['top_score'] : $event['data']['top_score']) * 100, 0);
+    $newScore = round(($mqtt ? $event['score'] : $event['data']['score']) * 100, 0);
 
-    // calculer le score
-    if (!$mqtt) {
-      $newTopScore = round($event['data']['top_score'] * 100, 0);
-      $newScore = round($event['data']['score'] * 100, 0);
-    } else {
-      $newTopScore = round($event['top_score'] * 100, 0);
-      $newScore = round($event['score'] * 100, 0);
-    }
-
-    // calculer les zones
-    $newZones = isset($event['zones'])
-      && is_array($event['zones'])
-      && !empty($event['zones'])
+    // Calcul des zones
+    $newZones = isset($event['zones']) && is_array($event['zones']) && !empty($event['zones'])
       ? implode(', ', $event['zones'])
       : null;
 
-    // nettoyer le label
-    $label = $event['label'];
-    // Détecter si la chaîne est déjà en UTF-8
-    /*  if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
-      // Si la chaîne est déjà en UTF-8, on la décodera à partir de UTF-8
-      $label = utf8_decode($label);
-    } else {
-      // Sinon, on la convertit de ISO-8859-1 à UTF-8
-      $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
-    } */
-    // renvoyer les infos
-    $infos = array(
+    // Retour des infos
+    return array(
       "image" => $img,
       "thumbnail" => $img,
-      "snapshot" => $snapshot,
-      "hasSnapshot" => $hasSnapshot,
-      "clip" => $clip ?? "",
-      "hasClip" => $hasClip ?? 0,
+      "snapshot" => $snapshot['url'],
+      "hasSnapshot" => $snapshot['has'],
+      "clip" => $clip['url'],
+      "hasClip" => $clip['has'],
       "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
-      "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
+      "endTime" => $endTime,
       "topScore" => $newTopScore,
       "score" => $newScore,
       "zones" => $newZones,
-      "label" => $label
+      "label" => self::cleanLabel($event['label'])
     );
-
-    return $infos;
   }
+
+  private static function processMedia($dir, $id, $suffix, $camera, $isThumbnail = 0)
+  {
+    $filePath = $dir . '/' . $id . $suffix;
+    if (!file_exists($filePath)) {
+      log::add(__CLASS__, 'debug', "| Fichier non trouvé: $filePath, téléchargement");
+      sleep(5); // Option à améliorer
+      $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $isThumbnail);
+      return $img == "error" ? "null" : "/plugins/frigate/data/" . $camera . "/" . $id . $suffix;
+    }
+    return "/plugins/frigate/data/" . $camera . "/" . $id . $suffix;
+  }
+
+  private static function processSnapshot($dir, $event, $force)
+  {
+    if (!file_exists($dir . '/' . $event['id'] . '_snapshot.jpg') || $force) {
+      log::add(__CLASS__, 'debug', "| Fichier snapshot non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
+      if ($event['has_snapshot'] == "true") {
+        log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
+        sleep(5); // Option à améliorer
+        $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
+        return ['url' => $snapshot == "error" ? "null" : $snapshot, 'has' => $snapshot != "error"];
+      }
+      log::add(__CLASS__, 'debug', "| Has Snapshot: false, téléchargement annulé");
+    }
+    return ['url' => "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_snapshot.jpg', 'has' => 1];
+  }
+
+  private static function processClip($dir, $event, $type, $force)
+  {
+    if ($type != "end") {
+      log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
+      return ['url' => "null", 'has' => 0];
+    }
+
+    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
+      log::add(__CLASS__, 'debug', "| Fichier clip non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
+      if ($event['has_clip'] == "true") {
+        sleep(5); // Option à améliorer
+        $clip = self::saveURL($event['id'], "clip", $event['camera']);
+        if ($clip == "error") return ['url' => "null", 'has' => 0];
+
+        $duration = self::getVideoDuration($dir . '/' . $event['id'] . '_clip.mp4');
+        if ($duration !== false) {
+          log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+        }
+        return ['url' => $clip, 'has' => 1];
+      }
+    }
+    return ['url' => "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4', 'has' => 1];
+  }
+  private static function processPreview($dir, $event, $force)
+  {
+    if (!file_exists($dir . '/' . $event['id'] . '_preview.gif') || $force) {
+      log::add(__CLASS__, 'debug', "| Fichier preview non trouvé: " . $dir . '/' . $event['id'] . '_preview.gif');
+      $preview = self::saveURL($event['id'], "preview", $event['camera']);
+      return ['url' => $preview == "error" ? "null" : $preview, 'has' => $preview != "error"];
+    }
+    return "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_preview.gif';
+  }
+  private static function cleanLabel($label)
+  {
+    return $label;
+  }
+
 
   public static function getVideoDuration($filePath)
   {
@@ -1457,7 +1429,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
     // récupérer le json de configuration
-	  $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
+    $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
@@ -2111,7 +2083,7 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-
+    $getPreview = str_replace("snapshot.jpg","preview.gif",$event->getSnapshot());
     // Initialisation des variables d'événement
     $eventId = $event->getEventId();
     $hasClip = $event->getHasClip();
@@ -2120,9 +2092,11 @@ class frigate extends eqLogic
     $clip = $urlJeedom . $event->getClip();
     $snapshot = $urlJeedom . $event->getSnapshot();
     $thumbnail = $urlJeedom . $event->getThumbnail();
+    $preview = $urlJeedom . $getPreview;
     $clipPath = "/var/www/html" . $event->getClip();
     $snapshotPath = "/var/www/html" . $event->getSnapshot();
     $thumbnailPath = "/var/www/html" . $event->getThumbnail();
+    $previewPath = "/var/www/html" . $getPreview;
     $camera = $event->getCamera();
     $label = $event->getLabel();
     $zones = $event->getZones();
@@ -2177,8 +2151,8 @@ class frigate extends eqLogic
         }
 
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
-          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
+          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
+          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
           $options
         );
 
@@ -2229,7 +2203,15 @@ class frigate extends eqLogic
       $urlJeedom = network::getNetworkAccess('internal');
     }
     $urlfrigate = self::getUrlFrigate();
-    $format = ($type == "snapshot") ? "jpg" : "mp4";
+
+if ($type == "preview") {
+  $format = "gif";
+} elseif ($type == "snapshot") {
+  $format = "jpg";
+} else {
+  $format = "mp4";
+}
+
     $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($mode == 1) {
@@ -2239,6 +2221,7 @@ class frigate extends eqLogic
       $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
+      $file = $file . '?timestamp=1&bbox=1';
       $lien = urldecode($file);
       $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
     } elseif ($mode == 4) {
@@ -2687,25 +2670,25 @@ class frigate extends eqLogic
 
   private static function jsonFromUrl($jsonUrl)
   {
-      // Télécharger le contenu JSON depuis l'URL
-      $jsonContent = file_get_contents($jsonUrl);
+    // Télécharger le contenu JSON depuis l'URL
+    $jsonContent = file_get_contents($jsonUrl);
 
-      // Vérifier si le téléchargement a réussi
-      if ($jsonContent === false) {
-          log::add(__CLASS__, 'error', "jsonFromUrl : Failed to retrieve JSON from URL");
-          return json_encode(["error" => "Failed to retrieve JSON from URL: $jsonUrl"]);
-      }
+    // Vérifier si le téléchargement a réussi
+    if ($jsonContent === false) {
+      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to retrieve JSON from URL");
+      return json_encode(["error" => "Failed to retrieve JSON from URL: $jsonUrl"]);
+    }
 
-      // Décoder le JSON en tableau PHP
-      $jsonArray = json_decode($jsonContent, true);
+    // Décoder le JSON en tableau PHP
+    $jsonArray = json_decode($jsonContent, true);
 
-      // Vérifier si la conversion a réussi
-      if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
-          log::add(__CLASS__, 'error', "jsonFromUrl : Failed to decode JSON content");
-          return json_encode(["error" => "Failed to decode JSON content from URL: $jsonUrl"]);
-      }
-    
-      return $jsonArray;
+    // Vérifier si la conversion a réussi
+    if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
+      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to decode JSON content");
+      return json_encode(["error" => "Failed to decode JSON content from URL: $jsonUrl"]);
+    }
+
+    return $jsonArray;
   }
 
   private static function yamlToJsonFromUrl($yamlUrl)

@@ -6,7 +6,7 @@
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
 
-        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#" onclick="gotoCameraEvents#id#()"
+        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#" onclick="gotoPanelEvents#id#()"
             title="{{Afficher les évènements de la caméra}}">
             <i class="fas fa-photo-video iconGotoCameraEvents#id#"></i>
         </span>
@@ -14,7 +14,7 @@
 
     <div class="column">
         <div class="img-container">
-            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
+            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openPanelModal#id#(this)" />
             #detectNow#
             #ptzWidget#
             #ptzZoom#
@@ -98,18 +98,29 @@
             refreshImage(); // Initial call to display the image immediately            
 
         }
-        function gotoCameraEvents#id#() {
+        function gotoPanelEvents#id#() {
             const camera = '#cameraName#';
-                    $('a[href="#Events"]').tab('show');
-                    $('input.cameraFilter[value="camera1"]').prop('checked', true);
+            document.querySelector('a[href="#Events"]').click();
+
+            const checkboxes = document.querySelectorAll('input.cameraFilter');
+            checkboxes.forEach(function (checkbox) {
+                checkbox.checked = false;
+            });
+
+            const targetCheckbox = document.querySelector(`input.cameraFilter[value="${camera}"]`);
+            if (targetCheckbox) {
+                targetCheckbox.checked = true;
+            }
+            filterEvents();
         }
+
         function execAction(cmdid) {
             jeedom.cmd.execute({
                 id: cmdid
             })
         }
 
-        function openModal#id#(imgElement) {
+        function openPanelModal#id#(imgElement) {
             var modal = document.getElementById("myModal#id#");
             var modalImg = document.getElementById("modalImg#id#");
 

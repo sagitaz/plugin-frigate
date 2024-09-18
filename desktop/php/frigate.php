@@ -398,7 +398,7 @@ sendVarToJS('refresh', $refresh);
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
                         #time#, #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
                         <br>
-                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #jeemate#
+                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">
