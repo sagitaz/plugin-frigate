@@ -25,9 +25,9 @@ if (init('object_id') == '') {
   <li role="presentation">
     <a href="#Events" aria-controls="Events" role="tab" data-toggle="tab" data-url="/get-events-content">Evènements</a>
   </li>
-  <li role="presentation">
+ <!-- <li role="presentation">
     <a href="#Health" aria-controls="Health" role="tab" data-toggle="tab" data-url="/get-health-content">Santé</a>
-  </li>
+  </li> -->
   <!--<li role="presentation">
     <a href="#Snapshots" aria-controls="Snapshots" role="tab" data-toggle="tab" data-url="/get-snapshots-content">Captures</a>
   </li>-->
