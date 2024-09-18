@@ -1,7 +1,7 @@
 <!-- events filters template -->
 <div class="col-sm-10 flex-container">
   
-<?-- selecteur caméras -->
+<!-- selecteur caméras -->
   
 <div class="custom-select">
   <button class="select-button" id="cameraSelectButton">Caméras</button>
@@ -15,7 +15,7 @@
   </div>
 </div>
 
-<?-- selecteur label -->
+<!-- selecteur label -->
 <div class="custom-select">
   <button class="select-button" id="labelSelectButton">Labels</button>
   <div class="select-dropdown" id="labelSelectDropdown">
@@ -29,7 +29,7 @@
 </div>
 
    
-<?-- selecteur timeFilter avec radio buttons -->
+<!-- selecteur timeFilter avec radio buttons -->
 <div class="custom-select">
   <button class="select-button" id="timeFilterButton">Période</button>
   <div class="select-dropdown" id="timeFilterDropdown">

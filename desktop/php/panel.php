@@ -10,7 +10,7 @@ if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, true, 'frigate') as $frigate) {
       if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents') {
-        $frigate_widgets[] = array('widget' => $frigate->toHtml('dashboard'));
+        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'));
       }
     }
   }

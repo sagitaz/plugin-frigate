@@ -318,6 +318,12 @@ class frigate extends eqLogic
       $type = "camera";
     }
 
+    // panel ou dashbord
+    if ($_version == 'panel') {
+      $panel = true;
+      $_version = 'dashboard';
+    }
+
     if ($type == 'camera') {
       $replace = $this->preToHtml($_version);
       if (!is_array($replace)) {
@@ -617,12 +623,19 @@ class frigate extends eqLogic
 
 
 
-
-      $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
-      $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
-      $html = $this->postToHtml($_version, $html);
-      cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
-      return $html;
+      if (!$panel) {
+        $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
+        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
+        $html = $this->postToHtml($_version, $html);
+        cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
+        return $html;
+      } else {
+        $html = template_replace($replace, getTemplate('core', $version, 'widgetPanel', __CLASS__));
+        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetPanel.html');
+        $html = $this->postToHtml($_version, $html);
+        cache::set('widgetPanel' . $_version . $this->getId(), $html, 0);
+        return $html;
+      }
     } else {
       return parent::toHtml($_version);
     }

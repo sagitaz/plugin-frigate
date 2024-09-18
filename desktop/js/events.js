@@ -150,8 +150,9 @@ var gotoHomeButton = document.getElementById('gotoHome');
 if (gotoHomeButton) {
   gotoHomeButton.addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
-  });
+  })
 }
+
 
 function deleteEvent(eventId, askConfirm) {
   if (askConfirm) {
