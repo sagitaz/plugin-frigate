@@ -209,6 +209,12 @@ sendVarToJS('refresh', $refresh);
                                     </span>
                                 </div>
                             </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Afficher sur le panel}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="panel"></label>
+                                </div>
+                            </div>
                             <div class="form-group eqFrigate ptz-options">
                                 <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
                                 <div class="col-sm-6">
@@ -218,7 +224,7 @@ sendVarToJS('refresh', $refresh);
 
                         </div>
 
-                        <!-- Partie droite de l'onglet "Équipement" -->
+                        <!-- Partie droite de l'onglet " Équipement" -->
                         <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
                         <div class="col-lg-6 eqFrigate">
                             <div class="col-lg-12 pull-left">

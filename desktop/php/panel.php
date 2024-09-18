@@ -4,12 +4,12 @@ if (!isConnect('admin')) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
 
-$allObject = jeeObject::buildTree(null, true);
+$allObject = jeeObject::buildTree(null, false);
 $frigate_widgets = array();
 if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, true, 'frigate') as $frigate) {
-      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents') {
+      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration["panel"] == true) {
         $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'));
       }
     }
