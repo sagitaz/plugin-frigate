@@ -9,7 +9,7 @@ $frigate_widgets = array();
 if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, true, 'frigate') as $frigate) {
-      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration["panel"] == true) {
+      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration("panel") == true) {
         $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'));
       }
     }

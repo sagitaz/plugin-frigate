@@ -319,6 +319,7 @@ class frigate extends eqLogic
     }
 
     // panel ou dashbord
+    $panel = false;
     if ($_version == 'panel') {
       $panel = true;
       $_version = 'dashboard';
