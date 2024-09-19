@@ -38,12 +38,7 @@
     display: block;
   }
 </style>
-<?php
-function isValidFile($file)
-{
-  return file_exists($file) && is_file($file);
-}
-?>
+
 <div data-date="<?= $date ?>" data-camera="<?= $camera ?>" data-label="<?= $label ?>" data-id="<?= $id ?>"
   class="frigateEventContainer">
   <div class="frigateEvent">
@@ -52,13 +47,9 @@ function isValidFile($file)
     <div class="img-container" onmouseenter="handleHover(this)">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container -->
-      <?php if (isValidFile($preview)): ?>
-        <div class="image-overlay">
-          <img src="<?= htmlspecialchars($preview) ?>" alt="Preview">
-        </div>
-      <?php elseif (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1 && isValidFile($clip)): ?>
+      <?php if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1): ?>
         <div class="video-overlay">
-          <video data-src="<?= htmlspecialchars($clip) ?>" autoplay="" muted="" loop=""></video>
+          <img class="imgSnap" src="<?= $preview ?>" />
         </div>
       <?php endif; ?>
       <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
@@ -94,7 +85,7 @@ function isValidFile($file)
     <!-- div buttons -->
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
                               echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
-                                                      echo 'data-video="' . $clip . '"'; ?>
+                                                                              echo 'data-video="' . $clip . '"'; ?>
       data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
