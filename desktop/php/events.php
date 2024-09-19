@@ -155,6 +155,7 @@ if (!isConnect('admin')) {
     $snapshot = $event['snapshot'];
     $hasClip = $event['hasClip'];
     $clip = $event['clip'];
+    $preview = str_replace("clip.mp4","preview.gif", $event["clip"]);
     $zones = $event['zones'];
 
     // event creation (template)
