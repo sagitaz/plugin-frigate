@@ -52,7 +52,46 @@ function setupEventListeners() {
   cameraButton.addEventListener('click', toggleDropdown);
   cameraDropdown.removeEventListener('click', toggleDropdown);
   cameraDropdown.addEventListener('click', toggleDropdown);
+  // Si une valeur de timeFilter a été récupérée, l'appliquer
+  if (timeFilter) {
+    const radioButton = document.querySelector(`input[name="timeFilter"][value="${timeFilter}"]`);
+    if (radioButton) {
+      radioButton.checked = true; // Sélectionner le bouton radio correspondant
+    }
+  }
+  // Si une configuration de cameraFilter existe, l'appliquer
+  if (cameraFilter) {
+    // 1. Clear uniquement si cameraFilterConfig est défini
+    document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
+      checkbox.checked = false; // Désélectionner toutes les cases caméra
+    });
 
+    // 2. Appliquer les valeurs configurées
+    cameraFilter.forEach(function (camera) {
+      const cameraCheckbox = document.querySelector(`.cameraFilter[value="${camera}"]`);
+      if (cameraCheckbox) {
+        cameraCheckbox.checked = true; // Cochez la case correspondante
+      }
+    });
+  }
+
+  // Si une configuration de labelFilter existe, l'appliquer
+  if (labelFilter) {
+    // 1. Clear uniquement si labelFilterConfig est défini
+    document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
+      checkbox.checked = false; // Désélectionner toutes les cases label
+    });
+
+    // 2. Appliquer les valeurs configurées
+    labelFilter.forEach(function (label) {
+      const labelCheckbox = document.querySelector(`.labelFilter[value="${label}"]`);
+      if (labelCheckbox) {
+        labelCheckbox.checked = true; // Cochez la case correspondante
+      }
+    });
+  }
+  // Appliquer immédiatement le filtre après avoir défini la valeur
+  filterEvents();
 }
 
 
@@ -79,12 +118,33 @@ window.addEventListener('click', function (e) {
 // Gestion du filtre d'événements
 document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
   checkbox.addEventListener('change', filterEvents);
+  // Sauvegarder les valeurs sélectionnées pour cameraFilter et labelFilter
+  checkbox.addEventListener('change', function (event) {
+    var selectedValue = event.target.value;
+    var filterType = event.target.classList.contains('cameraFilter') ? 'cameraFilter' : 'labelFilter';
+    jeedom.config.save({
+      plugin: 'frigate',
+      configuration: {
+        [filterType]: selectedValue
+      }
+    });
+  });
 });
+
 
 document.getElementById('startDate').addEventListener('change', filterEvents);
 document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
   radio.addEventListener('change', filterEvents);
+  radio.addEventListener('change', function (event) {
+    var selectedValue = event.target.value;
+    jeedom.config.save({
+      plugin: 'frigate',
+      configuration: {
+        'timeFilter': selectedValue
+      }
+    });
+  });
 });
 
 document.getElementById('clearDates').addEventListener('click', function () {
@@ -379,4 +439,4 @@ function handleHover(event) {
   }
 }
 
-filterEvents();
+setupEventListeners();
