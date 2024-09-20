@@ -8,7 +8,12 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
     const hasVideo = !!videoSrc;
     const hasSnapshot = !!snapshotSrc;
 
-    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    if (this.classList.contains('video-btn')) {
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+    }
+    else {
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    }
 
     document.getElementById('showVideo').onclick = function () {
       showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
@@ -200,7 +205,7 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   }
 
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
-  showImageBtn.classList.toggle('hidden-btn', !hasSnapshot);
+  showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
 
   mediaModal.style.display = 'block';
 }
