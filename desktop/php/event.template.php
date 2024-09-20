@@ -44,12 +44,12 @@
   <div class="frigateEvent">
 
     <!-- div img -->
-    <div class="img-container" onmouseenter="handleHover(this)">
+    <div class="img-container">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
-      <!-- Hidden video container -->
-      <?php if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1): ?>
+      <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
+      <?php if (!empty($hasPreview)): ?>
         <div class="video-overlay">
-          <video data-src="<?= $clip ?>" autoplay="" muted="" loop=""></video>
+          <img class="imgSnap" src="<?= $preview ?>" />
         </div>
       <?php endif; ?>
       <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
@@ -76,7 +76,7 @@
           <?php if ($cameraFound): ?>
           </a>
           <?php $zonesFormatted = htmlspecialchars(str_replace('_', ' ', $zones)) ?>
-          <?= $zones !== '' ? '<div class="zones"" title="' . $zonesFormatted .'">' . $zonesFormatted . '</div>': '' ?>
+          <?= $zones !== '' ? '<div class="zones"" title="' . $zonesFormatted . '">' . $zonesFormatted . '</div>' : '' ?>
         </div>
       <?php endif; ?>
       <i class="fas fa-clock"></i><span> <?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?></span>
@@ -84,8 +84,8 @@
 
     <!-- div buttons -->
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
-      echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
-               echo 'data-video="' . $clip . '"'; ?>
+                              echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
+                                                                              echo 'data-video="' . $clip . '"'; ?>
       data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">

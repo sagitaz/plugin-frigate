@@ -86,7 +86,7 @@ sendVarToJS('refresh', $refresh);
         <legend><i class="fas fa-table"></i> {{Mes équipements}}</legend>
         <?php
         if (count($eqLogics) == 0) {
-            echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Frigate trouvé, cliquer sur "Rechercher" et patienter, cela peu être long si beaucoup de caméras}}</div>';
+            echo '<br><div class="text-center" style="font-size:1.2em;font-weight:bold;">{{Aucun équipement Frigate trouvé, cliquez sur "Rechercher" et patientez, cela peut être long si beaucoup de caméras}}</div>';
         } else {
             // Champ de recherche
             echo '<div class="input-group" style="margin:5px;">';
@@ -199,7 +199,7 @@ sendVarToJS('refresh', $refresh);
                             </div>
                             <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{Mot de passe}}
-                                    <sup><i class="fas fa-question-circle tooltips" title="{{Mot de passe d'accès a votre caméra, seulement pour les commandes HTTP}}"></i></sup>
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Mot de passe d'accès à votre caméra, seulement pour les commandes HTTP}}"></i></sup>
 
                                 </label>
                                 <div class="col-sm-6 input-group">
@@ -207,6 +207,12 @@ sendVarToJS('refresh', $refresh);
                                     <span class="input-group-btn">
                                         <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
                                     </span>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Afficher sur le panel}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="panel"></label>
                                 </div>
                             </div>
                             <div class="form-group eqFrigate ptz-options">
@@ -218,7 +224,7 @@ sendVarToJS('refresh', $refresh);
 
                         </div>
 
-                        <!-- Partie droite de l'onglet "Équipement" -->
+                        <!-- Partie droite de l'onglet " Équipement" -->
                         <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
                         <div class="col-lg-6 eqFrigate">
                             <div class="col-lg-12 pull-left">
@@ -398,7 +404,7 @@ sendVarToJS('refresh', $refresh);
                         {{Vous pouvez utiliser les variables suivantes}} :<br>
                         #time#, #event_id#, #camera#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
                         <br>
-                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #jeemate#
+                        #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
                     </div>
                     <form class="form-horizontal">

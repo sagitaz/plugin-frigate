@@ -4,13 +4,13 @@ if (!isConnect('admin')) {
   throw new Exception('{{401 - Accès non autorisé}}');
 }
 
-$allObject = jeeObject::buildTree(null, true);
+$allObject = jeeObject::buildTree(null, false);
 $frigate_widgets = array();
 if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, true, 'frigate') as $frigate) {
-      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents') {
-        $frigate_widgets[] = array('widget' => $frigate->toHtml('dashboard'));
+      if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration("panel") == true) {
+        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'));
       }
     }
   }
@@ -25,9 +25,9 @@ if (init('object_id') == '') {
   <li role="presentation">
     <a href="#Events" aria-controls="Events" role="tab" data-toggle="tab" data-url="/get-events-content">Evènements</a>
   </li>
-  <li role="presentation">
+ <!-- <li role="presentation">
     <a href="#Health" aria-controls="Health" role="tab" data-toggle="tab" data-url="/get-health-content">Santé</a>
-  </li>
+  </li> -->
   <!--<li role="presentation">
     <a href="#Snapshots" aria-controls="Snapshots" role="tab" data-toggle="tab" data-url="/get-snapshots-content">Captures</a>
   </li>-->
@@ -195,6 +195,8 @@ if (init('object_id') == '') {
         $snapshot = $event['snapshot'];
         $hasClip = $event['hasClip'];
         $clip = $event['clip'];
+        $preview = str_replace("snapshot.jpg", "preview.gif", $event["snapshot"]);
+        $hasPreview = file_exists("/var/www/html" . $preview);
         $zones = $event['zones'];
 
         // event creation (template)

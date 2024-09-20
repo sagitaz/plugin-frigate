@@ -8,7 +8,12 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
     const hasVideo = !!videoSrc;
     const hasSnapshot = !!snapshotSrc;
 
-    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    if (this.classList.contains('video-btn')) {
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+    }
+    else {
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    }
 
     document.getElementById('showVideo').onclick = function () {
       showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
@@ -46,13 +51,49 @@ function toggleDropdown() {
 // Fonction pour configurer les écouteurs d'événements
 function setupEventListeners() {
   const cameraButton = document.getElementById('cameraSelectButton');
-
   // Assurez-vous que les écouteurs sont correctement configurés
   cameraButton.removeEventListener('click', toggleDropdown);
   cameraButton.addEventListener('click', toggleDropdown);
   cameraDropdown.removeEventListener('click', toggleDropdown);
   cameraDropdown.addEventListener('click', toggleDropdown);
+  // Si une valeur de timeFilter a été récupérée, l'appliquer
+  if (timeFilter) {
+    const radioButton = document.querySelector(`input[name="timeFilter"][value="${timeFilter}"]`);
+    if (radioButton) {
+      radioButton.checked = true;
+    }
+  }
+  // Si une configuration de cameraFilter existe, l'appliquer
+  if (cameraFilter) {
+    document.querySelectorAll('.cameraFilter').forEach(function (checkbox) {
+      checkbox.checked = false;
+    });
 
+    cameraFilter.forEach(function (camera) {
+      const cameraCheckbox = document.querySelector(`.cameraFilter[value="${camera}"]`);
+      if (cameraCheckbox) {
+        cameraCheckbox.checked = true;
+      }
+    });
+  }
+
+  // Si une configuration de labelFilter existe, l'appliquer
+  if (labelFilter) {
+    document.querySelectorAll('.labelFilter').forEach(function (checkbox) {
+      checkbox.checked = false;
+    });
+
+    labelFilter.forEach(function (label) {
+      const labelCheckbox = document.querySelector(`.labelFilter[value="${label}"]`);
+      if (labelCheckbox) {
+        labelCheckbox.checked = true;
+      }
+    });
+  }
+
+
+  // Appliquer immédiatement le filtre après avoir défini la valeur
+  filterEvents();
 }
 
 
@@ -79,12 +120,35 @@ window.addEventListener('click', function (e) {
 // Gestion du filtre d'événements
 document.querySelectorAll('.cameraFilter, .labelFilter').forEach(function (checkbox) {
   checkbox.addEventListener('change', filterEvents);
+  checkbox.addEventListener('change', function (event) {
+    var filterType = event.target.classList.contains('cameraFilter') ? 'cameraFilter' : 'labelFilter';
+    var selectedValues = Array.from(document.querySelectorAll(`.${filterType}:checked`)).map(function (checkedBox) {
+      return checkedBox.value;
+    });
+    jeedom.config.save({
+      plugin: 'frigate',
+      configuration: {
+        [filterType]: selectedValues
+      }
+    });
+  });
 });
+
+
 
 document.getElementById('startDate').addEventListener('change', filterEvents);
 document.getElementById('endDate').addEventListener('change', filterEvents);
 document.querySelectorAll('input[name="timeFilter"]').forEach(function (radio) {
   radio.addEventListener('change', filterEvents);
+  radio.addEventListener('change', function (event) {
+    var selectedValue = event.target.value;
+    jeedom.config.save({
+      plugin: 'frigate',
+      configuration: {
+        'timeFilter': selectedValue
+      }
+    });
+  });
 });
 
 document.getElementById('clearDates').addEventListener('click', function () {
@@ -150,8 +214,9 @@ var gotoHomeButton = document.getElementById('gotoHome');
 if (gotoHomeButton) {
   gotoHomeButton.addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
-  });
+  })
 }
+
 
 function deleteEvent(eventId, askConfirm) {
   if (askConfirm) {
@@ -378,4 +443,4 @@ function handleHover(event) {
   }
 }
 
-filterEvents();
+setupEventListeners();
