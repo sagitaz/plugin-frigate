@@ -1,6 +1,9 @@
 <?php
 $timeFilter = config::byKey('timeFilter', 'frigate');
 sendVarToJS('timeFilter', $timeFilter);
+if (!empty($selectedCameras)) {
+	config::save('cameraFilter', $selectedCameras, 'frigate');
+}
 $cameraFilter = config::byKey('cameraFilter', 'frigate');
 sendVarToJS('cameraFilter', $cameraFilter);
 $labelFilter = config::byKey('labelFilter', 'frigate');
