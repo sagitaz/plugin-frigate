@@ -1048,7 +1048,7 @@ class frigate extends eqLogic
     $img = self::processMedia($dir, $event['id'], '_thumbnail.jpg', $event['camera'], 1);
     $snapshot = self::processSnapshot($dir, $event, $force);
     $clip = self::processClip($dir, $event, $type, $force);
-    $preview = self::processPreview($dir, $event, $type, $force);
+    $preview = self::processPreview($dir, $event);
 
     // Gestion du end_time
     $endTime = !empty($event['end_time']) ? ceil($event['end_time']) : 0;
@@ -1125,13 +1125,15 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
         }
         return ['url' => $clip, 'has' => 1];
+      } else {
+        log::add(__CLASS__, 'debug', "| Has Clip: false, telechargement annulé");
+        return ['url' => "null", 'has' => 0];
       }
     }
-    return ['url' => "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4', 'has' => 1];
   }
-  private static function processPreview($dir, $event, $force)
+  private static function processPreview($dir, $event)
   {
-    if (!file_exists($dir . '/' . $event['id'] . '_preview.gif') || $force) {
+    if (!file_exists($dir . '/' . $event['id'] . '_preview.gif')) {
       log::add(__CLASS__, 'debug', "| Fichier preview non trouvé: " . $dir . '/' . $event['id'] . '_preview.gif');
       $preview = self::saveURL($event['id'], "preview", $event['camera']);
       return ['url' => $preview == "error" ? "null" : $preview, 'has' => $preview != "error"];
