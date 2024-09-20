@@ -3,6 +3,12 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+
+# 17/09/2024 Beta 1.0.2
+- Ajout de la variable #preview# dans les notifications
+- Sur la page events, ce sera la preview au survol et plus le clip (moins lourd).
+- Les filtres sont sauvegardés pour etre appliqués à la prochaine ouverture de la page events.
+
 # 16/09/2024 Beta 1.0.1
 - Correction selecteur preset sur widget
 - Corrections de diverses erreur JS
