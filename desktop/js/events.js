@@ -205,7 +205,7 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   }
 
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
-  showImageBtn.classList.toggle('hidden-btn', !hasSnapshot);
+  showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
 
   mediaModal.style.display = 'block';
 }

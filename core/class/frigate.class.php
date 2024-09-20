@@ -590,7 +590,7 @@ class frigate extends eqLogic
       // Créer la structure HTML du select
       $selectHtml = '<div class="btn-icon">';
       $selectHtml .= '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">';
-
+      $selectHtml .= '<option value="">{{action}}</option>';
       // Boucle sur les presets disponibles
       for ($i = 0; $i <= 10; $i++) {
         $presetCmd = 'action_preset_' . $i;
