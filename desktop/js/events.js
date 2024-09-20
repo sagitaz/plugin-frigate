@@ -8,7 +8,12 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
     const hasVideo = !!videoSrc;
     const hasSnapshot = !!snapshotSrc;
 
-    showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    if (this.classList.contains('video-btn')) {
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+    }
+    else {
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+    }
 
     document.getElementById('showVideo').onclick = function () {
       showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
