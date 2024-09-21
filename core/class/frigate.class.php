@@ -285,6 +285,10 @@ class frigate extends eqLogic
         $infoCmd->save();
       }
     }
+
+    $infoCmd = self::createCmd($this->getId(), "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);
+    $infoCmd->setGeneric_type("CAMERA_URL");
+    $infoCmd->save();
   }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
