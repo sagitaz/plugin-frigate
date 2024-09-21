@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 21/09/2024 Beta 1.0.3
+- Option pour flux RTSP (voir documentation)
+- Force le type génèrique de l'url snapshot (faites une recherche ou un save de chaque equipement)
+
 # 17/09/2024 Beta 1.0.2
 - Ajout de la variable #preview# dans les notifications
 - Sur la page events, ce sera la preview au survol et plus le clip (moins lourd).

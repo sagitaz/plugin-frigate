@@ -63,6 +63,8 @@ Après installation du plugin et la configuration de l'URL et du port de votre s
 ### Equipement
 - user : seulement utile si vous créer des commandes HTTP
 - mot de passe : seulement utile si vous créer des commandes HTTP
+- Panel : cocher pour que la caméra soit visible sur le Panel
+- Flux vidéo : Renseigné un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
 - preset : si vous souhaitez un nombre différent que le réglage global
 
 A droite, les quelques paramètres disponibles pour la visualisation.
@@ -236,10 +238,42 @@ Le cronDaily est le seul à vérifier la version de votre serveur frigate, si un
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 
+# <u>Flux vidéo</u>
+Dans le plugin il n'y a pas de lecteur pour le flux vidéo.
+
+L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur frigate et pas celle de la caméra.
+
+1. **Flux RTSP de Frigate** :
+   - **Avantages** : Frigate peut centraliser les flux de plusieurs caméras, ce qui réduit le nombre de connexions directes à chaque caméra. Cela peut améliorer la stabilité et la gestion des ressources réseau.
+   - **Inconvénients** : La configuration peut être plus complexe, surtout si vous avez plusieurs caméras avec des paramètres différents.
+
+2. **Flux RTSP de la caméra** :
+   - **Avantages** : Utiliser directement le flux RTSP de la caméra peut être plus simple à configurer, surtout si vous avez une seule caméra ou si vous ne souhaitez pas utiliser de logiciel intermédiaire.
+   - **Inconvénients** : Chaque appareil se connectera directement à la caméra, ce qui peut augmenter la charge sur le réseau et sur la caméra elle-même.
+
+En résumé, si vous avez plusieurs caméras et que vous souhaitez une gestion centralisée, le flux RTSP de Frigate pourrait être plus avantageux. Si vous préférez une solution plus simple et directe, utiliser le flux RTSP de la caméra pourrait être suffisant.
+
+Celui-ci est utile pour l'application **JeeMate**, si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre equipement celui que vous souhaitez utiliser, la même chose si vous préfèrer utiliserle fux d'origine de la caméra.
+
+Configuration frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par defaut conviendra.
+**``   frigate1:`` 
+``      ffmpeg:`` 
+``          inputs:`` 
+``         - path: rtsp://127.0.0.1:8554/frigate1``**
+
+Configuration frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur frigate.
+**``   frigate1:`` 
+``      ffmpeg:`` 
+``          inputs:`` 
+``         - path: rtsp://127.0.0.1:8554/frigate1_SD``
+`` - role: detect``
+``         - path: rtsp://127.0.0.1:8554/frigate1_HD``
+`` - role: detect``**
+
+> **Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate**
 # <u>Panel</u>
 - visualisation des caméras.
 - page évènements
-- page santé (à venir)
 
 # <u>Support</u>
 - Community Jeedom

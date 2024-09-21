@@ -215,86 +215,94 @@ sendVarToJS('refresh', $refresh);
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="panel"></label>
                                 </div>
                             </div>
-                            <div class="form-group eqFrigate ptz-options">
-                                <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Flux vidéo}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.}}"></i></sup>
+                                </label>
                                 <div class="col-sm-6">
-                                    <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="cameraStreamAccessUrlPerso" placeholder="{{Lien vers votre flux vidéo}}"">
                                 </div>
                             </div>
+                            <div class=" form-group eqFrigate ptz-options">
+                                    <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
+                                    <div class="col-sm-6">
+                                        <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
+                                    </div>
+                                </div>
 
-                        </div>
-
-                        <!-- Partie droite de l'onglet " Équipement" -->
-                        <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
-                        <div class="col-lg-6 eqFrigate">
-                            <div class="col-lg-12 pull-left">
-                                <legend><i class="fas fa-info" title="{{sauvegarder après tout changement}}"></i> {{Visualisation}}</legend>
                             </div>
 
+                            <!-- Partie droite de l'onglet " Équipement" -->
+                            <!-- Affiche un champ de commentaire par défaut mais vous pouvez y mettre ce que vous voulez -->
+                            <div class="col-lg-6 eqFrigate">
+                                <div class="col-lg-12 pull-left">
+                                    <legend><i class="fas fa-info" title="{{sauvegarder après tout changement}}"></i> {{Visualisation}}</legend>
+                                </div>
 
-                            <div class="form-group eqFrigate">
-                                <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span>
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox"></label>
-                                <label class="col-sm-4 control-label timestamp-configuration"><span>{{timestamp}}</span>
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp"></label>
-                                <label class="col-sm-4 control-label zones-configuration"><span>{{zones}}</span>
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones"></label>
-                                <label class="col-sm-4 control-label mask-configuration"><span>{{mask}}</span>
-                                    <input type="checkbox" class="eqLogicAttr mask-checkbox" data-l1key="configuration" data-l2key="mask"></label>
-                                <label class="col-sm-4 control-label motion-configuration"><span>{{motion}}</span>
-                                    <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion"></label>
-                                <label class="col-sm-4 control-label regions-configuration"><span>{{régions}}</span>
-                                    <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions"></label>
-                            </div>
 
-                            <div>
-                                <?php
+                                <div class="form-group eqFrigate">
+                                    <label class="col-sm-4 control-label bbox-configuration"><span>{{bbox}}</span>
+                                        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="bbox"></label>
+                                    <label class="col-sm-4 control-label timestamp-configuration"><span>{{timestamp}}</span>
+                                        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="timestamp"></label>
+                                    <label class="col-sm-4 control-label zones-configuration"><span>{{zones}}</span>
+                                        <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="zones"></label>
+                                    <label class="col-sm-4 control-label mask-configuration"><span>{{mask}}</span>
+                                        <input type="checkbox" class="eqLogicAttr mask-checkbox" data-l1key="configuration" data-l2key="mask"></label>
+                                    <label class="col-sm-4 control-label motion-configuration"><span>{{motion}}</span>
+                                        <input type="checkbox" class="eqLogicAttr motion-checkbox" data-l1key="configuration" data-l2key="motion"></label>
+                                    <label class="col-sm-4 control-label regions-configuration"><span>{{régions}}</span>
+                                        <input type="checkbox" class="eqLogicAttr regions-checkbox" data-l1key="configuration" data-l2key="regions"></label>
+                                </div>
 
-                                $name = '';
-                                $conditionIf = '';
-                                $evaluateExpression = '';
+                                <div>
+                                    <?php
 
-                                try {
-                                    if (isset($_GET['id']) && is_numeric($_GET['id'])) {
-                                        $eqLogicId = intval($_GET['id']);
-                                        $equipment = eqLogic::byId($eqLogicId);
+                                    $name = '';
+                                    $conditionIf = '';
+                                    $evaluateExpression = '';
 
-                                        if ($equipment) {
-                                            $configuration = $equipment->getConfiguration();
-                                            if (isset($configuration['name'])) {
-                                                $name = $configuration['name'];
-                                            }
-                                            if (isset($configuration['conditionIf'])) {
-                                                $conditionIf = $configuration['conditionIf'];
-                                                $evaluateExpression = jeedom::evaluateExpression($conditionIf);
+                                    try {
+                                        if (isset($_GET['id']) && is_numeric($_GET['id'])) {
+                                            $eqLogicId = intval($_GET['id']);
+                                            $equipment = eqLogic::byId($eqLogicId);
+
+                                            if ($equipment) {
+                                                $configuration = $equipment->getConfiguration();
+                                                if (isset($configuration['name'])) {
+                                                    $name = $configuration['name'];
+                                                }
+                                                if (isset($configuration['conditionIf'])) {
+                                                    $conditionIf = $configuration['conditionIf'];
+                                                    $evaluateExpression = jeedom::evaluateExpression($conditionIf);
+                                                }
                                             }
                                         }
+                                    } catch (Exception $e) {
+                                        //echo "Erreur : " . $e->getMessage();
                                     }
-                                } catch (Exception $e) {
-                                    //echo "Erreur : " . $e->getMessage();
-                                }
 
-                                if ($name !== '') {
-                                    echo '<div class="pull-right">
+                                    if ($name !== '') {
+                                        echo '<div class="pull-right">
                                         <a class="btn btn-success eqLogicAction" onclick="gotoCameraEvents(\'' . $name . '\')" title="{{Afficher les évènements de la caméra}}">
                                         <i class="fas fa-window-restore"></i>&nbsp;Evènements</a>
                                     </div>';
-                                }
+                                    }
 
-                                ?>
+                                    ?>
 
-                            </div>
-                            <div class="form-group">
-                                <div class="col-sm-12" style="display: none;">
-                                    <input type="text" id="cameraUrlInput" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="img">
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12" style="display: none;">
+                                        <input type="text" id="cameraUrlInput" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="img">
+                                    </div>
+                                </div>
+                                <div class="form-group">
+                                    <div class="col-sm-12">
+                                        <img id="imgFrigate" class="img-responsive" src="" />
+                                    </div>
                                 </div>
                             </div>
-                            <div class="form-group">
-                                <div class="col-sm-12">
-                                    <img id="imgFrigate" class="img-responsive" src="" />
-                                </div>
-                            </div>
-                        </div>
                     </fieldset>
                 </form>
             </div><!-- /.tabpanel #eqlogictab-->
