@@ -604,7 +604,7 @@ class frigate extends eqLogic
       // Créer la structure HTML du select
       $selectHtml = '<div class="btn-icon">';
       $selectHtml .= '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">';
-      $selectHtml .= '<option value="">{{action}}</option>';
+      $selectHtml .= '<option value="" disabled selected hidden>{{action}}</option>';
       // Boucle sur les presets disponibles
       for ($i = 0; $i <= 10; $i++) {
         $presetCmd = 'action_preset_' . $i;
@@ -1634,7 +1634,7 @@ class frigate extends eqLogic
       $rtsp = $eqlogic->getConfiguration('cameraStreamAccessUrlPerso');
       $link = $eqlogic->getConfiguration("cameraStreamAccessUrl");
       if ($rtsp != '') {
-          $infoCmd->event($rtsp);
+        $infoCmd->event($rtsp);
       } else {
         $infoCmd->event($link);
       }
@@ -2106,7 +2106,7 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-    $getPreview = str_replace("snapshot.jpg","preview.gif",$event->getSnapshot());
+    $getPreview = str_replace("snapshot.jpg", "preview.gif", $event->getSnapshot());
     // Initialisation des variables d'événement
     $eventId = $event->getEventId();
     $hasClip = $event->getHasClip();
@@ -2227,13 +2227,13 @@ class frigate extends eqLogic
     }
     $urlfrigate = self::getUrlFrigate();
 
-if ($type == "preview") {
-  $format = "gif";
-} elseif ($type == "snapshot") {
-  $format = "jpg";
-} else {
-  $format = "mp4";
-}
+    if ($type == "preview") {
+      $format = "gif";
+    } elseif ($type == "snapshot") {
+      $format = "jpg";
+    } else {
+      $format = "mp4";
+    }
 
     $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
