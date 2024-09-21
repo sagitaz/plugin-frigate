@@ -7,6 +7,7 @@
 # 21/09/2024 Beta 1.0.3
 - Option pour flux RTSP (voir documentation)
 - Force le type génèrique de l'url snapshot (faites une recherche ou un save de chaque equipement)
+- Correction page events vignette (clip, preview, rien)
 
 # 17/09/2024 Beta 1.0.2
 - Ajout de la variable #preview# dans les notifications

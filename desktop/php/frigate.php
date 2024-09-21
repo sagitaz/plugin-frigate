@@ -220,7 +220,7 @@ sendVarToJS('refresh', $refresh);
                                     <sup><i class="fas fa-question-circle tooltips" title="{{Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.}}"></i></sup>
                                 </label>
                                 <div class="col-sm-6">
-                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="cameraStreamAccessUrlPerso" placeholder="{{Lien vers votre flux vidéo}}"">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="cameraStreamAccessUrl" placeholder="{{Lien vers votre flux vidéo}}"">
                                 </div>
                             </div>
                             <div class=" form-group eqFrigate ptz-options">
