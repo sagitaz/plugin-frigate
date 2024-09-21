@@ -44,14 +44,26 @@
   <div class="frigateEvent">
 
     <!-- div img -->
-    <div class="img-container">
+    <div class="img-container" onmouseenter="handleHover(this)">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
-      <?php if (!empty($hasPreview)): ?>
-        <div class="video-overlay">
-          <img class="imgSnap" src="<?= $preview ?>" />
-        </div>
-      <?php endif; ?>
+
+      <?php
+      if ($showClip) {
+        echo '<div class="video-overlay">';
+        echo '<video data-src="' . $clip . '" autoplay="" muted="" loop=""></video>';
+        echo '</div>';
+      } else {
+        if ($hasPreview) {
+          echo '<div>';
+          echo '<img class="video-overlay" src="' . $preview . '" />';
+          echo '</div>';
+        }
+      }
+
+
+      ?>
+
       <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
         <i class="<?= $favoriteClass ?>"></i>
       </button>
