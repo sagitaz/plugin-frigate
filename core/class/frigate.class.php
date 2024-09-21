@@ -118,6 +118,7 @@ class frigate extends eqLogic
       self::cleanAllOldestFiles();
       if ($frequence !== "functionality::cron::enable" || $frequence !== "functionality::cron5::enable" || $frequence !== "functionality::cron10::enable" || $frequence !== "functionality::cron15::enable") {
         self::cleanByType();
+        self::cleanByType("update");
       }
       $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
       if (empty($frigate)) {
@@ -250,48 +251,52 @@ class frigate extends eqLogic
       $urlLatest = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
       $img = $encoded_url = urlencode($urlLatest);
       $this->setConfiguration('img', $img);
-    }
 
-    if ($this->getConfiguration('cameraStreamAccessUrl') == '') {
-      $this->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $url . ':8554/' . $this->getConfiguration('name'));
-    }
-
-    $urlStream = "";
-    $cmd = cmd::byEqLogicIdCmdName($this->getId(), "SNAPSHOT LIVE");
-    if (is_object($cmd)) {
-      $urlStream = $cmd->execCmd();
-    }
-
-    if ($this->getConfiguration('urlStream') == '' || $this->getConfiguration('urlStream') != $urlStream) {
-      $urlJeedom = network::getNetworkAccess('external');
-      if ($urlJeedom == "") {
-        $urlJeedom = network::getNetworkAccess('internal');
-      }
-      $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
-      $this->setConfiguration('urlStream', $urlStream);
+      // maj lien et cmd snapshot
+      $urlStream = "";
+      $cmd = cmd::byEqLogicIdCmdName($this->getId(), "SNAPSHOT LIVE");
       if (is_object($cmd)) {
-        $cmd->event($urlJeedom . $urlStream);
-        $cmd->save();
+        $urlStream = $cmd->execCmd();
+
+        if ($this->getConfiguration('urlStream') == '' || $this->getConfiguration('urlStream') != $urlStream) {
+          $urlJeedom = network::getNetworkAccess('external');
+          if ($urlJeedom == "") {
+            $urlJeedom = network::getNetworkAccess('internal');
+          }
+          $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
+          $this->setConfiguration('urlStream', $urlStream);
+          if (is_object($cmd)) {
+            $cmd->event($urlJeedom . $urlStream);
+            $cmd->save();
+          }
+        }
+      }
+
+      // maj lien et cmd rtsp    
+      $rtspStream = "";
+      $cmd = cmd::byEqLogicIdCmdName($this->getId(), "RTSP");
+      if (is_object($cmd)) {
+        $rtspStream = $cmd->execCmd();
+
+        $rtsp = $this->getConfiguration('cameraStreamAccessUrl');
+        if ($rtsp == '' || $rtsp != $rtspStream) {
+          if ($rtsp == '') {
+            $rtsp = 'rtsp://' . $url . ':8554/' . $this->getConfiguration('name');
+          }
+
+          $this->setConfiguration('cameraStreamAccessUrl', $rtsp);
+
+          if (is_object($cmd)) {
+            $cmd->event($rtsp);
+            $cmd->save();
+          }
+        }
       }
     }
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
-  public function postSave()
-  {
-    $infoCmd = self::createCmd($this->getId(), "RTSP", "string", "", "link_rtsp", "", 0, null, 0);
-    $rtsp = $this->getConfiguration('cameraStreamAccessUrlPerso');
-    if ($rtsp != '') {
-      if (is_object($infoCmd)) {
-        $infoCmd->event($rtsp);
-        $infoCmd->save();
-      }
-    }
-
-    $infoCmd = self::createCmd($this->getId(), "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);
-    $infoCmd->setGeneric_type("CAMERA_URL");
-    $infoCmd->save();
-  }
+  public function postSave() {}
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
   public function preRemove() {}
@@ -1249,7 +1254,8 @@ class frigate extends eqLogic
     }
   }
 
-  public static function cleanByType($type = "new") {
+  public static function cleanByType($type = "new")
+  {
     $events = frigate_events::byType($type);
 
     if (!empty($events)) {
@@ -1266,7 +1272,7 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'error', "| Échec du nettoyage de l'événement ID: " . $eventId);
         }
       }
-    } 
+    }
   }
 
   public static function cleanOldestFile()
@@ -1656,13 +1662,8 @@ class frigate extends eqLogic
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
-      $rtsp = $eqlogic->getConfiguration('cameraStreamAccessUrlPerso');
       $link = $eqlogic->getConfiguration("cameraStreamAccessUrl");
-      if ($rtsp != '') {
-        $infoCmd->event($rtsp);
-      } else {
-        $infoCmd->event($link);
-      }
+      $infoCmd->event($link);
       $infoCmd->save();
     }
     $infoCmd = self::createCmd($eqlogicId, "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);
