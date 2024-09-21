@@ -14,9 +14,13 @@
         "Le plugin MQTT Manager n\\'est pas installé": "The MQTT Manager plugin is not installed",
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Thank you for installing the plugin. If you need help, please contact support on Discord or on Community.",
         "Topic mqtt pour Frigate non défini.": "Topic mqtt for Frigate not defined.",
-        "Veuillez vérifier la configuration": "Please check configuration"
+        "Veuillez vérifier la configuration": "Please check configuration",
+        "action": "action"
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "View camera events"
+    },
+    "plugins\/frigate\/core\/template\/dashboard\/widgetPanel.html": {
         "Afficher les évènements de la caméra": "View camera events"
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
@@ -139,6 +143,7 @@
         "Action(s)": "Action(s)",
         "Activer": "Enable",
         "Afficher les évènements de la caméra": "View camera events",
+        "Afficher sur le panel": "Display on panel",
         "Ajouter une action": "Add an action",
         "Ajouter une commande HTTP": "Add an HTTP command",
         "Aucun": "None",
@@ -156,11 +161,14 @@
         "Equipement visible": "Visible equipment",
         "Etat actuel : ": "Current status :",
         "Events": "Events",
+        "Flux vidéo": "Video feeds",
         "Gestion": "Management",
         "ID": "ID",
         "Identifiant": "ID",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Camera access ID, for HTTP commands only",
         "Infos": "News",
+        "Lien vers votre flux vidéo": "Link to your video stream",
+        "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Link to your video stream if the default one is not suitable. see documentation.",
         "Logs Frigate": "Logs Frigate",
         "Mes équipements": "My equipment",
         "Mot de passe": "Password",
