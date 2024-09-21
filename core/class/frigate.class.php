@@ -116,7 +116,9 @@ class frigate extends eqLogic
       self::cleanFolderData();
       log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
       self::cleanAllOldestFiles();
-
+      if ($frequence !== "functionality::cron::enable" || $frequence !== "functionality::cron5::enable" || $frequence !== "functionality::cron10::enable" || $frequence !== "functionality::cron15::enable") {
+        self::cleanByType();
+      }
       $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
       if (empty($frigate)) {
         return;
@@ -1247,7 +1249,25 @@ class frigate extends eqLogic
     }
   }
 
+  public static function cleanByType($type = "new") {
+    $events = frigate_events::byType($type);
 
+    if (!empty($events)) {
+      foreach ($events as $event) {
+        $eventId = $event->getEventId();
+
+        log::add(__CLASS__, 'info', "| Nettoyage de l'événement ID: " . $eventId . " il est de type: " . $type);
+
+        $result = self::cleanDbEvent($eventId);
+
+        if ($result) {
+          log::add(__CLASS__, 'info', "| Événement ID: " . $eventId . " nettoyé avec succès.");
+        } else {
+          log::add(__CLASS__, 'error', "| Échec du nettoyage de l'événement ID: " . $eventId);
+        }
+      }
+    } 
+  }
 
   public static function cleanOldestFile()
   {
@@ -1323,6 +1343,7 @@ class frigate extends eqLogic
         $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
         $snapshot = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.jpg";
         $thumbnail = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.jpg";
+        $preview = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_preview.gif";
 
         if (file_exists($clip)) {
           unlink($clip);
@@ -1335,6 +1356,10 @@ class frigate extends eqLogic
         if (file_exists($thumbnail)) {
           unlink($thumbnail);
           log::add(__CLASS__, 'debug', "| Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
+        }
+        if (file_exists($preview)) {
+          unlink($preview);
+          log::add(__CLASS__, 'debug', "| GIF supprimé pour l'événement " . $frigate->getEventId());
         }
 
         $frigate->remove();
