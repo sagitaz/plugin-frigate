@@ -127,6 +127,10 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#thumbnail_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
+- **#preview#** : lien vers fichier le fichier preview
+`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
+- **#preview_path#** : path vers fichier preview
+`/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#label#** : texte
 - **#start#** : heure de début
 - **#end#** : heure de fin
@@ -135,12 +139,12 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 
 Une checkbox vous permet de désactiver la verification de la condition. 
 
-- <u>**LABEL**</u>
+- <u>LABEL</u>
 **Pour rappel le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 
-- <u>**TYPE**</u>
+- <u>TYPE</u>
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
@@ -150,6 +154,8 @@ Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhai
 ### Exemple de notifications :
 #### Plugin JeeMate
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#``**
+- **preview** : dans le champ titre : **``title=votre titre;;bigPicture=#preview#``**
+- **thumbnail** : dans le champ titre : **``title=votre titre;;bigPicture=#thumbnail#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
 
 Pour une notification automatique, ajouter frigate=#jeemate#, disponible avec la future v3 de JeeMate
