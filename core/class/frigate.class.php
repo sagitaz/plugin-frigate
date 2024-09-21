@@ -788,7 +788,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/" . $camera . "/ptz/info";
     $presets = self::getcURL("Presets", $resultURL);
     return $presets;
-    log::add(__CLASS__, 'debug', "----------------------END IMPORT PRESET----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------END IMPORT PRESET----------------------------");
   }
 
   public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
@@ -2740,8 +2740,8 @@ class frigate extends eqLogic
     return $jsonArray;
   }
 
-  private static function yamlToJsonFromUrl($yamlUrl)
-  {
+ /* private static function yamlToJsonFromUrl($yamlUrl)
+ {
     // Télécharger le contenu YAML depuis l'URL
     $yamlContent = file_get_contents($yamlUrl);
     // Vérifier si le téléchargement a réussi
@@ -2760,6 +2760,8 @@ class frigate extends eqLogic
     $jsonContent = json_encode($yamlArray, JSON_PRETTY_PRINT);
     return $jsonContent;
   }
+
+  */
 
   private static function checkFriagetVersion()
   {
