@@ -127,6 +127,10 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#thumbnail_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
+- **#preview#** : lien vers fichier le fichier preview
+`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
+- **#preview_path#** : path vers fichier preview
+`/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#label#** : texte
 - **#start#** : heure de début
 - **#end#** : heure de fin
@@ -135,12 +139,12 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 
 Une checkbox vous permet de désactiver la verification de la condition. 
 
-- <u>**LABEL**</u>
+- <u>LABEL</u>
 **Pour rappel le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le label pour lequel vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 
-- <u>**TYPE**</u>
+- <u>TYPE</u>
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
@@ -150,6 +154,8 @@ Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhai
 ### Exemple de notifications :
 #### Plugin JeeMate
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#``**
+- **preview** : dans le champ titre : **``title=votre titre;;bigPicture=#preview#``**
+- **thumbnail** : dans le champ titre : **``title=votre titre;;bigPicture=#thumbnail#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
 
 Pour une notification automatique, ajouter frigate=#jeemate#, disponible avec la future v3 de JeeMate
@@ -239,7 +245,8 @@ Le cronDaily est le seul à vérifier la version de votre serveur frigate, si un
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 
 # <u>Flux vidéo</u>
-Dans le plugin il n'y a pas de lecteur pour le flux vidéo.
+### configuration
+Dans le plugin Frigate **il n'y a pas de lecteur pour le flux vidéo**, cette configuration sert pour les plugins compatibles.
 
 L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur frigate et pas celle de la caméra.
 
@@ -253,24 +260,30 @@ L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur friga
 
 En résumé, si vous avez plusieurs caméras et que vous souhaitez une gestion centralisée, le flux RTSP de Frigate pourrait être plus avantageux. Si vous préférez une solution plus simple et directe, utiliser le flux RTSP de la caméra pourrait être suffisant.
 
-Celui-ci est utile pour l'application **JeeMate**, si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre equipement celui que vous souhaitez utiliser, la même chose si vous préfèrer utiliserle fux d'origine de la caméra.
+### Avec JeeMate
+Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre equipement celui que vous souhaitez utiliser, la même chose si vous préfèrer utiliserle fux d'origine de la caméra.
 
 Configuration frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par defaut conviendra.
-**``   frigate1:`` 
-``      ffmpeg:`` 
-``          inputs:`` 
-``         - path: rtsp://127.0.0.1:8554/frigate1``**
+
+>**``   frigate1:``**
+**``      ffmpeg:``**
+**``          inputs:``**
+**``         - path: rtsp://127.0.0.1:8554/frigate1``**
 
 Configuration frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur frigate.
-**``   frigate1:`` 
-``      ffmpeg:`` 
-``          inputs:`` 
-``         - path: rtsp://127.0.0.1:8554/frigate1_SD``
-`` - role: detect``
-``         - path: rtsp://127.0.0.1:8554/frigate1_HD``
-`` - role: detect``**
+
+>**``   frigate1:``** 
+**``      ffmpeg:``**
+**``          inputs:``**
+**``         - path: rtsp://127.0.0.1:8554/frigate1_SD``**
+**`` - role: detect``**
+**``         - path: rtsp://127.0.0.1:8554/frigate1_HD``**
+**`` - role: record``**
 
 > **Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate**
+
+Après chaque modification de l'URL du flux dans le plugin Frigate, il vous faudra sauvegarder aussi dans le pligin JeeMate puis faire une synchronisation complète dans l'application.
+
 # <u>Panel</u>
 - visualisation des caméras.
 - page évènements
