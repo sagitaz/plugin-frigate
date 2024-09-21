@@ -275,7 +275,17 @@ class frigate extends eqLogic
   }
 
   // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
-  public function postSave() {}
+  public function postSave()
+  {
+    $infoCmd = self::createCmd($this->getId(), "RTSP", "string", "", "link_rtsp", "", 0, null, 0);
+    $rtsp = $this->getConfiguration('cameraStreamAccessUrlPerso');
+    if ($rtsp != '') {
+      if (is_object($infoCmd)) {
+        $infoCmd->event($rtsp);
+        $infoCmd->save();
+      }
+    }
+  }
 
   // Fonction exécutée automatiquement avant la suppression de l'équipement
   public function preRemove() {}
@@ -1617,8 +1627,13 @@ class frigate extends eqLogic
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
+      $rtsp = $eqlogic->getConfiguration('cameraStreamAccessUrlPerso');
       $link = $eqlogic->getConfiguration("cameraStreamAccessUrl");
-      $infoCmd->event($link);
+      if ($rtsp != '') {
+          $infoCmd->event($rtsp);
+      } else {
+        $infoCmd->event($link);
+      }
       $infoCmd->save();
     }
     $infoCmd = self::createCmd($eqlogicId, "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);

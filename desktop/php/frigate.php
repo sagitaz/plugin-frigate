@@ -215,6 +215,12 @@ sendVarToJS('refresh', $refresh);
                                     <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="panel"></label>
                                 </div>
                             </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Flux vidéo}}</label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="cameraStreamAccessUrlPerso" placeholder="{{Lien vers votre flux vidéo}}" title="{{Lien vers votre flux prédefini si celui par défaut ne convient pas. voir documentation.}}">
+                                </div>
+                            </div>
                             <div class="form-group eqFrigate ptz-options">
                                 <label class="col-sm-4 control-label">{{Nombre de preset}}</label>
                                 <div class="col-sm-6">
