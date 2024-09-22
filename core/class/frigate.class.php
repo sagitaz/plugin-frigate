@@ -86,7 +86,7 @@ class frigate extends eqLogic
       config::save('functionality::cron::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 1, 'frigate');
+      config::save('functionality::cron5::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron10::enable', 'frigate')) {
       config::save('functionality::cron10::enable', 0, 'frigate');
@@ -100,43 +100,61 @@ class frigate extends eqLogic
     if (!config::byKey('functionality::cronHourly::enable', 'frigate')) {
       config::save('functionality::cronHourly::enable', 0, 'frigate');
     }
+    if (!config::byKey('functionality::cronDaily::enable', 'frigate')) {
+      config::save('functionality::cronDaily::enable', 1, 'frigate');
+    }
   }
 
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
+
+    // Si on utilise MQTT2, les crons 1, 5, 10 et 15 ne sont pas utilisés
     if (class_exists('mqtt2')) {
       $deamon_info = self::deamon_info();
-      if ($deamon_info['launchable'] === 'ok' && $frequence === "functionality::cron::enable" || $frequence === "functionality::cron5::enable" || $frequence === "functionality::cron10::enable" || $frequence === "functionality::cron15::enable") {
-        log::add(__CLASS__, 'debug', "| les crons 1, 5, 1 et 15 sont désactivés avec MQTT et ne sont pas utilisés");
-      }
-    } else {
-      log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
-      log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
-      self::cleanFolderData();
-      log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
-      self::cleanAllOldestFiles();
-      if ($frequence !== "functionality::cron::enable" || $frequence !== "functionality::cron5::enable" || $frequence !== "functionality::cron10::enable" || $frequence !== "functionality::cron15::enable") {
-        self::cleanByType();
-        self::cleanByType("update");
-      }
-      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-      if (empty($frigate)) {
+      if ($deamon_info['launchable'] === 'ok' && (
+      $frequence === "functionality::cron::enable" ||
+      $frequence === "functionality::cron5::enable" ||
+      $frequence === "functionality::cron10::enable" ||
+        $frequence === "functionality::cron15::enable")) {
+        log::add(__CLASS__, 'debug', "| Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
         return;
       }
+    }
 
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    // Exécution des autres fréquences et nettoyage
+    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+    self::cleanFolderData();
+    self::cleanAllOldestFiles();
 
-      if (config::byKey($frequence, 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
+    // Si la fréquence n'est pas parmi les crons désactivés, exécuter cleanByType
+    if (!($frequence === "functionality::cron::enable" ||
+    $frequence === "functionality::cron5::enable" ||
+    $frequence === "functionality::cron10::enable" ||
+    $frequence === "functionality::cron15::enable")) {
+      self::cleanByType();
+      self::cleanByType("update");
+    }
+
+    // Exécution des actions si Frigate est disponible
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
+      $cmd = $frigate->getCmd(null, 'info_Cron');
+      $execute = "1";
+      // Vérification si la commande existe
+      if (is_object($cmd)) {
+        $execute = $cmd->execCmd();
+      }
+
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
       }
     }
+
     log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
-    return;
   }
+
 
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
@@ -2304,8 +2322,14 @@ class frigate extends eqLogic
       }
     }
 
-    // Télécharger l'image ou la vidéo
-    $content = file_get_contents($lien);
+    $headers = @get_headers($lien);
+
+    if ($headers && strpos($headers[0], '200') !== false) {
+      // Le fichier existe, on peut le télécharger
+      $content = file_get_contents($lien);
+    } else {
+      $content = false;
+    }
 
     if ($content !== false) {
       // Enregistrer l'image ou la vidéo dans le dossier spécifié
@@ -2318,7 +2342,7 @@ class frigate extends eqLogic
         $result = "error";
       }
     } else {
-      log::add(__CLASS__, 'debug', "| Échec du téléchargement du fichier : " . $lien);
+      log::add(__CLASS__, 'debug', "| Le fichier n'existe pas ou une erreur s'est produite.");
       $result = "error";
     }
 
