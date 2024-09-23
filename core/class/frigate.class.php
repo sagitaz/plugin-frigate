@@ -115,6 +115,7 @@ class frigate extends eqLogic
     if (config::byKey("cron::run", 'frigate')) {
       log::add(__CLASS__, 'debug', "| Un cron est deja en cours d'exécution, on n'exécute pas de nouveau.");
       config::save('cron::run', 0, 'frigate');
+      log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
       return;
     }
     config::save('cron::run', 1, 'frigate');
@@ -128,6 +129,7 @@ class frigate extends eqLogic
         $frequence === "functionality::cron15::enable")) {
         log::add(__CLASS__, 'debug', "| Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
         config::save('cron::run', 0, 'frigate');
+        log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
         return;
       }
     }
@@ -1097,7 +1099,7 @@ class frigate extends eqLogic
     $img = self::processMedia($dir, $event['id'], '_thumbnail.jpg', $event['camera'], 1);
     $snapshot = self::processSnapshot($dir, $event, $force);
     $clip = self::processClip($dir, $event, $type, $force);
-    $preview = self::processPreview($dir, $event);
+    self::processPreview($dir, $event);
 
     // Gestion du end_time
     $endTime = !empty($event['end_time']) ? ceil($event['end_time']) : 0;
@@ -1108,25 +1110,26 @@ class frigate extends eqLogic
 
     // Calcul des zones
     $newZones = isset($event['zones']) && is_array($event['zones']) && !empty($event['zones'])
-      ? implode(', ', $event['zones'])
-      : null;
+    ? implode(', ', $event['zones'])
+      : "";
 
     // Retour des infos
     return array(
-      "image" => $img,
-      "thumbnail" => $img,
-      "snapshot" => $snapshot['url'],
-      "hasSnapshot" => $snapshot['has'],
-      "clip" => $clip['url'],
-      "hasClip" => $clip['has'],
-      "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
-      "endTime" => $endTime,
-      "topScore" => $newTopScore,
-      "score" => $newScore,
+      "image" => !empty($img) ? $img : "",
+      "thumbnail" => !empty($img) ? $img : "",
+      "snapshot" => isset($snapshot['url']) ? $snapshot['url'] : "",
+      "hasSnapshot" => isset($snapshot['has']) ? $snapshot['has'] : "",
+      "clip" => isset($clip['url']) ? $clip['url'] : "",
+      "hasClip" => isset($clip['has']) ? $clip['has'] : "",
+      "startTime" => isset($event['start_time']) && is_numeric($event['start_time']) && ceil($event['start_time']) > 0 ? ceil($event['start_time']) : (isset($event['start_time']) ? $event['start_time'] : ""),
+      "endTime" => is_numeric($endTime) ? $endTime : "",
+      "topScore" => is_numeric($newTopScore) ? $newTopScore : "",
+      "score" => is_numeric($newScore) ? $newScore : "",
       "zones" => $newZones,
-      "label" => self::cleanLabel($event['label'])
+      "label" => isset($event['label']) ? self::cleanLabel($event['label']) : ""
     );
   }
+
 
   private static function processMedia($dir, $id, $suffix, $camera, $isThumbnail = 0)
   {
