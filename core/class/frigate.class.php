@@ -261,7 +261,7 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
 
 
-    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
+    if ($this->getLogicalId() != 'eqFrigateStats' || $this->getLogicalId() != 'eqFrigateEvents') {
       if ($this->getConfiguration('ptz') == '') {
         $this->setConfiguration('ptz', '0');
       }
@@ -279,7 +279,7 @@ class frigate extends eqLogic
       $quality = $this->getConfiguration('quality', 70);
 
       $urlLatest = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
-      $img = $encoded_url = urlencode($urlLatest);
+      $img = urlencode($urlLatest);
       $this->setConfiguration('img', $img);
 
       // maj lien et cmd snapshot
@@ -1537,10 +1537,27 @@ class frigate extends eqLogic
       $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
       if (!is_object($frigate)) {
         $n++;
+        $urlLatest = "http://" . $urlfrigate . "/api/" . $name . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
+        $img = urlencode($urlLatest);
+
         $frigate = new frigate();
         $frigate->setName($cameraName . $addToName);
         $frigate->setEqType_name("frigate");
         $frigate->setConfiguration("name", $cameraName);
+        $frigate->setConfiguration('panel', 0);
+        $frigate->setConfiguration('ptz', 0);
+        $frigate->setConfiguration('preset_max', 0);
+        $frigate->setConfiguration('userName', "");
+        $frigate->setConfiguration('password', "");
+        $frigate->setConfiguration('bbox', 0);
+        $frigate->setConfiguration('timestamp', 0);
+        $frigate->setConfiguration('zones', 0);
+        $frigate->setConfiguration('mask', 0);
+        $frigate->setConfiguration('motion', 0);
+        $frigate->setConfiguration('regions', 0);
+        $frigate->setConfiguration('img', $img);
+        $frigate->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $urlfrigate . ':8554/' . $cameraName);
+        $frigate->setConfiguration('urlStream', "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img);
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
@@ -1924,6 +1941,9 @@ class frigate extends eqLogic
   public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    if (!is_object($frigate)) {
+      return; // frigate n'existe pas
+    }
     // Création des commandes Crons pour l'equipement général
     // commande infos
     $infoCmd = self::createCmd($frigate->getId(), "Cron etat", "binary", "", "info_Cron", "LIGHT_STATE", 0);
@@ -2517,11 +2537,15 @@ class frigate extends eqLogic
       return;
     }
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
-    $eqlogicId = $frigate->getId();
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-    $version = $cmd->execCmd();
-    if ($version != config::byKey('frigate_version', 'frigate')) {
-      config::save('frigate_version', $version, 'frigate');
+    if (!is_object($frigate)) {
+      return; // frigate n'existe pas
+    } else {
+      $eqlogicId = $frigate->getId();
+      $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
+      $version = $cmd->execCmd();
+      if ($version != config::byKey('frigate_version', 'frigate')) {
+        config::save('frigate_version', $version, 'frigate');
+      }
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
