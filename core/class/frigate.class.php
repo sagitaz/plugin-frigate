@@ -114,6 +114,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
     if (config::byKey("cron::run", 'frigate')) {
       log::add(__CLASS__, 'debug', "| Un cron est deja en cours d'exécution, on n'exécute pas de nouveau.");
+      config::save('cron::run', 0, 'frigate');
       return;
     }
     config::save('cron::run', 1, 'frigate');
@@ -126,6 +127,7 @@ class frigate extends eqLogic
         $frequence === "functionality::cron10::enable" ||
         $frequence === "functionality::cron15::enable")) {
         log::add(__CLASS__, 'debug', "| Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
+        config::save('cron::run', 0, 'frigate');
         return;
       }
     }
