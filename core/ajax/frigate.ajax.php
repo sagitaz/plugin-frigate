@@ -52,7 +52,6 @@ try {
         // Recherche et creation de cameras
         $result = frigate::generateAllEqs();
         ajax::success($result);
-        frigate::setCmdsCron();
     }
 
     if (init('action') == 'restartFrigate') {

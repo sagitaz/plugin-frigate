@@ -235,12 +235,17 @@ Visualiser tous les logs de votre serveur Frigate
 # <u>Cron</u>
 **Si vous n'utilisez pas MQTT** : un cron régulier vous permet de récupérer les derniers events et donc d'exécuter les actions associées.
 
-**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron horaire est suffisant, il permet de mettre à jour les infos de l'évènement.
+**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron heure ou jour  est suffisant, il permet de mettre à jour les infos de l'évènement.
 
 Dans tous les cas, laisser au moins un cron actif car il sera vérifié à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire, ils seront supprimés.
 
 Le cronDaily est le seul à vérifier la version de votre serveur frigate, si une maj est disponible vous aurez un message.
 
+**Mon conseil :**
+Sans MQTT : cron ou cron5 (suivant puissance machine) + cronDaily
+Avec MQTT : cronDaily
+
+> Dans tous les cas si un cron est en cours d'exécution le suivant ne sera pas lancé et en MQTT les cron (1, 5, 10 et 15 sont désactivès).
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 

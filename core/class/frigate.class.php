@@ -62,6 +62,9 @@ class frigate extends eqLogic
     if (!config::byKey('cron', 'frigate')) {
       config::save('cron', '5', 'frigate');
     }
+    if (!config::byKey('cron::run', 'frigate')) {
+      config::save('cron::run', 0, 'frigate');
+    }
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
       if (!config::byKey('topic', 'frigate')) {
@@ -108,14 +111,19 @@ class frigate extends eqLogic
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
-
+    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+    if (config::byKey("cron::run", 'frigate')) {
+      log::add(__CLASS__, 'debug', "| Un cron est deja en cours d'exécution, on n'exécute pas de nouveau.");
+      return;
+    }
+    config::save('cron::run', 1, 'frigate');
     // Si on utilise MQTT2, les crons 1, 5, 10 et 15 ne sont pas utilisés
     if (class_exists('mqtt2')) {
       $deamon_info = self::deamon_info();
       if ($deamon_info['launchable'] === 'ok' && (
-      $frequence === "functionality::cron::enable" ||
-      $frequence === "functionality::cron5::enable" ||
-      $frequence === "functionality::cron10::enable" ||
+        $frequence === "functionality::cron::enable" ||
+        $frequence === "functionality::cron5::enable" ||
+        $frequence === "functionality::cron10::enable" ||
         $frequence === "functionality::cron15::enable")) {
         log::add(__CLASS__, 'debug', "| Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
         return;
@@ -123,15 +131,14 @@ class frigate extends eqLogic
     }
 
     // Exécution des autres fréquences et nettoyage
-    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
     self::cleanFolderData();
     self::cleanAllOldestFiles();
 
     // Si la fréquence n'est pas parmi les crons désactivés, exécuter cleanByType
     if (!($frequence === "functionality::cron::enable" ||
-    $frequence === "functionality::cron5::enable" ||
-    $frequence === "functionality::cron10::enable" ||
-    $frequence === "functionality::cron15::enable")) {
+      $frequence === "functionality::cron5::enable" ||
+      $frequence === "functionality::cron10::enable" ||
+      $frequence === "functionality::cron15::enable")) {
       self::cleanByType();
       self::cleanByType("update");
     }
@@ -152,6 +159,7 @@ class frigate extends eqLogic
       }
     }
 
+    config::save('cron::run', 0, 'frigate');
     log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
   }
 
@@ -189,7 +197,7 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
-    self::checkFriagetVersion();
+    self::checkFrigateVersion();
     self::execCron('functionality::cronDaily::enable');
   }
 
@@ -1590,6 +1598,8 @@ class frigate extends eqLogic
       $frigate->setIsVisible(1);
       $frigate->save();
     }
+    // création des commandes d'activation des cron
+    frigate::setCmdsCron();
   }
 
   public static function generateEqStats()
@@ -2764,7 +2774,7 @@ class frigate extends eqLogic
     return $jsonArray;
   }
 
- /* private static function yamlToJsonFromUrl($yamlUrl)
+  /* private static function yamlToJsonFromUrl($yamlUrl)
  {
     // Télécharger le contenu YAML depuis l'URL
     $yamlContent = file_get_contents($yamlUrl);
@@ -2787,7 +2797,7 @@ class frigate extends eqLogic
 
   */
 
-  private static function checkFriagetVersion()
+  private static function checkFrigateVersion()
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
