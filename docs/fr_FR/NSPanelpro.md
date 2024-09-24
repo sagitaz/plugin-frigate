@@ -37,10 +37,11 @@ Préparer votre interface depuis un smartphone ou l’app windows, sauvegarder e
 > Sur Windows les commandes sont à exécuter avec Powershell en mode administrateur.
 
 ### Étape 4 : Installation de Jeedom Connect en mode Launcher
-Installer Jeedom Connect
-adb connect [ip_address]
+- Installer Jeedom Connect
+>adb connect [ip_address]
 adb install JC_XXXXXX.apk (en fonction de la release récupérée)
-Rebooter le NSPanel Pro
+
+- Rebooter le NSPanel Pro
 Au redémarrage, il doit vous demander de sélectionner le launcher par défaut. Sélectionnez Jeedom et cochez « Toujours ».
 Connectez-vous à Jeedom Connect (voir documentation Jeedom pour la création d’équipement côté plugin).
 Configurez Jeedom Connect pour afficher le lanceur d’applications dans la barre du haut (Préférences >> Barre du haut >> Bouton de la barre du haut).
@@ -49,7 +50,7 @@ Le minimum est fait côté Jeedom Connect. Passons aux mises à jour et à l’o
 
 ### Étape 4  : Installation de JeeMate en mode Launcher
 - Installer JeeMate
-adb connect [ip_address]
+>adb connect [ip_address]
 adb install JC_XXXXXX.apk (en fonction de la release récupérée)
 
 - Rebooter le NSPanel Pro
@@ -61,54 +62,57 @@ Attention : il n'est pas possible d'effectuer la mise a jour de l'application de
 
 ### Étape 4  : Installation de NS Panel Pro tools
 
-``adb connect [ip_address]``
-``adb install nspanel_pro_tools.apk``
+>adb connect [ip_address]
+adb install nspanel_pro_tools.apk
 
 ### Étape 6 : Bascule du NSPanel Pro en Mode Routeur Zigbee
 Connexion et Accès Root
-``adb connect [ip_address]``
-``adb root``
-``adb shell``
+>adb connect [ip_address]
+adb root
+adb shell
 
 Montage du Système en Écriture
-``mount -o remount,rw /vendor``
-``exit``
+>mount -o remount,rw /vendor
+exit
 
 Clonage du Dépôt et Transfert des Scripts
-``cd sonoff-nspanelpro-scripts``
-``find *.sh -exec adb push {} /vendor/bin/siliconlabs_host/ \;``
-``adb shell``
+>cd sonoff-nspanelpro-scripts
+find *.sh -exec adb push {} /vendor/bin/siliconlabs_host/ \;
+adb shell
 
 Configuration des Permissions et Exécution des Scripts
-``chmod +x /vendor/bin/siliconlabs_host/mod-*``
-``exit``
+>chmod +x /vendor/bin/siliconlabs_host/mod-*
+exit
 
 ### Étape 7 : Exécution des Scripts de Configuration Zigbee
 Écoute des Topics MQTT
-``adb shell /vendor/bin/siliconlabs_host/mod-mqtt_listen.sh``
+>adb shell /vendor/bin/siliconlabs_host/mod-mqtt_listen.sh
 Sur un autre terminal pour laisser le script précédent tourner :
 
 Configuration du Module Zigbee en Mode Répéteur
-``adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_repeater_mode.sh``
+>adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_repeater_mode.sh
 Activation du Mode Pairing en Mode Répéteur
 
 Activez le mode appairage sur votre plugin Zigbee préféré (ex : z2m).
 Exécutez la commande suivante :
-``adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_repeater_pairing_mode.sh``
+>adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_repeater_pairing_mode.sh
 Vous verrez ainsi votre NSPanel Pro apparaître dans la liste des équipements (sans commandes associées, il ne fera que du routage).
 Activation du Mode Turbo Zigbee
 
 Vous pouvez modifier la puissance d’émission Zigbee (impact inconnu) :
-``adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_turbo_mode.sh 10``
-``adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_turbo_mode.sh 20``
+>adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_turbo_mode.sh 10
+
+>adb shell /vendor/bin/siliconlabs_host/mod-set_zigbee_turbo_mode.sh 20
 
 ### Étape 8 : Suppression des Applications Inutiles
 Gagner en Fluidité sur le NSPanel Pro
-``adb shell /vendor/bin/siliconlabs_host/mod-debloat_nspanelpro.sh``
+>adb shell /vendor/bin/siliconlabs_host/mod-debloat_nspanelpro.sh
+
 ### Étape 9 : Installer les Outils de Paramétrage du NSPanel Pro
 Installer nspanel_pro_tools
-``adb install nspanel_pro_tools_apk``
-``adb reboot``
+>adb install nspanel_pro_tools_apk
+adb reboot
+
 Lancer nspanel_pro_tools
 Via le lanceur d’application sur Jeedom Connect, lancez nspanel_pro_tools et découvrez les paramétrages possibles.
 
