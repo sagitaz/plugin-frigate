@@ -36,17 +36,6 @@ Préparer votre interface depuis un smartphone ou l’app windows, sauvegarder e
 
 > Sur Windows les commandes sont à exécuter avec Powershell en mode administrateur.
 
-### Étape 4 : Installation de Jeedom Connect en mode Launcher
-- Installer Jeedom Connect
->adb connect [ip_address]
-adb install JC_XXXXXX.apk (en fonction de la release récupérée)
-
-- Rebooter le NSPanel Pro
-Au redémarrage, il doit vous demander de sélectionner le launcher par défaut. Sélectionnez Jeedom et cochez « Toujours ».
-Connectez-vous à Jeedom Connect (voir documentation Jeedom pour la création d’équipement côté plugin).
-Configurez Jeedom Connect pour afficher le lanceur d’applications dans la barre du haut (Préférences >> Barre du haut >> Bouton de la barre du haut).
-Le minimum est fait côté Jeedom Connect. Passons aux mises à jour et à l’optimisation du Sonoff NSPanel Pro.
-
 
 ### Étape 4  : Installation de JeeMate en mode Launcher
 - Installer JeeMate
