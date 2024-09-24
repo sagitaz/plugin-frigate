@@ -51,14 +51,17 @@ Le minimum est fait côté Jeedom Connect. Passons aux mises à jour et à l’o
 ### Étape 4  : Installation de JeeMate en mode Launcher
 - Installer JeeMate
 >adb connect [ip_address]
-adb install JC_XXXXXX.apk (en fonction de la release récupérée)
+adb install jeemate.apk (en fonction de la release récupérée)
 
 - Rebooter le NSPanel Pro
 Au redémarrage, il doit vous demander de sélectionner le launcher par défaut. Sélectionnez JeeMate et cochez « Toujours ».
 
+Dans le plugin → créer u nouveau equipement et lancer la procédure d’appairage automatique.
+Ouvrez l’application sur le NSPanel, selectionner votre Jeedom et valider l’appairage automatique.
+
 Installer la sauvegarde.
 
-Attention : il n'est pas possible d'effectuer la mise a jour de l'application defini comme launcher, donc installer un autre launcher pour basculer dessus si vous souhaiter maj JeeMate. j'ai de mon coté installé ultra-small-launcher.
+**Attention : il n'est pas possible d'effectuer la mise a jour de l'application defini comme launcher, donc installer un autre launcher pour basculer dessus si vous souhaiter maj JeeMate. j'ai de mon coté installé ultra-small-launcher.**
 
 ### Étape 4  : Installation de NS Panel Pro tools
 
