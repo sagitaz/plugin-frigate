@@ -2855,7 +2855,7 @@ class frigate extends eqLogic
     } else {
       $etat = 0; // Site inaccessible
     }
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_status", "", 0, null, 0);
+    $cmd = self::createCmd($eqlogicId, "status serveur", "binary", "", "info_status", "", 0, null, 0);
     // Enregistrer la valeur de l'événement
     $cmd->event($etat);
     $cmd->save();
