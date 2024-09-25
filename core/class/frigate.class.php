@@ -1118,7 +1118,7 @@ class frigate extends eqLogic
 
     // Calcul des zones
     $newZones = isset($event['zones']) && is_array($event['zones']) && !empty($event['zones'])
-    ? implode(', ', $event['zones'])
+      ? implode(', ', $event['zones'])
       : "";
 
     // Retour des infos
@@ -1613,7 +1613,6 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'info', ":fg-warning:restartFrigate:/fg:");
     self::publish_message('restart', '');
   }
-
   public static function generateEqEvents()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -1650,8 +1649,7 @@ class frigate extends eqLogic
 
     // Création de la commande restart Frigate si elle n'existe pas
     $eqlogicId = $frigate->getId();
-    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
-    $cmd->save();
+    self::createEqStatsCmd($eqlogicId);
   }
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
@@ -1843,7 +1841,23 @@ class frigate extends eqLogic
     log::add("frigate", 'debug', '| commande mise à jour');
     return true;
   }
+  public static function createEqStatsCmd($eqlogicId)
+  {
+    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
+    $cmd->save();
 
+    $cmd = self::createCmd($eqlogicId, "status serveur", "binary", "", "info_status", "", 0, null, 0);
+    $cmd->save();
+    // seulement en MQTT
+    if (class_exists('mqtt2')) {
+      $deamon_info = self::deamon_info();
+      if ($deamon_info['launchable'] === 'ok') {
+        $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
+        $cmd->save();
+      }
+    }
+    return true;
+  }
   public static function editHTTP($cmdId, $link)
   {
     $cmd = cmd::byid($cmdId);
@@ -2140,7 +2154,7 @@ class frigate extends eqLogic
     // Statistiques pour eqLogic statistiques générales
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $eqlogicId = $frigate->getId();
-    
+
     // Mise à jour des statistiques des détecteurs
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
@@ -2586,6 +2600,13 @@ class frigate extends eqLogic
           self::majStatsCmds($value, true);
           break;
 
+        case 'available':
+          log::add(__CLASS__, 'info', ' => Traitement mqtt available');
+          $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
+          $cmd->event($value);
+          $cmd->save();
+          break;
+
         default:
           $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $key, "frigate");
           if (!is_object($eqCamera)) {
@@ -2835,7 +2856,8 @@ class frigate extends eqLogic
   }
 
   */
-  private static function checkFrigateStatus() {
+  private static function checkFrigateStatus()
+  {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     if (!$frigate) {
       return;
@@ -2861,6 +2883,8 @@ class frigate extends eqLogic
     // Enregistrer la valeur de l'événement
     $cmd->event($etat);
     $cmd->save();
+
+    return $etat;
   }
   private static function checkFrigateVersion()
   {
