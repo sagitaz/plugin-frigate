@@ -235,6 +235,7 @@ class frigate extends eqLogic
     $CommunityInfo = $CommunityInfo . 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
     $CommunityInfo = $CommunityInfo . 'Debian : ' . $system . "\n";
     $CommunityInfo = $CommunityInfo . 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
+    $CommunityInfo = $CommunityInfo . 'Plugin : ' . config::byKey('pluginVersion', 'frigate') . "\n";
     $CommunityInfo = $CommunityInfo . "```";
     return $CommunityInfo;
   }
@@ -2839,6 +2840,28 @@ class frigate extends eqLogic
     } else {
       config::save('frigate_maj', 0, 'frigate');
     }
+  }
+  public static function getPluginVersion()
+  {
+    $pluginVersion = '0.0.0';
+    try {
+      if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
+        log::add('frigate', 'warning', '[Plugin-Version] fichier info.json manquant');
+      }
+      $data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
+      if (!is_array($data)) {
+        log::add('frigate', 'warning', '[Plugin-Version] Impossible de décoder le fichier info.json');
+      }
+      try {
+        $pluginVersion = $data['pluginVersion'];
+      } catch (\Exception $e) {
+        log::add('frigate', 'warning', '[Plugin-Version] Impossible de récupérer la version du plugin');
+      }
+    } catch (\Exception $e) {
+      log::add('frigate', 'debug', '[Plugin-Version] Get ERROR :: ' . $e->getMessage());
+    }
+    log::add('frigate', 'info', '[Plugin-Version] PluginVersion :: ' . $pluginVersion);
+    return $pluginVersion;
   }
 }
 class frigateCmd extends cmd
