@@ -171,36 +171,43 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron::enable');
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron5::enable');
   }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron10::enable');
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron15::enable');
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron30::enable');
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cronHourly::enable');
   }
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
+    self::checkFrigateStatus();
     self::checkFrigateVersion();
     self::execCron('functionality::cronDaily::enable');
   }
@@ -2826,7 +2833,33 @@ class frigate extends eqLogic
   }
 
   */
+  private static function checkFrigateStatus() {
+    $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
+    if (!$frigate) {
+      return;
+    }
+    $eqlogicId = $frigate->getId();
+    $urlFrigate = self::getUrlFrigate();
+    $etat = 0;
 
+    $ch = curl_init($urlFrigate);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($ch);
+
+    // Obtenir le code de statut HTTP
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode == 200) {
+      $etat = 1; // Site accessible
+    } else {
+      $etat = 0; // Site inaccessible
+    }
+    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_status", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($etat);
+    $cmd->save();
+  }
   private static function checkFrigateVersion()
   {
     $urlfrigate = self::getUrlFrigate();
