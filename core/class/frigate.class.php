@@ -1636,6 +1636,7 @@ class frigate extends eqLogic
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
+    // créer l'équipement s'il n'existe pas.
     if (!is_object($frigate)) {
       $frigate = new frigate();
       $frigate->setName('Statistiques');
@@ -1646,6 +1647,11 @@ class frigate extends eqLogic
       $frigate->setIsVisible(1);
       $frigate->save();
     }
+
+    // Création de la commande restart Frigate si elle n'existe pas
+    $eqlogicId = $frigate->getId();
+    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
+    $cmd->save();
   }
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
@@ -2134,11 +2140,7 @@ class frigate extends eqLogic
     // Statistiques pour eqLogic statistiques générales
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $eqlogicId = $frigate->getId();
-
-    // Création de la commande restart Frigate
-    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
-    $cmd->save();
-
+    
     // Mise à jour des statistiques des détecteurs
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
