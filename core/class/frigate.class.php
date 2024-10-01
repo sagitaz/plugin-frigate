@@ -2708,7 +2708,9 @@ class frigate extends eqLogic
   public static function backupExclude()
   {
     // retourne le répertoire de sauvegarde des snapshots et des vidéos des events à ne pas enregistrer dans le backup Jeedom
-    return ['data'];
+    if (config::byKey('excludeBackup', 'frigate', 0)) {
+      return ['data'];
+    }
   }
 
 
