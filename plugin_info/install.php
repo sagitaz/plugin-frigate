@@ -23,6 +23,8 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 // Fonction exécutée automatiquement après l'installation du plugin
 function frigate_install()
 {
+    $pluginVersion = frigate::getPluginVersion();
+    config::save('pluginVersion', $pluginVersion, 'frigate');
     Log::add("frigate", 'info', 'Start Install');
     $sql = file_get_contents(dirname(__FILE__) . '/install.sql');
     DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL);
@@ -36,6 +38,8 @@ function frigate_install()
 // Fonction exécutée automatiquement après la mise à jour du plugin
 function frigate_update()
 {
+    $pluginVersion = frigate::getPluginVersion();
+    config::save('pluginVersion', $pluginVersion, 'frigate');
     Log::add("frigate", 'info', 'Start Update');
     /*   Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
     $sql = "DROP TABLE IF EXISTS `frigate_events`;";

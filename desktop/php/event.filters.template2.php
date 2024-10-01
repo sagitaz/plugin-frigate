@@ -56,11 +56,11 @@ sendVarToJS('labelFilter', $labelFilter);
   <div class="col-sm-4 datetime-container">
     <label for="startDate">
       <i class="fa fa-calendar"></i> Début
-      <input type="datetime-local" id="startDate" class="datetime-input">
+      <input type="date" id="startDate" class="datetime-input">
     </label>
     <label for="endDate">
       <i class="fa fa-calendar"></i> Fin
-      <input type="datetime-local" id="endDate" class="datetime-input">
+      <input type="date" id="endDate" class="datetime-input">
     </label>
     <button id="clearDates" class="select-button" title="{{Effacer les dates sélectionnées}}">
       <i class="fas fa-redo"></i>
