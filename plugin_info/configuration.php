@@ -115,6 +115,14 @@ if (!isConnect()) {
                     <input type="number" class="configKey form-control input-xs" data-l1key="presetMax" placeholder="5" />
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-lg-7 control-label">{{Pause action}}
+                    <sup><i class="fas fa-question-circle tooltips" title="{{Pause à effectuer sur l'action PTZ (1 à 10)}}"></i></sup>
+                </label>
+                <div class="col-xs-5">
+                    <input type="number" class="configKey form-control input-xs" data-l1key="pausePTZ" placeholder="10" />
+                </div>
+            </div>
         </fieldset>
     </div>
 </div>

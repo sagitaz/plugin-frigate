@@ -3006,6 +3006,12 @@ class frigateCmd extends cmd
     $link = $this->getConfiguration('request') ?? "";
     $user = $frigate->getConfiguration('userName');
     $password = $frigate->getConfiguration('password');
+    // la pause doit etre entre 0.1s et 1.0s, on multiplie donc le resultat par 10000 pour faire le usleep
+    $pause = config::byKey("pausePTZ", "frigate", 10);
+    if ($pause < 1 || $pause > 10) {
+      $pause = 10;
+    } 
+    $pause = 10000 * $pause;
 
     switch ($logicalId) {
       case 'action_startCron':
@@ -3078,22 +3084,22 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_right':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_RIGHT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_up':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_UP');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_down':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_DOWN');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_stop':
@@ -3101,12 +3107,12 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_zoom_in':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_IN');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_preset_1':
