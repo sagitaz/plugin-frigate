@@ -5,7 +5,10 @@
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
 # 23/09/2024 Beta 1.0.4
-- option pour exclure ou non les datas du backup Jeedom
+- Option pour exclure ou non les datas du backup Jeedom
+- Ajout de la pause PTZ
+- Ajout commande statut serveur et disponibilité serveur
+- Save automatiquement le bbox sur les snapshots
 - Optimisation du cron
 - Correction erreur file_get_content si fichiers n'existe pas
 - Correction filtre date (Firefox)

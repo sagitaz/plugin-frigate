@@ -2329,16 +2329,17 @@ class frigate extends eqLogic
       $urlJeedom = network::getNetworkAccess('internal');
     }
     $urlfrigate = self::getUrlFrigate();
-
+    $extra = "";
     if ($type == "preview") {
       $format = "gif";
     } elseif ($type == "snapshot") {
       $format = "jpg";
+      $extra = '?timestamp=1&bbox=1';
     } else {
       $format = "mp4";
     }
 
-    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
+    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format . $extra;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($mode == 1) {
       $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/thumbnail.jpg";
