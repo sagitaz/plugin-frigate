@@ -1600,7 +1600,12 @@ class frigate extends eqLogic
       $audioCameraCmds = isset($cameraConfig['audio']['enabled_in_config']) && !empty($cameraConfig['audio']['enabled_in_config']);
       if ($audioCmds || $audioCameraCmds) {
         log::add(__CLASS__, 'debug', "| Création des commandes audio pour : " . json_encode($cameraName));
-        $valueAudio = $cameraConfig['audio']['enabled'];
+        if ($audioCmds) {
+          $valueAudio = $configurationArray['audio']['enabled'];
+        }
+        if ($audioCameraCmds) {
+          $valueAudio = $cameraConfig['audio']['enabled'];
+        }
         self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
