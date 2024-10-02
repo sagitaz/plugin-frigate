@@ -1519,7 +1519,7 @@ class frigate extends eqLogic
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
-    $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
+    $audioCmds = isset($configurationArray['audio']['enabled']) && !empty($configurationArray['audio']['enabled']);
     $addToName = "";
     $create = 1;
     //  $stats = self::getcURL("create eqCameras", $resultURL);

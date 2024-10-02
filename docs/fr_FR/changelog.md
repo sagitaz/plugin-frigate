@@ -4,7 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 23/09/2024 Beta 1.0.4
+# 02/10/2024 Beta 1.0.4
+- Correction erreur création des commandes audio
+
+# 01/10/2024 Beta 1.0.4
 - Option pour exclure ou non les datas du backup Jeedom
 - Ajout de la pause PTZ
 - Ajout commande statut serveur et disponibilité serveur
@@ -12,6 +15,7 @@
 - Optimisation du cron
 - Correction erreur file_get_content si fichiers n'existe pas
 - Correction filtre date (Firefox)
+- Option pour afficher les cameras sur le panel
 
 # 21/09/2024 Beta 1.0.3
 - Option pour flux RTSP (voir documentation)
