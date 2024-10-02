@@ -4,8 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 02/10/2024 Beta 1.0.4
+# 02/10/2024 Beta 1.0.5
 - Correction erreur création des commandes audio
+- Correction erreur création des commandes mqtt (valeur remise à 1)
 
 # 01/10/2024 Beta 1.0.4
 - Option pour exclure ou non les datas du backup Jeedom
