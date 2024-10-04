@@ -1519,7 +1519,6 @@ class frigate extends eqLogic
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
-    $audioCmds = isset($configurationArray['audio']['enabled']) && !empty($configurationArray['audio']['enabled']);
     $addToName = "";
     $create = 1;
     //  $stats = self::getcURL("create eqCameras", $resultURL);
@@ -1597,15 +1596,13 @@ class frigate extends eqLogic
         }
       }
       // commandes audio s'il est configuré
-      $audioCameraCmds = isset($cameraConfig['audio']['enabled_in_config']) && !empty($cameraConfig['audio']['enabled_in_config']);
-      if ($audioCmds || $audioCameraCmds) {
+      $isAudioEnabledGlobally  = isset($configurationArray['audio']['enabled']) && !empty($configurationArray['audio']['enabled']);
+      $isAudioEnabledForCamera = isset($cameraConfig['audio']['enabled_in_config']) && !empty($cameraConfig['audio']['enabled_in_config']);
+      if ($isAudioEnabledGlobally  || $isAudioEnabledForCamera) {
         log::add(__CLASS__, 'debug', "| Création des commandes audio pour : " . json_encode($cameraName));
-        if ($audioCmds) {
-          $valueAudio = $configurationArray['audio']['enabled'];
-        }
-        if ($audioCameraCmds) {
-          $valueAudio = $cameraConfig['audio']['enabled'];
-        }
+
+        $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled']; 
+        
         self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
@@ -1698,7 +1695,11 @@ class frigate extends eqLogic
   public static function createAudioCmds($eqlogicId, $value)
   {
     $infoCmd = self::createCmd($eqlogicId, "audio Etat", "binary", "", "info_audio", "JEEMATE_CAMERA_AUDIO_STATE", 0);
-    $infoCmd->event($value);
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    if ($currentState !== $value) {
+      $infoCmd->event($value);
+    }
     $infoCmd->save();
 
     // commande action
@@ -1765,7 +1766,12 @@ class frigate extends eqLogic
   public static function createMQTTcmds($eqlogicId, $value)
   {
     $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
-    $infoCmd->event($value["detect"]);
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["detect"];
+    if ($currentState !== $stateValue) {
+    $infoCmd->event($stateValue);
+    }
     $infoCmd->save();
 
     // commande action
@@ -1778,7 +1784,12 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "recordings Etat", "binary", "", "info_recordings", "JEEMATE_CAMERA_NVR_STATE", 0);
-    $infoCmd->event($value["recordings"]);
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["recordings"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
+    }
     $infoCmd->save();
 
     // commande action
@@ -1791,8 +1802,14 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "snapshots Etat", "binary", "", "info_snapshots", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    $infoCmd->event($value["snapshots"]);
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["snapshots"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
+    }
     $infoCmd->save();
+
 
     // commande action
     $cmd = self::createCmd($eqlogicId, "snapshots off", "other", "", "action_stop_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
@@ -1810,8 +1827,14 @@ class frigate extends eqLogic
       $infoCmd->save();
     }
     $infoCmd = self::createCmd($eqlogicId, "motion Etat", "binary", "", "info_motion", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    $infoCmd->event($value["motion"]);
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["motion"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
+    }
     $infoCmd->save();
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "motion off", "other", "", "action_stop_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -2672,12 +2695,22 @@ class frigate extends eqLogic
 
   private static function updateCameraState($eqCamera, $type, $state, $jeemateState)
   {
-    $stateValue = ($state == 'ON') ? "1" : "0";
-    $infoCmd = self::createCmd($eqCamera->getId(), $type . " Etat", "binary", "", "info_" . $type, $jeemateState, 0);
-    $infoCmd->event($stateValue);
-    $infoCmd->save();
-    $eqCamera->refreshWidget();
+
+    if (isset($state)) {
+      $infoCmd = self::createCmd($eqCamera->getId(), $type . " Etat", "binary", "", "info_" . $type, $jeemateState, 0);
+      $currentState = $infoCmd->execCmd(); // Obtenir l'état actuel
+
+      $stateValue = ($state == 'ON') ? "1" : "0";
+
+      if ($currentState !== $stateValue) {
+        $infoCmd->event($stateValue);
+        $infoCmd->save();
+        $eqCamera->refreshWidget();
+        log::add(__CLASS__, 'debug', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
+      }
+    }
   }
+
 
 
   public static function setFavorite($eventId, $isFav)
