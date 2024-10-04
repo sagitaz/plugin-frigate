@@ -164,9 +164,10 @@ Pour une notification automatique, ajouter frigate=#jeemate#, disponible avec la
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#;;frigate=#jeemate#``**
 
 #### Plugin Telegram
-- **snapshot** : dans le champ titre : **``title=votre titre | snapshot=#snapshot#``**
-- **snapshot** : dans le champ titre : **``title=votre titre | file=#snapshot_path#``**
-- **clip** : dans le champ titre : **``title=votre titre | file=#clip_path#``**
+- **snapshot** : dans le champ action : **``title=votre titre | snapshot=#snapshot#``**
+- **snapshot** : dans le champ action : **``title=votre titre | file=#snapshot_path#``**
+- **clip** : dans le champ action : **``title=votre titre | file=#clip_path#``**
+- **preview** : dans le champ message : **``#preview#``**
 
 #### Plugin Mobile v2
 - **snapshot** : dans le champ message : **``votre message | file=#snapshot_path#``**
