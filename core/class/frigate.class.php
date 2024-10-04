@@ -1580,11 +1580,11 @@ class frigate extends eqLogic
       // commandes MQTT s'il est configuré
       if ($mqttCmds) {
         log::add(__CLASS__, 'debug', "| Création des commandes MQTT pour : " . json_encode($cameraName));
-        $value["detect"] = $cameraConfig['detect']['enabled'];
-        $value["recordings"] = $cameraConfig['record']['enabled'];
-        $value["snapshots"] = $cameraConfig['snapshots']['enabled'];
-        $value["motion"] = $cameraConfig['motion']['enabled'];
-
+        $value["detect"] = isset($cameraConfig['detect']['enabled']) ? $cameraConfig['detect']['enabled'] : $configurationArray['detect']['enabled'];
+        $value["recordings"] = isset($cameraConfig['record']['enabled']) ? $cameraConfig['record']['enabled'] : $configurationArray['record']['enabled'];
+        $value["snapshots"] = isset($cameraConfig['snapshots']['enabled']) ? $cameraConfig['snapshots']['enabled'] : $configurationArray['snapshots']['enabled'];
+        $value["motion"] = isset($cameraConfig['motion']['enabled']) ? $cameraConfig['motion']['enabled'] : $configurationArray['motion']['enabled'];
+        
         self::createMqttCmds($frigate->getId(), $value);
         // commande PTZ si onvif est configuré
         if (isset($cameraConfig['onvif']['host']) && !empty($cameraConfig['onvif']['host']) && $cameraConfig['onvif']['host'] !== '0.0.0.0') {
