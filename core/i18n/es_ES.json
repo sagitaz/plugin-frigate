@@ -244,7 +244,7 @@
         "Paramétrage Frigate": "Ajustes de la fragata",
         "Paramétrage par défaut d'un évènement créé manuellement": "Configuración por defecto de un evento creado manualmente",
         "Pause action": "Acción de pausa",
-        "Pause à effectuer sur l'action PTZ (1 à 10)": "Acción PTZ en pausa (de 1 a 10)",
+        "Pause à effectuer sur l'action PTZ (0 à 10)": "Acción PTZ en pausa (0 a 10)",
         "Pièce par défaut pour les équipements": "Pieza por defecto para equipos",
         "Port": "Puerto",
         "Preset": "Preajuste",
