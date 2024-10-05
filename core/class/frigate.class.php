@@ -3042,7 +3042,7 @@ class frigateCmd extends cmd
     $password = $frigate->getConfiguration('password');
     // la pause doit etre entre 0.1s et 1.0s, on multiplie donc le resultat par 10000 pour faire le usleep
     $pause = config::byKey("pausePTZ", "frigate", 10);
-    if ($pause < 1 || $pause > 10) {
+    if ($pause < 0 || $pause > 10) {
       $pause = 10;
     }
     $pause = 10000 * $pause;

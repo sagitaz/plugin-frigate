@@ -1,4 +1,14 @@
-# Plugin Frigate
+Plugin créé par **Sagitaz** et **Noodom**
+
+# <u>Aide</u>
+Pour toute demande d'aide sur community ou discord, merci de fournir le maximum d'informations possibles.
+
+Sur la page configuration, le bouton assistance permet déjà d'en remplir automatiquement certaines.
+
+Donner aussi des logs en mode debug.
+
+Merci
+
 
 # <u>Installation</u>
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
@@ -8,17 +18,22 @@ La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking
 
 # <u>Configuration</u>
 - **Pièce par défaut** : Les caméras créées seront automatiquement placées dans cette pièce.
+- **Exclure du backup** : Si coché, les données de la caméra ne seront pas sauvegardées dans le fichier de configuration de Jeedom.
+- **Version du plugin** : Si vous avez des problèmes avec la mise à jour, vous pouvez indiquer la version du plugin.
+
 #### Paramétrage Frigate
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
 - **Port** : le port du serveur Frigate (5000 par défaut)
+- **Adresse externe** : Pour accéder à la page du serveur Frigate depuis l'extérieur.
 - **Topic MQTT** : le topic de votre serveur Frigate (frigate par défaut)
 - **Preset** : Pour les caméras avec PTZ, définir le nombre de positions que vous souhaitez récupérer.
+- **Pause action** : Pause a effectuer sur les actions PTZ, par exemple, apres avoir appuyer sur move up, un stop est automatiquement effectué, vous pouvez définir le temps avant cette action stop. de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
 
 #### Gestion des évènements
 - **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquez ici le nombre de jours souhaités.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
 
->Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
+Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
 - **Taille des dossiers** : Taille maximum du dossier data.
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
@@ -61,6 +76,7 @@ J'en ajouterai suivant les demandes et besoins de chacun.
 Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton rechercher. Les caméras trouvées seront automatiquement créées. Il est necessaire de patienter car à la première recherche est également importer les évènement de la dernière journée, cela peut prendre un peu de temps.
 
 ### Equipement
+
 - user : seulement utile si vous créer des commandes HTTP
 - mot de passe : seulement utile si vous créer des commandes HTTP
 - Panel : cocher pour que la caméra soit visible sur le Panel
@@ -69,17 +85,19 @@ Après installation du plugin et la configuration de l'URL et du port de votre s
 
 A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
+
 - bbox
 - timestamp : la date
 - zones
 - mask : la zone sera masquée
 - motion : la zone est avec un contour rouge
 - region : la zone est avec un contour vert
+
 ### Commandes infos
-##### toutes les cameras
+##### Toutes les cameras
 Les informations sur le dernier évènement de la caméra et sur ses statistiques.
 
-> L'info **LABEL** correspond à l'object qui a déclenché la détection (person, vehicle, cat, dog, etc...)
+L'info **LABEL** correspond à l'object qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 ##### MQTT
 L'information sur détection en cours
@@ -88,14 +106,14 @@ L'information sur détection en cours
 - **Capture** :état, capture
 - **Camera** : état, activer, désactiver, toggle (Un redemarrage du serveur est necessaire pour la prise en compte car le fichier configuration est modifié).
 
->Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
+Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
 
 - **Detect** : état, on, off, toggle
 - **Snapshot** : état, on, off, toggle
 - **Recording** : état, on, off, toggle
 - **Motion** : état, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
 
-> Les commandes PTZ, preset et audio ne sont créées que si la configuration de votre serveur Frigate possède les informations.
+Les commandes PTZ, preset et audio ne sont créées que si la configuration de votre serveur Frigate possède les informations.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
 - **Audio** : état, on, off, toggle
 - **Preset** : l'action permettant de placer votre caméra sur un point précis.
@@ -194,9 +212,9 @@ Dans celle-ci seront regroupés tous les évènements visibles, vous pouvez pour
 
 Tous les évènements favoris ne sont pas supprimés.
 
-> **ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible, une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
+**ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible, une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
 
-> **ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
+**ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
 
 ### Création d'un évènement manuel
 Dans la configuration générale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
@@ -215,6 +233,7 @@ Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors 
 Pour ceux n'utilisant pas MQTT le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
 
 ### Création d'une capture instantanée
+
 Dans les actions des caméras se trouve deux commandes :
 - Capturer image (action)
 - URL image (info)
@@ -227,8 +246,10 @@ Par exemple si vous souhaitez une URL complète, vous pouvez dans configuration,
 Ou bien pour ceux ayant besoin du path :
 
 **``str_replace('"','',"/var/www/html"#value#)``**
+
 # <u>Configuration Frigate</u>
-> **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
+
+**ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
 
 # <u>Logs Frigate</u>
 Visualiser tous les logs de votre serveur Frigate
@@ -246,7 +267,8 @@ Le cronDaily est le seul à vérifier la version de votre serveur frigate, si un
 Sans MQTT : cron ou cron5 (suivant puissance machine) + cronDaily
 Avec MQTT : cronDaily
 
-> Dans tous les cas si un cron est en cours d'exécution le suivant ne sera pas lancé et en MQTT les cron (1, 5, 10 et 15 sont désactivès).
+***Dans tous les cas si un cron est en cours d'exécution le suivant ne sera pas lancé et en MQTT les cron (1, 5, 10 et 15 sont désactivès).***
+
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 
@@ -286,11 +308,13 @@ Configuration frigate avec plusieurs flux, indiquer l'url du flux voulu sur la p
 **``         - path: rtsp://127.0.0.1:8554/frigate1_HD``**
 **`` - role: record``**
 
-> **Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate**
+***Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate***
 
 Après chaque modification de l'URL du flux dans le plugin Frigate, il vous faudra sauvegarder aussi dans le pligin JeeMate puis faire une synchronisation complète dans l'application.
 
 # <u>Panel</u>
+N'oubliez pas d'activer la page panel dans la configuration génèrale, puis pour chaque caméra de cocher la case "Panel".
+
 - visualisation des caméras.
 - page évènements
 
