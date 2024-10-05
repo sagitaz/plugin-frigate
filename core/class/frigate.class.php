@@ -2243,6 +2243,7 @@ class frigate extends eqLogic
     $thumbnailPath = "/var/www/html" . $event->getThumbnail();
     $previewPath = "/var/www/html" . $getPreview;
     $camera = $event->getCamera();
+    $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
     $zones = $event->getZones();
     $score = $event->getScore();
@@ -2296,8 +2297,8 @@ class frigate extends eqLogic
         }
 
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
-          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
+          ['#time#', '#event_id#', '#camera#','#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
+          [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
           $options
         );
 
