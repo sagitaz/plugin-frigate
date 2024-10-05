@@ -62,6 +62,9 @@ class frigate extends eqLogic
     if (!config::byKey('cron', 'frigate')) {
       config::save('cron', '5', 'frigate');
     }
+    if (!config::byKey('cron::run', 'frigate')) {
+      config::save('cron::run', 0, 'frigate');
+    }
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
       if (!config::byKey('topic', 'frigate')) {
@@ -86,7 +89,7 @@ class frigate extends eqLogic
       config::save('functionality::cron::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 1, 'frigate');
+      config::save('functionality::cron5::enable', 0, 'frigate');
     }
     if (!config::byKey('functionality::cron10::enable', 'frigate')) {
       config::save('functionality::cron10::enable', 0, 'frigate');
@@ -100,75 +103,112 @@ class frigate extends eqLogic
     if (!config::byKey('functionality::cronHourly::enable', 'frigate')) {
       config::save('functionality::cronHourly::enable', 0, 'frigate');
     }
+    if (!config::byKey('functionality::cronDaily::enable', 'frigate')) {
+      config::save('functionality::cronDaily::enable', 1, 'frigate');
+    }
   }
 
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "----------------------:fg-success:START CRON:/fg:----------------------------------");
+    log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
+    if (config::byKey("cron::run", 'frigate')) {
+      log::add(__CLASS__, 'debug', "| Un cron est deja en cours d'exécution, on n'exécute pas de nouveau.");
+      config::save('cron::run', 0, 'frigate');
+      log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
+      return;
+    }
+    config::save('cron::run', 1, 'frigate');
+    // Si on utilise MQTT2, les crons 1, 5, 10 et 15 ne sont pas utilisés
     if (class_exists('mqtt2')) {
       $deamon_info = self::deamon_info();
-      if ($deamon_info['launchable'] === 'ok' && $frequence === "functionality::cron::enable" || $frequence === "functionality::cron5::enable" || $frequence === "functionality::cron10::enable" || $frequence === "functionality::cron15::enable") {
-        log::add(__CLASS__, 'debug', "| les crons 1, 5, 1 et 15 sont désactivés avec MQTT et ne sont pas utilisés");
-      }
-    } else {
-      log::add(__CLASS__, 'debug', "| Exécution du cron : {$frequence}");
-      log::add(__CLASS__, 'debug', "| Nettoyage du dossier data");
-      self::cleanFolderData();
-      log::add(__CLASS__, 'debug', "| Nettoyage des anciens fichiers");
-      self::cleanAllOldestFiles();
-
-      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-      if (empty($frigate)) {
+      if ($deamon_info['launchable'] === 'ok' && (
+        $frequence === "functionality::cron::enable" ||
+        $frequence === "functionality::cron5::enable" ||
+        $frequence === "functionality::cron10::enable" ||
+        $frequence === "functionality::cron15::enable")) {
+        log::add(__CLASS__, 'debug', "| Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
+        config::save('cron::run', 0, 'frigate');
+        log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
         return;
       }
+    }
 
-      $execute = $frigate->getCmd(null, 'info_Cron')->execCmd();
+    // Exécution des autres fréquences et nettoyage
+    self::cleanFolderData();
+    self::cleanAllOldestFiles();
 
-      if (config::byKey($frequence, 'frigate', 0) == 1) {
-        if ($execute == "1") {
-          self::getEvents();
-          self::getStats();
-        }
+    // Si la fréquence n'est pas parmi les crons désactivés, exécuter cleanByType
+    if (!($frequence === "functionality::cron::enable" ||
+      $frequence === "functionality::cron5::enable" ||
+      $frequence === "functionality::cron10::enable" ||
+      $frequence === "functionality::cron15::enable")) {
+      self::cleanByType();
+      self::cleanByType("update");
+    }
+
+    // Exécution des actions si Frigate est disponible
+    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
+      $cmd = $frigate->getCmd(null, 'info_Cron');
+      $execute = "1";
+      // Vérification si la commande existe
+      if (is_object($cmd)) {
+        $execute = $cmd->execCmd();
+      }
+
+      if ($execute == "1") {
+        self::getEvents();
+        self::getStats();
       }
     }
+
+    config::save('cron::run', 0, 'frigate');
     log::add(__CLASS__, 'debug', "----------------------END CRON----------------------------------");
-    return;
   }
+
 
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron::enable');
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron5::enable');
   }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron10::enable');
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron15::enable');
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cron30::enable');
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
+    self::checkFrigateStatus();
     self::execCron('functionality::cronHourly::enable');
   }
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
-    self::checkFriagetVersion();
+    self::checkFrigateStatus();
+    self::checkFrigateVersion();
     self::execCron('functionality::cronDaily::enable');
   }
 
@@ -202,6 +242,7 @@ class frigate extends eqLogic
     $CommunityInfo = $CommunityInfo . 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
     $CommunityInfo = $CommunityInfo . 'Debian : ' . $system . "\n";
     $CommunityInfo = $CommunityInfo . 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
+    $CommunityInfo = $CommunityInfo . 'Plugin : ' . config::byKey('pluginVersion', 'frigate') . "\n";
     $CommunityInfo = $CommunityInfo . "```";
     return $CommunityInfo;
   }
@@ -228,7 +269,7 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
 
 
-    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
+    if ($this->getLogicalId() != 'eqFrigateStats' || $this->getLogicalId() != 'eqFrigateEvents') {
       if ($this->getConfiguration('ptz') == '') {
         $this->setConfiguration('ptz', '0');
       }
@@ -246,30 +287,48 @@ class frigate extends eqLogic
       $quality = $this->getConfiguration('quality', 70);
 
       $urlLatest = "http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg?timestamp=" . $timestamp . "&bbox=" . $bbox . "&zones=" . $zones . "&mask=" . $mask . "&motion=" . $motion . "&regions=" . $regions;
-      $img = $encoded_url = urlencode($urlLatest);
+      $img = urlencode($urlLatest);
       $this->setConfiguration('img', $img);
-    }
 
-    if ($this->getConfiguration('cameraStreamAccessUrl') == '') {
-      $this->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $url . ':8554/' . $this->getConfiguration('name'));
-    }
-
-    $urlStream = "";
-    $cmd = cmd::byEqLogicIdCmdName($this->getId(), "SNAPSHOT LIVE");
-    if (is_object($cmd)) {
-      $urlStream = $cmd->execCmd();
-    }
-
-    if ($this->getConfiguration('urlStream') == '' || $this->getConfiguration('urlStream') != $urlStream) {
-      $urlJeedom = network::getNetworkAccess('external');
-      if ($urlJeedom == "") {
-        $urlJeedom = network::getNetworkAccess('internal');
-      }
-      $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
-      $this->setConfiguration('urlStream', $urlStream);
+      // maj lien et cmd snapshot
+      $urlStream = "";
+      $cmd = cmd::byEqLogicIdCmdName($this->getId(), "SNAPSHOT LIVE");
       if (is_object($cmd)) {
-        $cmd->event($urlJeedom . $urlStream);
-        $cmd->save();
+        $urlStream = $cmd->execCmd();
+
+        if ($this->getConfiguration('urlStream') == '' || $this->getConfiguration('urlStream') != $urlStream) {
+          $urlJeedom = network::getNetworkAccess('external');
+          if ($urlJeedom == "") {
+            $urlJeedom = network::getNetworkAccess('internal');
+          }
+          $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
+          $this->setConfiguration('urlStream', $urlStream);
+          if (is_object($cmd)) {
+            $cmd->event($urlJeedom . $urlStream);
+            $cmd->save();
+          }
+        }
+      }
+
+      // maj lien et cmd rtsp    
+      $rtspStream = "";
+      $cmd = cmd::byEqLogicIdCmdName($this->getId(), "RTSP");
+      if (is_object($cmd)) {
+        $rtspStream = $cmd->execCmd();
+
+        $rtsp = $this->getConfiguration('cameraStreamAccessUrl');
+        if ($rtsp == '' || $rtsp != $rtspStream) {
+          if ($rtsp == '') {
+            $rtsp = 'rtsp://' . $url . ':8554/' . $this->getConfiguration('name');
+          }
+
+          $this->setConfiguration('cameraStreamAccessUrl', $rtsp);
+
+          if (is_object($cmd)) {
+            $cmd->event($rtsp);
+            $cmd->save();
+          }
+        }
       }
     }
   }
@@ -316,6 +375,13 @@ class frigate extends eqLogic
     $logicalId = $this->getLogicalId();
     if (strpos($logicalId, "eqFrigateCamera_") !== false) {
       $type = "camera";
+    }
+
+    // panel ou dashbord
+    $panel = false;
+    if ($_version == 'panel') {
+      $panel = true;
+      $_version = 'dashboard';
     }
 
     if ($type == 'camera') {
@@ -391,11 +457,11 @@ class frigate extends eqLogic
         if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
           if ($etat->execCmd() == 0) {
             $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume iconActionOff' . $this->getId() . '" title="audio ON" onclick="execAction(' . $on->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-off iconActionOff' . $this->getId() . '" title="audio ON" onclick="execAction(' . $on->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           } else {
             $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-off iconAction' . $this->getId() . '" title="audio OFF" onclick="execAction(' . $off->getId() . ')"></i>';
+            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-down iconAction' . $this->getId() . '" title="audio OFF" onclick="execAction(' . $off->getId() . ')"></i>';
             $replace['#actions#'] = $replace['#actions#'] . '</div>';
           }
         }
@@ -583,7 +649,7 @@ class frigate extends eqLogic
       // Créer la structure HTML du select
       $selectHtml = '<div class="btn-icon">';
       $selectHtml .= '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">';
-
+      $selectHtml .= '<option value="" disabled selected hidden>{{action}}</option>';
       // Boucle sur les presets disponibles
       for ($i = 0; $i <= 10; $i++) {
         $presetCmd = 'action_preset_' . $i;
@@ -617,12 +683,19 @@ class frigate extends eqLogic
 
 
 
-
-      $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
-      $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
-      $html = $this->postToHtml($_version, $html);
-      cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
-      return $html;
+      if (!$panel) {
+        $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
+        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
+        $html = $this->postToHtml($_version, $html);
+        cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
+        return $html;
+      } else {
+        $html = template_replace($replace, getTemplate('core', $version, 'widgetPanel', __CLASS__));
+        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetPanel.html');
+        $html = $this->postToHtml($_version, $html);
+        cache::set('widgetPanel' . $_version . $this->getId(), $html, 0);
+        return $html;
+      }
     } else {
       return parent::toHtml($_version);
     }
@@ -753,7 +826,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/" . $camera . "/ptz/info";
     $presets = self::getcURL("Presets", $resultURL);
     return $presets;
-    log::add(__CLASS__, 'debug', "----------------------END IMPORT PRESET----------------------------------");
+    log::add(__CLASS__, 'debug', "----------------------END IMPORT PRESET----------------------------");
   }
 
   public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
@@ -1026,137 +1099,112 @@ class frigate extends eqLogic
     );
   }
 
-  public static function getEventinfos($mqtt, $event, $force = false, $type = "end")
+  public static function getEventInfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
-    // verifier si le fichier thumbnail existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_thumbnail.jpg')) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_thumbnail.jpg, téléchargement');
-      sleep(5);
-      $img = self::saveURL($event['id'], null, $event['camera'], 1);
-      if ($img == "error") {
-        $img = "null";
-      }
-    } else {
-      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_thumbnail.jpg');
-      $img = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_thumbnail.jpg';
-    }
 
-    // verifier si le fichier snapshot existe avant de le telecharger
+    // Fonction de vérification et téléchargement
+    $img = self::processMedia($dir, $event['id'], '_thumbnail.jpg', $event['camera'], 1);
+    $snapshot = self::processSnapshot($dir, $event, $force);
+    $clip = self::processClip($dir, $event, $type, $force);
+    self::processPreview($dir, $event);
+
+    // Gestion du end_time
+    $endTime = !empty($event['end_time']) ? ceil($event['end_time']) : 0;
+
+    // Calcul des scores
+    $newTopScore = round(($mqtt ? $event['top_score'] : $event['data']['top_score']) * 100, 0);
+    $newScore = round(($mqtt ? $event['score'] : $event['data']['score']) * 100, 0);
+
+    // Calcul des zones
+    $newZones = isset($event['zones']) && is_array($event['zones']) && !empty($event['zones'])
+      ? implode(', ', $event['zones'])
+      : "";
+
+    // Retour des infos
+    return array(
+      "image" => !empty($img) ? $img : "",
+      "thumbnail" => !empty($img) ? $img : "",
+      "snapshot" => isset($snapshot['url']) ? $snapshot['url'] : "",
+      "hasSnapshot" => isset($snapshot['has']) ? $snapshot['has'] : "",
+      "clip" => isset($clip['url']) ? $clip['url'] : "",
+      "hasClip" => isset($clip['has']) ? $clip['has'] : "",
+      "startTime" => isset($event['start_time']) && is_numeric($event['start_time']) && ceil($event['start_time']) > 0 ? ceil($event['start_time']) : (isset($event['start_time']) ? $event['start_time'] : ""),
+      "endTime" => is_numeric($endTime) ? $endTime : "",
+      "topScore" => is_numeric($newTopScore) ? $newTopScore : "",
+      "score" => is_numeric($newScore) ? $newScore : "",
+      "zones" => $newZones,
+      "label" => isset($event['label']) ? self::cleanLabel($event['label']) : ""
+    );
+  }
+
+
+  private static function processMedia($dir, $id, $suffix, $camera, $isThumbnail = 0)
+  {
+    $filePath = $dir . '/' . $id . $suffix;
+    if (!file_exists($filePath)) {
+      log::add(__CLASS__, 'debug', "| Fichier non trouvé: $filePath, téléchargement");
+      sleep(5); // Option à améliorer
+      $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $isThumbnail);
+      return $img == "error" ? "null" : "/plugins/frigate/data/" . $camera . "/" . $id . $suffix;
+    }
+    return "/plugins/frigate/data/" . $camera . "/" . $id . $suffix;
+  }
+
+  private static function processSnapshot($dir, $event, $force)
+  {
     if (!file_exists($dir . '/' . $event['id'] . '_snapshot.jpg') || $force) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
+      log::add(__CLASS__, 'debug', "| Fichier snapshot non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       if ($event['has_snapshot'] == "true") {
         log::add(__CLASS__, 'debug', "| Has Snapshot: true, téléchargement");
-        sleep(5);
+        sleep(5); // Option à améliorer
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
-        $hasSnapshot = 1;
-        if ($snapshot == "error") {
-          $snapshot = "null";
-          $hasSnapshot = 0;
-        }
-      } else {
-        log::add(__CLASS__, 'debug', "| Has Snapshot: false, téléchargement annulé");
-        $snapshot = "null";
-        $hasSnapshot = 0;
+        return ['url' => $snapshot == "error" ? "null" : $snapshot, 'has' => $snapshot != "error"];
       }
-    } else {
-      //log::add(__CLASS__, 'debug', "| File found: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
-      $snapshot = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_snapshot.jpg';
-      $hasSnapshot = 1;
+      log::add(__CLASS__, 'debug', "| Has Snapshot: false, téléchargement annulé");
     }
-
-    // verifier si le fichier clip existe avant de le telecharger
-    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
-      log::add(__CLASS__, 'debug', "| Fichier non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
-      if ($type == "end") {
-        if ($event['has_clip'] == "true") {
-          log::add(__CLASS__, 'debug', "| Has Clip: true, téléchargement");
-          sleep(5);
-          $clip = self::saveURL($event['id'], "clip", $event['camera']);
-          $hasClip = 1;
-          if ($clip == "error") {
-            $clip = "null";
-            $hasClip = 0;
-          } else {
-            $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-            $duration = self::getVideoDuration($filePath);
-            if ($duration !== false) {
-              log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-            } else {
-              log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-            }
-          }
-        } else {
-          log::add(__CLASS__, 'debug', "| Has Clip: false, téléchargement annulé");
-          $clip = "null";
-          $hasClip = 0;
-        }
-      } else {
-        log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
-      }
-    } else {
-      $clip = "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_clip.mp4';
-      $hasClip = 1;
-      $filePath = $dir . '/' . $event['id'] . '_clip.mp4';
-      $duration = self::getVideoDuration($filePath);
-      if ($duration !== false) {
-        log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
-      } else {
-        log::add(__CLASS__, 'debug', "| Impossible de recuperer la durée de la videofile");
-      }
-    }
-
-    // verifier le endtime
-    $endTime = $event['end_time'];
-    if (empty($event['end_time'])) {
-      log::add(__CLASS__, 'debug', "| Evénement sans end_time, il est forcé à 0 : " . json_encode($event));
-      $endTime = 0;
-    }
-
-    // calculer le score
-    if (!$mqtt) {
-      $newTopScore = round($event['data']['top_score'] * 100, 0);
-      $newScore = round($event['data']['score'] * 100, 0);
-    } else {
-      $newTopScore = round($event['top_score'] * 100, 0);
-      $newScore = round($event['score'] * 100, 0);
-    }
-
-    // calculer les zones
-    $newZones = isset($event['zones'])
-      && is_array($event['zones'])
-      && !empty($event['zones'])
-      ? implode(', ', $event['zones'])
-      : null;
-
-    // nettoyer le label
-    $label = $event['label'];
-    // Détecter si la chaîne est déjà en UTF-8
-    /*  if (mb_detect_encoding($label, 'UTF-8', true) === 'UTF-8') {
-      // Si la chaîne est déjà en UTF-8, on la décodera à partir de UTF-8
-      $label = utf8_decode($label);
-    } else {
-      // Sinon, on la convertit de ISO-8859-1 à UTF-8
-      $label = mb_convert_encoding($label, 'UTF-8', 'ISO-8859-1');
-    } */
-    // renvoyer les infos
-    $infos = array(
-      "image" => $img,
-      "thumbnail" => $img,
-      "snapshot" => $snapshot,
-      "hasSnapshot" => $hasSnapshot,
-      "clip" => $clip ?? "",
-      "hasClip" => $hasClip ?? 0,
-      "startTime" => ceil($event['start_time']) > 0 ? ceil($event['start_time']) : $event['start_time'],
-      "endTime" => ceil($endTime) > 0 ? ceil($endTime) : $endTime,
-      "topScore" => $newTopScore,
-      "score" => $newScore,
-      "zones" => $newZones,
-      "label" => $label
-    );
-
-    return $infos;
+    return ['url' => "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_snapshot.jpg', 'has' => 1];
   }
+
+  private static function processClip($dir, $event, $type, $force)
+  {
+    if ($type != "end") {
+      log::add(__CLASS__, 'debug', "| Pas de clip, le type n'est pas 'end' " . json_encode($event));
+      return ['url' => "null", 'has' => 0];
+    }
+
+    if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
+      log::add(__CLASS__, 'debug', "| Fichier clip non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
+      if ($event['has_clip'] == "true") {
+        sleep(5); // Option à améliorer
+        $clip = self::saveURL($event['id'], "clip", $event['camera']);
+        if ($clip == "error") return ['url' => "null", 'has' => 0];
+
+        $duration = self::getVideoDuration($dir . '/' . $event['id'] . '_clip.mp4');
+        if ($duration !== false) {
+          log::add(__CLASS__, 'debug', "| La durée de la video est de " . gmdate("H:i:s", $duration));
+        }
+        return ['url' => $clip, 'has' => 1];
+      } else {
+        log::add(__CLASS__, 'debug', "| Has Clip: false, telechargement annulé");
+        return ['url' => "null", 'has' => 0];
+      }
+    }
+  }
+  private static function processPreview($dir, $event)
+  {
+    if (!file_exists($dir . '/' . $event['id'] . '_preview.gif')) {
+      log::add(__CLASS__, 'debug', "| Fichier preview non trouvé: " . $dir . '/' . $event['id'] . '_preview.gif');
+      $preview = self::saveURL($event['id'], "preview", $event['camera']);
+      return ['url' => $preview == "error" ? "null" : $preview, 'has' => $preview != "error"];
+    }
+    return "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_preview.gif';
+  }
+  private static function cleanLabel($label)
+  {
+    return $label;
+  }
+
 
   public static function getVideoDuration($filePath)
   {
@@ -1245,7 +1293,26 @@ class frigate extends eqLogic
     }
   }
 
+  public static function cleanByType($type = "new")
+  {
+    $events = frigate_events::byType($type);
 
+    if (!empty($events)) {
+      foreach ($events as $event) {
+        $eventId = $event->getEventId();
+
+        log::add(__CLASS__, 'info', "| Nettoyage de l'événement ID: " . $eventId . " il est de type: " . $type);
+
+        $result = self::cleanDbEvent($eventId);
+
+        if ($result) {
+          log::add(__CLASS__, 'info', "| Événement ID: " . $eventId . " nettoyé avec succès.");
+        } else {
+          log::add(__CLASS__, 'error', "| Échec du nettoyage de l'événement ID: " . $eventId);
+        }
+      }
+    }
+  }
 
   public static function cleanOldestFile()
   {
@@ -1321,6 +1388,7 @@ class frigate extends eqLogic
         $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
         $snapshot = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.jpg";
         $thumbnail = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.jpg";
+        $preview = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_preview.gif";
 
         if (file_exists($clip)) {
           unlink($clip);
@@ -1333,6 +1401,10 @@ class frigate extends eqLogic
         if (file_exists($thumbnail)) {
           unlink($thumbnail);
           log::add(__CLASS__, 'debug', "| Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
+        }
+        if (file_exists($preview)) {
+          unlink($preview);
+          log::add(__CLASS__, 'debug', "| GIF supprimé pour l'événement " . $frigate->getEventId());
         }
 
         $frigate->remove();
@@ -1443,14 +1515,10 @@ class frigate extends eqLogic
 
     log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
-    //  $resultURL = $urlfrigate . "/api/stats";
-    // décoder le yaml de configuration
-    $configuration = self::yamlToJsonFromUrl("http://" . $urlfrigate . "/api/config/raw");
-    // Décoder la chaîne JSON en tableau PHP
-    $configurationArray = json_decode($configuration, true);
+    // récupérer le json de configuration
+    $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
-    $audioCmds = isset($configurationArray['audio']['enable']) && !empty($configurationArray['audio']['enable']);
     $addToName = "";
     $create = 1;
     //  $stats = self::getcURL("create eqCameras", $resultURL);
@@ -1476,10 +1544,27 @@ class frigate extends eqLogic
       $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
       if (!is_object($frigate)) {
         $n++;
+        $urlLatest = "http://" . $urlfrigate . "/api/" . $name . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
+        $img = urlencode($urlLatest);
+
         $frigate = new frigate();
         $frigate->setName($cameraName . $addToName);
         $frigate->setEqType_name("frigate");
         $frigate->setConfiguration("name", $cameraName);
+        $frigate->setConfiguration('panel', 0);
+        $frigate->setConfiguration('ptz', 0);
+        $frigate->setConfiguration('preset_max', 0);
+        $frigate->setConfiguration('userName', "");
+        $frigate->setConfiguration('password', "");
+        $frigate->setConfiguration('bbox', 0);
+        $frigate->setConfiguration('timestamp', 0);
+        $frigate->setConfiguration('zones', 0);
+        $frigate->setConfiguration('mask', 0);
+        $frigate->setConfiguration('motion', 0);
+        $frigate->setConfiguration('regions', 0);
+        $frigate->setConfiguration('img', $img);
+        $frigate->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $urlfrigate . ':8554/' . $cameraName);
+        $frigate->setConfiguration('urlStream', "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img);
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
@@ -1495,7 +1580,12 @@ class frigate extends eqLogic
       // commandes MQTT s'il est configuré
       if ($mqttCmds) {
         log::add(__CLASS__, 'debug', "| Création des commandes MQTT pour : " . json_encode($cameraName));
-        self::createMqttCmds($frigate->getId());
+        $value["detect"] = isset($cameraConfig['detect']['enabled']) ? $cameraConfig['detect']['enabled'] : $configurationArray['detect']['enabled'];
+        $value["recordings"] = isset($cameraConfig['record']['enabled']) ? $cameraConfig['record']['enabled'] : $configurationArray['record']['enabled'];
+        $value["snapshots"] = isset($cameraConfig['snapshots']['enabled']) ? $cameraConfig['snapshots']['enabled'] : $configurationArray['snapshots']['enabled'];
+        $value["motion"] = isset($cameraConfig['motion']['enabled']) ? $cameraConfig['motion']['enabled'] : $configurationArray['motion']['enabled'];
+        
+        self::createMqttCmds($frigate->getId(), $value);
         // commande PTZ si onvif est configuré
         if (isset($cameraConfig['onvif']['host']) && !empty($cameraConfig['onvif']['host']) && $cameraConfig['onvif']['host'] !== '0.0.0.0') {
           log::add(__CLASS__, 'debug', "| Création des commandes PTZ pour : " . json_encode($cameraName));
@@ -1506,9 +1596,14 @@ class frigate extends eqLogic
         }
       }
       // commandes audio s'il est configuré
-      if ($audioCmds) {
+      $isAudioEnabledGlobally  = isset($configurationArray['audio']['enabled']) && !empty($configurationArray['audio']['enabled']);
+      $isAudioEnabledForCamera = isset($cameraConfig['audio']['enabled_in_config']) && !empty($cameraConfig['audio']['enabled_in_config']);
+      if ($isAudioEnabledGlobally  || $isAudioEnabledForCamera) {
         log::add(__CLASS__, 'debug', "| Création des commandes audio pour : " . json_encode($cameraName));
-        self::createAudioCmds($frigate->getId());
+
+        $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled']; 
+        
+        self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
     message::add('frigate', 'Frigate : ' . $n . ' cameras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
@@ -1527,7 +1622,6 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'info', ":fg-warning:restartFrigate:/fg:");
     self::publish_message('restart', '');
   }
-
   public static function generateEqEvents()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -1542,12 +1636,15 @@ class frigate extends eqLogic
       $frigate->setIsVisible(1);
       $frigate->save();
     }
+    // création des commandes d'activation des cron
+    frigate::setCmdsCron();
   }
 
   public static function generateEqStats()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
+    // créer l'équipement s'il n'existe pas.
     if (!is_object($frigate)) {
       $frigate = new frigate();
       $frigate->setName('Statistiques');
@@ -1558,6 +1655,10 @@ class frigate extends eqLogic
       $frigate->setIsVisible(1);
       $frigate->save();
     }
+
+    // Création de la commande restart Frigate si elle n'existe pas
+    $eqlogicId = $frigate->getId();
+    self::createEqStatsCmd($eqlogicId);
   }
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
@@ -1591,15 +1692,16 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
-  public static function createAudioCmds($eqlogicId)
+  public static function createAudioCmds($eqlogicId, $value)
   {
     $infoCmd = self::createCmd($eqlogicId, "audio Etat", "binary", "", "info_audio", "JEEMATE_CAMERA_AUDIO_STATE", 0);
-    $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
-      $infoCmd->event(1);
-      $infoCmd->save();
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    if ($currentState !== $value) {
+      $infoCmd->event($value);
     }
+    $infoCmd->save();
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "audio off", "other", "", "action_stop_audio", "JEEMATE_CAMERA_AUDIO_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -1637,6 +1739,7 @@ class frigate extends eqLogic
       $infoCmd->save();
     }
     $infoCmd = self::createCmd($eqlogicId, "SNAPSHOT LIVE", "string", "", "link_snapshot", "CAMERA_URL", 0, null, 0);
+    $infoCmd->setGeneric_type("CAMERA_URL");
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
@@ -1660,15 +1763,17 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "(Config) Inverser activation caméra", "other", "", "action_toggle_camera", "", 0, $infoCmd, 0, "action");
     $cmd->save();
   }
-  public static function createMQTTcmds($eqlogicId)
+  public static function createMQTTcmds($eqlogicId, $value)
   {
     $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
-    $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
-      $infoCmd->event(1);
-      $infoCmd->save();
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["detect"];
+    if ($currentState !== $stateValue) {
+    $infoCmd->event($stateValue);
     }
+    $infoCmd->save();
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "detect off", "other", "", "action_stop_detect", "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -1679,12 +1784,14 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "recordings Etat", "binary", "", "info_recordings", "JEEMATE_CAMERA_NVR_STATE", 0);
-    $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
-      $infoCmd->event(1);
-      $infoCmd->save();
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["recordings"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
     }
+    $infoCmd->save();
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "recordings off", "other", "", "action_stop_recordings", "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -1695,12 +1802,15 @@ class frigate extends eqLogic
 
 
     $infoCmd = self::createCmd($eqlogicId, "snapshots Etat", "binary", "", "info_snapshots", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
-      $infoCmd->event(1);
-      $infoCmd->save();
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["snapshots"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
     }
+    $infoCmd->save();
+
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "snapshots off", "other", "", "action_stop_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -1711,18 +1821,20 @@ class frigate extends eqLogic
 
     $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 1);
     $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
+    $valueDetectNow = $infoCmd->execCmd();
+    if (!isset($valueDetectNow) || $valueDetectNow == null || $valueDetectNow == '') {
       $infoCmd->event(1);
       $infoCmd->save();
     }
     $infoCmd = self::createCmd($eqlogicId, "motion Etat", "binary", "", "info_motion", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    $infoCmd->save();
-    $value = $infoCmd->execCmd();
-    if (!isset($value) || $value == null || $value == '') {
-      $infoCmd->event(1);
-      $infoCmd->save();
+    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
+    $currentState = $infoCmd->execCmd();
+    $stateValue = $value["motion"];
+    if ($currentState !== $stateValue) {
+      $infoCmd->event($stateValue);
     }
+    $infoCmd->save();
+
     // commande action
     $cmd = self::createCmd($eqlogicId, "motion off", "other", "", "action_stop_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
     $cmd->save();
@@ -1748,7 +1860,23 @@ class frigate extends eqLogic
     log::add("frigate", 'debug', '| commande mise à jour');
     return true;
   }
+  public static function createEqStatsCmd($eqlogicId)
+  {
+    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
+    $cmd->save();
 
+    $cmd = self::createCmd($eqlogicId, "status serveur", "binary", "", "info_status", "", 0, null, 0);
+    $cmd->save();
+    // seulement en MQTT
+    if (class_exists('mqtt2')) {
+      $deamon_info = self::deamon_info();
+      if ($deamon_info['launchable'] === 'ok') {
+        $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
+        $cmd->save();
+      }
+    }
+    return true;
+  }
   public static function editHTTP($cmdId, $link)
   {
     $cmd = cmd::byid($cmdId);
@@ -1860,6 +1988,9 @@ class frigate extends eqLogic
   public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+    if (!is_object($frigate)) {
+      return; // frigate n'existe pas
+    }
     // Création des commandes Crons pour l'equipement général
     // commande infos
     $infoCmd = self::createCmd($frigate->getId(), "Cron etat", "binary", "", "info_Cron", "LIGHT_STATE", 0);
@@ -2043,10 +2174,6 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
     $eqlogicId = $frigate->getId();
 
-    // Création de la commande restart Frigate
-    $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
-    $cmd->save();
-
     // Mise à jour des statistiques des détecteurs
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
@@ -2101,7 +2228,7 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-
+    $getPreview = str_replace("snapshot.jpg", "preview.gif", $event->getSnapshot());
     // Initialisation des variables d'événement
     $eventId = $event->getEventId();
     $hasClip = $event->getHasClip();
@@ -2110,9 +2237,11 @@ class frigate extends eqLogic
     $clip = $urlJeedom . $event->getClip();
     $snapshot = $urlJeedom . $event->getSnapshot();
     $thumbnail = $urlJeedom . $event->getThumbnail();
+    $preview = $urlJeedom . $getPreview;
     $clipPath = "/var/www/html" . $event->getClip();
     $snapshotPath = "/var/www/html" . $event->getSnapshot();
     $thumbnailPath = "/var/www/html" . $event->getThumbnail();
+    $previewPath = "/var/www/html" . $getPreview;
     $camera = $event->getCamera();
     $label = $event->getLabel();
     $zones = $event->getZones();
@@ -2167,8 +2296,8 @@ class frigate extends eqLogic
         }
 
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#'],
-          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate],
+          ['#time#', '#event_id#', '#camera#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
+          [$time, $eventId, $camera, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
           $options
         );
 
@@ -2219,8 +2348,17 @@ class frigate extends eqLogic
       $urlJeedom = network::getNetworkAccess('internal');
     }
     $urlfrigate = self::getUrlFrigate();
-    $format = ($type == "snapshot") ? "jpg" : "mp4";
-    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format;
+    $extra = "";
+    if ($type == "preview") {
+      $format = "gif";
+    } elseif ($type == "snapshot") {
+      $format = "jpg";
+      $extra = '?timestamp=1&bbox=1';
+    } else {
+      $format = "mp4";
+    }
+
+    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format . $extra;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($mode == 1) {
       $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/thumbnail.jpg";
@@ -2229,6 +2367,7 @@ class frigate extends eqLogic
       $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
+      $file = $file . '?timestamp=1&bbox=1';
       $lien = urldecode($file);
       $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
     } elseif ($mode == 4) {
@@ -2262,8 +2401,14 @@ class frigate extends eqLogic
       }
     }
 
-    // Télécharger l'image ou la vidéo
-    $content = file_get_contents($lien);
+    $headers = @get_headers($lien);
+
+    if ($headers && strpos($headers[0], '200') !== false) {
+      // Le fichier existe, on peut le télécharger
+      $content = file_get_contents($lien);
+    } else {
+      $content = false;
+    }
 
     if ($content !== false) {
       // Enregistrer l'image ou la vidéo dans le dossier spécifié
@@ -2276,7 +2421,7 @@ class frigate extends eqLogic
         $result = "error";
       }
     } else {
-      log::add(__CLASS__, 'debug', "| Échec du téléchargement du fichier : " . $lien);
+      log::add(__CLASS__, 'debug', "| Le fichier n'existe pas ou une erreur s'est produite.");
       $result = "error";
     }
 
@@ -2436,11 +2581,15 @@ class frigate extends eqLogic
       return;
     }
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
-    $eqlogicId = $frigate->getId();
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-    $version = $cmd->execCmd();
-    if ($version != config::byKey('frigate_version', 'frigate')) {
-      config::save('frigate_version', $version, 'frigate');
+    if (!is_object($frigate)) {
+      return; // frigate n'existe pas
+    } else {
+      $eqlogicId = $frigate->getId();
+      $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
+      $version = $cmd->execCmd();
+      if ($version != config::byKey('frigate_version', 'frigate')) {
+        config::save('frigate_version', $version, 'frigate');
+      }
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
@@ -2471,6 +2620,13 @@ class frigate extends eqLogic
           self::majStatsCmds($value, true);
           break;
 
+        case 'available':
+          log::add(__CLASS__, 'info', ' => Traitement mqtt available');
+          $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
+          $cmd->event($value);
+          $cmd->save();
+          break;
+
         default:
           $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $key, "frigate");
           if (!is_object($eqCamera)) {
@@ -2487,7 +2643,7 @@ class frigate extends eqLogic
   private static function processCameraData($eqCamera, $key, $data)
   {
     foreach ($data as $innerKey => $innerValue) {
-      if (in_array($innerKey, ['audio', 'birdeye', 'improve_constrast', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'])) {
+      if (in_array($innerKey, ['birdeye', 'improve_constrast', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'])) {
         // A venir
         continue;
       }
@@ -2507,6 +2663,10 @@ class frigate extends eqLogic
 
         case 'snapshots':
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_SNAPSHOT_STATE");
+          break;
+
+        case 'audio':
+          self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_AUDIO_STATE");
           break;
       }
     }
@@ -2535,12 +2695,22 @@ class frigate extends eqLogic
 
   private static function updateCameraState($eqCamera, $type, $state, $jeemateState)
   {
-    $stateValue = ($state == 'ON') ? "1" : "0";
-    $infoCmd = self::createCmd($eqCamera->getId(), $type . " Etat", "binary", "", "info_" . $type, $jeemateState, 0);
-    $infoCmd->event($stateValue);
-    $infoCmd->save();
-    $eqCamera->refreshWidget();
+
+    if (isset($state)) {
+      $infoCmd = self::createCmd($eqCamera->getId(), $type . " Etat", "binary", "", "info_" . $type, $jeemateState, 0);
+      $currentState = $infoCmd->execCmd(); // Obtenir l'état actuel
+
+      $stateValue = ($state == 'ON') ? "1" : "0";
+
+      if ($currentState !== $stateValue) {
+        $infoCmd->event($stateValue);
+        $infoCmd->save();
+        $eqCamera->refreshWidget();
+        log::add(__CLASS__, 'debug', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
+      }
+    }
   }
+
 
 
   public static function setFavorite($eventId, $isFav)
@@ -2572,7 +2742,9 @@ class frigate extends eqLogic
   public static function backupExclude()
   {
     // retourne le répertoire de sauvegarde des snapshots et des vidéos des events à ne pas enregistrer dans le backup Jeedom
-    return ['data'];
+    if (config::byKey('excludeBackup', 'frigate', 0)) {
+      return ['data'];
+    }
   }
 
 
@@ -2675,9 +2847,31 @@ class frigate extends eqLogic
   }
 
 
-
-  private static function yamlToJsonFromUrl($yamlUrl)
+  private static function jsonFromUrl($jsonUrl)
   {
+    // Télécharger le contenu JSON depuis l'URL
+    $jsonContent = file_get_contents($jsonUrl);
+
+    // Vérifier si le téléchargement a réussi
+    if ($jsonContent === false) {
+      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to retrieve JSON from URL");
+      return json_encode(["error" => "Failed to retrieve JSON from URL: $jsonUrl"]);
+    }
+
+    // Décoder le JSON en tableau PHP
+    $jsonArray = json_decode($jsonContent, true);
+
+    // Vérifier si la conversion a réussi
+    if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
+      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to decode JSON content");
+      return json_encode(["error" => "Failed to decode JSON content from URL: $jsonUrl"]);
+    }
+
+    return $jsonArray;
+  }
+
+  /* private static function yamlToJsonFromUrl($yamlUrl)
+ {
     // Télécharger le contenu YAML depuis l'URL
     $yamlContent = file_get_contents($yamlUrl);
     // Vérifier si le téléchargement a réussi
@@ -2697,7 +2891,38 @@ class frigate extends eqLogic
     return $jsonContent;
   }
 
-  private static function checkFriagetVersion()
+  */
+  private static function checkFrigateStatus()
+  {
+    $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
+    if (!$frigate) {
+      return;
+    }
+    $eqlogicId = $frigate->getId();
+    $urlFrigate = self::getUrlFrigate();
+    $etat = 0;
+
+    $ch = curl_init($urlFrigate);
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_exec($ch);
+
+    // Obtenir le code de statut HTTP
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode == 200) {
+      $etat = 1; // Site accessible
+    } else {
+      $etat = 0; // Site inaccessible
+    }
+    $cmd = self::createCmd($eqlogicId, "status serveur", "binary", "", "info_status", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($etat);
+    $cmd->save();
+
+    return $etat;
+  }
+  private static function checkFrigateVersion()
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
@@ -2710,6 +2935,28 @@ class frigate extends eqLogic
     } else {
       config::save('frigate_maj', 0, 'frigate');
     }
+  }
+  public static function getPluginVersion()
+  {
+    $pluginVersion = '0.0.0';
+    try {
+      if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
+        log::add('frigate', 'warning', '[Plugin-Version] fichier info.json manquant');
+      }
+      $data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
+      if (!is_array($data)) {
+        log::add('frigate', 'warning', '[Plugin-Version] Impossible de décoder le fichier info.json');
+      }
+      try {
+        $pluginVersion = $data['pluginVersion'];
+      } catch (\Exception $e) {
+        log::add('frigate', 'warning', '[Plugin-Version] Impossible de récupérer la version du plugin');
+      }
+    } catch (\Exception $e) {
+      log::add('frigate', 'debug', '[Plugin-Version] Get ERROR :: ' . $e->getMessage());
+    }
+    log::add('frigate', 'info', '[Plugin-Version] PluginVersion :: ' . $pluginVersion);
+    return $pluginVersion;
   }
 }
 class frigateCmd extends cmd
@@ -2793,6 +3040,12 @@ class frigateCmd extends cmd
     $link = $this->getConfiguration('request') ?? "";
     $user = $frigate->getConfiguration('userName');
     $password = $frigate->getConfiguration('password');
+    // la pause doit etre entre 0.1s et 1.0s, on multiplie donc le resultat par 10000 pour faire le usleep
+    $pause = config::byKey("pausePTZ", "frigate", 10);
+    if ($pause < 0 || $pause > 10) {
+      $pause = 10;
+    }
+    $pause = 10000 * $pause;
 
     switch ($logicalId) {
       case 'action_startCron':
@@ -2865,22 +3118,22 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_right':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_RIGHT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_up':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_UP');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_down':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_DOWN');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_stop':
@@ -2888,12 +3141,12 @@ class frigateCmd extends cmd
         break;
       case 'action_ptz_zoom_in':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_IN');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_ptz_zoom_out':
         $this->publishCameraMessage($camera, 'ptz', 'ZOOM_OUT');
-        sleep(1);
+        usleep($pause);
         $this->publishCameraMessage($camera, 'ptz', 'STOP');
         break;
       case 'action_preset_1':

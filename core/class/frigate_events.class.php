@@ -86,6 +86,22 @@ class frigate_events
 		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
 
+	public static function byType($_type)
+	{
+		$values = array(
+			'type' => $_type,
+		);
+		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
+			FROM frigate_events
+			WHERE type=:type';
+
+		return DB::Prepare($sql,
+			$values,
+			DB::FETCH_TYPE_ALL,
+			PDO::FETCH_CLASS,
+			__CLASS__
+		);
+	}
 	/*     * *********************Methode d'instance************************* */
 
 	public function preSave()

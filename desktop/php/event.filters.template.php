@@ -33,8 +33,8 @@
 
 <div class="col-sm-12" style="margin-bottom:10px">
   <div class="col-sm-4 datetime-container">
-    <label>Entre <input type="datetime-local" id="startDate"></label>
-    <label>et <input type="datetime-local" id="endDate"></label>
+    <label>Entre <input type="date" id="startDate"></label>
+    <label>et <input type="date" id="endDate"></label>
     <label>Ou de </label>
   </div>
 

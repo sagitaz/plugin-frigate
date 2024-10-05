@@ -3,6 +3,38 @@
 >**IMPORTANT**
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
+
+# 05/10/2024 Stable 1.1.0
+- Voir le détails des mises à jour précèdentes.
+
+# 04/10/2024 Beta 1.0.6
+- Correction changement valeur audio
+- Mise a jour des statuts seulement si différent de la dernière
+
+# 02/10/2024 Beta 1.0.5
+- Correction erreur création des commandes audio
+- Correction erreur création des commandes mqtt (valeur remise à 1)
+
+# 01/10/2024 Beta 1.0.4
+- Option pour exclure ou non les datas du backup Jeedom
+- Ajout de la pause PTZ
+- Ajout commande statut serveur et disponibilité serveur
+- Save automatiquement le bbox sur les snapshots
+- Optimisation du cron
+- Correction erreur file_get_content si fichiers n'existe pas
+- Correction filtre date (Firefox)
+- Option pour afficher les cameras sur le panel
+
+# 21/09/2024 Beta 1.0.3
+- Option pour flux RTSP (voir documentation)
+- Force le type génèrique de l'url snapshot (faites une recherche ou un save de chaque equipement)
+- Correction page events vignette (clip, preview, rien)
+
+# 17/09/2024 Beta 1.0.2
+- Ajout de la variable #preview# dans les notifications
+- Sur la page events, ce sera la preview au survol et plus le clip (moins lourd).
+- Les filtres sont sauvegardés pour etre appliqués à la prochaine ouverture de la page events.
+
 # 16/09/2024 Beta 1.0.1
 - Correction selecteur preset sur widget
 - Corrections de diverses erreur JS

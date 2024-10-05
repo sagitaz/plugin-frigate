@@ -231,7 +231,8 @@
   white-space: nowrap;
   max-width: 100%;
   line-height: 16px;
-  color: var(--sc-lightTxt-color);;
+  color: var(--sc-lightTxt-color);
+  ;
   padding: 0 3px 0 3px;
 }
 
@@ -259,7 +260,7 @@
   color: rgb(var(--defaultText-color));
 }
 
-.datetime-container input[type="datetime-local"] {
+.datetime-container input[type="date"] {
   border: 2px solid #ccc;
   border-radius: 4px;
   padding: 5px 10px;
@@ -268,7 +269,7 @@
   transition: border-color 0.3s;
 }
 
-.datetime-container input[type="datetime-local"]:focus {
+.datetime-container input[type="date"]:focus {
   border-color: #007BFF;
   outline: none;
 }

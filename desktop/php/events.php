@@ -155,7 +155,13 @@ if (!isConnect('admin')) {
     $snapshot = $event['snapshot'];
     $hasClip = $event['hasClip'];
     $clip = $event['clip'];
+    $preview = str_replace("snapshot.jpg", "preview.gif", $event["snapshot"]);
+    $hasPreview = file_exists("/var/www/html" . $preview);
     $zones = $event['zones'];
+    $showClip = 0;
+    if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1) {
+      $showClip = 1;
+    }
 
     // event creation (template)
     include 'event.template.php';

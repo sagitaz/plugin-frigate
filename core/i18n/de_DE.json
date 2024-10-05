@@ -14,9 +14,13 @@
         "Le plugin MQTT Manager n\\'est pas installé": "Das MQTT Manager-Plugin ist nicht installiert",
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Vielen Dank, dass Sie das Plugin installiert haben. Bei allen Hilfeanfragen wenden Sie sich bitte an den Support in Discord oder Community.",
         "Topic mqtt pour Frigate non défini.": "Topic mqtt für Frigate nicht definiert.",
-        "Veuillez vérifier la configuration": "Bitte überprüfen Sie die Konfiguration"
+        "Veuillez vérifier la configuration": "Bitte überprüfen Sie die Konfiguration",
+        "action": "aktion"
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
+        "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen"
+    },
+    "plugins\/frigate\/core\/template\/dashboard\/widgetPanel.html": {
         "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen"
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
@@ -139,6 +143,7 @@
         "Action(s)": "Aktion(en)",
         "Activer": "Aktivieren",
         "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen",
+        "Afficher sur le panel": "Auf dem Panel anzeigen",
         "Ajouter une action": "Eine Aktion hinzufügen",
         "Ajouter une commande HTTP": "HTTP-Befehl hinzufügen",
         "Aucun": "Nein",
@@ -156,11 +161,14 @@
         "Equipement visible": "Sichtbare Ausstattung",
         "Etat actuel : ": "Aktueller Stand :",
         "Events": "Veranstaltungen",
+        "Flux vidéo": "Video-Feeds",
         "Gestion": "Management",
         "ID": "Identifikation",
         "Identifiant": "ICH WÜRDE",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Zugangskennung zu Ihrer Kamera, nur für HTTP-Befehle",
         "Infos": "Infos",
+        "Lien vers votre flux vidéo": "Link zu Ihrem Videostream",
+        "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Link zu Ihrem Videostream, wenn der Standard-Videostream nicht passt. siehe Dokumentation.",
         "Logs Frigate": "Frigate-Logs",
         "Mes équipements": "Meine Geräte",
         "Mot de passe": "Passwort",
@@ -223,8 +231,11 @@
         "Durée par défaut de la vidéo d un évènement manuel": "Standarddauer des Videos eines manuellen Ereignisses",
         "Enregistrement d une vidéo par défaut pour un évènement manuel": "Aufnahme eines Standardvideos für ein manuelles Ereignis",
         "Enregistrer une vidéo": "Ein Video aufnehmen",
+        "Exclure du backup": "Vom Backup ausschließen",
+        "Exclure les clips et snapshot des sauvegardes Jeedom": "Clips und Snapshots von Jeedom-Backups ausschließen",
         "Exemple: 192.168.1.20": "Beispiel: 192.168.1.20",
         "Gestion des évènements": "Verwaltung von Ereignissen",
+        "Génèrale": "Allgemein",
         "Label": "Label",
         "Label par défaut d'un évènement créé manuellement": "Standardlabel eines manuell erstellten Ereignisses",
         "Nombre de jours à garder": "Anzahl der zu behaltenden Tage",
@@ -232,6 +243,8 @@
         "Nombre de preset à importer": "Anzahl der zu importierenden Presets",
         "Paramétrage Frigate": "Frigate-Einstellungen",
         "Paramétrage par défaut d'un évènement créé manuellement": "Standardeinstellungen für ein manuell erstelltes Ereignis",
+        "Pause action": "Pause Aktion",
+        "Pause à effectuer sur l'action PTZ (1 à 10)": "Pause, die bei der PTZ-Aktion gemacht werden soll (1 bis 10)",
         "Pièce par défaut pour les équipements": "Standardraum für Geräte",
         "Port": "Hafen",
         "Preset": "Preset",
@@ -246,6 +259,8 @@
         "Topic MQTT de Frigate": "MQTT-Topic von Frigate",
         "URL Frigate": "Frigate-URL",
         "URL de Frigate": "URL von Frigate",
+        "Version Plugin": "Plugin-Version",
+        "Version du Plugin (A indiquer sur Community)": "Version des Plugins (Auf Community anzugeben)",
         "Vidéos en vignette dans la page des évènements": "Videos als Thumbnail auf der Veranstaltungsseite",
         "ne sert que pour le bouton vers votre serveur Frigate": "wird nur für die Schaltfläche zu Ihrem Frigate-Server verwendet",
         "port de Frigate (5000 par défaut)": "frigate-Port (standardmäßig 5000)"
