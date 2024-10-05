@@ -244,7 +244,7 @@
         "Paramétrage Frigate": "Frigate-Einstellungen",
         "Paramétrage par défaut d'un évènement créé manuellement": "Standardeinstellungen für ein manuell erstelltes Ereignis",
         "Pause action": "Pause Aktion",
-        "Pause à effectuer sur l'action PTZ (1 à 10)": "Pause, die bei der PTZ-Aktion gemacht werden soll (1 bis 10)",
+        "Pause à effectuer sur l'action PTZ (0 à 10)": "Pause, die bei der PTZ-Aktion gemacht werden soll (0 bis 10)",
         "Pièce par défaut pour les équipements": "Standardraum für Geräte",
         "Port": "Hafen",
         "Preset": "Preset",
