@@ -128,6 +128,7 @@ Vous pouvez ici indiquer les actions à effectuer à chaque nouvel évènement.
 Une liste de variables est disponible afin de personnaliser les notifications.
 - **#time#** : l'heure actuelle au format 12:00
 - **#camera#** : le nom de la caméra
+- **#cameraId#** : l'id de la caméra (pour par exemple un deeplink vers la page de la caméra dans l'application Jeemate)
 - **#score#** : le score en pourcentage -> 82 %
 - **#has_clip#** : texte 0 ou 1
 - **#has_snapshot#** : texte 0 ou 1
