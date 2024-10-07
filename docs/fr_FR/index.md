@@ -100,7 +100,9 @@ Les informations sur le dernier évènement de la caméra et sur ses statistique
 L'info **LABEL** correspond à l'object qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 ##### MQTT
-L'information sur détection en cours
+- **Détection en cours** : dès que Frigate voit un changement il passe à 1 (nuages, luminosité, personne, etc...) 
+- **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection est en cours ou non pour chaque object configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc... vous aurez 3 états : personne, vache, véhicule. Si vous cocher "visible" l'icône sera présente sur le widget lorsqu'il y aura une détection, l'icône est a personnaliser dans les paramètres de la commande.
+- **Détection all** : tant qu'un des object est à 1 alors la commande sera à 1. Si tous les objets sont à 0 alors la commande est à 0.
 
 ### Commandes actions
 - **Capture** :état, capture
