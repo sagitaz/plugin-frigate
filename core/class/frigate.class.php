@@ -478,7 +478,7 @@ class frigate extends eqLogic
             $value = $cmd->execCmd(); // Exécuter la commande et obtenir la valeur
 
             // Si la valeur est égale à 1, ajouter l'icône à l'affichage
-            if ($value == 0) {
+            if ($value == 1) {
               $replace['#detectNow#'] .= '<div class="btn-detect">';
               $replace['#detectNow#'] .= '<i class="' . $icon . ' iconDetect' . $this->getId() . '"></i>';
               $replace['#detectNow#'] .= '</div>';
