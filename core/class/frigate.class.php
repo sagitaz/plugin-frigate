@@ -468,21 +468,26 @@ class frigate extends eqLogic
       }
       // commantes motions
       $replace['#detectNow#'] = "";
-      if (is_object($this->getCmd('info', 'info_detectNow'))) {
-        $detectNow = $this->getCmd("info", 'info_detectNow');
-        if ($detectNow->getIsVisible() == 1) {
-          $value = $detectNow->execCmd();
-          if ($value == 1) {
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '<div class="btn-detect">';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user iconDetect' . $this->getId() . '"></i>';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>';
-          } else {
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '<div class="btn-detect">';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '<i class="fas fa-user-slash iconDetectOff' . $this->getId() . '"></i>';
-            $replace['#detectNow#'] = $replace['#detectNow#'] . '</div>';
+      $cmds = $this->getCmd('info');
+      foreach ($cmds as $cmd) {
+        if (strpos($cmd->getLogicalId(), 'info_detect_') === 0 && $cmd->getLogicalId() != 'info_detect_all') {
+          $icon = $cmd->getDisplay("icon", "fas fa-user");
+          $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
+          // Vérifier si la commande est visible
+          if ($cmd->getIsVisible() == 1) {
+            $value = $cmd->execCmd(); // Exécuter la commande et obtenir la valeur
+
+            // Si la valeur est égale à 1, ajouter l'icône à l'affichage
+            if ($value == 0) {
+              $replace['#detectNow#'] .= '<div class="btn-detect">';
+              $replace['#detectNow#'] .= '<i class="' . $icon . ' iconDetect' . $this->getId() . '"></i>';
+              $replace['#detectNow#'] .= '</div>';
+            }
           }
         }
       }
+
+
       if (is_object($this->getCmd('action', 'action_start_motion')) && is_object($this->getCmd('action', 'action_stop_motion'))) {
         $on = $this->getCmd("action", 'action_start_motion');
         $off = $this->getCmd("action", 'action_stop_motion');
@@ -1504,20 +1509,22 @@ class frigate extends eqLogic
   {
 
     log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES EQUIPEMENTS:/fg:----------------------------------");
-    frigate::generateEqEvents();
-    frigate::generateEqStats();
-    frigate::generateEqCameras();
-
-    log::add(__CLASS__, 'debug', "----------------------:fg-success:FIN CREATION DES EQUIPEMENTS:/fg:----------------------------------");
-  }
-  public static function generateEqCameras()
-  {
-
-    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
     $urlfrigate = self::getUrlFrigate();
     // récupérer le json de configuration
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     log::add(__CLASS__, 'debug', "| Fichier de configuration : " . json_encode($configurationArray));
+
+    frigate::generateEqEvents($configurationArray);
+    frigate::generateEqStats();
+    frigate::generateEqCameras($configurationArray);
+
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:FIN CREATION DES EQUIPEMENTS:/fg:----------------------------------");
+  }
+  public static function generateEqCameras($configurationArray)
+  {
+
+    log::add(__CLASS__, 'debug', "----------------------:fg-success:CREATION DES CAMERAS:/fg:----------------------------------");
+    $urlfrigate = self::getUrlFrigate();
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $addToName = "";
     $create = 1;
@@ -1584,8 +1591,20 @@ class frigate extends eqLogic
         $value["recordings"] = isset($cameraConfig['record']['enabled']) ? $cameraConfig['record']['enabled'] : $configurationArray['record']['enabled'];
         $value["snapshots"] = isset($cameraConfig['snapshots']['enabled']) ? $cameraConfig['snapshots']['enabled'] : $configurationArray['snapshots']['enabled'];
         $value["motion"] = isset($cameraConfig['motion']['enabled']) ? $cameraConfig['motion']['enabled'] : $configurationArray['motion']['enabled'];
-        
+
         self::createMqttCmds($frigate->getId(), $value);
+
+        // verifier les objects configurés en détection
+        $objectsGeneral = $configurationArray['objects']['track'];
+        $objectsCamera = $cameraConfig['objects']['track'];
+        // fusionner les 2 tableaux
+        $objects = array_merge($objectsGeneral, $objectsCamera);
+        // supprimer les entrées identique :
+        $objects = array_unique($objects);
+        // créé les commandes 
+        foreach ($objects as $object) {
+          self::createObjectDetectorCmd($frigate->getId(), $object);
+        }
         // commande PTZ si onvif est configuré
         if (isset($cameraConfig['onvif']['host']) && !empty($cameraConfig['onvif']['host']) && $cameraConfig['onvif']['host'] !== '0.0.0.0') {
           log::add(__CLASS__, 'debug', "| Création des commandes PTZ pour : " . json_encode($cameraName));
@@ -1601,8 +1620,8 @@ class frigate extends eqLogic
       if ($isAudioEnabledGlobally  || $isAudioEnabledForCamera) {
         log::add(__CLASS__, 'debug', "| Création des commandes audio pour : " . json_encode($cameraName));
 
-        $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled']; 
-        
+        $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled'];
+
         self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
@@ -1622,7 +1641,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'info', ":fg-warning:restartFrigate:/fg:");
     self::publish_message('restart', '');
   }
-  public static function generateEqEvents()
+  public static function generateEqEvents($configurationArray)
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
@@ -1638,6 +1657,31 @@ class frigate extends eqLogic
     }
     // création des commandes d'activation des cron
     frigate::setCmdsCron();
+    // création des commandes détection objects        
+    $objectsGeneral = $configurationArray['objects']['track'];
+    $objectsCamera = []; // tableau pour stocker les objets détectés des caméras
+
+    // Parcourir toutes les caméras
+    foreach ($configurationArray['cameras'] as $cameraId => $cameraConfig) {
+      if (isset($cameraConfig['objects']['track'])) {
+        $objectsCamera = array_merge($objectsCamera, $cameraConfig['objects']['track']);
+      }
+    }
+
+    // Fusionner les objets généraux et ceux des caméras
+    $objects = array_merge($objectsGeneral, $objectsCamera);
+
+    // Supprimer les entrées en double
+    $objects = array_unique($objects);
+
+    // Créer les commandes pour chaque objet
+    foreach ($objects as $object) {
+      self::createObjectDetectorCmd($frigate->getId(), $object);
+    }
+
+    // Sauvegarder la configuration mise à jour
+    $frigate->setConfiguration("objects", $objects);
+    $frigate->save();
   }
 
   public static function generateEqStats()
@@ -1763,6 +1807,15 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "(Config) Inverser activation caméra", "other", "", "action_toggle_camera", "", 0, $infoCmd, 0, "action");
     $cmd->save();
   }
+
+  public static function createObjectDetectorCmd($eqlogicId, $object)
+  {
+    $infoCmd = self::createCmd($eqlogicId, "Détection " . $object, "binary", "", "info_detect_" . $object, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
+    $infoCmd->save();
+    $infoCmd = self::createCmd($eqlogicId, "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
+    $infoCmd->save();
+  }
+
   public static function createMQTTcmds($eqlogicId, $value)
   {
     $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
@@ -1770,7 +1823,7 @@ class frigate extends eqLogic
     $currentState = $infoCmd->execCmd();
     $stateValue = $value["detect"];
     if ($currentState !== $stateValue) {
-    $infoCmd->event($stateValue);
+      $infoCmd->event($stateValue);
     }
     $infoCmd->save();
 
@@ -2297,7 +2350,7 @@ class frigate extends eqLogic
         }
 
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#','#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
+          ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
           [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
           $options
         );
@@ -2643,9 +2696,20 @@ class frigate extends eqLogic
 
   private static function processCameraData($eqCamera, $key, $data)
   {
+    // recupérer la liste des object a surveiller
+    $eqEvent = eqLogic::byLogicalId("eqFrigateEvents", "frigate");
+    $objects = $eqEvent->getConfiguration("objects");
     foreach ($data as $innerKey => $innerValue) {
       if (in_array($innerKey, ['birdeye', 'improve_constrast', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'])) {
-        // A venir
+
+        continue;
+      }
+
+      if (in_array($innerKey, $objects)) {
+        // mise à jour pour la caméra
+        self::handleObject($eqCamera, $innerKey, $innerValue);
+        // mise à jour pour l'équipement event
+        self::handleObject($eqEvent, $innerKey, $innerValue);
         continue;
       }
 
@@ -2668,6 +2732,13 @@ class frigate extends eqLogic
 
         case 'audio':
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_AUDIO_STATE");
+          break;
+
+        case 'all':
+          // mise à jour pour la caméra
+          self::handleAllObject($eqCamera, $innerKey, $innerValue);
+          // mise à jour pour l'équipement event
+          self::handleAllObject($eqEvent, $innerKey, $innerValue);
           break;
       }
     }
@@ -2694,6 +2765,25 @@ class frigate extends eqLogic
     }
   }
 
+  private static function handleObject($eqCamera, $key, $innerValue)
+  {
+    if ($innerValue !== 1) {
+      $innerValue = 0;
+    }
+    if (isset($innerValue) && !is_array($innerValue)) {
+      $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
+      $infoCmd->event($innerValue);
+      $infoCmd->save();
+    }
+  }
+  private static function handleAllObject($eqCamera, $key, $innerValue)
+  {
+    if (isset($innerValue) && !is_array($innerValue)) {
+      $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
+      $infoCmd->event($innerValue);
+      $infoCmd->save();
+    }
+  }
   private static function updateCameraState($eqCamera, $type, $state, $jeemateState)
   {
 
