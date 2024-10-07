@@ -471,7 +471,7 @@ class frigate extends eqLogic
       $cmds = $this->getCmd('info');
       foreach ($cmds as $cmd) {
         if (strpos($cmd->getLogicalId(), 'info_detect_') === 0 && $cmd->getLogicalId() != 'info_detect_all') {
-          $icon = $cmd->getDisplay("icon", "fas fa-user");
+          $icon = $cmd->getDisplay("icon", "fas fa-exclamation-circle");
           $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
           // Vérifier si la commande est visible
           if ($cmd->getIsVisible() == 1) {
