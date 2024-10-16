@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 07/10/2024 Stable 1.1.2
+- Verification de l'etat du serveur Frigate avant d'executer les cron
+
 # 07/10/2024 Beta 1.1.1
 - Ajout des commandes binaire pour les object detectés
 
