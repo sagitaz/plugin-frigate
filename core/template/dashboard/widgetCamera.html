@@ -15,7 +15,9 @@
     <div class="column">
         <div class="img-container">
             <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
-            #detectNow#
+            <div class="detect-container">
+                #detectNow#
+            </div>
             #ptzWidget#
             #ptzZoom#
         </div>
@@ -231,10 +233,17 @@
             height: auto !important;
         }
 
-        .frigate_widget .btn-detect {
+        .frigate_widget .detect-container {
             position: absolute;
-            bottom: 5px;
+            bottom: 0px;
             right: 5px;
+            display: flex;
+            gap: 5px;
+            z-index: 100;
+            text-align: right;
+        }
+
+        .frigate_widget .btn-detect {
             z-index: 100;
             text-align: right;
         }
