@@ -65,6 +65,9 @@ class frigate extends eqLogic
     if (!config::byKey('cron::run', 'frigate')) {
       config::save('cron::run', 0, 'frigate');
     }
+    if (!config::byKey('excludeBackup', 'frigate')) {
+      config::save('excludeBackup', 1, 'frigate');
+    }
     // seulement si mqtt2 est installé
     if (class_exists('mqtt2')) {
       if (!config::byKey('topic', 'frigate')) {
@@ -168,45 +171,89 @@ class frigate extends eqLogic
   }
 
 
+  private static function isFrigateServerAvailable() {
+    $urlFrigate = self::getUrlFrigate();
+    if ($urlFrigate === false) {
+      return false;
+    }
+    
+    $ch = curl_init("http://" . $urlFrigate . "/api/version");
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 5);
+    $result = curl_exec($ch);
+    $httpCode = curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    
+    return $httpCode >= 200 && $httpCode < 300 && !empty($result);
+  }
+
   // Fonction exécutée automatiquement toutes les minutes par Jeedom
   public static function cron()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cron::enable');
   }
   // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
   public static function cron5()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron5 non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cron5::enable');
   }
   // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
   public static function cron10()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron10 non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cron10::enable');
   }
   // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
   public static function cron15()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron15 non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cron15::enable');
   }
   // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
   public static function cron30()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron30 non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cron30::enable');
   }
   // Fonction exécutée automatiquement toutes les heures par Jeedom
   public static function cronHourly()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. CronHourly non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::execCron('functionality::cronHourly::enable');
   }
   // Fonction exécutée automatiquement tous les jours par Jeedom
   public static function cronDaily()
   {
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. CronDaily non exécuté.");
+      return;
+    }
     self::checkFrigateStatus();
     self::checkFrigateVersion();
     self::execCron('functionality::cronDaily::enable');
