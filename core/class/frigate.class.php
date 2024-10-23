@@ -306,7 +306,7 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement avant la mise à jour de l'équipement
   public function preUpdate() {}
 
-  // Fonction exécutée automatiquement après la mise à jour de l'équipement
+  // Fonction exécutée automatiquement apr��s la mise à jour de l'équipement
   public function postUpdate() {}
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
@@ -2379,16 +2379,26 @@ class frigate extends eqLogic
         $cmdLabelName = $action['cmdLabelName'] ?: "all";
         $cmdTypeName = $action['cmdTypeName'] ?: "end";
         $cmdZoneName = $action['cmdZoneName'] ?: "all";
-        // zones est une chaine de caractères séparé par des virgules
-        $zonesArray = explode(',', $zones);
-        if ($cmdZoneName === "all") {
-          $zonesArray[] = "all";
-        }
-        // Vérifier les trois conditions ensemble
-        $labelMatch = ($cmdLabelName === $label || $cmdLabelName === "all");
-        $typeMatch = ($cmdTypeName === $type);
-        $zoneMatch = (in_array($cmdZoneName, $zonesArray) || $cmdZoneName === "all");
 
+        // Convertir les chaînes en tableaux
+        $cmdLabels = array_map('trim', explode(',', $cmdLabelName));
+        $cmdZones = array_map('trim', explode(',', $cmdZoneName));
+        $eventZones = array_map('trim', explode(',', $zones));
+
+        // Ajouter "all" aux tableaux si nécessaire
+        if (in_array("all", $cmdLabels)) $cmdLabels[] = $label;
+        if (in_array("all", $cmdZones)) $eventZones[] = "all";
+
+        // Vérifier les trois conditions
+        $labelMatch = in_array($label, $cmdLabels) || in_array("all", $cmdLabels);
+        $typeMatch = ($cmdTypeName === $type);
+        $zoneMatch = count(array_intersect($cmdZones, $eventZones)) > 0;
+
+        if (!($labelMatch && $typeMatch && $zoneMatch)) {
+          log::add(__CLASS__, 'debug', "| ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
+          continue;
+        }
+        
         $options = $action['options'];
         $enable = $action['options']['enable'] ?? false;
         $actionForced = $action['options']['actionForced'] ?? false;
