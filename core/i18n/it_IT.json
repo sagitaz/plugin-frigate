@@ -69,7 +69,8 @@
         "Sélectionner un mot-clé": "Seleziona una parola chiave",
         "Tester": "Prova",
         "Type": "Tipo",
-        "URL HTTP de votre commande": "URL HTTP dell'ordine"
+        "URL HTTP de votre commande": "URL HTTP dell'ordine",
+        "Zone": "Zona"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",
