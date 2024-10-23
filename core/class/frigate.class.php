@@ -2378,6 +2378,17 @@ class frigate extends eqLogic
         $cmd = $action['cmd'];
         $cmdLabelName = $action['cmdLabelName'] ?: "all";
         $cmdTypeName = $action['cmdTypeName'] ?: "end";
+        $cmdZoneName = $action['cmdZoneName'] ?: "all";
+        // zones est une chaine de caractères séparé par des virgules
+        $zonesArray = explode(',', $zones);
+        if ($cmdZoneName === "all") {
+          $zonesArray[] = "all";
+        }
+        // Vérifier les trois conditions ensemble
+        $labelMatch = ($cmdLabelName === $label || $cmdLabelName === "all");
+        $typeMatch = ($cmdTypeName === $type);
+        $zoneMatch = (in_array($cmdZoneName, $zonesArray) || $cmdZoneName === "all");
+
         $options = $action['options'];
         $enable = $action['options']['enable'] ?? false;
         $actionForced = $action['options']['actionForced'] ?? false;
@@ -2408,15 +2419,8 @@ class frigate extends eqLogic
           continue;
         }
 
-        // Vérifie si le label de commande ne correspond pas au label attendu
-        if ($cmdLabelName !== $label && $cmdLabelName !== "all") {
-          log::add(__CLASS__, 'debug', "| ACTION: Label de commande ('{$cmdLabelName}') ne correspond pas au label attendu ('{$label}') et n'est pas 'all', l'action sera ignoré.");
-          continue;
-        }
-
-        // Vérifie si le type de commande ne correspond pas au type attendu
-        if ($cmdTypeName !== $type) {
-          log::add(__CLASS__, 'debug', "| ACTION: Type de commande ('{$cmdTypeName}') ne correspond pas au type attendu ('{$type}'), l'action sera ignoré.");
+        if (!($labelMatch && $typeMatch && $zoneMatch)) {
+          log::add(__CLASS__, 'debug', "| ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
           continue;
         }
 
