@@ -69,7 +69,8 @@
         "Sélectionner un mot-clé": "Select a keyword",
         "Tester": "Test",
         "Type": "Kind",
-        "URL HTTP de votre commande": "HTTP URL of your command"
+        "URL HTTP de votre commande": "HTTP URL of your command",
+        "Zone": "Zone"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",

@@ -69,7 +69,8 @@
         "Sélectionner un mot-clé": "Schlüsselwort auswählen",
         "Tester": "Prüfung",
         "Type": "Typ",
-        "URL HTTP de votre commande": "HTTP-URL Ihrer Bestellung"
+        "URL HTTP de votre commande": "HTTP-URL Ihrer Bestellung",
+        "Zone": "Bereich"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Protokolle",
