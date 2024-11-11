@@ -306,13 +306,16 @@ class frigate extends eqLogic
   // Fonction exécutée automatiquement avant la mise à jour de l'équipement
   public function preUpdate() {}
 
-  // Fonction exécutée automatiquement apr��s la mise à jour de l'équipement
+  // Fonction exécutée automatiquement après la mise à jour de l'équipement
   public function postUpdate() {}
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
   {
     $url = config::byKey('URL', 'frigate');
+    // on nettoie l'url si elle contient http:// ou https://
+    $url = preg_replace('#^https?://#', '', $url);
+    config::save('URL', '', 'frigate');
     $port = config::byKey('port', 'frigate');
 
 
