@@ -315,7 +315,7 @@ class frigate extends eqLogic
     $url = config::byKey('URL', 'frigate');
     // on nettoie l'url si elle contient http:// ou https://
     $url = preg_replace('#^https?://#', '', $url);
-    config::save('URL', '', 'frigate');
+    config::save('URL', $url, 'frigate');
     $port = config::byKey('port', 'frigate');
 
 
