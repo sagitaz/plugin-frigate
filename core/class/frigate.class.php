@@ -1181,9 +1181,9 @@ class frigate extends eqLogic
       "image" => !empty($img) ? $img : "",
       "thumbnail" => !empty($img) ? $img : "",
       "snapshot" => isset($snapshot['url']) ? $snapshot['url'] : "",
-      "hasSnapshot" => isset($snapshot['has']) ? $snapshot['has'] : "",
+      "hasSnapshot" => isset($snapshot['has']) ? $snapshot['has'] : 0,
       "clip" => isset($clip['url']) ? $clip['url'] : "",
-      "hasClip" => isset($clip['has']) ? $clip['has'] : "",
+      "hasClip" => isset($clip['has']) ? $clip['has'] : 0,
       "startTime" => isset($event['start_time']) && is_numeric($event['start_time']) && ceil($event['start_time']) > 0 ? ceil($event['start_time']) : (isset($event['start_time']) ? $event['start_time'] : ""),
       "endTime" => is_numeric($endTime) ? $endTime : "",
       "topScore" => is_numeric($newTopScore) ? $newTopScore : "",
@@ -2485,7 +2485,7 @@ class frigate extends eqLogic
       $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
-      $file = $file . '?timestamp=1&bbox=1';
+     // $file = $file . '?timestamp=1&bbox=1';
       $lien = urldecode($file);
       $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
     } elseif ($mode == 4) {

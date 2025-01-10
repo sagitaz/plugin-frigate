@@ -144,8 +144,8 @@ class frigate_events
             AND startTime < (UNIX_TIMESTAMP(NOW()) - :seconds);';
 
 		$values = array(
-				'seconds' => $seconds,
-			);
+			'seconds' => $seconds,
+		);
 
 		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
@@ -250,7 +250,8 @@ class frigate_events
 
 	public function setHasClip($hasClip)
 	{
-		$this->hasClip = $hasClip;
+		// Force la valeur à 0 si différent de 1
+		$this->hasClip = ($hasClip === 1 || $hasClip === '1') ? 1 : 0;
 	}
 	public function getClip()
 	{
@@ -268,7 +269,8 @@ class frigate_events
 
 	public function setHasSnapshot($hasSnapshot)
 	{
-		$this->hasSnapshot = $hasSnapshot;
+		// Force la valeur à 0 si différent de 1
+		$this->hasSnapshot = ($hasSnapshot === 1 || $hasSnapshot === '1') ? 1 : 0;
 	}
 	public function getSnapshot()
 	{
@@ -374,9 +376,8 @@ class frigate_events
 	}
 
 	public function setIsFavorite($isFavorite)
-	{
-		$this->isFavorite = $isFavorite;
+	{		
+		// Force la valeur à 0 si différent de 1
+		$this->isFavorite = ($isFavorite === 1 || $isFavorite === '1') ? 1 : 0;
 	}
-	
-	
 }
