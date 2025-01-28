@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 10/01/2024 Beta 1.1.6
+- Correction erreur cronDaily mySQL
+
 # 11/11/2024 Stable 1.1.5
 - Nettoie l'URL
 
