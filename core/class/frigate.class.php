@@ -2729,6 +2729,9 @@ class frigate extends eqLogic
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
           log::add(__CLASS__, 'info', ' => Traitement mqtt manual event <=');
+          log::add("frigate-zones", 'debug', 'Zone entrée : ' . $value['before']['zones'][0]);
+          log::add("frigate-zones", 'debug', 'Zone sortie : ' . $value['after']['zones'][0]);
+
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
