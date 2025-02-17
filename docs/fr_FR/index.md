@@ -328,3 +328,9 @@ N'oubliez pas d'activer la page panel dans la configuration génèrale, puis pou
 # <u>Support</u>
 - Community Jeedom
 - Discord JeeMate
+
+
+# <u>Remerciemment</u>
+Le plugin et le support sont gratuits, vous souhaitez néanmoins m'offrir un café ou des couches pour bébé, je vous remercie par avance.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C1C61AKVV7)
