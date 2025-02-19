@@ -2949,6 +2949,12 @@ class frigate extends eqLogic
     //log::add(__CLASS__, 'info', "getFrigateConfiguration:: save config file");
     //$file = file_put_contents(dirname(__FILE__, 3) . '/data/config.yaml', $curlResponse);
 
+    $cResponse = json_decode($curlResponse);
+    if ($cResponse != null) {
+      // 0.15
+      $curlResponse = $cResponse;
+    }
+    
     $response = array(
       'status' => 'success',
       'message' => $curlResponse
