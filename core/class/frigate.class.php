@@ -2379,6 +2379,8 @@ class frigate extends eqLogic
     }
     if (is_array($actions)) {
       foreach ($actions as $action) {
+        log::add("frigateActions", 'debug', "╔════════════════════════════════════════════════════════════════╗");
+        log::add("frigateActions", 'debug',  "║ Action : " . json_encode($action));
         $cmd = $action['cmd'];
         $cmdLabelName = $action['cmdLabelName'] ?: "all";
         $cmdTypeName = $action['cmdTypeName'] ?: "end";
@@ -2417,19 +2419,17 @@ class frigate extends eqLogic
 
           // Vérifier que les deux zones sont présentes et dans le bon ordre
           $zoneMatch = ($enterZonePos !== false && $quitZonePos !== false && $enterZonePos < $quitZonePos);
-          log::add("frigate-zones", 'debug', "╔════════════════════════════════════════════════════════════════╗");
-          log::add("frigate-zones", 'debug', "║ Zones de l'évènement : " . json_encode($eventZones));
-          log::add("frigate-zones", 'debug', "║ Zone d'entrée' : " . json_encode($enterZone));
-          log::add("frigate-zones", 'debug', "║ Zone de sortie : " . json_encode($quitZone));
+          log::add("frigateActions", 'debug', "║ Zones de l'évènement : " . json_encode($eventZones));
+          log::add("frigateActions", 'debug', "║ Zone d'entrée' : " . json_encode($enterZone));
+          log::add("frigateActions", 'debug', "║ Zone de sortie : " . json_encode($quitZone));
           if ($zoneMatch) {
-            log::add("frigate-zones", 'debug', "║ Correspondance trouvé, déclenchement des actions.");
+            log::add("frigateActions", 'debug', "║ Correspondance trouvé, déclenchement des actions.");
           } else {
 
-            log::add("frigate-zones", 'debug', "║ Les zones ne correspondent pas !");
+            log::add("frigateActions", 'debug', "║ Les zones ne correspondent pas !");
           }
-          log::add("frigate-zones", 'debug',  "║ Types de l'event : " . json_encode($type) );
-          log::add("frigate-zones", 'debug',  "║ Types de cmd event : " . json_encode($cmdTypeName));
-          log::add("frigate-zones", 'debug', "╚════════════════════════════════════════════════════════════════╝");
+          log::add("frigateActions", 'debug',  "║ Types de l'event : " . json_encode($type));
+          log::add("frigateActions", 'debug',  "║ Types de cmd event : " . json_encode($cmdTypeName));
         }
 
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
@@ -2442,16 +2442,16 @@ class frigate extends eqLogic
         $actionForced = $action['options']['actionForced'] ?? false;
 
         if (!$enable) {
-          log::add(__CLASS__, 'debug', "║ Commande(s) désactivée(s)");
+          log::add("frigateActions", 'debug', "║ Commande(s) désactivée(s)");
           continue;
         }
 
         if (!$conditionIsActived) {
-          log::add(__CLASS__, 'debug', "║ Commande(s) exécutée(s)");
+          log::add("frigateActions", 'debug', "║ Commande(s) exécutée(s)");
         } elseif ($conditionIsActived && $actionForced) {
-          log::add(__CLASS__, 'debug', "║ Commande(s) exécutée(s) car la condition est ignorée");
+          log::add("frigateActions", 'debug', "║ Commande(s) exécutée(s) car la condition est ignorée");
         } else {
-          log::add(__CLASS__, 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
+          log::add("frigateActions", 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
           continue;
         }
 
@@ -2463,12 +2463,12 @@ class frigate extends eqLogic
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
         if ($event->getStartTime() <= time() - 10800) {
-          log::add(__CLASS__, 'debug', "║ ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
+          log::add("frigateActions", 'debug', "║ ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
           continue;
         }
 
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
-          log::add(__CLASS__, 'debug', "║ ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
+          log::add("frigateActions", 'debug', "║ ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
           continue;
         }
 
@@ -2476,18 +2476,19 @@ class frigate extends eqLogic
         $optionsJson = json_encode($action['options']);
         if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
           if ($hasClip == 1) {
-            log::add(__CLASS__, 'debug', "║ ACTION CLIP : " . $optionsJson);
+            log::add("frigateActions", 'debug', "║ ACTION CLIP : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           }
         } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
           if ($hasSnapshot == 1) {
-            log::add(__CLASS__, 'debug', "║ ACTION SNAPSHOT : " . $optionsJson);
+            log::add("frigateActions", 'debug', "║ ACTION SNAPSHOT : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           }
         } else {
           log::add(__CLASS__, 'debug', "║ ACTION : " . $optionsJson);
           scenarioExpression::createAndExec('action', $cmd, $options);
         }
+        log::add("frigateActions", 'debug', "╚════════════════════════════════════════════════════════════════╝");
       }
     }
   }
@@ -2772,8 +2773,8 @@ class frigate extends eqLogic
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
           log::add(__CLASS__, 'info', ' => Traitement mqtt manual event <=');
-          //  log::add("frigate-zones", 'debug', 'Zone entrée : ' . $value['before']['zones'][0]);
-          //  log::add("frigate-zones", 'debug', 'Zone sortie : ' . $value['after']['zones'][0]);
+          //  log::add("frigateActions", 'debug', 'Zone entrée : ' . $value['before']['zones'][0]);
+          //  log::add("frigateActions", 'debug', 'Zone sortie : ' . $value['after']['zones'][0]);
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
