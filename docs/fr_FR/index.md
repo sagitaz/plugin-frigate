@@ -171,9 +171,14 @@ Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 
-- <u>ZONE</u> :
-Dans la case **zone**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
+- <u>ZONES</u> :
+
+Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
 Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
+
+La case **zone de sortie** permet de gérer le sens de la détection, cela ne fonctionne qu'avec une zone d'entrée définie, si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
+
+
 
 
 ### Exemple de notifications :
