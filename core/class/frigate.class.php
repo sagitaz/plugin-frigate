@@ -1001,7 +1001,7 @@ class frigate extends eqLogic
     foreach ($filteredRecoveryEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
 
-      log::add(__CLASS__, 'debug', "╔════════════════════════:fg-success:START EVENT:/fg:═══════════════════");
+      log::add(__CLASS__, 'debug', "╔════════════════════════:fg-success:START EVENT:/fg: ═══════════════════");
 
       $infos = self::getEventinfos($mqtt, $event, false, $type);
 
@@ -1102,7 +1102,7 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'debug', "║ Pas de mise à jour pour event ID: " . $event['id']);
         }
       }
-      log::add(__CLASS__, 'debug', "╚════════════════════════END EVENT═══════════════════");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ END EVENT ═══════════════════");
     }
   }
 
@@ -1387,6 +1387,7 @@ class frigate extends eqLogic
   {
     $maxSize = config::byKey('datas_weight', 'frigate');
     $size = self::getFolderSize();
+    log::add(__CLASS__, 'debug', "╔════════════════════════:fg-success:START CLEAN:/fg: ═══════════════════");
     log::add(__CLASS__, 'debug', "║ Taille du dossier : " . $size);
     log::add(__CLASS__, 'debug', "║ Taille maximale du dossier : " . $maxSize);
 
@@ -1400,6 +1401,7 @@ class frigate extends eqLogic
     if ($size <= $maxSize) {
       log::add(__CLASS__, 'debug', "║ Le dossier n'est pas plein");
     }
+    log::add(__CLASS__, 'debug', "╚════════════════════════ END CLEAN ═══════════════════");
   }
 
 
@@ -2135,9 +2137,7 @@ class frigate extends eqLogic
       }
       // Vérifier si la liste d'actions est vide
       $cameraActionsExist = !empty($cameraAction);
-      log::add(__CLASS__, 'debug', "║ EVENT :: ADD.");
       self::eventAdd($event, $eqCamera->getId());
-      log::add(__CLASS__, 'debug', "║ EVENT :: END. = "  . json_encode($event));
     }
 
     $eqCamera->getId();
@@ -2788,7 +2788,7 @@ class frigate extends eqLogic
         case 'reviews':
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
-          log::add(__CLASS__, 'info', ' => Traitement mqtt manual event <=');
+          log::add("frigateMQTT", 'info', ' => Traitement mqtt manual event <=');
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
