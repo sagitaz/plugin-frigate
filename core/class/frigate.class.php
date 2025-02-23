@@ -2383,16 +2383,30 @@ class frigate extends eqLogic
     }
     if (is_array($actions)) {
       log::add("frigateActions", 'debug', "╔═════════════════════════════ :b:START " . $type . ":/b: ═══════════════════════════════════╗");
-      log::add("frigateActions", 'debug',  "║ hasSnapshot : " . $hasSnapshot);
-      log::add("frigateActions", 'debug',  "║ hasClip : " . $hasClip);
-      log::add("frigateActions", 'debug',  "║ label : " . $label);
+      log::add("frigateActions", 'debug',  "║ Caméra : " . $eqLogic->getHumanName());
+      log::add("frigateActions", 'debug',  "║ HasSnapshot : " . $hasSnapshot);
+      log::add("frigateActions", 'debug',  "║ HasClip : " . $hasClip);
+      log::add("frigateActions", 'debug',  "║ Label : " . $label);
       foreach ($actions as $action) {
         log::add("frigateActions", 'debug', "╠════════════════════════════════════");
 
-        // vérifier en premier si la commande est activée
+        // Vérifier la condition d'éxècution
+        $options = $action['options'];
+        $actionForced = $action['options']['actionForced'] ?? false;
+
+        if (!$conditionIsActived) {
+          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution.");
+        } elseif ($conditionIsActived && $actionForced) {
+          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
+        } else {
+          log::add("frigateActions", 'info', "║ Action non exécutées car " . $conditionIf .  " est vrai.");
+          continue;
+        }
+
+        // vérifier si la commande est activée
         $enable = $action['options']['enable'] ?? false;
         if (!$enable) {
-          log::add("frigateActions", 'debug', "║ Commande(s) désactivée(s)");
+          log::add("frigateActions", 'debug', "║ Commande désactivée");
           continue;
         }
 
@@ -2434,27 +2448,14 @@ class frigate extends eqLogic
           log::add("frigateActions", 'debug', "║ Zone d'entrée' : " . json_encode($enterZone));
           log::add("frigateActions", 'debug', "║ Zone de sortie : " . json_encode($quitZone));
           if ($zoneMatch) {
-            log::add("frigateActions", 'debug', "║ Correspondance trouvé, déclenchement des actions.");
+            log::add("frigateActions", 'debug', "║ Correspondance trouvé, déclenchement de l'action.");
           } else {
-
             log::add("frigateActions", 'debug', "║ Les zones ne correspondent pas !");
           }
         }
 
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
           log::add("frigateActions", 'debug', "║ Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
-          continue;
-        }
-
-        $options = $action['options'];
-        $actionForced = $action['options']['actionForced'] ?? false;
-
-        if (!$conditionIsActived) {
-          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution.");
-        } elseif ($conditionIsActived && $actionForced) {
-          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
-        } else {
-          log::add("frigateActions", 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
           continue;
         }
 
@@ -2466,7 +2467,7 @@ class frigate extends eqLogic
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
         if ($event->getStartTime() <= time() - 10800) {
-          log::add("frigateActions", 'debug', "║ ACTION: Événement trop ancien (plus de 3 heures), il sera ignoré.");
+          log::add("frigateActions", 'debug', "║ Événement trop ancien (plus de 3 heures), il sera ignoré.");
           continue;
         }
 
@@ -2610,7 +2611,7 @@ class frigate extends eqLogic
     $urlClip = "";
     // mise a jour des commandes
     log::add(__CLASS__, 'debug', "║ Mise à jour de la commande.");
-    $eqLogic->getCmd(null, 'info_url_capture')->event("/var/www/html" . $url);
+    $eqLogic->getCmd(null, 'info_url_capture')->event($url);
     $eqLogic->getCmd(null, 'info_label')->event("capture");
     $eqLogic->getCmd(null, 'info_score')->event(0);
     $eqLogic->getCmd(null, 'info_topscore')->event(0);
