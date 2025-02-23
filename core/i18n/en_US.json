@@ -70,7 +70,8 @@
         "Tester": "Test",
         "Type": "Kind",
         "URL HTTP de votre commande": "HTTP URL of your command",
-        "Zone": "Zone"
+        "Zone entrée": "Input zone",
+        "Zone sortie": "Output zone"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",
