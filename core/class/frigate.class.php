@@ -1484,6 +1484,7 @@ class frigate extends eqLogic
   }
   public static function deleteEvent($id, $all = false)
   {
+    log::add(__CLASS__, 'debug', "╔════════════════════════:fg-success: SUPPRESSION EVENEMENT :/fg:═══════════════════");
     $frigate = frigate_events::byEventId($id);
     if (!empty($frigate) && isset($frigate[0])) {
       $isFavorite = $frigate[0]->getIsFavorite() ?? 0;
@@ -1502,8 +1503,10 @@ class frigate extends eqLogic
       } else {
         self::cleanDbEvent($id);
       }
+      log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
       return "OK";
     } else {
+      log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
       return "Error 02";
     }
   }
