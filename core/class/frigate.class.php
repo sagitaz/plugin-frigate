@@ -2457,7 +2457,7 @@ class frigate extends eqLogic
           log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
         } else {
           log::add("frigateActions", 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-          log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+         // log::add("frigateActions", 'debug', "╠════════════════════════════════════");
           continue;
         }
 
@@ -2771,17 +2771,17 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      log::add(__CLASS__, 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
-      log::add(__CLASS__, 'debug', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
+      log::add("frigateMQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
+      log::add("frigateMQTT", 'debug', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
 
       switch ($key) {
         case 'events':
           if (version_compare($version, "0.14", "<")) {
-            log::add(__CLASS__, 'info', ' => Traitement mqtt events <0.14');
+            log::add("frigateMQTT", 'info', ' => Traitement mqtt events <0.14');
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           } else {
-            log::add(__CLASS__, 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews.');
+            log::add("frigateMQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews.');
           }
           break;
 
@@ -2789,20 +2789,18 @@ class frigate extends eqLogic
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
           log::add(__CLASS__, 'info', ' => Traitement mqtt manual event <=');
-          //  log::add("frigateActions", 'debug', 'Zone entrée : ' . $value['before']['zones'][0]);
-          //  log::add("frigateActions", 'debug', 'Zone sortie : ' . $value['after']['zones'][0]);
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
 
         case 'stats':
-          log::add(__CLASS__, 'info', ' => Traitement mqtt stats');
+          log::add("frigateMQTT", 'info', ' => Traitement mqtt stats');
           self::majStatsCmds($value, true);
           break;
 
         case 'available':
-          log::add(__CLASS__, 'info', ' => Traitement mqtt available');
+          log::add("frigateMQTT", 'info', ' => Traitement mqtt available');
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
@@ -2814,7 +2812,7 @@ class frigate extends eqLogic
             continue 2;
           }
 
-          log::add(__CLASS__, 'info', ' => Traitement mqtt camera ' . $key);
+          log::add("frigateMQTT", 'info', ' => Traitement mqtt camera ' . $key);
           self::processCameraData($eqCamera, $key, $value);
           break;
       }
@@ -2924,7 +2922,7 @@ class frigate extends eqLogic
         $infoCmd->event($stateValue);
         $infoCmd->save();
         $eqCamera->refreshWidget();
-        log::add(__CLASS__, 'debug', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
+        log::add("frigateMQTT", 'debug', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
       }
     }
   }
