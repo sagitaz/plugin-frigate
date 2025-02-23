@@ -1639,7 +1639,7 @@ class frigate extends eqLogic
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
       // commandes identique pour toutes les caméras
-      log::add(__CLASS__, 'debug', "║ Création des commandes génèrales pour : " . json_encode($cameraName));
+      log::add(__CLASS__, 'debug', "║ Création des commandes générales pour : " . json_encode($cameraName));
       self::createCamerasCmds($frigate->getId());
       // commandes MQTT s'il est configuré
       if ($mqttCmds) {
@@ -1682,12 +1682,12 @@ class frigate extends eqLogic
         self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
-    message::add('frigate', 'Frigate : ' . $n . ' cameras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
+    message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
     // commandes de statisque
     self::getStats();
     // commandes des events
     self::getEvents(false, array(), 'end', null, 1);
-    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminé.');
+    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminée.');
 
     log::add(__CLASS__, 'debug', "╚════════════════════════END CREATION DES CAMERAS═══════════════════");
     return $n;
