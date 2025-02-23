@@ -110,7 +110,7 @@ if (!isConnect('admin')) {
     '6h' => '- 6h',
     '12h' => '- 12h',
     '1j' => '- 1 jour',
-    '2j' => '- 2 jour',
+    '2j' => '- 2 jours',
     '1s' => '- 1 semaine'
   ];
 
