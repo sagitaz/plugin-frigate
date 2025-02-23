@@ -70,7 +70,8 @@
         "Tester": "Prova",
         "Type": "Tipo",
         "URL HTTP de votre commande": "URL HTTP dell'ordine",
-        "Zone": "Zona"
+        "Zone entrée": "Zona di ingresso",
+        "Zone sortie": "Zona di uscita"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",

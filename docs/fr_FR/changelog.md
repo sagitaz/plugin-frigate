@@ -4,7 +4,16 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 10/01/2024 Beta 1.1.6
+# 23/02/2025 Beta 1.1.8
+- Ajout de logs frigateActions et frigateMQTT
+- Corrections variable snapshot sur type update et new
+- Correction URL image (voir doc si besoin de le modifier)
+
+# 19/02/202 Beta 1.1.7
+- Gestion zone de sortie
+- Correction affichage fichier de configuration frigate > 0.15
+
+# 10/01/2025 Beta 1.1.6
 - Correction erreur cronDaily mySQL
 
 # 11/11/2024 Stable 1.1.5
