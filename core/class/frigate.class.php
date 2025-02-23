@@ -2882,8 +2882,8 @@ class frigate extends eqLogic
 
   private static function handleObject($eqCamera, $key, $innerValue)
   {
-    if ($innerValue !== 1) {
-      $innerValue = 0;
+    if ($innerValue !== 0) {
+      $innerValue = 1;
     }
     if (isset($innerValue) && !is_array($innerValue)) {
       $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
@@ -2894,10 +2894,10 @@ class frigate extends eqLogic
   private static function handleAllObject($eqCamera, $key, $innerValue)
   {
     if (isset($innerValue["active"])) {
-      $value = $innerValue["active"];
+      $value = ($innerValue["active"] !== 0) ? 1 : 0;
       log::add("frigateDetect", 'info', 'Valeur if : ' . $value);
     } elseif (isset($innerValue) && !is_array($innerValue)) {
-      $value = $innerValue;
+      $value = ($innerValue !== 0) ? 1 : 0;
       log::add("frigateDetect", 'info', 'Valeur elseif : ' . $value);
     } else {
       $value = 0;
