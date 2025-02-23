@@ -2388,6 +2388,14 @@ class frigate extends eqLogic
       log::add("frigateActions", 'debug',  "║ label : " . $label);
       foreach ($actions as $action) {
         log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+
+        // vérifier en premier si la commande est activée
+        $enable = $action['options']['enable'] ?? false;
+        if (!$enable) {
+          log::add("frigateActions", 'debug', "║ Commande(s) désactivée(s)");
+          continue;
+        }
+
         log::add("frigateActions", 'debug',  "║ Action : " . json_encode($action));
         $cmd = $action['cmd'];
         $cmdLabelName = $action['cmdLabelName'] ?: "all";
@@ -2396,11 +2404,6 @@ class frigate extends eqLogic
         $cmdZoneEndName = $action['cmdZoneEndName'] ?: "";
 
         // Convertir les chaînes en tableaux
-        /*  $cmdLabels = array_map('trim', explode(',', $cmdLabelName));
-        $cmdZones = array_map('trim', explode(',', $cmdZoneName));
-        $cmdZonesEnd = array_map('trim', explode(',', $cmdZoneEndName));
-        $eventZones = array_map('trim', explode(',', $zones)); */
-
         $cmdLabels = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdLabelName));
         $cmdZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneName));
         $cmdZonesEnd = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneEndName));
@@ -2439,20 +2442,12 @@ class frigate extends eqLogic
         }
 
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
-          log::add(__CLASS__, 'debug', "║ ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
-        //   log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+          log::add("frigateActions", 'debug', "║ Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
           continue;
         }
 
         $options = $action['options'];
-        $enable = $action['options']['enable'] ?? false;
         $actionForced = $action['options']['actionForced'] ?? false;
-
-        if (!$enable) {
-          log::add("frigateActions", 'debug', "║ Commande(s) désactivée(s)");
-        //   log::add("frigateActions", 'debug', "╠════════════════════════════════════");
-          continue;
-        }
 
         if (!$conditionIsActived) {
           log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution.");
@@ -2460,7 +2455,6 @@ class frigate extends eqLogic
           log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
         } else {
           log::add("frigateActions", 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
-         // log::add("frigateActions", 'debug', "╠════════════════════════════════════");
           continue;
         }
 
@@ -2476,18 +2470,11 @@ class frigate extends eqLogic
           continue;
         }
 
-     /*   if (!($labelMatch && $typeMatch && $zoneMatch)) {
-          log::add("frigateActions", 'debug', "║ ACTION: Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
-          log::add("frigateActions", 'debug', "╠════════════════════════════════════");
-          continue;
-        } */
-
         // Exécuter l'action selon le contenu des options
         $optionsJson = json_encode($action['options']);
         if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
           if ($hasClip == 1) {
             log::add("frigateActions", 'debug', "║ ACTION CLIP : " . $optionsJson);
-          //   log::add("frigateActions", 'debug', "╠════════════════════════════════════");
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
             log::add("frigateActions", 'debug', "║ Le clip n'est pas disponible, actions non éxècutée.");
@@ -2496,7 +2483,6 @@ class frigate extends eqLogic
         } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
           if ($hasSnapshot == 1) {
             log::add("frigateActions", 'debug', "║ ACTION SNAPSHOT : " . $optionsJson);
-          //   log::add("frigateActions", 'debug', "╠════════════════════════════════════");
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
             log::add("frigateActions", 'debug', "║ Le snapshot n'est pas disponible, actions non éxècutée.");
@@ -2504,7 +2490,6 @@ class frigate extends eqLogic
           }
         } else {
           log::add("frigateActions", 'debug', "║ ACTION OTHER: " . $optionsJson);
-         // log::add("frigateActions", 'debug', "╠════════════════════════════════════");
           scenarioExpression::createAndExec('action', $cmd, $options);
         }
       }
