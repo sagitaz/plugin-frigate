@@ -2452,9 +2452,9 @@ class frigate extends eqLogic
         }
 
         if (!$conditionIsActived) {
-          log::add("frigateActions", 'debug', "║ Commande(s) exécutée(s)");
+          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution.");
         } elseif ($conditionIsActived && $actionForced) {
-          log::add("frigateActions", 'debug', "║ Commande(s) exécutée(s) car la condition est ignorée");
+          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
         } else {
           log::add("frigateActions", 'info', "║ " . $eqLogic->getHumanName() . ' : actions non exécutées car ' . $conditionIf . ' est vrai.');
           log::add("frigateActions", 'debug', "╠════════════════════════════════════");
@@ -2488,6 +2488,7 @@ class frigate extends eqLogic
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
             log::add("frigateActions", 'debug', "║ Le clip n'est pas disponible, actions non éxècutée.");
+            log::add("frigateActions", 'debug', "╠════════════════════════════════════");
           }
         } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
           if ($hasSnapshot == 1) {
@@ -2496,6 +2497,7 @@ class frigate extends eqLogic
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
             log::add("frigateActions", 'debug', "║ Le snapshot n'est pas disponible, actions non éxècutée.");
+            log::add("frigateActions", 'debug', "╠════════════════════════════════════");
           }
         } else {
           log::add("frigateActions", 'debug', "║ ACTION OTHER: " . $optionsJson);
@@ -2503,7 +2505,6 @@ class frigate extends eqLogic
           scenarioExpression::createAndExec('action', $cmd, $options);
         }
       }
-      log::add("frigateActions", 'debug', "╠════════════════════════════════════");
       log::add("frigateActions", 'debug', "╚═════════════════════════════ :b:END   " . $type . ":/b: ═══════════════════════════════════╝");
     }
   }
