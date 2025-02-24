@@ -2883,19 +2883,18 @@ class frigate extends eqLogic
 
   private static function handleObject($eqCamera, $key, $innerValue)
   {
-    if ($innerValue !== 0) {
-      $innerValue = 1;
-    }
-    if (isset($innerValue) && !is_array($innerValue)) {
+    // Ne prendre en considération que les détections d'object en mouvement
+    if (isset($innerValue["active"])) {
+      $value = ($innerValue["active"] !== 0) ? 1 : 0;
       $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
-      $infoCmd->event($innerValue);
+      $infoCmd->event($value);
       $infoCmd->save();
-      log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($innerValue));
+      log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
     }
   }
   private static function handleAllObject($eqCamera, $key, $innerValue)
   {
-    $value = 0;
+    // Ne prendre en considération que les détections d'object en mouvement
     if (isset($innerValue["active"])) {
       $value = ($innerValue["active"] !== 0) ? 1 : 0;
       $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
