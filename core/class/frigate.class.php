@@ -1639,7 +1639,7 @@ class frigate extends eqLogic
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
       // commandes identique pour toutes les caméras
-      log::add(__CLASS__, 'debug', "║ Création des commandes génèrales pour : " . json_encode($cameraName));
+      log::add(__CLASS__, 'debug', "║ Création des commandes générales pour : " . json_encode($cameraName));
       self::createCamerasCmds($frigate->getId());
       // commandes MQTT s'il est configuré
       if ($mqttCmds) {
@@ -1682,12 +1682,12 @@ class frigate extends eqLogic
         self::createAudioCmds($frigate->getId(), $valueAudio);
       }
     }
-    message::add('frigate', 'Frigate : ' . $n . ' cameras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
+    message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
     // commandes de statisque
     self::getStats();
     // commandes des events
     self::getEvents(false, array(), 'end', null, 1);
-    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminé.');
+    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminée.');
 
     log::add(__CLASS__, 'debug', "╚════════════════════════END CREATION DES CAMERAS═══════════════════");
     return $n;
@@ -2820,6 +2820,7 @@ class frigate extends eqLogic
       }
 
       if (in_array($innerKey, $objects)) {
+        log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $innerKey. ', Etat : ' . json_encode($innerValue));
         // mise à jour pour la caméra
         self::handleObject($eqCamera, $innerKey, $innerValue);
         // mise à jour pour l'équipement event
@@ -2849,6 +2850,7 @@ class frigate extends eqLogic
           break;
 
         case 'all':
+          log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
           // mise à jour pour la caméra
           self::handleAllObject($eqCamera, $innerKey, $innerValue);
           // mise à jour pour l'équipement event
@@ -2862,7 +2864,7 @@ class frigate extends eqLogic
   {
     if (isset($innerValue['state']) && $innerValue['state']) {
       $state = ($innerValue['state'] == 'ON') ? "1" : "0";
-      // log::add(__CLASS__, 'info', $key . ' => Valeur motion state : ' . $state);
+       log::add(__CLASS__, 'info', $key . ' => Valeur motion state : ' . $state);
       $infoCmd = self::createCmd($eqCamera->getId(), 'motion Etat', 'binary', '', 'info_motion', 'JEEMATE_CAMERA_DETECT_STATE', 0);
       $infoCmd->event($state);
       $infoCmd->save();
@@ -2871,7 +2873,7 @@ class frigate extends eqLogic
 
     if (isset($innerValue) && !is_array($innerValue)) {
       $state = ($innerValue == 'ON') ? "1" : "0";
-      //   log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $state);
+         log::add(__CLASS__, 'info', $key . ' => Valeur motion : ' . $state);
       $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 1);
       $infoCmd->event($state);
       $infoCmd->save();
@@ -2881,22 +2883,30 @@ class frigate extends eqLogic
 
   private static function handleObject($eqCamera, $key, $innerValue)
   {
-    if ($innerValue !== 1) {
-      $innerValue = 0;
+    if ($innerValue !== 0) {
+      $innerValue = 1;
     }
     if (isset($innerValue) && !is_array($innerValue)) {
       $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
       $infoCmd->event($innerValue);
       $infoCmd->save();
+      log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($innerValue));
     }
   }
   private static function handleAllObject($eqCamera, $key, $innerValue)
   {
-    if (isset($innerValue) && !is_array($innerValue)) {
+    $value = 0;
+    if (isset($innerValue["active"])) {
+      $value = ($innerValue["active"] !== 0) ? 1 : 0;
+    } elseif (isset($innerValue) && !is_array($innerValue)) {
+      $value = ($innerValue !== 0) ? 1 : 0;
+    } 
+
       $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
-      $infoCmd->event($innerValue);
+      $infoCmd->event($value);
       $infoCmd->save();
-    }
+    log::add("frigateDetect", 'debug', $eqCamera->getHumanName() . ', Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($innerValue));
+    
   }
   private static function updateCameraState($eqCamera, $type, $state, $jeemateState)
   {
