@@ -52,7 +52,6 @@ if (!isConnect('admin')) {
     } else {
       // Liste des caméras
       echo '<select class="eventAttr col-sm-8" data-l1key="camera">';
-      echo '<div class="eqLogicThumbnailContainer">';
       foreach ($eqLogics as $eqLogic) {
         $cameraOption = $eqLogic->getName();
         $cameraValue = $eqLogic->getConfiguration('name');
@@ -60,7 +59,6 @@ if (!isConnect('admin')) {
           echo '<option value="' . $cameraValue . '">' . $cameraOption . '</option>';
         }
       }
-      echo '</div>';
       echo '</select>';
     }
     ?>
