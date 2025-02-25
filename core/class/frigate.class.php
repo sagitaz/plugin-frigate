@@ -2821,12 +2821,12 @@ class frigate extends eqLogic
 
       if (in_array($innerKey, $objects)) {
         log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ═══════════════════════════════════╗");
-        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $$eqCamera->getHumanName() . ":/b:");          
+        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");          
         log::add("frigateDetect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
         // mise à jour pour la caméra
         self::handleObject($eqCamera, $innerKey, $innerValue);
         // mise à jour pour l'équipement event
-        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $$eqCamera->getHumanName() . ":/b:");          
+        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");          
         self::handleObject($eqEvent, $innerKey, $innerValue);
         log::add("frigateDetect", 'info', "╚════════════════════════════════════════════════════════════════════════════════════╝");
         continue;
@@ -2855,12 +2855,12 @@ class frigate extends eqLogic
 
         case 'all':
           log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-success:START ALL DETECT :/fg: ═══════════════════════════════════╗");
-          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $$eqCamera->getHumanName() . ":/b:");          
+          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");          
           log::add("frigateDetect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
           // mise à jour pour la caméra
           self::handleAllObject($eqCamera, $innerKey, $innerValue);
           // mise à jour pour l'équipement event
-          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $$eqCamera->getHumanName() . ":/b:");          
+          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");          
           self::handleAllObject($eqEvent, $innerKey, $innerValue);
           log::add("frigateDetect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
           break;
