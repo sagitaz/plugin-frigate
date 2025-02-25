@@ -2854,7 +2854,7 @@ class frigate extends eqLogic
           break;
 
         case 'all':
-          log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT :/fg: ═══════════════════════════════════╗");
+          log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
           log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");          
           log::add("frigateDetect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
           // mise à jour pour la caméra
