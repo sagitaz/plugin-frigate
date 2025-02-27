@@ -119,7 +119,7 @@ function addCmdToTable(_cmd) {
 
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
-    } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
+    } else if (type === 'cameras' || type === 'gpu' || type === 'cpu' || type === 'detectors' || type === 'Recordings') {
         printTable(_cmd, tr, "table_stats");
     } else if (type === 'info' || type === 'enable' || type === 'link') {
         printTable(_cmd, tr, "table_infos");

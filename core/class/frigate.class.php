@@ -2317,6 +2317,39 @@ class frigate extends eqLogic
       }
     }
 
+    // Mise à jour des usages CPU
+    if (isset($stats['cpu_usages']['frigate.full_system'])) {
+      foreach ($stats['cpu_usages']['frigate.full_system'] as $key => $value) {
+        $cmdName = 'Full system_' . $key;
+        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "cpu_" . $key, "GENERIC_INFO");
+        $cmd->event($value);
+        $cmd->save();
+      }
+    } else {
+      log::add('frigate', 'debug', "La clé 'frigate.full_system' n'existe pas dans cpu_usages.");
+    }
+
+    // Mise a jour storage
+    // Filtrer les clés qui se terminent par "recordings"
+    $recordingsPaths = array_filter($stats['service']['storage'], function ($key) {
+      return preg_match('/recordings$/', $key);
+    }, ARRAY_FILTER_USE_KEY);
+    foreach ($recordingsPaths as $key => $value) {
+      // Liste des valeurs à enregistrer
+      $metrics = ['total', 'used', 'free'];
+
+      foreach ($metrics as $metric) {
+        if (isset($value[$metric])) {
+          $cmdName = 'Recordings_' . ucfirst($metric); // Ex: Recordings_media_frigate_recordings_Total
+          // Créer ou récupérer la commande
+          $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", $cmdName, "GENERIC_INFO");
+          // Enregistrer la valeur correspondante
+          $cmd->event($value[$metric]);
+          $cmd->save();
+        }
+      }
+    }
+
     // Créer ou récupérer la commande version Frigate
     $version = strstr($stats['service']['version'], '-', true);
 
@@ -2913,7 +2946,7 @@ class frigate extends eqLogic
     $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
     $infoCmd->event($value);
     $infoCmd->save();
-    log::add("frigateDetect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($innerValue));
+    log::add("frigateDetect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
     if ($value === 0) {
       $cmds = cmd::byEqLogicId($eqCamera->getId(), "info");
       foreach ($cmds as $cmd) {
