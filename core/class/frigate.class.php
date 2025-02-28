@@ -2415,35 +2415,35 @@ class frigate extends eqLogic
       // Ou afficher un message d'erreur
     }
     if (is_array($actions)) {
-      log::add("frigateActions", 'debug', "╔═════════════════════════════ :b:START " . $type . ":/b: ═══════════════════════════════════╗");
-      log::add("frigateActions", 'debug',  "║ Caméra : " . $eqLogic->getHumanName());
-      log::add("frigateActions", 'debug',  "║ HasSnapshot : " . $hasSnapshot);
-      log::add("frigateActions", 'debug',  "║ HasClip : " . $hasClip);
-      log::add("frigateActions", 'debug',  "║ Label : " . $label);
+      log::add("frigate_Actions", 'debug', "╔═════════════════════════════ :b:START " . $type . ":/b: ═══════════════════════════════════╗");
+      log::add("frigate_Actions", 'debug',  "║ Caméra : " . $eqLogic->getHumanName());
+      log::add("frigate_Actions", 'debug',  "║ HasSnapshot : " . $hasSnapshot);
+      log::add("frigate_Actions", 'debug',  "║ HasClip : " . $hasClip);
+      log::add("frigate_Actions", 'debug',  "║ Label : " . $label);
       foreach ($actions as $action) {
-        log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+        log::add("frigate_Actions", 'debug', "╠════════════════════════════════════");
 
         // Vérifier la condition d'éxècution
         $options = $action['options'];
         $actionForced = $action['options']['actionForced'] ?? false;
 
         if (!$conditionIsActived) {
-          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution.");
+          log::add("frigate_Actions", 'debug', "║ Commande en cour d'éxècution.");
         } elseif ($conditionIsActived && $actionForced) {
-          log::add("frigateActions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
+          log::add("frigate_Actions", 'debug', "║ Commande en cour d'éxècution car la condition est ignorée");
         } else {
-          log::add("frigateActions", 'info', "║ Action non exécutées car " . $conditionIf .  " est vrai.");
+          log::add("frigate_Actions", 'info', "║ Action non exécutées car " . $conditionIf .  " est vrai.");
           continue;
         }
 
         // vérifier si la commande est activée
         $enable = $action['options']['enable'] ?? false;
         if (!$enable) {
-          log::add("frigateActions", 'debug', "║ Commande désactivée");
+          log::add("frigate_Actions", 'debug', "║ Commande désactivée");
           continue;
         }
 
-        log::add("frigateActions", 'debug',  "║ Action : " . json_encode($action));
+        log::add("frigate_Actions", 'debug',  "║ Action : " . json_encode($action));
         $cmd = $action['cmd'];
         $cmdLabelName = $action['cmdLabelName'] ?: "all";
         $cmdTypeName = $action['cmdTypeName'] ?: "end";
@@ -2477,18 +2477,18 @@ class frigate extends eqLogic
 
           // Vérifier que les deux zones sont présentes et dans le bon ordre
           $zoneMatch = ($enterZonePos !== false && $quitZonePos !== false && $enterZonePos < $quitZonePos);
-          log::add("frigateActions", 'debug', "║ Zones de l'évènement : " . json_encode($eventZones));
-          log::add("frigateActions", 'debug', "║ Zone d'entrée' : " . json_encode($enterZone));
-          log::add("frigateActions", 'debug', "║ Zone de sortie : " . json_encode($quitZone));
+          log::add("frigate_Actions", 'debug', "║ Zones de l'évènement : " . json_encode($eventZones));
+          log::add("frigate_Actions", 'debug', "║ Zone d'entrée' : " . json_encode($enterZone));
+          log::add("frigate_Actions", 'debug', "║ Zone de sortie : " . json_encode($quitZone));
           if ($zoneMatch) {
-            log::add("frigateActions", 'debug', "║ Correspondance trouvé, déclenchement de l'action.");
+            log::add("frigate_Actions", 'debug', "║ Correspondance trouvé, déclenchement de l'action.");
           } else {
-            log::add("frigateActions", 'debug', "║ Les zones ne correspondent pas !");
+            log::add("frigate_Actions", 'debug', "║ Les zones ne correspondent pas !");
           }
         }
 
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
-          log::add("frigateActions", 'debug', "║ Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
+          log::add("frigate_Actions", 'debug', "║ Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
           continue;
         }
 
@@ -2500,7 +2500,7 @@ class frigate extends eqLogic
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
         if ($event->getStartTime() <= time() - 10800) {
-          log::add("frigateActions", 'debug', "║ Événement trop ancien (plus de 3 heures), il sera ignoré.");
+          log::add("frigate_Actions", 'debug', "║ Événement trop ancien (plus de 3 heures), il sera ignoré.");
           continue;
         }
 
@@ -2508,26 +2508,26 @@ class frigate extends eqLogic
         $optionsJson = json_encode($action['options']);
         if (strpos($optionsJson, '#clip#') !== false || strpos($optionsJson, '#clip_path#') !== false) {
           if ($hasClip == 1) {
-            log::add("frigateActions", 'debug', "║ ACTION CLIP : " . $optionsJson);
+            log::add("frigate_Actions", 'debug', "║ ACTION CLIP : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
-            log::add("frigateActions", 'debug', "║ Le clip n'est pas disponible, actions non éxècutée.");
-            log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+            log::add("frigate_Actions", 'debug', "║ Le clip n'est pas disponible, actions non éxècutée.");
+            log::add("frigate_Actions", 'debug', "╠════════════════════════════════════");
           }
         } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
           if ($hasSnapshot == 1) {
-            log::add("frigateActions", 'debug', "║ ACTION SNAPSHOT : " . $optionsJson);
+            log::add("frigate_Actions", 'debug', "║ ACTION SNAPSHOT : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
-            log::add("frigateActions", 'debug', "║ Le snapshot n'est pas disponible, actions non éxècutée.");
-            log::add("frigateActions", 'debug', "╠════════════════════════════════════");
+            log::add("frigate_Actions", 'debug', "║ Le snapshot n'est pas disponible, actions non éxècutée.");
+            log::add("frigate_Actions", 'debug', "╠════════════════════════════════════");
           }
         } else {
-          log::add("frigateActions", 'debug', "║ ACTION OTHER: " . $optionsJson);
+          log::add("frigate_Actions", 'debug', "║ ACTION OTHER: " . $optionsJson);
           scenarioExpression::createAndExec('action', $cmd, $options);
         }
       }
-      log::add("frigateActions", 'debug', "╚═════════════════════════════ :b:END   " . $type . ":/b: ═══════════════════════════════════╝");
+      log::add("frigate_Actions", 'debug', "╚═════════════════════════════ :b:END   " . $type . ":/b: ═══════════════════════════════════╝");
     }
   }
 
@@ -2793,36 +2793,36 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      log::add("frigateMQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
-      log::add("frigateMQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
+      log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
+      log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
 
       switch ($key) {
         case 'events':
           if (version_compare($version, "0.14", "<")) {
-            log::add("frigateMQTT", 'info', ' => Traitement mqtt events <0.14');
+            log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           } else {
-            log::add("frigateMQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews.');
+            log::add("frigate_MQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews.');
           }
           break;
 
         case 'reviews':
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
-          log::add("frigateMQTT", 'info', ' => Traitement mqtt manual event <=');
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt manual event <=');
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
 
         case 'stats':
-          log::add("frigateMQTT", 'info', ' => Traitement mqtt stats');
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt stats');
           self::majStatsCmds($value, true);
           break;
 
         case 'available':
-          log::add("frigateMQTT", 'info', ' => Traitement mqtt available');
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt available');
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
@@ -2834,7 +2834,7 @@ class frigate extends eqLogic
             continue 2;
           }
 
-          log::add("frigateMQTT", 'info', ' => Traitement mqtt camera ' . $key);
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt camera ' . $key);
           self::processCameraData($eqCamera, $key, $value);
           break;
       }
@@ -2853,15 +2853,15 @@ class frigate extends eqLogic
       }
 
       if (in_array($innerKey, $objects)) {
-        log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ════════════════════════════════╗");
-        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-        log::add("frigateDetect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
+        log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ════════════════════════════════╗");
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+        log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
         // mise à jour pour la caméra
         self::handleObject($eqCamera, $innerKey, $innerValue);
         // mise à jour pour l'équipement event
-        log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
         self::handleObject($eqEvent, $innerKey, $innerValue);
-        log::add("frigateDetect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
+        log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
 
@@ -2887,15 +2887,15 @@ class frigate extends eqLogic
           break;
 
         case 'all':
-          log::add("frigateDetect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
-          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-          log::add("frigateDetect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
+          log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
+          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+          log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
           // mise à jour pour la caméra
           self::handleAllObject($eqCamera, $innerKey, $innerValue);
           // mise à jour pour l'équipement event
-          log::add("frigateDetect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
+          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
           self::handleAllObject($eqEvent, $innerKey, $innerValue);
-          log::add("frigateDetect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
+          log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
           break;
       }
     }
@@ -2905,7 +2905,7 @@ class frigate extends eqLogic
   {
     if (isset($innerValue['state']) && $innerValue['state']) {
       $state = ($innerValue['state'] == 'ON') ? "1" : "0";
-      log::add("frigateMQTT", 'info', $key . ' => Valeur motion state : ' . $state);
+      log::add("frigate_MQTT", 'info', $key . ' => Valeur motion state : ' . $state);
       $infoCmd = self::createCmd($eqCamera->getId(), 'motion Etat', 'binary', '', 'info_motion', 'JEEMATE_CAMERA_DETECT_STATE', 0);
       $infoCmd->event($state);
       $infoCmd->save();
@@ -2914,7 +2914,7 @@ class frigate extends eqLogic
 
     if (isset($innerValue) && !is_array($innerValue)) {
       $state = ($innerValue == 'ON') ? "1" : "0";
-      log::add("frigateMQTT", 'info', $key . ' => Valeur motion : ' . $state);
+      log::add("frigate_MQTT", 'info', $key . ' => Valeur motion : ' . $state);
       $infoCmd = self::createCmd($eqCamera->getId(), 'détection en cours', 'binary', '', 'info_detectNow', 'JEEMATE_CAMERA_SNAPSHOT_STATE', 1);
       $infoCmd->event($state);
       $infoCmd->save();
@@ -2933,7 +2933,7 @@ class frigate extends eqLogic
     $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
     $infoCmd->event($value);
     $infoCmd->save();
-    log::add("frigateDetect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
+    log::add("frigate_Detect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
   }
   private static function handleAllObject($eqCamera, $key, $innerValue)
   {
@@ -2946,14 +2946,14 @@ class frigate extends eqLogic
     $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
     $infoCmd->event($value);
     $infoCmd->save();
-    log::add("frigateDetect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
+    log::add("frigate_Detect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
     if ($value === 0) {
       $cmds = cmd::byEqLogicId($eqCamera->getId(), "info");
       foreach ($cmds as $cmd) {
         if ((substr($cmd->getLogicalId(), 0, 12) == 'info_detect_') && ($cmd->getLogicalId() !== "info_detect_all") && ($cmd->execCmd() == 1)) {
           $cmd->event($value);
           $cmd->save();
-          log::add("frigateDetect", 'info', '║ cmd : ' . $cmd->getName() . ', Valeur forcée : ' . json_encode($value));
+          log::add("frigate_Detect", 'info', '║ cmd : ' . $cmd->getName() . ', Valeur forcée : ' . json_encode($value));
         }
       }
     }
@@ -2971,7 +2971,7 @@ class frigate extends eqLogic
         $infoCmd->event($stateValue);
         $infoCmd->save();
         $eqCamera->refreshWidget();
-        log::add("frigateMQTT", 'info', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
+        log::add("frigate_MQTT", 'info', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
       }
     }
   }
