@@ -1695,8 +1695,9 @@ class frigate extends eqLogic
 
   public static function restartFrigate()
   {
-    log::add(__CLASS__, 'info', ":fg-warning:restartFrigate:/fg:");
+    log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-warning:RESTART FRIGATE:/fg: ═══════════════════");
     self::publish_message('restart', '');
+    log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════════");
   }
   public static function generateEqEvents($configurationArray)
   {
@@ -2540,12 +2541,14 @@ class frigate extends eqLogic
       $urlJeedom = network::getNetworkAccess('internal');
     }
     $urlfrigate = self::getUrlFrigate();
+    $eqLogic = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate");
+    $timestamp = $eqLogic->getConfiguration('timestamp');
     $extra = "";
     if ($type == "preview") {
       $format = "gif";
     } elseif ($type == "snapshot") {
       $format = "jpg";
-      $extra = '?timestamp=1&bbox=1';
+      $extra = '?timestamp=' . $timestamp . '&bbox=1';
     } else {
       $format = "mp4";
     }
@@ -2559,9 +2562,8 @@ class frigate extends eqLogic
       $lien = $file;
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
-      // $file = $file . '?timestamp=1&bbox=1';
       $lien = urldecode($file);
-      $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
+      $path = "/data/snapshots/" . $eventId . "_snapshot.jpg?timestamp=" . $timestamp;
     } elseif ($mode == 4) {
       $path = "/data/" . $camera . "/" . $eventId . "_clip.mp4";
       $newpath = dirname(__FILE__, 3) . $path;
