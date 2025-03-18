@@ -2563,7 +2563,7 @@ class frigate extends eqLogic
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
       $lien = urldecode($file);
-      $path = "/data/snapshots/" . $eventId . "_snapshot.jpg?timestamp=" . $timestamp;
+      $path = "/data/snapshots/" . $eventId . "_snapshot.jpg;
     } elseif ($mode == 4) {
       $path = "/data/" . $camera . "/" . $eventId . "_clip.mp4";
       $newpath = dirname(__FILE__, 3) . $path;

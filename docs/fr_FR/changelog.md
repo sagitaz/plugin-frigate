@@ -4,6 +4,12 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 18/03/2025 Stable 1.2.0
+- Mise à jour avec toutes les corrections précèdentes.
+
+# 18/03/2025 Beta 1.2.0
+- Correction path snapshot
+
 # 27/02/2025 Beta 1.1.9
 - Ajout des stats CPU et storage
 
