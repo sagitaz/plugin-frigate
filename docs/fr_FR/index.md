@@ -1,7 +1,7 @@
 Plugin créé par **Sagitaz** et **Noodom**
 
 # <u>Aide</u>
-Pour toute demande d'aide sur community ou discord, merci de fournir le maximum d'informations possibles.
+Pour toute demande d'aide sur Community ou Discord, merci de fournir le maximum d'informations possibles.
 
 Sur la page configuration, le bouton assistance permet déjà d'en remplir automatiquement certaines.
 
@@ -13,6 +13,8 @@ Merci
 # <u>Installation</u>
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 **Le plugin est compatible avec les versions de Frigate supérieures à 0.13.0**
+
+Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut donc l'installer et le configurer vous-même. Voir la documentation officielle de Frigate pour plus d'informations.
 
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
@@ -27,18 +29,18 @@ La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking
 - **Adresse externe** : Pour accéder à la page du serveur Frigate depuis l'extérieur.
 - **Topic MQTT** : le topic de votre serveur Frigate (frigate par défaut)
 - **Preset** : Pour les caméras avec PTZ, définir le nombre de positions que vous souhaitez récupérer.
-- **Pause action** : Pause a effectuer sur les actions PTZ, par exemple, apres avoir appuyer sur move up, un stop est automatiquement effectué, vous pouvez définir le temps avant cette action stop. de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
+- **Pause action** : Pause à effectuer sur les actions PTZ. Par exemple, après avoir appuyé sur move up, un stop est automatiquement effectué : vous pouvez définir le temps avant cette action stop de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
 
 #### Gestion des évènements
-- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom, indiquez ici le nombre de jours souhaités.
+- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
 - **Taille des dossiers** : Taille maximum du dossier data.
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
-- **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement la vidéo sera jouée.
-- **Confirmation avant suppression** : Affiche une alerte avant la suppréssion d'un évènement.
+- **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement, la vidéo sera jouée.
+- **Confirmation avant suppression** : Affiche une alerte avant la suppression d'un évènement.
 #### Paramétrage par défaut d'un évènement créé manuellement
 - **Label** : le nom de l'évènement créé (manuel par défaut).
 - **Enregistrer une vidéo** : oui par défaut.
@@ -62,7 +64,7 @@ Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucu
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
 Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveaux évènements.
-Il est possible de crééer des actions communes a toutes les caméras (voir la section dédiée)
+Il est possible de créer des actions communes à toutes les caméras (voir la section dédiée)
 J'en ajouterai suivant les demandes et besoins de chacun.
 
 
@@ -73,15 +75,15 @@ Il comporte aussi la commande action permettant de redémarrer le serveur Frigat
 J'en ajouterai suivant les demandes et besoins de chacun.
 
 ## <u>Equipement Caméra</u>
-Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton rechercher. Les caméras trouvées seront automatiquement créées. Il est necessaire de patienter car à la première recherche est également importer les évènement de la dernière journée, cela peut prendre un peu de temps.
+Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton Rechercher. Les caméras trouvées seront automatiquement créées. Il est nécessaire de patienter car à la première recherche sont également importés les évènements de la dernière journée. Cela peut prendre un peu de temps.
 
 ### Equipement
 
-- user : seulement utile si vous créer des commandes HTTP
-- mot de passe : seulement utile si vous créer des commandes HTTP
+- user : seulement utile si vous créez des commandes HTTP
+- mot de passe : seulement utile si vous créez des commandes HTTP
 - Panel : cocher pour que la caméra soit visible sur le Panel
-- Flux vidéo : Renseigné un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
-- preset : si vous souhaitez un nombre différent que le réglage global
+- Flux vidéo : Renseigner un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
+- preset : si vous souhaitez un nombre différent du réglage global
 
 A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
@@ -94,19 +96,19 @@ Refresh de l'image suivant votre configuration.
 - region : la zone est avec un contour vert
 
 ### Commandes infos
-##### Toutes les cameras
+##### Toutes les caméras
 Les informations sur le dernier évènement de la caméra et sur ses statistiques.
 
-L'info **LABEL** correspond à l'object qui a déclenché la détection (person, vehicle, cat, dog, etc...)
+L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 ##### MQTT
-- **Détection en cours** : dès que Frigate voit un changement il passe à 1 (nuages, luminosité, personne, etc...) 
-- **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection est en cours ou non pour chaque object configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc... vous aurez 3 états : personne, vache, véhicule. Si vous cocher "visible" l'icône sera présente sur le widget lorsqu'il y aura une détection, l'icône est a personnaliser dans les paramètres de la commande.
-- **Détection all** : tant qu'un des object est à 1 alors la commande sera à 1. Si tous les objets sont à 0 alors la commande est à 0.
+- **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...) 
+- **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Si un objet est considéré statique, alors la détection repasse à 0.
+- **Détection all** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande all est à 0, alors les autres commandes de détection seront forcées à 0.
 
 ### Commandes actions
 - **Capture** :état, capture
-- **Camera** : état, activer, désactiver, toggle (Un redemarrage du serveur est necessaire pour la prise en compte car le fichier configuration est modifié).
+- **Camera** : état, activer, désactiver, toggle (Un redémarrage du serveur est nécessaire pour la prise en compte car le fichier configuration est modifié).
 
 Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
 
@@ -121,16 +123,16 @@ Les commandes PTZ, preset et audio ne sont créées que si la configuration de v
 - **Preset** : l'action permettant de placer votre caméra sur un point précis.
 
 ### Action(s) sur évènement
-Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipements **caméras**.
-Les actions configurées sur l'équipement **Events** seront éxécutées par les évènements provenant de toutes les caméras **sauf si elles possédent des actions configurées et activées.**
+Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipement **caméras**.
+Les actions configurées sur l'équipement **Events** seront exécutées par les évènements provenant de toutes les caméras **sauf si elles possèdent des actions configurées et activées.**
 #### Conditions
 Indiquer ici dans quel cas les actions NE DOIVENT PAS être exécutées.
 #### Actions
-Vous pouvez ici indiquer les actions à effectuer à chaque nouvel évènement.
+Vous pouvez indiquer ici les actions à effectuer à chaque nouvel évènement.
 Une liste de variables est disponible afin de personnaliser les notifications.
 - **#time#** : l'heure actuelle au format 12:00
 - **#camera#** : le nom de la caméra
-- **#cameraId#** : l'id de la caméra (pour par exemple un deeplink vers la page de la caméra dans l'application Jeemate)
+- **#cameraId#** : l'id de la caméra (pour par exemple un deeplink vers la page de la caméra dans l'application JeeMate)
 - **#score#** : le score en pourcentage -> 82 %
 - **#has_clip#** : texte 0 ou 1
 - **#has_snapshot#** : texte 0 ou 1
@@ -158,10 +160,10 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#duree#** : durée de l'évènement
 - **#jeemate#** : voir explications plus bas
 
-Une checkbox vous permet de désactiver la verification de la condition. 
+Une checkbox vous permet de désactiver la vérification de la condition. 
 
 - <u>LABEL</u> : 
-**Pour rappel le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
+**Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
@@ -171,9 +173,14 @@ Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 
-- <u>ZONE</u> :
-Dans la case **zone**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
+- <u>ZONES</u> :
+
+Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
 Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
+
+La case **zone de sortie** permet de gérer le sens de la détection. Cela ne fonctionne qu'avec une zone d'entrée définie. Si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
+
+
 
 
 ### Exemple de notifications :
@@ -219,7 +226,7 @@ Dans celle-ci seront regroupés tous les évènements visibles, vous pouvez pour
 
 Tous les évènements favoris ne sont pas supprimés.
 
-**ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible, une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
+**ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible : une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
 
 **ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
 
@@ -227,7 +234,7 @@ Tous les évènements favoris ne sont pas supprimés.
 Dans la configuration générale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
 Sur la page **Events**, vous trouverez un bouton permettant de créer un nouvel évènement.
 Pour chaque caméra, une commande action vous permettra aussi de créer un évènement.
-Cette commande est de type message, si vous laissez vide alors les paramètres par défaut seront utilisés (depuis le widget ce sera toujours le cas).
+Cette commande est de type message. Si vous laissez vide alors les paramètres par défaut seront utilisés (depuis le widget ce sera toujours le cas).
 title : **``Indiquer le label``**
 message : **``score=80 | video=1 | duration=20``**
 
@@ -237,17 +244,17 @@ Attention sur les évènements créés manuellement, si dans votre configuration
 
 Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
 
-Pour ceux n'utilisant pas MQTT le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
+Pour ceux n'utilisant pas MQTT, le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
 
 ### Création d'une capture instantanée
 
-Dans les actions des caméras se trouve deux commandes :
+Dans les actions des caméras se trouvent deux commandes :
 - Capturer image (action)
 - URL image (info)
 
-L'URL est de la forme **``/plugins/frigate/data/caméra/id_snapshot.jpg``** afin de s'adapter au maximum de plugin de communication.
+L'URL est de la forme **``/plugins/frigate/data/caméra/id_snapshot.jpg``** afin de s'adapter au maximum de plugins de communication.
 
-Par exemple si vous souhaitez une URL complète, vous pouvez dans configuration, calcul et arrondi de la commande info mettre ceci :
+Par exemple si vous souhaitez une URL complète, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
 **``str_replace('"','',"https://monjeedom.eu.jeedom.link"#value#)``**
 
 Ou bien pour ceux ayant besoin du path :
@@ -264,17 +271,17 @@ Visualiser tous les logs de votre serveur Frigate
 # <u>Cron</u>
 **Si vous n'utilisez pas MQTT** : un cron régulier vous permet de récupérer les derniers events et donc d'exécuter les actions associées.
 
-**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron heure ou jour  est suffisant, il permet de mettre à jour les infos de l'évènement.
+**Si vous utilisez MQTT** : tous les nouveaux events sont reçus automatiquement, un cron heure ou jour est suffisant : il permet de mettre à jour les infos de l'évènement.
 
 Dans tous les cas, laisser au moins un cron actif car il sera vérifié à chaque fois si les fichiers sauvegardés correspondent bien à un évènement et dans le cas contraire, ils seront supprimés.
 
-Le cronDaily est le seul à vérifier la version de votre serveur frigate, si une maj est disponible vous aurez un message.
+Le cronDaily est le seul à vérifier la version de votre serveur frigate : si une maj est disponible, vous aurez un message.
 
 **Mon conseil :**
 Sans MQTT : cron ou cron5 (suivant puissance machine) + cronDaily
 Avec MQTT : cronDaily
 
-***Dans tous les cas si un cron est en cours d'exécution le suivant ne sera pas lancé et en MQTT les cron (1, 5, 10 et 15 sont désactivès).***
+***Dans tous les cas, si un cron est en cours d'exécution, le suivant ne sera pas lancé et en MQTT, les cron (1, 5, 10 et 15 sont désactivès).***
 
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
@@ -283,7 +290,7 @@ Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
 ### configuration
 Dans le plugin Frigate **il n'y a pas de lecteur pour le flux vidéo**, cette configuration sert pour les plugins compatibles.
 
-L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur frigate et pas celle de la caméra.
+L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur Frigate et pas celle de la caméra.
 
 1. **Flux RTSP de Frigate** :
    - **Avantages** : Frigate peut centraliser les flux de plusieurs caméras, ce qui réduit le nombre de connexions directes à chaque caméra. Cela peut améliorer la stabilité et la gestion des ressources réseau.
@@ -296,16 +303,16 @@ L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur friga
 En résumé, si vous avez plusieurs caméras et que vous souhaitez une gestion centralisée, le flux RTSP de Frigate pourrait être plus avantageux. Si vous préférez une solution plus simple et directe, utiliser le flux RTSP de la caméra pourrait être suffisant.
 
 ### Avec JeeMate
-Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre equipement celui que vous souhaitez utiliser, la même chose si vous préfèrer utiliserle fux d'origine de la caméra.
+Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre équipement celui que vous souhaitez utiliser, la même chose si vous préférez utiliser le fux d'origine de la caméra.
 
-Configuration frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par defaut conviendra.
+Configuration Frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par défaut conviendra.
 
 >**``   frigate1:``**
 **``      ffmpeg:``**
 **``          inputs:``**
 **``         - path: rtsp://127.0.0.1:8554/frigate1``**
 
-Configuration frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur frigate.
+Configuration Frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur Frigate.
 
 >**``   frigate1:``** 
 **``      ffmpeg:``**
@@ -317,10 +324,10 @@ Configuration frigate avec plusieurs flux, indiquer l'url du flux voulu sur la p
 
 ***Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate***
 
-Après chaque modification de l'URL du flux dans le plugin Frigate, il vous faudra sauvegarder aussi dans le pligin JeeMate puis faire une synchronisation complète dans l'application.
+Après chaque modification de l'URL du flux dans le plugin Frigate, il vous faudra sauvegarder aussi dans le plugin JeeMate puis faire une synchronisation complète dans l'application.
 
 # <u>Panel</u>
-N'oubliez pas d'activer la page panel dans la configuration génèrale, puis pour chaque caméra de cocher la case "Panel".
+N'oubliez pas d'activer la page panel dans la configuration générale, puis pour chaque caméra de cocher la case "Panel".
 
 - visualisation des caméras.
 - page évènements

@@ -70,7 +70,8 @@
         "Tester": "Test",
         "Type": "Kind",
         "URL HTTP de votre commande": "HTTP URL of your command",
-        "Zone": "Zone"
+        "Zone entrée": "Input zone",
+        "Zone sortie": "Output zone"
     },
     "plugins\/frigate\/desktop\/js\/frigateLogs.js": {
         "Logs": "Logs",
@@ -236,7 +237,7 @@
         "Exclure les clips et snapshot des sauvegardes Jeedom": "Exclude clips and snapshots from Jeedom backups",
         "Exemple: 192.168.1.20": "Example: 192.168.1.20",
         "Gestion des évènements": "Event management",
-        "Génèrale": "General",
+        "Générale": "General",
         "Label": "Label",
         "Label par défaut d'un évènement créé manuellement": "Default label for a manually created event",
         "Nombre de jours à garder": "Number of days to keep",

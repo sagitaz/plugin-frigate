@@ -119,7 +119,7 @@ function addCmdToTable(_cmd) {
 
     if (type === 'hide') {
         // Actions spécifiques pour le type 'hide'
-    } else if (type === 'cameras' || type === 'gpu' || type === 'detectors') {
+    } else if (type === 'cameras' || type === 'gpu' || type === 'cpu' || type === 'detectors' || type === 'Recordings') {
         printTable(_cmd, tr, "table_stats");
     } else if (type === 'info' || type === 'enable' || type === 'link') {
         printTable(_cmd, tr, "table_infos");
@@ -163,7 +163,10 @@ function addAction(_action, _type) {
     div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdTypeName" placeholder="{{Type}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-1">'
-    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdZoneName" placeholder="{{Zone}}" data-type="' + _type + '" />'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdZoneName" placeholder="{{Zone entrée}}" data-type="' + _type + '" />'
+    div += '</div>'
+    div += '<div class="col-sm-1">'
+    div += '<input class="expressionAttr form-control cmdAction input-sm" data-l1key="cmdZoneEndName" placeholder="{{Zone sortie}}" data-type="' + _type + '" />'
     div += '</div>'
     div += '<div class="col-sm-3">'
     div += '<div class="input-group input-group-sm">'
@@ -178,7 +181,7 @@ function addAction(_action, _type) {
     div += '</div>'
     div += '</div>'
     var actionOption_id = jeedomUtils.uniqId()
-    div += '<div class="col-sm-5 actionOptions" id="' + actionOption_id + '"></div>'
+    div += '<div class="col-sm-4 actionOptions" id="' + actionOption_id + '"></div>'
 
     $('#div_' + _type).append(div)
     $('#div_' + _type + ' .' + _type + '').last().setValues(_action, '.expressionAttr')

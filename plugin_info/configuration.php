@@ -24,7 +24,7 @@ if (!isConnect()) {
 ?>
 <div class="col-md-6 frigate-info">
     <div class="frigate-heading">
-        <h3 class="frigate-title"> {{Génèrale}}
+        <h3 class="frigate-title"> {{Générale}}
         </h3>
     </div>
     <div class="frigate-body">
