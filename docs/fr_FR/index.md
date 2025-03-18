@@ -14,6 +14,8 @@ Merci
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 **Le plugin est compatible avec les versions de Frigate supérieures à 0.13.0**
 
+Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut donc l'installer et le configurer vous-même. Voir la documentation officielle de Frigate pour plus d'informations.
+
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
 # <u>Configuration</u>
