@@ -1,20 +1,32 @@
 Plugin créé par **Sagitaz** et **Noodom**
 
-# <u>Aide</u>
+# <u>Remerciemment</u>
+Le plugin et le support sont gratuits, vous souhaitez néanmoins m'offrir un café ou des couches pour bébé, je vous remercie par avance.
+
+[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C1C61AKVV7)
+
+# <u>Aide et Support</u>
+- Community Jeedom
+- Discord JeeMate
+
 Pour toute demande d'aide sur Community ou Discord, merci de fournir le maximum d'informations possibles.
 
 Sur la page configuration, le bouton assistance permet déjà d'en remplir automatiquement certaines.
 
 Donner aussi des logs en mode debug.
-
+Aucun support ne sera apporté sur d'autres moyens de communication que ceux-ci.
 Merci
 
 
-# <u>Installation</u>
-Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
-**Le plugin est compatible avec les versions de Frigate supérieures à 0.13.0**
+# <u>Pré-requis</u>
+- Jeedom 4.4.0 minimum
+- Debian 11 (Bullseye) minimum
+- Frigate 0.13.0 minimum
 
 Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut donc l'installer et le configurer vous-même. Voir la documentation officielle de Frigate pour plus d'informations.
+
+# <u>Installation</u>
+Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
@@ -64,15 +76,16 @@ Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucu
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
 Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveaux évènements.
+
 Il est possible de créer des actions communes à toutes les caméras (voir la section dédiée)
-J'en ajouterai suivant les demandes et besoins de chacun.
+Cocher "autoriser les actions" si vous souhaitez sur une détection exécuter les actions présentes dans l'équipement events et dans les équipements caméras.
 
 
 ## <u>Equipement Statistiques</u>
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec quelques statistiques disponibles.
+
 Il comporte aussi la commande action permettant de redémarrer le serveur Frigate.
-J'en ajouterai suivant les demandes et besoins de chacun.
 
 ## <u>Equipement Caméra</u>
 Après installation du plugin et la configuration de l'URL et du port de votre serveur Frigate, il vous suffit de cliquer sur le bouton Rechercher. Les caméras trouvées seront automatiquement créées. Il est nécessaire de patienter car à la première recherche sont également importés les évènements de la dernière journée. Cela peut prendre un peu de temps.
@@ -89,7 +102,7 @@ A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
 
 - bbox
-- timestamp : la date
+- timestamp : la date, celle-ci sera présente aussi sur le snapshot réaliser si coché.
 - zones
 - mask : la zone sera masquée
 - motion : la zone est avec un contour rouge
@@ -196,9 +209,10 @@ Pour une notification automatique, ajouter frigate=#jeemate#, disponible avec la
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#;;frigate=#jeemate#``**
 
 #### Plugin Telegram
-- **snapshot** : dans le champ action : **``title=votre titre | snapshot=#snapshot#``**
-- **snapshot** : dans le champ action : **``title=votre titre | file=#snapshot_path#``**
-- **clip** : dans le champ action : **``title=votre titre | file=#clip_path#``**
+Testez les 2 commandes snapshot. Selon les configurations, il se peut qu'une des deux ne fonctionne pas.
+- **snapshot** : dans le champ options : **``title=votre titre | snapshot=#snapshot#``**
+- **snapshot** : dans le champ options : **``title=votre titre | file=#snapshot_path#``**
+- **clip** : dans le champ options : **``title=votre titre | file=#clip_path#``**
 - **preview** : dans le champ message : **``#preview#``**
 
 #### Plugin Mobile v2
@@ -332,12 +346,3 @@ N'oubliez pas d'activer la page panel dans la configuration générale, puis pou
 - visualisation des caméras.
 - page évènements
 
-# <u>Support</u>
-- Community Jeedom
-- Discord JeeMate
-
-
-# <u>Remerciemment</u>
-Le plugin et le support sont gratuits, vous souhaitez néanmoins m'offrir un café ou des couches pour bébé, je vous remercie par avance.
-
-[![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C1C61AKVV7)

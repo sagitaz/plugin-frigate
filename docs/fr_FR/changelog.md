@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 20/03/2025 Beta 1.2.1
+- Ajout checkbox "autoriser les actions" pour l'équipement events
+
 # 18/03/2025 Stable 1.2.0
 - Mise à jour avec toutes les corrections précèdentes.
 
