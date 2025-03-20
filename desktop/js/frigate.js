@@ -367,21 +367,6 @@ function addOrRemoveClass(element, className, isAdd) {
 }
 
 function printEqLogic(_eqLogic) {
-    if (_eqLogic && _eqLogic.logicalId) {
-        if (_eqLogic.logicalId === "eqFrigateStats") {
-            addOrRemoveClass('eqFrigate', 'jeedisable', true);
-            addOrRemoveClass('eqActions', 'jeedisable', true);
-        } else if (_eqLogic.logicalId === "eqFrigateEvents") {
-            addOrRemoveClass('eqFrigate', 'jeedisable', true);
-            addOrRemoveClass('eqActions', 'jeedisable', false);
-        } else {
-            addOrRemoveClass('eqFrigate', 'jeedisable', false);
-            addOrRemoveClass('eqActions', 'jeedisable', false);
-        }
-    } else {
-        addOrRemoveClass('eqFrigate', 'jeedisable', false);
-        addOrRemoveClass('eqActions', 'jeedisable', false);
-    }
 
     let ptz = _eqLogic.configuration.ptz;
     if (ptz === undefined) {
@@ -390,8 +375,33 @@ function printEqLogic(_eqLogic) {
     if (ptz) {
         addOrRemoveClass('ptz-options', 'jeedisable', false);
     } else {
-        addOrRemoveClass('ptz-options', 'jeedisable', false);
+        addOrRemoveClass('ptz-options', 'jeedisable', true);
     }
+
+    if (_eqLogic && _eqLogic.logicalId) {
+        if (_eqLogic.logicalId === "eqFrigateStats") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', true);
+            addOrRemoveClass('eqEvents', 'jeedisable', true);
+            addOrRemoveClass('eqStats', 'jeedisable', false);
+        } else if (_eqLogic.logicalId === "eqFrigateEvents") {
+            addOrRemoveClass('eqFrigate', 'jeedisable', true);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
+            addOrRemoveClass('eqEvents', 'jeedisable', false);
+            addOrRemoveClass('eqStats', 'jeedisable', true);
+        } else {
+            addOrRemoveClass('eqFrigate', 'jeedisable', false);
+            addOrRemoveClass('eqActions', 'jeedisable', false);
+            addOrRemoveClass('eqEvents', 'jeedisable', true);
+            addOrRemoveClass('eqStats', 'jeedisable', false);
+        }
+    } else {
+        addOrRemoveClass('eqFrigate', 'jeedisable', false);
+        addOrRemoveClass('eqActions', 'jeedisable', false);
+        addOrRemoveClass('eqEvents', 'jeedisable', false);
+        addOrRemoveClass('eqStats', 'jeedisable', false);
+    }
+
 
 
 
