@@ -2174,7 +2174,20 @@ class frigate extends eqLogic
 
     // Vérification des actions caméra existantes
     // Si la liste d'actions n'est pas vide et qu'au moins une action est activée
-    if ($cameraActionsExist) {
+    // verifier si l'équipement event est autorisé a executer des actions
+    $autorizeAction = $frigate->getConfiguration('autorizeActions');
+    if ($autorizeAction == 1) {
+      log::add(__CLASS__, 'debug', "║ ACTION: Les actions sont autorisées pour l'équipement Events (ID: " . $frigate->getId() . ").");
+    } else {
+      log::add(__CLASS__, 'debug', "║ ACTION: Les actions sont désactivées pour l'équipement Events (ID: " . $frigate->getId() . ").");
+    }
+    if ($cameraActionsExist && $autorizeAction) {
+      log::add(__CLASS__, 'debug', "║ ACTION: Exécution des actions pour la caméra (ID: " . $eqCamera->getId() . ").");
+      self::executeActionNewEvent($eqCamera->getId(), $event);
+      log::add(__CLASS__, 'debug', "║ ACTION: Exécution des actions pour l'équipement Events (ID: " . $frigate->getId() . ").");
+      self::executeActionNewEvent($frigate->getId(), $event);
+    } elseif ($cameraActionsExist) {
+      // Si les actions caméra sont activées mais que l'équipement event n'est pas autorisé à exécuter des actions
       log::add(__CLASS__, 'debug', "║ ACTION: Exécution des actions pour la caméra (ID: " . $eqCamera->getId() . ").");
       self::executeActionNewEvent($eqCamera->getId(), $event);
     } else {
