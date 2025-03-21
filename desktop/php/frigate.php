@@ -399,10 +399,13 @@ sendVarToJS('refresh', $refresh);
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <div class="actionAttr form-group" id="actionTab">
                     <br>
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">{{Ne rien faire si}}</label>
-                        <div class="col-sm-6">
+                    <div class="form-group" style="padding:10px; text-align:right;">
+                        <label class="col-sm-2 control-label">{{Condition générale}}</label>
+                        <div class="col-sm-4">
                             <div class="input-group">
+                                <span class="input-group-btn">
+                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vrai alors les actions ne seront pas éxècutées}}"><i class="fas fa-cog"></i></a>
+                                </span>
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
                                 <span class="input-group-btn">
                                     <a class="btn listCmdInfo btn-default roundedRight" data-atCaret="1"><i class="fa fa-list-alt"></i></a>
@@ -414,8 +417,8 @@ sendVarToJS('refresh', $refresh);
                     </div>
                     <br>
                     <br>
-                    <div class="alert alert-info">
-                        {{Vous pouvez utiliser les variables suivantes}} :<br>
+                    <div class="alert alert-info" style="margin-left:40px; margin-right:40px;">
+                        <u>{{Vous pouvez utiliser les variables suivantes}} :</u><br>
                         #time#, #event_id#, #camera#, #cameraId#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
                         <br>
                         #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
