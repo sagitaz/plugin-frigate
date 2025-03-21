@@ -2444,9 +2444,9 @@ class frigate extends eqLogic
         if (!$conditionIsActived) {
           log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution.");
         } elseif ($conditionIsActived && $actionForced) {
-          log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution car la condition est ignorée");
+          log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution car la condition principale est ignorée");
         } else {
-          log::add("frigate_Actions", 'info', "║ Action non exécutées car " . $conditionIf .  " est vrai.");
+          log::add("frigate_Actions", 'info', "║ Action non exécutées car la condition principale " . $conditionIf .  " est vrai.");
           continue;
         }
 
@@ -2454,6 +2454,19 @@ class frigate extends eqLogic
         $enable = $action['options']['enable'] ?? false;
         if (!$enable) {
           log::add("frigate_Actions", 'info', "║ Commande désactivée");
+          continue;
+        }
+
+        // vérifier si la condition de l'action est remplie
+        $actionConditionIsActived = false;
+        $actionCondition = $action['actionCondition'];
+        if ($actionCondition != "" && jeedom::evaluateExpression($actionCondition)) {
+          $actionConditionIsActived = true;
+        }
+        log::add("frigate_Actions", 'info', "║ Condition de l'action  : " . $actionCondition . ", etat : " . json_encode($actionConditionIsActived));
+
+        if (!$actionConditionIsActived) {
+          log::add("frigate_Actions", 'info', "║ Condition de l'action non remplie : " . $actionCondition . ", l'action sera ignorée.");
           continue;
         }
 

@@ -175,26 +175,32 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 
 Une checkbox vous permet de désactiver la vérification de la condition. 
 
-- <u>LABEL</u> : 
+<u>LABEL</u> : 
 **Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
 
-- <u>TYPE</u> : 
+<u>TYPE</u> : 
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
 
-- <u>ZONES</u> :
+<u>ZONES</u> :
 
 Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
 Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
 
 La case **zone de sortie** permet de gérer le sens de la détection. Cela ne fonctionne qu'avec une zone d'entrée définie. Si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
 
+<u>CONDITION DE L'ACTION</u> :
+Mettre en place une condition pour que l'action soit exécutée.
+Si aucune condition n'est spécifiée, l'action sera réalisée.
+.
+<u>Déroulé de l'action</u> :
 
 
+![execution d'une action](../images/frigate_Doc_ActionsEvents.png)
 
 ### Exemple de notifications :
 #### Plugin JeeMate
