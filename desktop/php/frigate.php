@@ -397,10 +397,10 @@ sendVarToJS('refresh', $refresh);
             </div><!-- /.tabpanel #statstab-->
 
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
+            <br>
                 <div class="actionAttr form-group" id="actionTab">
-                    <br>
-                    <div class="form-group" style="padding:10px; text-align:right;">
-                        <label class="col-sm-2 control-label">{{Condition générale}}</label>
+                    <div class="form-group rounded" style="border:1px solid var(--txt-color); margin-left:40px; margin-right:40px; padding:10px 0px 40px 0px; background-color:var(--el-defaultColor) !important">
+                        <div class="col-sm-2" style="text-align:right;"><label class="control-label">{{Condition générale}}</label></div>
                         <div class="col-sm-4">
                             <div class="input-group">
                                 <span class="input-group-btn">
@@ -412,10 +412,9 @@ sendVarToJS('refresh', $refresh);
                                 </span>
                             </div>
                         </div>
-                        <label class="col-sm-1 control-label">{{Etat actuel : }}</label>
-                        <label class="col-sm-2 control-label"><?= $evaluateExpression ?></label>
+                        <div class="col-sm-1"><label class="control-label" style="text-align:right;">{{Etat actuel : }}</label></div>
+                        <div class="col-sm-1"><label class="control-label" style="text-align:left;"><?= $evaluateExpression ?></label></div>
                     </div>
-                    <br>
                     <br>
                     <div class="alert alert-info" style="margin-left:40px; margin-right:40px;">
                         <u>{{Vous pouvez utiliser les variables suivantes}} :</u><br>
