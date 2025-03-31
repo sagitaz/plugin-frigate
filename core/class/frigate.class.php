@@ -2466,7 +2466,7 @@ class frigate extends eqLogic
         // vérifier si la condition de l'action est remplie
         $actionConditionIsActived = true;
         $actionCondition = $action['actionCondition'];
-        if ($actionCondition != "" && jeedom::evaluateExpression($actionCondition)) {
+        if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
           $actionConditionIsActived = false;
         }
         log::add("frigate_Actions", 'info', "║ Condition de l'action  : " . $actionCondition . ", etat : " . json_encode($actionConditionIsActived));
