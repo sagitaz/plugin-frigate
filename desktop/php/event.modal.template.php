@@ -4,10 +4,14 @@
       <span class="close">&times;</span>
 
       <div class="modal-header">
-        <h2 id="mediaTitle"></h2>
+        <h2>
+        	<div id="mediaTitle"></div>
+        	<br/>
+        	<div id="mediaDescription" class="limited-text"></div>
+        </h2>
         <div class="button-container">
           <button id="showVideo" class="hidden-btn custom-button">Voir la vidéo</button>
-          <button id="showImage" class="hidden-btn custom-button">Voir la capture</button>
+          <button id="showImage" class="hidden-btn custom-button">Voir la capture</button><br/>
         </div>
       </div>
       <div class="media-container">

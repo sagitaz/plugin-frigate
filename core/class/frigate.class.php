@@ -1118,6 +1118,8 @@ class frigate extends eqLogic
       $boxArray = json_decode($box, true);
     }
 
+    $data = json_decode($event->getData(), true);
+
     $result = array(
       "id" => $event->getId(),
       "img" => $event->getLasted(),
@@ -1138,7 +1140,8 @@ class frigate extends eqLogic
       "top_score" => $event->getTopScore(),
       "type" => $event->getType(),
       "isFavorite" => $event->getIsFavorite() ?? 0,
-      "zones" => $event->getZones() ?? ''
+      "zones" => $event->getZones() ?? '',
+      "description" => $data['description'] ?? ''
     );
 
 
@@ -1518,7 +1521,8 @@ class frigate extends eqLogic
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
-
+      $data = json_decode($event->getData(), true);
+      
       $result[] = array(
         "id" => $event->getId(),
         "img" => $event->getLasted(),
@@ -1539,7 +1543,8 @@ class frigate extends eqLogic
         "top_score" => $event->getTopScore(),
         "type" => $event->getType(),
         "isFavorite" => $event->getIsFavorite() ?? 0,
-        "zones" => $event->getZones() ?? ''
+        "zones" => $event->getZones() ?? '',
+        "description" => $data['description'] ?? ''
       );
     }
 
@@ -2400,6 +2405,7 @@ class frigate extends eqLogic
     $camera = $event->getCamera();
     $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
+    $description = $event->getData();
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
@@ -2460,7 +2466,7 @@ class frigate extends eqLogic
         // vérifier si la condition de l'action est remplie
         $actionConditionIsActived = true;
         $actionCondition = $action['actionCondition'];
-        if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
+        if ($actionCondition != "" && jeedom::evaluateExpression($actionCondition)) {
           $actionConditionIsActived = false;
         }
         log::add("frigate_Actions", 'info', "║ Condition de l'action  : " . $actionCondition . ", etat : " . json_encode($actionConditionIsActived));
@@ -2523,8 +2529,8 @@ class frigate extends eqLogic
         }
 
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
-          [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
+          ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
+          [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
           $options
         );
 
