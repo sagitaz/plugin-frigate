@@ -2458,10 +2458,10 @@ class frigate extends eqLogic
         }
 
         // vérifier si la condition de l'action est remplie
-        $actionConditionIsActived = false;
+        $actionConditionIsActived = true;
         $actionCondition = $action['actionCondition'];
-        if ($actionCondition != "" && jeedom::evaluateExpression($actionCondition)) {
-          $actionConditionIsActived = true;
+        if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
+          $actionConditionIsActived = false;
         }
         log::add("frigate_Actions", 'info', "║ Condition de l'action  : " . $actionCondition . ", etat : " . json_encode($actionConditionIsActived));
 
@@ -2482,14 +2482,17 @@ class frigate extends eqLogic
         $cmdZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneName));
         $cmdZonesEnd = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneEndName));
         $eventZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $zones));
+        $cmdTypes = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdTypeName));
 
         // Ajouter "all" aux tableaux si nécessaire
         if (in_array("all", $cmdLabels)) $cmdLabels[] = $label;
         if (in_array("all", $cmdZones)) $eventZones[] = "all";
+        // Ajouter "end" aux tableaux si nécessaire
+        if (in_array("end", $cmdTypes)) $cmdTypes[] = "end";
 
         // Vérifier les trois conditions
         $labelMatch = in_array($label, $cmdLabels) || in_array("all", $cmdLabels);
-        $typeMatch = ($cmdTypeName === $type);
+        $typeMatch = in_array($type, $cmdTypes) || in_array("end", $cmdTypes);
         // Verifier si on utilise zone end, si non utilisé gestion classique sinon verifier ordre des zones
         if (empty($cmdZoneEndName)) {
           $zoneMatch = count(array_intersect($cmdZones, $eventZones)) > 0;
