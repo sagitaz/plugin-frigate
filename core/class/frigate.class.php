@@ -2547,7 +2547,7 @@ class frigate extends eqLogic
             log::add("frigate_Actions", 'info', "║ ACTION CLIP : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
-            log::add("frigate_Actions", 'info', "║ Le clip n'est pas disponible, actions non éxècutée.");
+            log::add("frigate_Actions", 'info', "║ Le clip n'est pas disponible, actions non exécutées.");
             log::add("frigate_Actions", 'info', "╠════════════════════════════════════");
           }
         } elseif (strpos($optionsJson, '#snapshot#') !== false || strpos($optionsJson, '#snapshot_path#') !== false) {
@@ -2555,7 +2555,7 @@ class frigate extends eqLogic
             log::add("frigate_Actions", 'info', "║ ACTION SNAPSHOT : " . $optionsJson);
             scenarioExpression::createAndExec('action', $cmd, $options);
           } else {
-            log::add("frigate_Actions", 'info', "║ Le snapshot n'est pas disponible, actions non éxècutée.");
+            log::add("frigate_Actions", 'info', "║ Le snapshot n'est pas disponible, actions non exécutées.");
             log::add("frigate_Actions", 'info', "╠════════════════════════════════════");
           }
         } else {

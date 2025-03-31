@@ -404,7 +404,7 @@ sendVarToJS('refresh', $refresh);
                         <div class="col-sm-4">
                             <div class="input-group">
                                 <span class="input-group-btn">
-                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vrai alors les actions ne seront pas éxècutées}}"><i class="fas fa-cog"></i></a>
+                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vraie alors les actions ne seront pas exécutées}}"><i class="fas fa-cog"></i></a>
                                 </span>
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
                                 <span class="input-group-btn">
