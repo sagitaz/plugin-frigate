@@ -95,6 +95,7 @@
 .modal-header h2 {
   flex: 1;
   margin: 0;
+  width: 90%;
 }
 
 .button-container {
@@ -422,9 +423,8 @@
 .limited-text {
   display: inline-block;
   font-size: 18px;
-  max-width: 600px;
-  white-space: nowrap;
-  overflow: hidden;
-  text-overflow: ellipsis;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
   cursor: pointer;
 }
