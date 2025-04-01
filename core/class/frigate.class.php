@@ -1522,7 +1522,7 @@ class frigate extends eqLogic
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
       $data = json_decode($event->getData(), true);
-      
+
       $result[] = array(
         "id" => $event->getId(),
         "img" => $event->getLasted(),
@@ -2405,7 +2405,8 @@ class frigate extends eqLogic
     $camera = $event->getCamera();
     $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
-    $description = $event->getData();
+    $data = $event->getData();
+    $description = isset($data['description']) ? $data['description'] : "";
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
