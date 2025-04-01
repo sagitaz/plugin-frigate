@@ -2491,18 +2491,24 @@ class frigate extends eqLogic
         $eventZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $zones));
         $cmdTypes = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdTypeName));
 
-        // Ajouter "all" aux tableaux si nécessaire
-        if (in_array("all", $cmdLabels)) $cmdLabels[] = $label;
-        if (in_array("all", $cmdZones)) $eventZones[] = "all";
-        // Ajouter "end" aux tableaux si nécessaire
-        if (in_array("end", $cmdTypes)) $cmdTypes[] = "end";
+        // Ajouter aux tableaux si nécessaire une valeur par défaut
+        if (empty($cmdLabels)) $cmdLabels[] = "all";
+        if (empty($cmdZones)) $cmdZones[] = "all";
+        if (empty($cmdTypes)) $cmdTypes[] = "end";
+        log::add("frigate_Actions", 'info', "║ Labels configurés : " . json_encode($cmdLabels) . ", labels de l'évènement : " . json_encode($label));
+
+        log::add("frigate_Actions", 'info', "║ Zones configurées : " . json_encode($cmdZones) . ", zones de l'évènement : " . json_encode($eventZones));
+
+        log::add("frigate_Actions", 'info', "║ Types configurés : " . json_encode($cmdTypes) . ", type de l'évènement : " . json_encode($type));
 
         // Vérifier les trois conditions
         $labelMatch = in_array($label, $cmdLabels) || in_array("all", $cmdLabels);
-        $typeMatch = in_array($type, $cmdTypes) || in_array("end", $cmdTypes);
+        $typeMatch = in_array($type, $cmdTypes);
         // Verifier si on utilise zone end, si non utilisé gestion classique sinon verifier ordre des zones
         if (empty($cmdZoneEndName)) {
-          $zoneMatch = count(array_intersect($cmdZones, $eventZones)) > 0;
+          log::add("frigate_Actions", 'info', "║ Pas de zone de sortie configurée, vérification des zones d'entrée uniquement.");
+          // Vérifier si au moins une des zones d'entrée est présente dans les zones de l'événement
+          $zoneMatch = count(array_intersect($cmdZones, $eventZones)) > 0 || in_array("all", $cmdZones);
         } else {
           // Récupérer les zones configurées
           $enterZone = $cmdZones[0]; // Zone d'entrée configurée
@@ -2513,7 +2519,11 @@ class frigate extends eqLogic
           $quitZonePos = array_search($quitZone, $eventZones);
 
           // Vérifier que les deux zones sont présentes et dans le bon ordre
-          $zoneMatch = ($enterZonePos !== false && $quitZonePos !== false && $enterZonePos < $quitZonePos);
+          if ($enterZonePos !== false && $quitZonePos !== false) {
+            $zoneMatch = $enterZonePos < $quitZonePos;
+          } else {
+            $zoneMatch = false;
+          }
           log::add("frigate_Actions", 'info', "║ Zones de l'évènement : " . json_encode($eventZones));
           log::add("frigate_Actions", 'info', "║ Zone d'entrée' : " . json_encode($enterZone));
           log::add("frigate_Actions", 'info', "║ Zone de sortie : " . json_encode($quitZone));
@@ -2523,9 +2533,9 @@ class frigate extends eqLogic
             log::add("frigate_Actions", 'info', "║ Les zones ne correspondent pas !");
           }
         }
-
+        // Si au moins une des conditions n'est pas remplie, ignorer l'action
         if (!($labelMatch && $typeMatch && $zoneMatch)) {
-          log::add("frigate_Actions", 'info', "║ Au moins une des conditions (label, type, zone) n'est pas remplie, l'action sera ignorée.");
+          log::add("frigate_Actions", 'info', "║ Au moins une des conditions (label : " . json_encode($labelMatch) . ", type : " . json_encode($typeMatch) . ", zone : " . json_encode($zoneMatch) . ") n'est pas remplie, l'action sera ignorée.");
           continue;
         }
 
