@@ -397,26 +397,28 @@ sendVarToJS('refresh', $refresh);
             </div><!-- /.tabpanel #statstab-->
 
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
+            <br>
                 <div class="actionAttr form-group" id="actionTab">
-                    <br>
-                    <div class="form-group">
-                        <label class="col-sm-1 control-label">{{Ne rien faire si}}</label>
-                        <div class="col-sm-6">
+                    <div class="form-group rounded" style="border:1px solid var(--txt-color); margin-left:40px; margin-right:40px; padding:10px 0px 40px 0px; background-color:var(--el-defaultColor) !important">
+                        <div class="col-sm-2" style="text-align:right;"><label class="control-label">{{Condition générale}}</label></div>
+                        <div class="col-sm-4">
                             <div class="input-group">
+                                <span class="input-group-btn">
+                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vraie alors les actions ne seront pas exécutées}}"><i class="fas fa-cog"></i></a>
+                                </span>
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
                                 <span class="input-group-btn">
                                     <a class="btn listCmdInfo btn-default roundedRight" data-atCaret="1"><i class="fa fa-list-alt"></i></a>
                                 </span>
                             </div>
                         </div>
-                        <label class="col-sm-1 control-label">{{Etat actuel : }}</label>
-                        <label class="col-sm-2 control-label"><?= $evaluateExpression ?></label>
+                        <div class="col-sm-1"><label class="control-label" style="text-align:right;">{{Etat actuel : }}</label></div>
+                        <div class="col-sm-1"><label class="control-label" style="text-align:left;"><?= $evaluateExpression ?></label></div>
                     </div>
                     <br>
-                    <br>
-                    <div class="alert alert-info">
-                        {{Vous pouvez utiliser les variables suivantes}} :<br>
-                        #time#, #event_id#, #camera#, #cameraId#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
+                    <div class="alert alert-info" style="margin-left:40px; margin-right:40px;">
+                        <u>{{Vous pouvez utiliser les variables suivantes}} :</u><br>
+                        #time#, #event_id#, #camera#, #cameraId#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #description#, #start#, #end#, #duree#, #type#
                         <br>
                         #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>

@@ -138,8 +138,11 @@ Les commandes PTZ, preset et audio ne sont créées que si la configuration de v
 ### Action(s) sur évènement
 Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipement **caméras**.
 Les actions configurées sur l'équipement **Events** seront exécutées par les évènements provenant de toutes les caméras **sauf si elles possèdent des actions configurées et activées.**
+Si vous souhaitez regrouper sur l'équipement Events des actions communes et ensuite ajouter des actions pour chaque caméra, pensez à cocher sur l'équipement Events la case "autoriser les actions".
+
 #### Conditions
 Indiquer ici dans quel cas les actions NE DOIVENT PAS être exécutées.
+
 #### Actions
 Vous pouvez indiquer ici les actions à effectuer à chaque nouvel évènement.
 Une liste de variables est disponible afin de personnaliser les notifications.
@@ -175,26 +178,38 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 
 Une checkbox vous permet de désactiver la vérification de la condition. 
 
-- <u>LABEL</u> : 
+<u>LABEL</u> : 
 **Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
+Les majuscules et les accents sont ignorés, donc si vous indiquez "Vélo" ou "velo", les deux seront considérées comme identiques.
 
-- <u>TYPE</u> : 
+<u>TYPE</u> : 
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
+Vous pourvez en mettre plusieurs en les séparant par des virgules.
+Si aucun type n'est spécifié, l'action sera exécutée seulement pour les évènements de type **end**.
+les majuscules et les accents sont ignorés, donc si vous indiquez "update" ou "UPDATE", les deux seront considérées comme identiques.
 
-- <u>ZONES</u> :
+<u>ZONES</u> :
 
 Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
 Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
 
 La case **zone de sortie** permet de gérer le sens de la détection. Cela ne fonctionne qu'avec une zone d'entrée définie. Si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
 
+Les majuscules et les accents sont ignorés, donc si vous indiquez "Allée" ou "allee", les deux seront considérées comme identiques.
+
+<u>CONDITION DE L'ACTION</u> :
+Mettre en place une condition pour que l'action soit exécutée.
+Si aucune condition n'est spécifiée, l'action sera réalisée.
+.
+<u>Déroulé de l'action</u> :
 
 
+![execution d'une action](../images/frigate_Doc_ActionsEvents.png)
 
 ### Exemple de notifications :
 #### Plugin JeeMate
@@ -345,4 +360,3 @@ N'oubliez pas d'activer la page panel dans la configuration générale, puis pou
 
 - visualisation des caméras.
 - page évènements
-
