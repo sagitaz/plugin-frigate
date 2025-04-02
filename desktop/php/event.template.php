@@ -98,7 +98,8 @@
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
                               echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
                                                                               echo 'data-video="' . $clip . '"'; ?>
-      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>">
+      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>"
+	    data-description="<?= $description ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
           <i class="fas fa-camera"></i>
@@ -113,6 +114,11 @@
         title="{{Supprimer l'évènement sur votre serveur Frigate}}">
         <i class="fas fa-trash"></i>
       </button>
+      <?php if ($description != ''): ?>
+        <button class="hover-button video-btn" title="<?= $description ?>">
+          <i class="fas fas fa-comment"></i>
+        </button>
+      <?php endif; ?>
     </div>
 
   </div>

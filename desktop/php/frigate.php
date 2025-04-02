@@ -404,7 +404,7 @@ sendVarToJS('refresh', $refresh);
                         <div class="col-sm-4">
                             <div class="input-group">
                                 <span class="input-group-btn">
-                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vrai alors les actions ne seront pas éxècutées}}"><i class="fas fa-cog"></i></a>
+                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vraie alors les actions ne seront pas exécutées}}"><i class="fas fa-cog"></i></a>
                                 </span>
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
                                 <span class="input-group-btn">
@@ -418,7 +418,7 @@ sendVarToJS('refresh', $refresh);
                     <br>
                     <div class="alert alert-info" style="margin-left:40px; margin-right:40px;">
                         <u>{{Vous pouvez utiliser les variables suivantes}} :</u><br>
-                        #time#, #event_id#, #camera#, #cameraId#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #start#, #end#, #duree#, #type#
+                        #time#, #event_id#, #camera#, #cameraId#, #score#, #has_clip#, #has_snapshot#, #top_score#, #zones#, #label#, #description#, #start#, #end#, #duree#, #type#
                         <br>
                         #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>

@@ -87,17 +87,25 @@
 
 .modal-header {
   display: flex;
-  justify-content: space-between;
-  align-items: center;
+  flex-direction: column;
+  align-items: flex-start;
+  position: relative;
+  width: 100%;
   margin-bottom: 20px;
 }
 
 .modal-header h2 {
   flex: 1;
   margin: 0;
+  width: 100%;
+  text-align: left;
+  margin-top: 40px;
 }
 
 .button-container {
+  position: absolute;
+  top: 10px;
+  right: 10px;
   display: flex;
   gap: 10px;
 }
@@ -417,4 +425,20 @@
   z-index: 7;
   border-bottom-left-radius: 10px;
   border-bottom-right-radius: 10px;
+}
+
+#mediaTitle {
+  font-size: 24px;
+  font-weight: bold;
+  width: 100%;
+  text-align: left;
+}
+
+.limited-text {
+  display: inline-block;
+  font-size: 18px;
+  white-space: normal;
+  word-wrap: break-word;
+  overflow-wrap: break-word;
+  cursor: pointer;
 }

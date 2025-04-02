@@ -187,6 +187,7 @@ if (init('object_id') == '') {
           //echo "Erreur : " . $e->getMessage();
         }
         $topScore = $event['top_score'];
+    	  $description = $event['description'];
         $duree = $event['duree'];
         $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
         $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($duree) . '</div>';

@@ -5,21 +5,22 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
     const snapshotSrc = eventBtns.getAttribute('data-snapshot');
     const videoSrc = eventBtns.getAttribute('data-video');
     const title = eventBtns.getAttribute('data-title');
+    const description = eventBtns.getAttribute('data-description');
     const hasVideo = !!videoSrc;
     const hasSnapshot = !!snapshotSrc;
 
     if (this.classList.contains('video-btn')) {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
     }
     else {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
     }
 
     document.getElementById('showVideo').onclick = function () {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title);
+      showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
     };
     document.getElementById('showImage').onclick = function () {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title);
+      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
     };
   });
 });
@@ -179,8 +180,16 @@ document.body.addEventListener('frigate::events', function () {
   window.location.reload();
 });
 
+function truncateText(element, fullText, maxLength) {
+  if (fullText.length > maxLength) {
+    element.textContent = fullText.substring(0, maxLength) + "...";
+    element.setAttribute("title", fullText);
+  } else {
+    element.textContent = fullText;
+  }
+}
 
-function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
+function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
   const mediaModal = document.getElementById('mediaModal');
   const videoContainer = document.querySelector('.video-container');
   const imageContainer = document.querySelector('.image-container');
@@ -190,9 +199,11 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title) {
   const showVideoBtn = document.getElementById('showVideo');
   const showImageBtn = document.getElementById('showImage');
   const mediaTitle = document.getElementById('mediaTitle');
+  const mediaDescription = document.getElementById('mediaDescription');
 
   mediaTitle.innerHTML = title;
-
+  truncateText(mediaDescription, description, 200);
+  
   if (mediaType === 'video') {
     videoSource.src = src;
     videoPlayer.load();
