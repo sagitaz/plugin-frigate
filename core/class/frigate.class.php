@@ -2233,6 +2233,12 @@ class frigate extends eqLogic
       $cmd->event($event->getZones());
       $cmd->save();
 
+      $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
+      $data = $event->getData();
+      $description = $data['description'] ?? "";
+      $cmd->event($description);
+      $cmd->save();
+
       $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "", 0, null, 0);
       $cmd->event($event->getEventId());
       $cmd->save();

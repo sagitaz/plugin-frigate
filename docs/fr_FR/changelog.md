@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 04/04/2025 Stable 1.2.4
+- Ajout commande info description (tester quand même les actions du plugin)
+
 # 02/04/2025 Stable 1.2.3
 - Gestion de la description genAI
 - Fix actions sur condition
