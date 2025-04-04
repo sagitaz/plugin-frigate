@@ -154,6 +154,7 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#has_snapshot#** : texte 0 ou 1
 - **#top_score#** : le score maximum en pourcentage -> 92 %
 - **#zones#** : tableau
+- **#description#** : la description de l'événement générée par genAI (il faut bien entendu l'avoir activé dans le serveur Frigate)
 - **#snapshot#** : lien vers fichier image
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#snapshot_path#** : path vers fichier image
