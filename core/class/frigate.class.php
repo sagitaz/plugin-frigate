@@ -2385,6 +2385,21 @@ class frigate extends eqLogic
     if ($version != config::byKey('frigate_version', 'frigate')) {
       config::save('frigate_version', $version, 'frigate');
     }
+
+    // Créer ou récupérer la valeur de uptime en secondes
+    $uptime = $stats['service']['uptime'] ?? 0;
+    $cmd = self::createCmd($eqlogicId, "uptime", "numeric", "", "info_uptime", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($uptime);
+    $cmd->save();
+
+    // Créer ou récupérer la valeur de uptime en format lisible
+    $uptimeTimestamp = time() - $uptime;
+    $uptimeDate = date("Y-m-d H:i:s", $uptimeTimestamp);
+    $cmd = self::createCmd($eqlogicId, "uptimeDate", "string", "", "info_uptimeDate", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($uptimeDate);
+    $cmd->save();
   }
 
   private static function executeActionNewEvent($eqLogicId, $event)
