@@ -3142,7 +3142,7 @@ class frigate extends eqLogic
   public static function sendFrigateConfiguration($frigateConfiguration, $restart = false)
   {
     $urlfrigate = self::getUrlFrigate();
-    $resultURL = $urlfrigate . "/api/config/save" . ($restart ? '?save_option=restart' : '');
+    $resultURL = $urlfrigate . "/api/config/save" . ($restart ? '?save_option=restart' : '?save_option=saveonly');
 
     $ch = curl_init($resultURL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
