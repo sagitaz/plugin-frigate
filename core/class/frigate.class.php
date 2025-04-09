@@ -2385,6 +2385,21 @@ class frigate extends eqLogic
     if ($version != config::byKey('frigate_version', 'frigate')) {
       config::save('frigate_version', $version, 'frigate');
     }
+
+    // Créer ou récupérer la valeur de uptime en secondes
+    $uptime = $stats['service']['uptime'] ?? 0;
+    $cmd = self::createCmd($eqlogicId, "uptime", "numeric", "", "info_uptime", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($uptime);
+    $cmd->save();
+
+    // Créer ou récupérer la valeur de uptime en format lisible
+    $uptimeTimestamp = time() - $uptime;
+    $uptimeDate = date("Y-m-d H:i:s", $uptimeTimestamp);
+    $cmd = self::createCmd($eqlogicId, "uptimeDate", "string", "", "info_uptimeDate", "", 0, null, 0);
+    // Enregistrer la valeur de l'événement
+    $cmd->event($uptimeDate);
+    $cmd->save();
   }
 
   private static function executeActionNewEvent($eqLogicId, $event)
@@ -3127,7 +3142,7 @@ class frigate extends eqLogic
   public static function sendFrigateConfiguration($frigateConfiguration, $restart = false)
   {
     $urlfrigate = self::getUrlFrigate();
-    $resultURL = $urlfrigate . "/api/config/save" . ($restart ? '?save_option=restart' : '');
+    $resultURL = $urlfrigate . "/api/config/save" . ($restart ? '?save_option=restart' : '?save_option=saveonly');
 
     $ch = curl_init($resultURL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
