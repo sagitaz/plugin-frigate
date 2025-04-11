@@ -183,6 +183,14 @@ if (!isConnect()) {
                     <input type="checkbox" class="configKey form-control" data-l1key="event::confirmDelete" />
                 </div>
             </div>
+            <div class="form-group">
+                <label class="col-lg-7 control-label">{{Pause création fichiers (en secondes)}}
+                    <sup><i class="fas fa-question-circle tooltips" title="{{Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip}}"></i></sup>
+                </label>
+                <div class="col-xs-5">
+                    <input type="number" class="configKey form-control input-xs" data-l1key="sleep" placeholder="5" />
+                </div>
+            </div>
         </fieldset>
     </div>
 </div>
