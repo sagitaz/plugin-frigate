@@ -1083,7 +1083,7 @@ class frigate extends eqLogic
             $frigate->$setMethod($newValue);
             $updated = true;
             if ($field == 'Type' && $newValue != $frigate->getType()) {
-              $infos = self::getEventinfos($mqtt, $event, true);
+              $infos = self::getEventinfos($mqtt, $event,true);
               $frigate->setSnapshot($infos["snapshot"]);
               $frigate->setClip($infos["clip"]);
               log::add(__CLASS__, 'debug', "║ Mise à jour forcé des champs snapshot et clip pour event ID: " . $event['id']);
@@ -1112,13 +1112,9 @@ class frigate extends eqLogic
     $date = date("d-m-Y H:i:s", $event->getStartTime());
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
     $box = $event->getBox();
-    if (is_array($box)) {
-      $boxArray = $box;
-    } else {
-      $boxArray = json_decode($box, true);
-    }
-
-    $data = json_decode($event->getData(), true);
+    $boxArray = is_array($box) ? $box : json_decode($box, true);
+    $data = $event->getData();
+    $dataArray = is_array($data) ? $data : json_decode($data, true);
 
     $result = array(
       "id" => $event->getId(),
@@ -1141,7 +1137,7 @@ class frigate extends eqLogic
       "type" => $event->getType(),
       "isFavorite" => $event->getIsFavorite() ?? 0,
       "zones" => $event->getZones() ?? '',
-      "description" => $data['description'] ?? ''
+      "description" => $dataArray['description'] ?? ''
     );
 
 
@@ -1161,8 +1157,14 @@ class frigate extends eqLogic
   public static function getEventInfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
-
+    $sleep = config::byKey('sleep', 'frigate');
+    if (empty($sleep) || $sleep < 0 || $sleep > 10) {
+      $sleep = 5;
+    } else {
+      $sleep = intval($sleep);
+    }
     // Fonction de vérification et téléchargement
+    sleep($sleep);
     $img = self::processMedia($dir, $event['id'], '_thumbnail.jpg', $event['camera'], 1);
     $snapshot = self::processSnapshot($dir, $event, $force);
     log::add(__CLASS__, 'debug', "║ Snapshot: " . json_encode($snapshot));
@@ -1204,7 +1206,6 @@ class frigate extends eqLogic
     $filePath = $dir . '/' . $id . $suffix;
     if (!file_exists($filePath)) {
       log::add(__CLASS__, 'debug', "║ Fichier non trouvé: $filePath, téléchargement");
-      sleep(5); // Option à améliorer
       $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $isThumbnail);
       return $img == "error" ? "null" : "/plugins/frigate/data/" . $camera . "/" . $id . $suffix;
     }
@@ -1217,7 +1218,6 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "║ Fichier snapshot non trouvé: " . $dir . '/' . $event['id'] . '_snapshot.jpg');
       if ($event['has_snapshot'] == "true") {
         log::add(__CLASS__, 'debug', "║ Has Snapshot: true, téléchargement");
-        sleep(5); // Option à améliorer
         $snapshot = self::saveURL($event['id'], "snapshot", $event['camera']);
         return ['url' => $snapshot == "error" ? "null" : $snapshot, 'has' => ($snapshot != "error") ? 1 : 0];
       }
@@ -1236,7 +1236,6 @@ class frigate extends eqLogic
     if (!file_exists($dir . '/' . $event['id'] . '_clip.mp4') || $force) {
       log::add(__CLASS__, 'debug', "║ Fichier clip non trouvé: " . $dir . '/' . $event['id'] . '_clip.mp4');
       if ($event['has_clip'] == "true") {
-        sleep(5); // Option à améliorer
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
         if ($clip == "error") return ['url' => "null", 'has' => 0];
 
@@ -1521,14 +1520,17 @@ class frigate extends eqLogic
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
-      $data = json_decode($event->getData(), true);
+      $box = $event->getBox();
+      $boxArray = is_array($box) ? $box : json_decode($box, true);
+      $data = $event->getData();
+      $dataArray = is_array($data) ? $data : json_decode($data, true);
 
       $result[] = array(
         "id" => $event->getId(),
         "img" => $event->getLasted(),
         "camera" => $event->getCamera(),
         "label" => $event->getLabel(),
-        "box" => json_decode($event->getBox(), true),
+        "box" => $boxArray,
         "date" => $date,
         "duree" => $duree,
         "startTime" => $event->getStartTime(),
@@ -1544,7 +1546,7 @@ class frigate extends eqLogic
         "type" => $event->getType(),
         "isFavorite" => $event->getIsFavorite() ?? 0,
         "zones" => $event->getZones() ?? '',
-        "description" => $data['description'] ?? ''
+        "description" => $dataArray['description'] ?? ''
       );
     }
 
@@ -2235,7 +2237,8 @@ class frigate extends eqLogic
 
       $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
       $data = $event->getData();
-      $description = $data['description'] ?? "";
+      $dataArray = is_array($data) ? $data : json_decode($data, true);
+      $description = isset($dataArray['description']) ? $dataArray['description'] : "";
       $cmd->event($description);
       $cmd->save();
 
@@ -2427,7 +2430,8 @@ class frigate extends eqLogic
     $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
     $data = $event->getData();
-    $description = isset($data['description']) ? $data['description'] : "";
+    $dataArray = is_array($data) ? $data : json_decode($data, true);
+    $description = isset($dataArray['description']) ? $dataArray['description'] : "";
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
