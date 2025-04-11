@@ -251,6 +251,8 @@
         "Paramétrage Frigate": "Ajustes de la fragata",
         "Paramétrage par défaut d'un évènement créé manuellement": "Configuración por defecto de un evento creado manualmente",
         "Pause action": "Acción de pausa",
+        "Pause création fichiers (en secondes)": "Pausa de creación de archivos (en segundos)",
+        "Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip": "Haz una pausa para dar tiempo al servidor a crear la instantánea o el archivo de clip",
         "Pause à effectuer sur l'action PTZ (0 à 10)": "Acción PTZ en pausa (0 a 10)",
         "Pièce par défaut pour les équipements": "Pieza por defecto para equipos",
         "Port": "Puerto",

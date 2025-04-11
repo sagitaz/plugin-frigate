@@ -251,6 +251,8 @@
         "Paramétrage Frigate": "Frigate-Einstellungen",
         "Paramétrage par défaut d'un évènement créé manuellement": "Standardeinstellungen für ein manuell erstelltes Ereignis",
         "Pause action": "Pause Aktion",
+        "Pause création fichiers (en secondes)": "Pause bei der Erstellung von Dateien (in Sekunden)",
+        "Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip": "Pause, die gemacht werden soll, um dem Server Zeit zu geben, die Snapshot- oder Clip-Datei zu erstellen",
         "Pause à effectuer sur l'action PTZ (0 à 10)": "Pause, die bei der PTZ-Aktion gemacht werden soll (0 bis 10)",
         "Pièce par défaut pour les équipements": "Standardraum für Geräte",
         "Port": "Hafen",
