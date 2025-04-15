@@ -53,6 +53,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
 - **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement, la vidéo sera jouée.
 - **Confirmation avant suppression** : Affiche une alerte avant la suppression d'un évènement.
+- **Pause création fichiers (en secondes)** : Délai d'attente avant de créer le fichier (clip / snapshot) (5 s par défaut). Suivant les serveurs, cela peut être nécessaire pour laisser le temps à Frigate de créer le fichier.
 #### Paramétrage par défaut d'un évènement créé manuellement
 - **Label** : le nom de l'évènement créé (manuel par défaut).
 - **Enregistrer une vidéo** : oui par défaut.
@@ -72,6 +73,9 @@ Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
+
+**Les commandes de tous les équipements sont créées automatiquement à la prochaine réception d'événements ou de statistiques. Si vous ne les voyez pas à la première installation du plugin, c'est que vos événements récents ont plus de 3 heures, il faut donc attendre le prochain événement pour voir les commandes.**
+
 ## <u>Equipement Events</u>
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
@@ -102,7 +106,7 @@ A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
 
 - bbox
-- timestamp : la date, celle-ci sera présente aussi sur le snapshot réaliser si coché.
+- timestamp : la date, celle-ci sera présente aussi sur le snapshot réalisé si coché.
 - zones
 - mask : la zone sera masquée
 - motion : la zone est avec un contour rouge
