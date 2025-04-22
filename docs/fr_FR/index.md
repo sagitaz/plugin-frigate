@@ -30,6 +30,10 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
+# <u>Log</u>
+Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
+
+![niveau de logs](../images/frigate_Doc_Logs.png)
 # <u>Configuration</u>
 - **Pièce par défaut** : Les caméras créées seront automatiquement placées dans cette pièce.
 - **Exclure du backup** : Si coché, les données de la caméra ne seront pas sauvegardées dans le fichier de configuration de Jeedom.
