@@ -397,14 +397,14 @@ sendVarToJS('refresh', $refresh);
             </div><!-- /.tabpanel #statstab-->
 
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
-            <br>
+                <br>
                 <div class="actionAttr form-group" id="actionTab">
                     <div class="form-group rounded" style="border:1px solid var(--txt-color); margin-left:40px; margin-right:40px; padding:10px 0px 40px 0px; background-color:var(--el-defaultColor) !important">
                         <div class="col-sm-2" style="text-align:right;"><label class="control-label">{{Condition générale}}</label></div>
                         <div class="col-sm-4">
                             <div class="input-group">
                                 <span class="input-group-btn">
-                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vraie alors les actions ne seront pas exécutées}}"><i class="fas fa-cog"></i></a>
+                                    <a class="btn btn-default roundedLeft" title="{{Si la condition est vraie alors les actions ne seront pas exécutées}}"><i class="fas fa-cog"></i></a><br>
                                 </span>
                                 <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="conditionIf" />
                                 <span class="input-group-btn">
@@ -422,6 +422,9 @@ sendVarToJS('refresh', $refresh);
                         <br>
                         #snapshot#, #clip#, #thumbnail#, #snapshot_path#, #clip_path#, #thumbnail_path#, #preview#, #jeemate#
                         <a class="btn btn-success btn-sm pull-right bt_addAction"><i class="fas fa-plus-circle"></i> {{Ajouter une action}}</a>
+                        <br><br>
+
+                        {{La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer}}
                     </div>
                     <form class="form-horizontal">
                         <fieldset>

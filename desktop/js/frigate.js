@@ -167,7 +167,7 @@ function addAction(_action, _type) {
     div += '<div class="col-sm-3">'
     div += '<div class="input-group">'
     div += '<span class="input-group-btn">'
-    div += '<a class="btn btn-default btn-sm roundedLeft" data-type="' + _type + '" title="{{Attention : la condition générale est prioritaire}}"><i class="fas fa-cog"></i></a>'
+    div += '<a class="btn btn-default btn-sm roundedLeft" data-type="' + _type + '" title="{{Action exécutée si la condition est remplie}}"><i class="fas fa-cog"></i></a>'
     div += '</span>'
     div += '<input type="text" class="expressionAttr cmdAction form-control input-sm" data-l1key="actionCondition" data-type="' + _type + '" placeholder="{{Condition}}" />'
     div += '<span class="input-group-btn">'

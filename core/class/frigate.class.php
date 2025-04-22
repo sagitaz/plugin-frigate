@@ -1158,7 +1158,7 @@ class frigate extends eqLogic
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     $sleep = config::byKey('sleep', 'frigate');
-    if (empty($sleep) || $sleep < 0 || $sleep > 10) {
+    if (!isset($sleep) || $sleep < 0 || $sleep > 10) {
       $sleep = 5;
     } else {
       $sleep = intval($sleep);

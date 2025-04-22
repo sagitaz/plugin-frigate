@@ -30,6 +30,10 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
 La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
+# <u>Log</u>
+Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
+
+![niveau de logs](../images/frigate_Doc_Logs.png)
 # <u>Configuration</u>
 - **Pièce par défaut** : Les caméras créées seront automatiquement placées dans cette pièce.
 - **Exclure du backup** : Si coché, les données de la caméra ne seront pas sauvegardées dans le fichier de configuration de Jeedom.
@@ -53,6 +57,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
 - **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement, la vidéo sera jouée.
 - **Confirmation avant suppression** : Affiche une alerte avant la suppression d'un évènement.
+- **Pause création fichiers (en secondes)** : Délai d'attente avant de créer le fichier (clip / snapshot) (5 s par défaut). Suivant les serveurs, cela peut être nécessaire pour laisser le temps à Frigate de créer le fichier.
 #### Paramétrage par défaut d'un évènement créé manuellement
 - **Label** : le nom de l'évènement créé (manuel par défaut).
 - **Enregistrer une vidéo** : oui par défaut.
@@ -72,6 +77,9 @@ Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
+
+**Les commandes de tous les équipements sont créées automatiquement à la prochaine réception d'événements ou de statistiques. Si vous ne les voyez pas à la première installation du plugin, c'est que vos événements récents ont plus de 3 heures, il faut donc attendre le prochain événement pour voir les commandes.**
+
 ## <u>Equipement Events</u>
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
@@ -102,7 +110,7 @@ A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
 
 - bbox
-- timestamp : la date, celle-ci sera présente aussi sur le snapshot réaliser si coché.
+- timestamp : la date, celle-ci sera présente aussi sur le snapshot réalisé si coché.
 - zones
 - mask : la zone sera masquée
 - motion : la zone est avec un contour rouge
@@ -140,11 +148,57 @@ Les actions sur évènements sont disponible pour l'équipement **Events** et po
 Les actions configurées sur l'équipement **Events** seront exécutées par les évènements provenant de toutes les caméras **sauf si elles possèdent des actions configurées et activées.**
 Si vous souhaitez regrouper sur l'équipement Events des actions communes et ensuite ajouter des actions pour chaque caméra, pensez à cocher sur l'équipement Events la case "autoriser les actions".
 
-#### Conditions
-Indiquer ici dans quel cas les actions NE DOIVENT PAS être exécutées.
+<u>Déroulé de l'action</u> :
+
+
+![execution d'une action](../images/frigate_Doc_ActionsEvents.png)
+#### Conditions générales
+Indiquer ici dans quel cas les actions **NE DOIVENT PAS** être exécutées.
+
+Par exemple, vous configurez la condition comme ceci : 
+**#[Maison][Mode maison][Mode]# == "présent"** 
+Les actions ne seront exécutées que si le mode est tout autre que présent.
+
 
 #### Actions
 Vous pouvez indiquer ici les actions à effectuer à chaque nouvel évènement.
+
+Une checkbox vous permet de désactiver la vérification de la condition génèrale. 
+
+<u>LABEL</u> : 
+**Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
+Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
+Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
+Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
+Les majuscules et les accents sont ignorés, donc si vous indiquez "Vélo" ou "velo", les deux seront considérées comme identiques.
+
+<u>TYPE</u> : 
+**Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
+**Sans** MQTT, il sera toujours de type **end**.
+Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
+Vous pourvez en mettre plusieurs en les séparant par des virgules.
+Si aucun type n'est spécifié, l'action sera exécutée seulement pour les évènements de type **end**.
+les majuscules et les accents sont ignorés, donc si vous indiquez "update" ou "UPDATE", les deux seront considérées comme identiques.
+
+<u>ZONES</u> :
+
+Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
+Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
+
+La case **zone de sortie** permet de gérer le sens de la détection. Cela ne fonctionne qu'avec une zone d'entrée définie. Si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
+
+Les majuscules et les accents sont ignorés, donc si vous indiquez "Allée" ou "allee", les deux seront considérées comme identiques.
+
+<u>CONDITION DE L'ACTION</u> :
+Indiquer ici dans quel cas les actions **DOIVENT** être exécutées.
+
+Par exemple, vous configurez la condition comme ceci : 
+**#[Maison][Mode maison][Mode]# == "absent"**
+Les actions ne seront exécutées que si le mode est configuré comme absent.
+
+Si aucune condition n'est spécifiée, l'action sera réalisée.
+
+<u>Variables disponibles :</u>
 Une liste de variables est disponible afin de personnaliser les notifications.
 - **#time#** : l'heure actuelle au format 12:00
 - **#camera#** : le nom de la caméra
@@ -177,40 +231,7 @@ Une liste de variables est disponible afin de personnaliser les notifications.
 - **#duree#** : durée de l'évènement
 - **#jeemate#** : voir explications plus bas
 
-Une checkbox vous permet de désactiver la vérification de la condition. 
 
-<u>LABEL</u> : 
-**Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
-Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
-Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
-Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
-Les majuscules et les accents sont ignorés, donc si vous indiquez "Vélo" ou "velo", les deux seront considérées comme identiques.
-
-<u>TYPE</u> : 
-**Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
-**Sans** MQTT, il sera toujours de type **end**.
-Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
-Vous pourvez en mettre plusieurs en les séparant par des virgules.
-Si aucun type n'est spécifié, l'action sera exécutée seulement pour les évènements de type **end**.
-les majuscules et les accents sont ignorés, donc si vous indiquez "update" ou "UPDATE", les deux seront considérées comme identiques.
-
-<u>ZONES</u> :
-
-Dans la case **zone d'entrée**, il vous suffit d'indiquer la ou les zones pour lesquelles vous souhaitez que l'action soit exécutée.
-Vous pouvez indiquer plusieurs zones en les séparant par des virgules.
-
-La case **zone de sortie** permet de gérer le sens de la détection. Cela ne fonctionne qu'avec une zone d'entrée définie. Si la zone d'entrée est déclenchée avant la zone de sortie alors l'action sera exécutée.
-
-Les majuscules et les accents sont ignorés, donc si vous indiquez "Allée" ou "allee", les deux seront considérées comme identiques.
-
-<u>CONDITION DE L'ACTION</u> :
-Mettre en place une condition pour que l'action soit exécutée.
-Si aucune condition n'est spécifiée, l'action sera réalisée.
-.
-<u>Déroulé de l'action</u> :
-
-
-![execution d'une action](../images/frigate_Doc_ActionsEvents.png)
 
 ### Exemple de notifications :
 #### Plugin JeeMate

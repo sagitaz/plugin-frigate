@@ -42,10 +42,10 @@
         "Êtes-vous sûr de vouloir supprimer cet évènement ?<br\/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?": "Are you sure you want to delete this event? <br\/>This will also delete it from your Frigate server! Continue?"
     },
     "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Action exécutée si la condition est remplie": "Action executed if condition is met",
         "Affichage des logs du serveur Frigate": "View Frigate server logs",
         "Afficher": "Show",
         "Ajouter une commande HTTP": "Add an HTTP command",
-        "Attention : la condition générale est prioritaire": "Warning: the general condition has priority",
         "Aucune URL externe n\\'est configurée.": "No external URL is configured.",
         "Aucune nouvelle caméra trouvée": "No new cameras found",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Check the box if you want the action to run in parallel with the other actions",
@@ -173,6 +173,7 @@
         "Identifiant": "ID",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Camera access ID, for HTTP commands only",
         "Infos": "News",
+        "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "The general condition takes precedence over the action conditions. Check the checkbox to ignore it",
         "Lien vers votre flux vidéo": "Link to your video stream",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Link to your video stream if the default one is not suitable. see documentation.",
         "Logs Frigate": "Logs Frigate",
