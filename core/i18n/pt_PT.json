@@ -42,10 +42,10 @@
         "Êtes-vous sûr de vouloir supprimer cet évènement ?<br\/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?": "Tem a certeza de que pretende eliminar este evento? Isto também o eliminará do seu servidor Frigate! Continuar?"
     },
     "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Action exécutée si la condition est remplie": "Ação executada se a condição for satisfeita",
         "Affichage des logs du serveur Frigate": "Visualização dos registos do servidor Frigate",
         "Afficher": "Mostrar",
         "Ajouter une commande HTTP": "Adicionar um comando HTTP",
-        "Attention : la condition générale est prioritaire": "Aviso: o estado geral tem prioridade",
         "Aucune URL externe n\\'est configurée.": "Não está configurado nenhum URL externo.",
         "Aucune nouvelle caméra trouvée": "Não foram encontradas novas câmaras",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Marque a caixa para que a ação seja executada em paralelo com as outras acções",
@@ -173,6 +173,7 @@
         "Identifiant": "EU IRIA",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acesso para a sua câmara, apenas para comandos HTTP",
         "Infos": "Informações",
+        "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "A condição geral tem precedência sobre as condições de ação. Marque a caixa de verificação para a ignorar",
         "Lien vers votre flux vidéo": "Ligação ao seu fluxo de vídeo",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Ligação ao seu fluxo de vídeo se o fluxo predefinido não for adequado. ver documentação.",
         "Logs Frigate": "Fragata de toros",
@@ -251,6 +252,8 @@
         "Paramétrage Frigate": "Definições da fragata",
         "Paramétrage par défaut d'un évènement créé manuellement": "Definição predefinida para um evento criado manualmente",
         "Pause action": "Pausa na ação",
+        "Pause création fichiers (en secondes)": "Pausa na criação de ficheiros (em segundos)",
+        "Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip": "Pausa para dar tempo ao servidor para criar o instantâneo ou ficheiro de clipes",
         "Pause à effectuer sur l'action PTZ (0 à 10)": "Pausa na ação PTZ (0 a 10)",
         "Pièce par défaut pour les équipements": "Peça por defeito para equipamento",
         "Port": "Porta",

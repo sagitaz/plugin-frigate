@@ -42,10 +42,10 @@
         "Êtes-vous sûr de vouloir supprimer cet évènement ?<br\/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?": "Sind Sie sicher, dass Sie dieses Ereignis löschen wollen?<br\/>Damit wird es auch von Ihrem Frigate-Server entfernt! Fortsetzen?"
     },
     "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Action exécutée si la condition est remplie": "Aktion wird ausgeführt, wenn die Bedingung erfüllt ist",
         "Affichage des logs du serveur Frigate": "Anzeige der Logs des Frigate-Servers",
         "Afficher": "Anzeige",
         "Ajouter une commande HTTP": "HTTP-Befehl hinzufügen",
-        "Attention : la condition générale est prioritaire": "Achtung: Die allgemeine Bedingung hat Vorrang",
         "Aucune URL externe n\\'est configurée.": "Es ist keine externe URL konfiguriert.",
         "Aucune nouvelle caméra trouvée": "Keine neuen Kameras gefunden",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Aktivieren Sie das Kontrollkästchen, wenn die Aktion parallel zu anderen Aktionen ausgeführt werden soll",
@@ -173,6 +173,7 @@
         "Identifiant": "ICH WÜRDE",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Zugangskennung zu Ihrer Kamera, nur für HTTP-Befehle",
         "Infos": "Infos",
+        "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "Die allgemeine Bedingung hat Vorrang vor den Aktionsbedingungen, markieren Sie die Checkbox, um sie zu ignorieren",
         "Lien vers votre flux vidéo": "Link zu Ihrem Videostream",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Link zu Ihrem Videostream, wenn der Standard-Videostream nicht passt. siehe Dokumentation.",
         "Logs Frigate": "Frigate-Logs",
@@ -251,6 +252,8 @@
         "Paramétrage Frigate": "Frigate-Einstellungen",
         "Paramétrage par défaut d'un évènement créé manuellement": "Standardeinstellungen für ein manuell erstelltes Ereignis",
         "Pause action": "Pause Aktion",
+        "Pause création fichiers (en secondes)": "Pause bei der Erstellung von Dateien (in Sekunden)",
+        "Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip": "Pause, die gemacht werden soll, um dem Server Zeit zu geben, die Snapshot- oder Clip-Datei zu erstellen",
         "Pause à effectuer sur l'action PTZ (0 à 10)": "Pause, die bei der PTZ-Aktion gemacht werden soll (0 bis 10)",
         "Pièce par défaut pour les équipements": "Standardraum für Geräte",
         "Port": "Hafen",

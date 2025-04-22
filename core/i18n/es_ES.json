@@ -42,10 +42,10 @@
         "Êtes-vous sûr de vouloir supprimer cet évènement ?<br\/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?": "¿Estás seguro de que quieres borrar este evento? ¡Esto también lo borrará de tu servidor Frigate! ¿Continuar?"
     },
     "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Action exécutée si la condition est remplie": "Acción ejecutada si se cumple la condición",
         "Affichage des logs du serveur Frigate": "Visualización de los registros del servidor Frigate",
         "Afficher": "Mostrar",
         "Ajouter une commande HTTP": "Añadir un comando HTTP",
-        "Attention : la condition générale est prioritaire": "Atención: el estado general tiene prioridad",
         "Aucune URL externe n\\'est configurée.": "No se ha configurado ninguna URL externa.",
         "Aucune nouvelle caméra trouvée": "No se han encontrado cámaras nuevas",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Marque la casilla para que la acción se ejecute en paralelo con las demás acciones",
@@ -173,6 +173,7 @@
         "Identifiant": "IDENTIFICACIÓN",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acceso para su cámara, sólo para comandos HTTP",
         "Infos": "Información",
+        "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "La condición general tiene prioridad sobre las condiciones de acción. Marque la casilla para ignorarla",
         "Lien vers votre flux vidéo": "Enlace a su flujo de vídeo",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Enlace a su flujo de vídeo si el predeterminado no es adecuado. consulte la documentación.",
         "Logs Frigate": "Fragata de troncos",
@@ -251,6 +252,8 @@
         "Paramétrage Frigate": "Ajustes de la fragata",
         "Paramétrage par défaut d'un évènement créé manuellement": "Configuración por defecto de un evento creado manualmente",
         "Pause action": "Acción de pausa",
+        "Pause création fichiers (en secondes)": "Pausa de creación de archivos (en segundos)",
+        "Pause à effectuer afin de laisser le temps au serveur de créer le fichier snapshot ou clip": "Haz una pausa para dar tiempo al servidor a crear la instantánea o el archivo de clip",
         "Pause à effectuer sur l'action PTZ (0 à 10)": "Acción PTZ en pausa (0 a 10)",
         "Pièce par défaut pour les équipements": "Pieza por defecto para equipos",
         "Port": "Puerto",
