@@ -42,10 +42,10 @@
         "Êtes-vous sûr de vouloir supprimer cet évènement ?<br\/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?": "Sei sicuro di voler cancellare questo evento? Questo lo cancellerà anche dal tuo server Frigate! Continuare?"
     },
     "plugins\/frigate\/desktop\/js\/frigate.js": {
+        "Action exécutée si la condition est remplie": "Azione eseguita se la condizione è soddisfatta",
         "Affichage des logs du serveur Frigate": "Visualizzazione dei log del server Frigate",
         "Afficher": "Mostra",
         "Ajouter une commande HTTP": "Aggiungere un comando HTTP",
-        "Attention : la condition générale est prioritaire": "Attenzione: la condizione generale ha la priorità",
         "Aucune URL externe n\\'est configurée.": "Non è configurato alcun URL esterno.",
         "Aucune nouvelle caméra trouvée": "Non sono state trovate nuove telecamere",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Selezionate la casella in modo che l'azione venga eseguita in parallelo con le altre azioni",
@@ -173,6 +173,7 @@
         "Identifiant": "Identifiant",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID di accesso per la telecamera, solo per i comandi HTTP",
         "Infos": "Informazioni",
+        "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "La condizione generale ha la precedenza sulle condizioni di azione. Selezionate la casella di controllo per ignorarla",
         "Lien vers votre flux vidéo": "Collegamento al flusso video",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Collegamento al proprio flusso video se quello predefinito non è adatto. vedere la documentazione.",
         "Logs Frigate": "Tronchi Frigate",
