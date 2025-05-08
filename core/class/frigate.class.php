@@ -828,7 +828,7 @@ class frigate extends eqLogic
 
     if (curl_errno($ch)) {
       log::add(__CLASS__, 'error', "║ Erreur getcURL (" . $method . "): " . curl_error($ch));
-      die();
+      return null;
     }
     curl_close($ch);
     $response = $decodeJson ? json_decode($data, true) : $data;
@@ -871,6 +871,11 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
+    if ($stats == null) {
+      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les stats de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return;
+    }
     self::majStatsCmds($stats);
     log::add(__CLASS__, 'debug', "╚════════════════════════ END STATS ═══════════════════");
   }
@@ -881,6 +886,11 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/" . $camera . "/ptz/info";
     $presets = self::getcURL("Presets", $resultURL);
+    if ($presets == null) {
+      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les presets de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return;
+    }
     log::add(__CLASS__, 'debug', "╚════════════════════════ END IMPORT PRESET ═══════════════════");
     return $presets;
   }
@@ -957,7 +967,11 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/logs/" . $service;
     $logs = self::getcURL("Logs", $resultURL, null, false);
-
+    if ($logs == null) {
+      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les logs de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return;
+    }
     return $logs;
   }
 
@@ -980,6 +994,11 @@ class frigate extends eqLogic
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
+      if ($events == null) {
+        log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les événements de Frigate.");
+        log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+        return;
+      }
       // Traiter les evenements du plus ancien au plus recent
       $events = array_reverse($events);
     }
@@ -1576,6 +1595,11 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     // récupérer le json de configuration
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
+    if ($configurationArray == null) {
+      log::add(__CLASS__, 'error', "║ Impossible de récupérer le fichier de configuration de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
+      return;
+    }
     log::add(__CLASS__, 'debug', "║ Fichier de configuration : " . json_encode($configurationArray));
 
     frigate::generateEqEvents($configurationArray);
@@ -2775,11 +2799,17 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/config";
     $config = self::getcURL("Configuration", $resultURL);
     if ($config === false) {
-      log::add(__CLASS__, 'debug', "Configuration non créée");
+      log::add(__CLASS__, 'debug', "║ Erreur lors de la récupération de la configuration de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return false;
+    } else if ($config == null) {
+      log::add(__CLASS__, 'error', "║Erreur: Impossible de récupérer la configuration de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return false;
     } else {
-      log::add(__CLASS__, 'debug', "Configuration : " . json_encode($config));
+      log::add(__CLASS__, 'debug', "║ Configuration de Frigate récupérée avec succès.");  
+      log::add(__CLASS__, 'debug', "║ Configuration : " . json_encode($config));
     }
-
     return $config;
   }
 
@@ -3086,7 +3116,7 @@ class frigate extends eqLogic
       if ($file->isFile() && $file->getFilename() === $fileName) {
         // Supprime le fichier
         unlink($file->getPathname());
-        log::add(__CLASS__, 'debug', "Fichier supprimé: " . $file->getPathname());
+        log::add(__CLASS__, 'debug', "║ Fichier supprimé: " . $file->getPathname());
       }
     }
   }
@@ -3116,7 +3146,7 @@ class frigate extends eqLogic
     if ($curlResponse === false) {
       $error = 'Erreur cURL : ' . curl_error($ch);
       curl_close($ch);
-      log::add(__CLASS__, 'error', 'getFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, 'error', '║ getFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3129,7 +3159,7 @@ class frigate extends eqLogic
     if ($httpCode != 200) {
       $error = 'Erreur : Impossible de récupérer la configuration. Code de statut : ' . $httpCode;
       curl_close($ch);
-      log::add(__CLASS__, 'error', 'getFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, 'error', '║ getFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3168,13 +3198,13 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-yaml'));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $frigateConfiguration);
 
-    log::add(__CLASS__, 'debug', 'sendFrigateConfiguration :: Data : ' . $frigateConfiguration);
+    log::add(__CLASS__, 'debug', '║ sendFrigateConfiguration :: Data : ' . $frigateConfiguration);
     $curlResponse = curl_exec($ch);
 
     if ($curlResponse === false) {
       $error = 'Erreur cURL : ' . curl_error($ch);
       curl_close($ch);
-      log::add(__CLASS__, 'error', 'sendFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, 'error', '║ sendFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3187,7 +3217,7 @@ class frigate extends eqLogic
     if ($httpCode != 200) {
       $error = 'Erreur : Impossible de sauvegarder la configuration. Code de statut : ' . $httpCode;
       curl_close($ch);
-      log::add(__CLASS__, 'error', 'sendFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, 'error', '║ sendFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3207,13 +3237,19 @@ class frigate extends eqLogic
 
   private static function jsonFromUrl($jsonUrl)
   {
-    // Télécharger le contenu JSON depuis l'URL
-    $jsonContent = file_get_contents($jsonUrl);
+    $headers = @get_headers($jsonUrl);
+
+    if ($headers && strpos($headers[0], '200') !== false) {
+      // Le fichier existe, on peut le télécharger
+      $jsonContent = file_get_contents($jsonUrl);
+    } else {
+      $jsonContent = false;
+    }
 
     // Vérifier si le téléchargement a réussi
     if ($jsonContent === false) {
-      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to retrieve JSON from URL");
-      return json_encode(["error" => "Failed to retrieve JSON from URL: $jsonUrl"]);
+      log::add(__CLASS__, 'error', "║ jsonFromUrl : Failed to retrieve JSON from URL");
+      return null;
     }
 
     // Décoder le JSON en tableau PHP
@@ -3221,8 +3257,8 @@ class frigate extends eqLogic
 
     // Vérifier si la conversion a réussi
     if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
-      log::add(__CLASS__, 'error', "jsonFromUrl : Failed to decode JSON content");
-      return json_encode(["error" => "Failed to decode JSON content from URL: $jsonUrl"]);
+      log::add(__CLASS__, 'error', "║ jsonFromUrl : Failed to decode JSON content");
+      return null;
     }
 
     return $jsonArray;
@@ -3285,6 +3321,11 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
+    if ($stats == null) {
+      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les stats de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
+      return;
+    }
     $version = strstr($stats['service']['version'], '-', true);
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
