@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 08/05/2025 Stable 1.2.9
+- Correction d'erreur si serveur non connecté.
+
 # 09/04/2025 Stable 1.2.5
 - Ajout commande info uptime
 - Ajout commande info uptimeDate

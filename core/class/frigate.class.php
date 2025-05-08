@@ -1593,12 +1593,17 @@ class frigate extends eqLogic
 
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
     $urlfrigate = self::getUrlFrigate();
+    if (empty($urlfrigate)) {
+      log::add(__CLASS__, 'error', "║ Impossible de récupérer l'URL de Frigate.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
+      return false;
+    }
     // récupérer le json de configuration
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     if ($configurationArray == null) {
       log::add(__CLASS__, 'error', "║ Impossible de récupérer le fichier de configuration de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
-      return;
+      return false;
     }
     log::add(__CLASS__, 'debug', "║ Fichier de configuration : " . json_encode($configurationArray));
 
@@ -1607,6 +1612,7 @@ class frigate extends eqLogic
     frigate::generateEqCameras($configurationArray);
 
     log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-success:FIN CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
+    return true;
   }
   public static function generateEqCameras($configurationArray)
   {
