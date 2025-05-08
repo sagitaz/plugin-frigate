@@ -1825,7 +1825,7 @@ class frigate extends eqLogic
     // $cmd->save();
   }
 
-  public static function createAudioCmds($eqlogicId, $value)
+  public static function createAudioCmds($eqlogicId, $value = 0)
   {
     $infoCmd = self::createCmd($eqlogicId, "audio Etat", "binary", "", "info_audio", "JEEMATE_CAMERA_AUDIO_STATE", 0);
     //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
@@ -3239,11 +3239,13 @@ class frigate extends eqLogic
   {
     $headers = @get_headers($jsonUrl);
 
-    if ($headers && strpos($headers[0], '200') !== false) {
+    $code = substr($headers[0], 9, 3);
+    if ($code == '200') {
       // Le fichier existe, on peut le télécharger
       $jsonContent = file_get_contents($jsonUrl);
     } else {
       $jsonContent = false;
+      log::add(__CLASS__, 'error', "║ jsonFromUrl : HTTP Error $code lors du téléchargement de $jsonUrl");
     }
 
     // Vérifier si le téléchargement a réussi
