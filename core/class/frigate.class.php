@@ -2189,8 +2189,14 @@ class frigate extends eqLogic
     // récupérer info de la commande timestamp
     $cmdtimestamp = cmd::byEqLogicIdCmdName($eqCamera->getId(), "timestamp");
     $timestamp = $cmdtimestamp->execCmd();
-    // Vérifier si le timestamp est supérieur à la date de l'événement
-    if ($timestamp > $eventDate) {
+    $cmdtype = cmd::byEqLogicIdCmdName($eqCamera->getId(), "type");
+    if (is_object($cmdtype)) {
+      $type = $cmdtype->execCmd();
+    } else {
+      $type = "";
+    }
+    // Vérifier si le timestamp est supérieur ou égale à la date de l'événement et le type end
+    if (($timestamp >= $eventDate) && ($type === "end")) {
       log::add(__CLASS__, 'debug', "║ ACTION: L'évènement est plus ancien que le dernier évènement enregistré.");
       return;
     }
@@ -2289,6 +2295,9 @@ class frigate extends eqLogic
       $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "", 0, null, 0);
       $cmd->event($event->getEventId());
       // $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "type", "string", "", "info_type", "", 0, null, 0);
+      $cmd->event($event->getType());
 
       $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO");
       $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO");
