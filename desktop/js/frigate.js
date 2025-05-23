@@ -516,27 +516,12 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-            if (data.result == 'URL') {
+            if (data.result == false) {
                 $('#div_alert').showAlert({
-                    message: '{{L\'URL n\'est pas configurée.}}',
+                    message: '{{Erreur dans la configuration.}}',
                     level: 'warning'
                 });
                 return;
-            } else if (data.result == 'PORT') {
-                $('#div_alert').showAlert({
-                    message: '{{Le port n\'est pas configuré.}}',
-                    level: 'warning'
-                });
-                return;
-            } else if (data.result == '0') {
-                $('#div_alert').showAlert({
-                    message: '{{Aucune nouvelle caméra trouvée}}',
-                    level: 'success'
-                });
-                $('#div_alert').showAlert({
-                    message: '{{Mise à jour des commandes et statistiques.}}',
-                    level: 'success'
-                });
             } else {
                 $('#div_alert').showAlert({
                     message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
