@@ -48,7 +48,6 @@ try {
     }
     
     if (init('action') == 'searchAndCreate') {
-
         // Recherche et creation de cameras
         $result = frigate::generateAllEqs();
         ajax::success($result);
