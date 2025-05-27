@@ -150,7 +150,7 @@ function addAction(_action, _type) {
     }
 
     var div = '<div class="' + _type + '">'
-    div += '<div class="form-group rounded" style="margin:10px !important; padding:3px; background-color:var(--el-defaultColor) !important">'
+    div += '<div class="form-group rounded" style="margin:10px !important; padding:3px; background-color:var(--cat-scenario-color) !important; border:1px solid var(--txt-color) !important;">'
     div += '<div class="col-sm-1">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="enable" checked title="{{Décocher la case pour désactiver l\'action}}">'
     div += '<input type="checkbox" class="expressionAttr" data-l1key="options" data-l2key="background" title="{{Cocher la case pour que l\'action s\'exécute en parallèle des autres actions}}">'

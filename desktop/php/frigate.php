@@ -399,7 +399,7 @@ sendVarToJS('refresh', $refresh);
             <div role="tabpanel" class="tab-pane eqActions" id="actionsTab">
                 <br>
                 <div class="actionAttr form-group" id="actionTab">
-                    <div class="form-group rounded" style="border:1px solid var(--txt-color); margin-left:40px; margin-right:40px; padding:10px 0px 40px 0px; background-color:var(--el-defaultColor) !important">
+                    <div class="form-group rounded" style="border:1px solid var(--txt-color); margin-left:40px; margin-right:40px; padding:10px 0px 40px 0px; background-color:var(--el-scenario-color) !important">
                         <div class="col-sm-2" style="text-align:right;"><label class="control-label">{{Condition générale}}</label></div>
                         <div class="col-sm-4">
                             <div class="input-group">
