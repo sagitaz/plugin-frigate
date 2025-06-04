@@ -198,8 +198,13 @@ Les actions ne seront exécutées que si le mode est configuré comme absent.
 
 Si aucune condition n'est spécifiée, l'action sera réalisée.
 
-<u>Variables disponibles :</u>
-Une liste de variables est disponible afin de personnaliser les notifications.
+<u>Variables disponibles pour les conditions:</u>
+- **#camera#** : le nom de la caméra
+- **#score#** : le score en pourcentage -> 82 %
+- **#top_score#** : le score maximum en pourcentage -> 92 %
+
+<u>Variables disponibles pour les actions:</u>
+Une liste de variables est disponible afin de personnaliser les actions, ces variables sont remplacées par leur valeur lors de l'exécution de l'action.
 - **#time#** : l'heure actuelle au format 12:00
 - **#camera#** : le nom de la caméra
 - **#cameraId#** : l'id de la caméra (pour par exemple un deeplink vers la page de la caméra dans l'application JeeMate)
