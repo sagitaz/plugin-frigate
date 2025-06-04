@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 04/06/2025 Stable 1.3.2
+- Ajout des variables #camera#, #score# et #top_score# dans les conditions
+
 # 27/05/2025 Stable 1.3.1
 - Correction sur nouvelle installation (bug de la 1.3.0)   
 - Cacher sur le dashboard ne cache pas sur le panel. 

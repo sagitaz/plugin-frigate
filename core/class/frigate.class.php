@@ -2500,6 +2500,11 @@ class frigate extends eqLogic
 
     // Vérification de la condition d'exécution
     $conditionIf = $eqLogic->getConfiguration('conditionIf');
+    $conditionIf = str_replace(
+      ['#camera#', '#score#', '#top_score#'],
+      [$camera, $score, $topScore],
+      $conditionIf
+    );
     if ($conditionIf && jeedom::evaluateExpression($conditionIf)) {
       $conditionIsActived = true;
     }
@@ -2547,6 +2552,11 @@ class frigate extends eqLogic
         // vérifier si la condition de l'action est remplie
         $actionConditionIsActived = true;
         $actionCondition = $action['actionCondition'];
+        $actionCondition = str_replace(
+          ['#camera#', '#score#', '#top_score#'],
+          [$camera, $score, $topScore],
+          $actionCondition
+        );
         if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
           $actionConditionIsActived = false;
         }
