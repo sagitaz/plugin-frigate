@@ -1016,6 +1016,12 @@ class frigate extends eqLogic
       // Traiter un évènement
       $events = array($event);
     } else if (!$mqtt) {
+      if ($recoveryDays == null) {
+        log::add(__CLASS__, 'debug', "║ Recupération des évènement sur 0 jour, processus stoppé.");
+        log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
+        return;
+        }
+      }
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
