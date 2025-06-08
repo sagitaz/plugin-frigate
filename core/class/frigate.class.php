@@ -1021,7 +1021,7 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
         return;
         }
-      }
+      
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
