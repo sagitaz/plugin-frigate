@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 08/06/2025 Stable 1.3.3
+- Comparaison des événènements avant récupération
+- Gestion récupération 0 jours.
+
 # 04/06/2025 Stable 1.3.2
 - Ajout des variables #camera#, #score# et #top_score# dans les conditions
 

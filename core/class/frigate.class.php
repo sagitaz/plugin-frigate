@@ -975,6 +975,31 @@ class frigate extends eqLogic
     return $logs;
   }
 
+  private static function saveAndCompareEvents($filePath, $events)
+  {
+    log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START COMPARE EVENTS:/fg: ═══════════════════");
+    log::add(__CLASS__, 'debug', "║ Sauvegarde et comparaison des événements dans le fichier : " . $filePath);
+    if (file_exists($filePath)) {
+      $oldEvents = json_decode(file_get_contents($filePath), true);
+      $newEvents = array_udiff($events, $oldEvents, function ($a, $b) {
+        return strcmp($a['start_time'], $b['start_time']);
+      });
+      if (!empty($newEvents)) {
+        file_put_contents($filePath, json_encode(array_merge($oldEvents, $newEvents)));
+        log::add(__CLASS__, 'debug', "║ Detection d'événements nouveaux : " . json_encode($newEvents));
+      } else {
+        log::add(__CLASS__, 'debug', "║ Aucun nouveau événement détecté.");
+      }
+      log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
+      return $newEvents;
+    } else {
+      file_put_contents($filePath, json_encode($events));
+      log::add(__CLASS__, 'debug', "║ Fichier de sauvegarde créé : " . $filePath);
+      log::add(__CLASS__, 'debug', "║ Sauvegarde des événements : " . json_encode($events));
+      log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
+      return $events;
+    }
+  }
   public static function getEvent($id = null, $type = 'end')
   {
     if ($id == null) return;
@@ -991,6 +1016,12 @@ class frigate extends eqLogic
       // Traiter un évènement
       $events = array($event);
     } else if (!$mqtt) {
+      if ($recoveryDays == null) {
+        log::add(__CLASS__, 'debug', "║ Recupération des évènements sur 0 jour, processus stoppé.");
+        log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
+        return;
+        }
+      
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
@@ -1001,7 +1032,18 @@ class frigate extends eqLogic
       }
       // Traiter les evenements du plus ancien au plus recent
       $events = array_reverse($events);
+      $filePath = __DIR__ . '/../../data/frigate_events.json';
+      // vérifier si le dossier existe sinon le créer
+      if (!file_exists(dirname($filePath))) {
+        mkdir(dirname($filePath), 0777, true);
+      }
+      $newEvents = self::saveAndCompareEvents($filePath, $events);
+      if (empty($newEvents)) {
+        return;
+      }
+      $events = $newEvents;
     }
+    
     if ($recoveryDays != 1) {
       // Nombre de jours a filtrer et enregistrer en DB
       $recoveryDays = config::byKey('recovery_days', 'frigate');

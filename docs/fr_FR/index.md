@@ -28,7 +28,11 @@ Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut do
 # <u>Installation</u>
 Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
-La version 0.14 du serveur Frigate apporte son lot de nouveautés et de breaking changes, le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
+Le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
+
+Au 08-06-2025 le plugin fonctionne avec les versions suivantes de Frigate :
+- Frigate 0.15.1 Stable
+- Frigate 0.16.2 Beta
 
 # <u>Log</u>
 Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
@@ -48,7 +52,7 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19,
 - **Pause action** : Pause à effectuer sur les actions PTZ. Par exemple, après avoir appuyé sur move up, un stop est automatiquement effectué : vous pouvez définir le temps avant cette action stop de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
 
 #### Gestion des évènements
-- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités.
+- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités. Si le nombre de jours est 0, alors le processus est arrêté et aucun appel à l'API Frigate n'est effectué.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
@@ -78,7 +82,9 @@ Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucu
 
 # <u>Utilisation</u>
 
-**Les commandes de tous les équipements sont créées automatiquement à la prochaine réception d'événements ou de statistiques. Si vous ne les voyez pas à la première installation du plugin, c'est que vos événements récents ont plus de 3 heures, il faut donc attendre le prochain événement pour voir les commandes.**
+**Les commandes infos de tous les équipements sont créées automatiquement à la prochaine réception d'événements ou de statistiques. Si vous ne les voyez pas à la première installation du plugin, c'est que vos événements récents ont plus de 3 heures, il faut donc attendre le prochain événement pour voir les commandes.**
+
+**Les commandes actions sont créées seulement quand vous utiliser le bouton "Rechercher / MAJ".**
 
 ## <u>Equipement Events</u>
 L'équipement est créé de manière automatique en même temps que les caméras.
