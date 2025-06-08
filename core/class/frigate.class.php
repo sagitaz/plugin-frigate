@@ -1016,7 +1016,8 @@ class frigate extends eqLogic
       // Traiter un évènement
       $events = array($event);
     } else if (!$mqtt) {
-      if ($recoveryDays == null) {
+      $recoveryDays = config::byKey('recovery_days', 'frigate');
+      if ($recoveryDays == 0) {
         log::add(__CLASS__, 'debug', "║ Recupération des évènements sur 0 jour, processus stoppé.");
         log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
         return;
