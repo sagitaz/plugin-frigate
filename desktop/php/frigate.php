@@ -28,7 +28,7 @@ sendVarToJS('refresh', $refresh);
         <legend><i class="fas fa-cog"></i> {{Gestion}}</legend>
         <!-- Boutons de gestion du plugin -->
         <div class="eqLogicThumbnailContainer">
-            <div class="cursor eqLogicAction logoPrimary" id="searchAndCreate" title="{{Mets à jour la liste des caméras et des commandes}}>
+            <div class="cursor eqLogicAction logoPrimary" id="searchAndCreate" title="{{Mets à jour la liste des caméras et des commandes}}">
                 <i class=" fas fa-video"></i>
                 <br>
                 <span>{{Rechercher / MAJ}}</span>

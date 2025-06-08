@@ -1017,7 +1017,7 @@ class frigate extends eqLogic
       $events = array($event);
     } else if (!$mqtt) {
       if ($recoveryDays == null) {
-        log::add(__CLASS__, 'debug', "║ Recupération des évènement sur 0 jour, processus stoppé.");
+        log::add(__CLASS__, 'debug', "║ Recupération des évènements sur 0 jour, processus stoppé.");
         log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
         return;
         }
