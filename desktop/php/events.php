@@ -80,7 +80,11 @@ if (!isConnect('admin')) {
 
     foreach ($string as $k => &$v) {
       if ($diff->$k) {
-        $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
+        $value = $diff->$k;
+        if ($value > 1 && $k !== 'm') {
+            $v .= 's';
+        }
+        $v = $value . ' ' . $v;
       } else {
         unset($string[$k]);
       }
