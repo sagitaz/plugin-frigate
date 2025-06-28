@@ -80,16 +80,10 @@ function timeElapsedString($datetime, $full = false)
     's' => ['seconde', 'secondes'],
   ];
 
-    foreach ($string as $k => &$v) {
-      if ($diff->$k) {
-        $value = $diff->$k;
-        if ($value > 1 && $k !== 'm') {
-            $v .= 's';
-        }
-        $v = $value . ' ' . $v;
-      } else {
-        unset($string[$k]);
-      }
+  foreach ($units as $key => [$singular, $plural]) {
+    if ($diff->$key) {
+      $count = $diff->$key;
+      $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
     }
   }
 
