@@ -59,39 +59,45 @@ if (!isConnect('admin')) {
     return $formattedDuration;
   }
 
-  function timeElapsedString($datetime, $full = false)
-  {
-    $now = new DateTime;
-    $ago = new DateTime($datetime);
-    $diff = $now->diff($ago);
+function timeElapsedString($datetime, $full = false)
+{
+  $now = new DateTime;
+  $ago = new DateTime($datetime);
+  $diff = $now->diff($ago);
 
-    $diff->w = floor($diff->d / 7);
-    $diff->d -= $diff->w * 7;
+  // Ajout des semaines à partir des jours
+  $diff->w = floor($diff->d / 7);
+  $diff->d -= $diff->w * 7;
 
-    $string = array(
-      'y' => 'année',
-      'm' => 'mois',
-      'w' => 'semaine',
-      'd' => 'jour',
-      'h' => 'heure',
-      'i' => 'minute',
-      's' => 'seconde',
-    );
+  // Tableau des unités de temps avec singulier/pluriel
+  $units = [
+    'y' => ['année', 'années'],
+    'm' => ['mois', 'mois'],
+    'w' => ['semaine', 'semaines'],
+    'd' => ['jour', 'jours'],
+    'h' => ['heure', 'heures'],
+    'i' => ['minute', 'minutes'],
+    's' => ['seconde', 'secondes'],
+  ];
 
-    foreach ($string as $k => &$v) {
-      if ($diff->$k) {
-        $v = $diff->$k . ' ' . $v . ($diff->$k > 1 ? 's' : '');
-      } else {
-        unset($string[$k]);
-      }
+  $strings = [];
+
+  foreach ($units as $key => [$singular, $plural]) {
+    if ($diff->$key) {
+      $count = $diff->$key;
+      $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
     }
-
-    if (!$full)
-      $string = array_slice($string, 0, 1);
-    return $string ? 'il y a ' . implode(', ', $string) : 'à l\'instant';
   }
 
-  $events = frigate::showEvents();
+  if (!$full) {
+    $strings = array_slice($strings, 0, 1);
+  }
+
+  return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
+}
+
+
+$events = frigate::showEvents();
 
   // cameras variables
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
