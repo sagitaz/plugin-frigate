@@ -1,6 +1,7 @@
 .frigateEventList {
   display: grid !important;
   margin: 0 auto;
+  width: 100%;
   gap: 20px;
   grid-template-columns: repeat(auto-fill, minmax(410px, 1fr));
   grid-auto-rows: 140px;
