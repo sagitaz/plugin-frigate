@@ -18,6 +18,7 @@
   align-items: center;
   gap: 20px;
   padding: 10px;
+  box-shadow: 0 2px 6px rgba(0, 0, 0, 0.1)
 }
 
 .imgSnap {
@@ -171,11 +172,6 @@
   line-height: 18px;
 }
 
-.durationTitle {
-  height: 30px;
-  line-height: 28px !important;
-}
-
 .container-text {
   flex-shrink: 0;
 }
@@ -188,11 +184,6 @@
   font-weight: bold;
   line-height: 16px;
   margin-left: 10px;
-}
-
-.percentageTitle {
-  height: 30px;
-  line-height: 28px !important;
 }
 
 .percentage-100 {
@@ -429,15 +420,19 @@
 }
 
 #mediaTitle {
-  font-size: 24px;
-  font-weight: bold;
-  width: 100%;
-  text-align: left;
+  --font-family: Arial, sans-serif;
+  max-width: 360px;
+  background-color: rgb(var(--defaultBkg-color))
+  border-radius: 10px;
+  box-shadow: 0 2px 6px rgba(0,0,0,0.1);
+  padding: 12px;
+  --margin: 12px auto;
+  font-size: 14px;
 }
 
 .limited-text {
   display: inline-block;
-  font-size: 18px;
+  font-size: 16px;
   white-space: normal;
   word-wrap: break-word;
   overflow-wrap: break-word;

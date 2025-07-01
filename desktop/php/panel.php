@@ -194,7 +194,7 @@ $events = frigate::showEvents();
     	  $description = $event['description'];
         $duree = $event['duree'];
         $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
-        $formattedDurationTitle = '<div class=\'duration durationTitle\'>' . formatDuration($duree) . '</div>';
+        $formattedDurationTitle = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
         $img = $event['img'];
         $hasSnapshot = $event['hasSnapshot'];
         $snapshot = $event['snapshot'];
