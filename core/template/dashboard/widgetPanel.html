@@ -104,15 +104,8 @@
             const camera = '#cameraName#';
             document.querySelector('a[href="#Events"]').click();
 
-            const checkboxes = document.querySelectorAll('input.cameraFilter');
-            checkboxes.forEach(function (checkbox) {
-                checkbox.checked = false;
-            });
-
-            const targetCheckbox = document.querySelector(`input.cameraFilter[value="${camera}"]`);
-            if (targetCheckbox) {
-                targetCheckbox.checked = true;
-            }
+            document.querySelectorAll('input.cameraFilter')
+                .forEach(cb => cb.checked = cb.value === camera);            
             filterEvents();
         }
 

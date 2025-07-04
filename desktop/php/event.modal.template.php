@@ -2,14 +2,15 @@
 <div id="mediaModal" class="modal">
   <div class="modal-content">
     <div class="modal-header">
-      <h2>
+      <div>
         <div id="mediaTitle"></div>
         <br />
         <div id="mediaDescription" class="limited-text"></div>
-      </h2>
+      </div>
       <div class="button-container">
-        <button id="showVideo" class="hidden-btn custom-button">Voir la vidéo</button>
-        <button id="showImage" class="hidden-btn custom-button">Voir la capture</button><br />
+        <button id="downloadBtn" class="custom-button"><i class="fas fa-download"></i>&nbsp;Télécharger le fichier</button>
+        <button id="showVideo" class="hidden-btn custom-button"><i class="fas fa-video"></i>&nbsp;Voir la vidéo</button>
+        <button id="showImage" class="hidden-btn custom-button"><i class="fas fa-camera"></i>&nbsp;Voir la capture</button><br />
         <span class="close">&times;</span>
       </div>
     </div>

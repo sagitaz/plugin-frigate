@@ -98,7 +98,7 @@
     <div class="eventBtns" <?php if ($hasSnapshot == 1)
                               echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
                                                                               echo 'data-video="' . $clip . '"'; ?>
-      data-title="<?= $label ?> <div class='percentage <?= getPercentageClass($topScore) ?> percentageTitle'><?= $topScore ?> %</div> - <?= $camera ?> - <?= $date ?> <?= $hasClip == 1 ? $formattedDurationTitle : '' ?>"
+      data-title="<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?><div class='percentage <?= getPercentageClass($topScore) ?>'><?= $topScore ?> %</div><br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?><br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
 	    data-description="<?= $description ?>">
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
