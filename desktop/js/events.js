@@ -1,6 +1,6 @@
 // Gestion des médias
-let clickTimeout;
-let lastWasDoubleClick = false;
+var clickTimeout;
+var lastWasDoubleClick = false;
 
 document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button) {
   button.addEventListener('click', function () {
