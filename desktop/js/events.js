@@ -250,7 +250,7 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
   downloadBtn.onclick = function () {
       downloadMedia (src);
   };
-  
+
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
   showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
 
@@ -262,6 +262,11 @@ if (gotoHomeButton) {
   gotoHomeButton.addEventListener('click', function () {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
   })
+}
+
+function downloadMedia (mediaSrc) {
+  const relativePath = mediaSrc.replace(/^.*plugins\//, 'plugins/');
+  window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
 }
 
 function deleteEvent(eventId, askConfirm) {
