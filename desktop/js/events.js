@@ -198,27 +198,36 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
   const snapshotImage = document.getElementById('snapshotImage');
   const showVideoBtn = document.getElementById('showVideo');
   const showImageBtn = document.getElementById('showImage');
+  const downloadBtn = document.getElementById('downloadBtn');
   const mediaTitle = document.getElementById('mediaTitle');
   const mediaDescription = document.getElementById('mediaDescription');
 
   mediaTitle.innerHTML = title;
   truncateText(mediaDescription, description, 200);
-  
+
   if (mediaType === 'video') {
     videoSource.src = src;
     videoPlayer.load();
     videoContainer.classList.add('active');
     imageContainer.classList.remove('active');
-  } else if (mediaType === 'snapshot') {
-    snapshotImage.src = src;
-    imageContainer.classList.add('active');
-    videoContainer.classList.remove('active');
+    downloadBtn.onclick = function () {
+      const relativePath = src.replace(/^.*plugins\//, 'plugins/');
+      window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
+    };
+} else if (mediaType === 'snapshot') {
+  snapshotImage.src = src;
+  imageContainer.classList.add('active');
+  videoContainer.classList.remove('active');
+  downloadBtn.onclick = function () {
+    const relativePath = src.replace(/^.*plugins\//, 'plugins/');
+    window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
+  };
   }
 
-  showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
-  showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
+showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
+showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
 
-  mediaModal.style.display = 'block';
+mediaModal.style.display = 'block';
 }
 
 var gotoHomeButton = document.getElementById('gotoHome');
@@ -227,7 +236,6 @@ if (gotoHomeButton) {
     jeedomUtils.loadPage("index.php?v=d&m=frigate&p=frigate");
   })
 }
-
 
 function deleteEvent(eventId, askConfirm) {
   if (askConfirm) {

@@ -8,6 +8,7 @@
         <div id="mediaDescription" class="limited-text"></div>
       </div>
       <div class="button-container">
+        <button id="downloadBtn" class="custom-button"><i class="fas fa-download"></i>&nbsp;Télécharger le fichier</button>
         <button id="showVideo" class="hidden-btn custom-button"><i class="fas fa-video"></i>&nbsp;Voir la vidéo</button>
         <button id="showImage" class="hidden-btn custom-button"><i class="fas fa-camera"></i>&nbsp;Voir la capture</button><br />
         <span class="close">&times;</span>
