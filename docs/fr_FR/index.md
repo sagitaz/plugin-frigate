@@ -282,9 +282,9 @@ Testez les 2 commandes snapshot. Selon les configurations, il se peut qu'une des
 1. - Mettre l'évènement en favori
 2. - lien vers la caméra
 3. - Visualiser le snapshot (simple clic sur l'icone)
-   - Télècharger le snapshot (double clic sur l'icone)
+   - Télécharger le snapshot (double clic sur l'icone)
 4. - Visualiser le clip (simple clic sur l'icone)
-   - Télècharger le clip (double clic sur l'icone)
+   - Télécharger le clip (double clic sur l'icone)
 5. - Supprimer l'évènement
 6. - Description de l'évènement (si genAI activé)
 
