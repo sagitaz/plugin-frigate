@@ -4,7 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 04/07/2025 Stable 1.3.5
+# 05/07/2025 Beta 1.3.6
+- Ajout téléchargement sur double clic.
+
+# 04/07/2025 Beta 1.3.5
 - Fix erreur JS sur dashboard.
 - Fix pluriel sur les évènements de plusieurs mois.
 - Fix largeur colonne sur les pages events. (merci @vegeta0911)
