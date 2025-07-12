@@ -2980,7 +2980,7 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
+      //log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
       log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
 
       switch ($key) {
@@ -2990,26 +2990,26 @@ class frigate extends eqLogic
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           } else {
-            log::add("frigate_MQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews.');
+            log::add("frigate_MQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews. Penser a mettre record enabled true dans votre configuration.');
           }
           break;
 
         case 'reviews':
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
-          log::add("frigate_MQTT", 'info', ' => Traitement mqtt manual event <=');
+          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt manual event <=');
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
 
         case 'stats':
-          log::add("frigate_MQTT", 'info', ' => Traitement mqtt stats');
+          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt stats');
           self::majStatsCmds($value, true);
           break;
 
         case 'available':
-          log::add("frigate_MQTT", 'info', ' => Traitement mqtt available');
+          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt available');
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
@@ -3021,7 +3021,7 @@ class frigate extends eqLogic
             continue 2;
           }
 
-          log::add("frigate_MQTT", 'info', ' => Traitement mqtt camera ' . $key);
+          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt camera ' . $key);
           self::processCameraData($eqCamera, $key, $value);
           break;
       }

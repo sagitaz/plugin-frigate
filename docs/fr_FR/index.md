@@ -277,38 +277,43 @@ Testez les 2 commandes snapshot. Selon les configurations, il se peut qu'une des
 
 # <u>Page Events</u>
 
-De nombreux filtres sont disponibles pour l'affichage de votre liste d'évènements.
+### Evènement :
+![cadre évènement](../images/frigate_Doc_Evenement.png)
+1. - Mettre l'évènement en favori
+2. - lien vers la caméra
+3. - Visualiser le snapshot (simple clic sur l'icone)
+   - Télécharger le snapshot (double clic sur l'icone)
+4. - Visualiser le clip (simple clic sur l'icone)
+   - Télécharger le clip (double clic sur l'icone)
+5. - Supprimer l'évènement
+6. - Description de l'évènement (si genAI activé)
 
-Dans celle-ci seront regroupés tous les évènements visibles, vous pouvez pour chacun d'entre eux :
-- Visualiser le snapshot (s'il existe)
-- Visualiser le clip (s'il existe)
-- Supprimer l'évènement
-- Mettre l'évènement en favori
-- lien vers la caméra
+**ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est présente.
 
-Tous les évènements favoris ne sont pas supprimés.
+Les évènements mis en favoris ne sont pas supprimés.
 
+
+![page évènements](../images/frigate_Doc_Evenements.png)
+
+1. - **supprimer tous les évènements visibles**
 **ATTENTION** : Le bouton "**supprimer tous les évènements visibles**" fera exactement ce qu'il annonce, donc appliquez bien les bons filtres avant de supprimer : aucun retour en arrière ne sera possible : une popup de confirmation est présente. La suppression est effectuée en database Jeedom mais aussi sur votre serveur Frigate.
 
-**ATTENTION** : le bouton "**supprimer**" supprime l'évènement en database Jeedom mais aussi sur votre serveur Frigate. En aucun cas, je ne serai responsable de votre mauvaise utilisation de ce bouton. Néanmoins, une popup de confirmation est ici aussi présente.
-
-### Création d'un évènement manuel
+2. - **Création d'un évènement manuel**
 Dans la configuration générale du plugin Frigate, vous pouvez indiquer les valeurs par défaut des évènements créés manuellement.
 Sur la page **Events**, vous trouverez un bouton permettant de créer un nouvel évènement.
 Pour chaque caméra, une commande action vous permettra aussi de créer un évènement.
 Cette commande est de type message. Si vous laissez vide alors les paramètres par défaut seront utilisés (depuis le widget ce sera toujours le cas).
 title : **``Indiquer le label``**
 message : **``score=80 | video=1 | duration=20``**
-
 Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5 sec. par defaut, donc en paramétrant à 20 sec. vous obtiendrez une vidéo de 30 sec.
-
 Attention sur les évènements créés manuellement, si dans votre configuration Frigate pour **``record -> retain -> mode``** vous avez **``motion``** alors les clips ne seront disponibles que s'il y a du mouvement de detecté, mettre à **``all``** si vous voulez tout avoir.
 
-Pour ceux en 0.14 et MQTT, les évènements sont remontés automatiquement lors de la création.
+3. - **Filtrer les évènements**
+Afficher seulement les événements d'une ou plusieurs caméras, seulement d'un label ou d'un type d'événement, seulement les événements de la semaine ou de l'année en cours, etc...
 
-Pour ceux n'utilisant pas MQTT, le snapshot est remonté rapidement, le clip s'il y en a un qu'au cron suivant.
+# Création d'une capture instantanée
 
-### Création d'une capture instantanée
+Vous ne souhaitez pas créer un évènement manuellement, mais vous souhaitez avoir une capture instantanée de la caméra ? Vous pouvez créer une action sur la caméra qui va capturer l'image de la caméra.
 
 Dans les actions des caméras se trouvent deux commandes :
 - Capturer image (action)
@@ -393,3 +398,18 @@ N'oubliez pas d'activer la page panel dans la configuration générale, puis pou
 
 - visualisation des caméras.
 - page évènements
+
+# <u> FAQ </u>
+
+### Le plugin est bien configuré en MQTT mais aucune action n'est effectuée
+Le topic frigate/reviews correspond aux review items (périodes d’activité détectée) qui sont générés après la détection et l’enregistrement des objets. Ce système de revue s'appuie fortement sur la fonction d’enregistrement (recording) pour fonctionner :
+
+Frigate organise les review items comme des plages temporelles regroupant plusieurs détections 
+
+Si l’enregistrement est désactivé (record.enabled: false), aucun segment vidéo n’est stocké, et donc la plateforme ne construit pas de review items → rien n’est publié dans frigate/reviews.
+
+Pour fonctionner le plugin a donc besoin de :
+`record:`
+`  enabled: true`
+
+

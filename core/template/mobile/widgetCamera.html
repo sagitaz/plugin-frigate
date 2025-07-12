@@ -83,6 +83,7 @@
         function gotoCameraEvents#id#() {
             const camera = '#cameraName#';
             jeedomUtils.loadPage("index.php?v=d&m=frigate&p=events&cameras=" + camera);
+            event.stopPropagation();
         }
         function execAction(cmdid) {
             jeedom.cmd.execute({

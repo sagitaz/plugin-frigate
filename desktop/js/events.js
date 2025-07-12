@@ -1,27 +1,55 @@
 // Gestion des médias
+var clickTimeout;
+var lastWasDoubleClick = false;
+
 document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button) {
   button.addEventListener('click', function () {
-    const eventBtns = this.parentElement;
-    const snapshotSrc = eventBtns.getAttribute('data-snapshot');
-    const videoSrc = eventBtns.getAttribute('data-video');
-    const title = eventBtns.getAttribute('data-title');
-    const description = eventBtns.getAttribute('data-description');
-    const hasVideo = !!videoSrc;
-    const hasSnapshot = !!snapshotSrc;
+    clickTimeout = setTimeout(() => {
+      if (lastWasDoubleClick) {
+        lastWasDoubleClick = false;
+      } else {
+        const eventBtns = this.parentElement;
+        const snapshotSrc = eventBtns.getAttribute('data-snapshot');
+        const videoSrc = eventBtns.getAttribute('data-video');
+        const title = eventBtns.getAttribute('data-title');
+        const description = eventBtns.getAttribute('data-description');
+        const hasVideo = !!videoSrc;
+        const hasSnapshot = !!snapshotSrc;
 
+        if (this.classList.contains('video-btn')) {
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
+        }
+        else {
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
+        }
+
+        document.getElementById('showVideo').onclick = function () {
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
+        };
+        document.getElementById('showImage').onclick = function () {
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
+        };
+      }
+    }, 300);
+  });
+  
+  button.addEventListener('dblclick', function () {
+    const eventBtns = this.parentElement;
+    clearTimeout(clickTimeout);
+  	lastWasDoubleClick = true;
+    
     if (this.classList.contains('video-btn')) {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
+   	  const videoSrc = eventBtns.getAttribute('data-video');
+      if (!!videoSrc) {
+        downloadMedia (videoSrc);
+      }
     }
     else {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
+      const snapshotSrc = eventBtns.getAttribute('data-snapshot');
+      if (!!snapshotSrc) {
+        downloadMedia (snapshotSrc);
+      }
     }
-
-    document.getElementById('showVideo').onclick = function () {
-      showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
-    };
-    document.getElementById('showImage').onclick = function () {
-      showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
-    };
   });
 });
 
@@ -198,22 +226,30 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
   const snapshotImage = document.getElementById('snapshotImage');
   const showVideoBtn = document.getElementById('showVideo');
   const showImageBtn = document.getElementById('showImage');
+  const downloadBtn = document.getElementById('downloadBtn');
+  const downloadLabel = document.querySelector('#downloadBtn .downloadLabel');
   const mediaTitle = document.getElementById('mediaTitle');
   const mediaDescription = document.getElementById('mediaDescription');
 
   mediaTitle.innerHTML = title;
   truncateText(mediaDescription, description, 200);
-  
+
   if (mediaType === 'video') {
     videoSource.src = src;
     videoPlayer.load();
     videoContainer.classList.add('active');
     imageContainer.classList.remove('active');
+    downloadLabel.textContent = 'Télécharger la vidéo';
   } else if (mediaType === 'snapshot') {
     snapshotImage.src = src;
     imageContainer.classList.add('active');
     videoContainer.classList.remove('active');
+    downloadLabel.textContent = 'Télécharger la capture';
   }
+
+  downloadBtn.onclick = function () {
+      downloadMedia (src);
+  };
 
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
   showImageBtn.classList.toggle('hidden-btn', !hasVideo || !hasSnapshot);
@@ -228,6 +264,10 @@ if (gotoHomeButton) {
   })
 }
 
+function downloadMedia (mediaSrc) {
+  const relativePath = mediaSrc.replace(/^.*plugins\//, 'plugins/');
+  window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
+}
 
 function deleteEvent(eventId, askConfirm) {
   if (askConfirm) {
