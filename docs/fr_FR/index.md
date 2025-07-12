@@ -282,9 +282,9 @@ Testez les 2 commandes snapshot. Selon les configurations, il se peut qu'une des
 1. - Mettre l'évènement en favori
 2. - lien vers la caméra
 3. - Visualiser le snapshot (simple clic sur l'icone)
-   - Télècharger le snapshot (double clic sur l'icone)
+   - Télécharger le snapshot (double clic sur l'icone)
 4. - Visualiser le clip (simple clic sur l'icone)
-   - Télècharger le clip (double clic sur l'icone)
+   - Télécharger le clip (double clic sur l'icone)
 5. - Supprimer l'évènement
 6. - Description de l'évènement (si genAI activé)
 
@@ -398,3 +398,18 @@ N'oubliez pas d'activer la page panel dans la configuration générale, puis pou
 
 - visualisation des caméras.
 - page évènements
+
+# <u> FAQ </u>
+
+### Le plugin est bien configuré en MQTT mais aucune action n'est effectuée
+Le topic frigate/reviews correspond aux review items (périodes d’activité détectée) qui sont générés après la détection et l’enregistrement des objets. Ce système de revue s'appuie fortement sur la fonction d’enregistrement (recording) pour fonctionner :
+
+Frigate organise les review items comme des plages temporelles regroupant plusieurs détections 
+
+Si l’enregistrement est désactivé (record.enabled: false), aucun segment vidéo n’est stocké, et donc la plateforme ne construit pas de review items → rien n’est publié dans frigate/reviews.
+
+Pour fonctionner le plugin a donc besoin de :
+`record:`
+`  enabled: true`
+
+
