@@ -422,8 +422,7 @@ record:
   enabled: true
 ```
 
-
- ### Exemple de fichier de configuration
+### Exemple de fichier de configuration
 
  Veuillez noter que c'est mon fichier, mes réglages et qu'il fonctionne pour ma situation, à vous de l'adapter ou de comparer avec le vôtre si jamais toutes les fonctions du plugin n'étaient pas fonctionnelles chez vous.
 
