@@ -484,7 +484,7 @@ snapshots:
       vehicule: 3           # Conserve ceux contenant un "vehicule" pendant 3 jours
 
 record:
-  enabled: true             # Active l’enregistrement vidéo
+  enabled: true             # Active l’enregistrement vidéo, obligatoire pour que le plugin reçoive les événements.
   retain:
     days: 1                 # Conserve les enregistrements pendant 1 jour
     mode: all               # Enregistre tout, même sans détection
