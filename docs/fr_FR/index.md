@@ -75,6 +75,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 # <u>Demon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
 Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
+Votre broker MQTT doit être sécurisé pour que le plugin mqtt-manager fonctionne.
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Deamon NOK :**
@@ -423,7 +424,6 @@ record:
 ```
 
 ### Exemple de fichier de configuration
-
  Veuillez noter que c'est mon fichier, mes réglages et qu'il fonctionne pour ma situation, à vous de l'adapter ou de comparer avec le vôtre si jamais toutes les fonctions du plugin n'étaient pas fonctionnelles chez vous.
 
  Je ne pourrais être tenu responsable de tout dysfonctionnement causé par cette configuration, vous devez donc adapter la configuration à votre propre serveur et à vos besoins.
@@ -431,6 +431,7 @@ record:
  J'ai mis des commentaires afin de vous aider.
 
  ```yaml
+ # Rappel, le plugin mqtt-manager nécéssite un broker mqtt sécurisé.
  mqtt:
   host: 192.168.2.22        # Adresse IP de votre serveur MQTT
   port: 1883                # Port du broker MQTT (1883 = standard non sécurisé)
