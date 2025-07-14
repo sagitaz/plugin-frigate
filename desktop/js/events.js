@@ -13,21 +13,23 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
         const videoSrc = eventBtns.getAttribute('data-video');
         const title = eventBtns.getAttribute('data-title');
         const description = eventBtns.getAttribute('data-description');
+        const eventId = eventBtns.getAttribute('data-eventid');
+        const confirmDelete = eventBtns.getAttribute('data-confirmdelete');
         const hasVideo = !!videoSrc;
         const hasSnapshot = !!snapshotSrc;
 
         if (this.classList.contains('video-btn')) {
-          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
         }
         else {
-          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
         }
 
         document.getElementById('showVideo').onclick = function () {
-          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description);
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
         };
         document.getElementById('showImage').onclick = function () {
-          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description);
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
         };
       }
     }, 300);
@@ -217,7 +219,7 @@ function truncateText(element, fullText, maxLength) {
   }
 }
 
-function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
+function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description, eventId, confirmDelete) {
   const mediaModal = document.getElementById('mediaModal');
   const videoContainer = document.querySelector('.video-container');
   const imageContainer = document.querySelector('.image-container');
@@ -228,6 +230,7 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
   const showImageBtn = document.getElementById('showImage');
   const downloadBtn = document.getElementById('downloadBtn');
   const downloadLabel = document.querySelector('#downloadBtn .downloadLabel');
+  const deleteBtn = document.getElementById('deleteBtn');
   const mediaTitle = document.getElementById('mediaTitle');
   const mediaDescription = document.getElementById('mediaDescription');
 
@@ -249,6 +252,10 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description) {
 
   downloadBtn.onclick = function () {
       downloadMedia (src);
+  };
+
+  deleteBtn.onclick = function () {
+    deleteEvent(eventId, confirmDelete !== "false");
   };
 
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);

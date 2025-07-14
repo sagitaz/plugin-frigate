@@ -44,7 +44,7 @@
   <div class="frigateEvent">
 
     <!-- div img -->
-    <div class="img-container" onmouseenter="handleHover(this)">
+    <div class="img-container" onmouseenter="if (typeof handleHover === 'function') handleHover(this)">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
 
