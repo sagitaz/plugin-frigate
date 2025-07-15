@@ -232,6 +232,7 @@
         "Affichage d'une alerte de confirmation lors de la demande de suppression d'un évènement": "Visualizzazione di un avviso di conferma quando viene richiesta la cancellazione di un evento",
         "Affichage de la vidéo en miniature d'un évènement au passage de la souris sur sa capture": "Visualizzazione di miniature video di un evento quando il mouse passa sopra la sua cattura",
         "Aucun": "Nessuno",
+        "Authentification": "Autenticazione",
         "Confirmation avant suppression d'un évènement": "Conferma prima di cancellare un evento",
         "Durée de la vidéo": "Durata del video",
         "Durée de rafraîchissement": "Tempo di aggiornamento",
@@ -272,6 +273,7 @@
         "Version du Plugin (A indiquer sur Community)": "Versione del plugin (da indicare nella Community)",
         "Vidéos en vignette dans la page des évènements": "Video in miniatura nella pagina degli eventi",
         "ne sert que pour le bouton vers votre serveur Frigate": "viene utilizzato solo per il collegamento al server Frigate",
-        "port de Frigate (5000 par défaut)": "porta Frigate (5000 di default)"
+        "port de Frigate (5000 par défaut)": "porta Frigate (5000 di default)",
+        "user et mot de passe de connexion au serveur Frigate séparés par deux points (:)": "nome utente e password di accesso al server Frigate separati da due punti (:)"
     }
 }
