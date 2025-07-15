@@ -95,9 +95,11 @@
     </div>
 
     <!-- div buttons -->
-    <div class="eventBtns" <?php if ($hasSnapshot == 1)
-                              echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
-                                                                              echo 'data-video="' . $clip . '"'; ?>
+    <div class="eventBtns" 
+      <?php echo 'data-eventid="' . $id . '"'; ?>
+      <?php echo 'data-confirmdelete="' . (config::byKey('event::confirmDelete', 'frigate', 1) == 1 ? 'true' : 'false') . '"' ?>
+      <?php if ($hasSnapshot == 1) echo 'data-snapshot="' . $snapshot . '"'; ?>
+      <?php if ($hasClip == 1) echo 'data-video="' . $clip . '"'; ?>
       data-title="<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?><div class='percentage <?= getPercentageClass($topScore) ?>'><?= $topScore ?> %</div><br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?><br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
 	    data-description="<?= $description ?>">
       <?php if ($hasSnapshot == 1): ?>
