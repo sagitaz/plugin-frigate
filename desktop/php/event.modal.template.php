@@ -8,6 +8,7 @@
         <div id="mediaDescription" class="limited-text"></div>
       </div>
       <div class="button-container">
+        <button id="deleteBtn" class="custom-button"><i class="fas fa-trash"></i>&nbsp;<span>Supprimer l'évènement</span></button>
         <button id="downloadBtn" class="custom-button"><i class="fas fa-download"></i>&nbsp;<span class="downloadLabel">Télécharger le fichier</span></button>
         <button id="showVideo" class="hidden-btn custom-button"><i class="fas fa-video"></i>&nbsp;Voir la vidéo</button>
         <button id="showImage" class="hidden-btn custom-button"><i class="fas fa-camera"></i>&nbsp;Voir la capture</button><br />
