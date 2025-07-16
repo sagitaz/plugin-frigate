@@ -92,14 +92,6 @@ if (!isConnect()) {
                 </div>
             </div>
             <div class="form-group">
-                <label class="col-lg-7 control-label">{{Authentification}}
-                    <sup><i class="fas fa-question-circle tooltips" title="{{user et mot de passe de connexion au serveur Frigate séparés par deux points (:)}}"></i></sup>
-                </label>
-                <div class="col-xs-5">
-                    <input class="configKey form-control input-xs" data-l1key="frigateAuth" type="text" />
-                </div>
-            </div>
-            <div class="form-group">
                 <label class="col-lg-7 control-label">{{Adresse externe}}
                     <sup><i class="fas fa-question-circle tooltips inputPassword" title=" {{ne sert que pour le bouton vers votre serveur Frigate}}"></i></sup>
                 </label>

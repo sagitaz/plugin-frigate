@@ -3307,39 +3307,15 @@ class frigate extends eqLogic
 
   private static function jsonFromUrl($jsonUrl)
   {
-    $auth = config::byKey('frigateAuth', 'frigate', '');
-    $jsonContent = false;
-
-    // -- 1. Test sans authentification --
     $headers = @get_headers($jsonUrl);
-    $code = is_array($headers) ? substr($headers[0], 9, 3) : null;
 
-    if ($code === '200') {
-      // Pas besoin d'auth, on télécharge directement
+    $code = substr($headers[0], 9, 3);
+    if ($code == '200') {
+      // Le fichier existe, on peut le télécharger
       $jsonContent = file_get_contents($jsonUrl);
     } else {
-      // -- 2. Si échec ET qu'une auth est fournie, on retente avec auth --
-      if (!empty($auth)) {
-        $context = stream_context_create([
-          'http' => [
-            'header' => "Authorization: Basic " . base64_encode($auth),
-            'ignore_errors' => true, // important pour lire le header même si erreur
-          ]
-        ]);
-
-        $headersAuth = @get_headers($jsonUrl, false, $context);
-        $codeAuth = is_array($headersAuth) ? substr($headersAuth[0], 9, 3) : null;
-
-        if ($codeAuth === '200') {
-          $jsonContent = file_get_contents($jsonUrl, false, $context);
-        } else {
-          $jsonContent = false;
-          log::add(__CLASS__, 'error', "║ jsonFromUrl : HTTP Error $code / $codeAuth lors du téléchargement de $jsonUrl");
-        }
-      } else {
-        // -- 3. Pas de possibilité de retenter --
-        log::add(__CLASS__, 'error', "║ jsonFromUrl : HTTP Error $code (et aucune authentification définie) pour $jsonUrl");
-      }
+      $jsonContent = false;
+      log::add(__CLASS__, 'error', "║ jsonFromUrl : HTTP Error $code lors du téléchargement de $jsonUrl");
     }
 
     // Vérifier si le téléchargement a réussi
