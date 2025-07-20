@@ -18,6 +18,19 @@ if (init('object_id') == '') {
 
 ?>
 
+
+<script language="javascript">
+    window.onload = function(){  
+      const el = document.getElementById("div_configuration");
+      const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
+      if (el && savedScroll !== null) {
+        // Repositionnement de la liste à sa position Y 
+        el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
+        localStorage.removeItem("frigateScrollTop");
+      }
+	}
+</script>
+
 <ul class="nav nav-tabs" role="tablist">
   <li role="presentation" class="active">
     <a href="#Cameras" aria-controls="Cameras" role="tab" data-toggle="tab" data-url="/get-cameras-content">Caméras</a>
@@ -161,7 +174,7 @@ $events = frigate::showEvents();
       // events filters (template)
       include 'event.filters.template2.php';
 
-      echo '<div class="frigateEventList col-lg-12">';
+      echo '<div id="frigateEventList" class="col-lg-12">';
       foreach ($events as $event) {
         // event variables
         $id = $event['eventId'];

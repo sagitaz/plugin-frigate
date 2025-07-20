@@ -331,7 +331,14 @@ function deleteAllEvents(eventId) {
           message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
-        window.location.reload(true);
+
+        // Sauvegarde de la position Y de la liste
+        const el = document.getElementById("frigateEventList");
+        if (el) {
+          localStorage.setItem("frigateScrollTop", -parseFloat(el.getBoundingClientRect().top));
+        }
+
+        location.reload();         
       }
     }
   })

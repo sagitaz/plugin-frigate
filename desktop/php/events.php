@@ -6,6 +6,17 @@ if (!isConnect('admin')) {
 
 ?>
 
+<script language="javascript">
+    window.onload = function(){  
+      const el = document.getElementById("div_mainContainer");
+      const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
+      if (el && savedScroll !== null) {
+		    // Repositionnement de la liste à sa position Y 
+        el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
+        localStorage.removeItem("frigateScrollTop");
+      }
+	}
+</script>
 
 <div class="col-lg-12">
   <br><br>
@@ -121,7 +132,7 @@ $events = frigate::showEvents();
   // events filters (template)
   include 'event.filters.template2.php';
 
-  echo '<div class="frigateEventList col-lg-12">';
+  echo '<div id="frigateEventList" class="col-lg-12">';
   foreach ($events as $event) {
     // event variables
     $id = $event['eventId'];
