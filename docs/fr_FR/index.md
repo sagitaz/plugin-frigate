@@ -34,6 +34,18 @@ Au 08-06-2025 le plugin fonctionne avec les versions suivantes de Frigate :
 - Frigate 0.15.1 Stable
 - Frigate 0.16.2 Beta
 
+# Mode de connexion au serveur Frigate
+### API
+La récupération des caméras, des anciens évènements, la suppression d'évènements, etc...
+De nombreuses fonctions du plugin utilisent la connexion à l'API Frigate.
+Celle-ci est accessible par le port 5000 sur votre réseau local, il est impératif que vous l'ayez configuré, sans quoi le plugin ne pourra fonctionner.
+Si vous souhaitez utiliser un autre port, vous pouvez le faire du moment que vous mappez vers le port 5000 (5054:5000) dans la configuration du serveur Frigate.
+### MQTT
+La configuration MQTT permet de recevoir les informations du serveur Frigate en temps réel.
+Cela améliore l'expérience utilisateur du plugin, mais n'est pas nécessaire pour son fonctionnement.
+Un broker sécurisé (user:mdp) est obligatoire pour que le plugin mqtt-manager dont dépend le plugin frigate fonctionne correctement.
+
+
 # <u>Log</u>
 Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
 
@@ -45,7 +57,7 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19,
 
 #### Paramétrage Frigate
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
-- **Port** : le port du serveur Frigate (5000 par défaut)
+- **Port** : le port du serveur Frigate (5000 par défaut), vous pouvez utiliser un autre port du moment qu'il map vers 5000 (5054:5000 par exemple), l'API ne fonctionnera pas sans cela.
 - **Adresse externe** : Pour accéder à la page du serveur Frigate depuis l'extérieur.
 - **Topic MQTT** : le topic de votre serveur Frigate (frigate par défaut)
 - **Preset** : Pour les caméras avec PTZ, définir le nombre de positions que vous souhaitez récupérer.
@@ -75,6 +87,7 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 # <u>Demon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
 Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
+Votre broker MQTT doit être sécurisé pour que le plugin mqtt-manager fonctionne.
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Deamon NOK :**
@@ -374,20 +387,27 @@ Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faud
 
 Configuration Frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par défaut conviendra.
 
->**``   frigate1:``**
-**``      ffmpeg:``**
-**``          inputs:``**
-**``         - path: rtsp://127.0.0.1:8554/frigate1``**
+```yaml
+frigate1:
+  ffmpeg:
+    inputs:
+      - path: rtsp://127.0.0.1:8554/frigate1
+```
 
 Configuration Frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur Frigate.
 
->**``   frigate1:``** 
-**``      ffmpeg:``**
-**``          inputs:``**
-**``         - path: rtsp://127.0.0.1:8554/frigate1_SD``**
-**`` - role: detect``**
-**``         - path: rtsp://127.0.0.1:8554/frigate1_HD``**
-**`` - role: record``**
+```yaml
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/frigate1_high  # Flux principal haute résolution
+          input_args: preset-rtsp-restream
+          roles:
+            - record        # Utilisé pour l’enregistrement
+        - path: rtsp://127.0.0.1:8554/frigate1_low   # Flux secondaire basse résolution
+          input_args: preset-rtsp-restream
+          roles:
+            - detect  
+```
 
 ***Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate***
 
@@ -409,7 +429,149 @@ Frigate organise les review items comme des plages temporelles regroupant plusie
 Si l’enregistrement est désactivé (record.enabled: false), aucun segment vidéo n’est stocké, et donc la plateforme ne construit pas de review items → rien n’est publié dans frigate/reviews.
 
 Pour fonctionner le plugin a donc besoin de :
-`record:`
-`  enabled: true`
+
+```yaml
+record:
+  enabled: true
+```
+
+### Exemple de fichier de configuration
+ Veuillez noter que c'est mon fichier, mes réglages et qu'il fonctionne pour ma situation, à vous de l'adapter ou de comparer avec le vôtre si jamais toutes les fonctions du plugin n'étaient pas fonctionnelles chez vous.
+
+ Je ne pourrais être tenu responsable de tout dysfonctionnement causé par cette configuration, vous devez donc adapter la configuration à votre propre serveur et à vos besoins.
+
+ J'ai mis des commentaires afin de vous aider.
+
+ ```yaml
+ # Rappel, le plugin mqtt-manager nécéssite un broker mqtt sécurisé.
+ mqtt:
+  host: 192.168.2.22        # Adresse IP de votre serveur MQTT
+  port: 1883                # Port du broker MQTT (1883 = standard non sécurisé)
+  user: ***                 # Nom d'utilisateur (masqué ici)
+  password: ***             # Mot de passe (masqué ici)
+  stats_interval: 300       # Fréquence (en secondes) des messages de statistiques MQTT
+
+detectors:
+  coral:
+    type: edgetpu           # Utilise un accélérateur Coral (Edge TPU) pour la détection
+    device: usb             # Type de connexion : USB
+
+ffmpeg:
+  hwaccel_args: preset-intel-qsv-h264  # Accélération matérielle Intel Quick Sync pour le décodage vidéo
+
+timestamp_style:
+  position: tr              # Position du timestamp sur l’image (tr = top-right = coin supérieur droit)
+  format: '%d/%m/%Y %H:%M:%S'  # Format du timestamp affiché (jour/mois/année heure:min:sec)
+
+birdseye:
+  enabled: false            # Désactive le mode Birdseye (vue multi-caméras combinée)
+
+model:
+  labelmap:                 # Remappage des classes de détection vers des noms personnalisés
+    0: personne
+    1: vehicule
+    2: vehicule
+    3: vehicule
+    5: vehicule
+    7: vehicule
+    16: animale
+    17: animale
+    18: animale
+    19: animale
+    20: animale
+
+detect:
+  enabled: true             # Active globalement la détection d'objets pour toutes les caméras (ajouté automatiquement par frigate 0.16)
+
+snapshots:
+  enabled: true             # Active les captures d’image (snapshots) lors des événements
+  clean_copy: true          # Génère une version sans annotation (utile pour archivage ou IA)
+  timestamp: false          # Ne superpose pas la date/heure sur les images
+  bounding_box: false       # Ne dessine pas de boîte de détection sur les images
+  crop: false               # Ne recadre pas automatiquement l’objet détecté
+  retain:                   # Durée de conservation des images
+    default: 3              # Par défaut, conserve les snapshots 3 jours
+    objects:
+      personne: 7           # Conserve ceux contenant une "personne" pendant 7 jours
+      vehicule: 3           # Conserve ceux contenant un "vehicule" pendant 3 jours
+
+record:
+  enabled: true             # Active l’enregistrement vidéo, obligatoire pour que le plugin reçoive les événements.
+  retain:
+    days: 1                 # Conserve les enregistrements pendant 1 jour
+    mode: all               # Enregistre tout, même sans détection
+  alerts:
+    retain:
+      days: 7               # Conserve les clips d’alerte pendant 7 jours
+      mode: active_objects  # Seulement si un objet actif a été détecté
+    pre_capture: 5          # Enregistre 5 secondes avant le début de l’événement
+    post_capture: 5         # Enregistre 5 secondes après la fin de l’événement
+  detections:
+    retain:
+      days: 7               # Conserve les clips avec détection pendant 7 jours
+      mode: active_objects
+    pre_capture: 3
+    post_capture: 5
+
+semantic_search:
+  enabled: true             # Active l’analyse sémantique des événements (IA)
+  reindex: false            # Ne re-analyse pas les anciens événements au démarrage
+
+genai:
+  enabled: true             # Active l’intégration IA (Google Gemini ici)
+  provider: gemini          # Fournisseur de l’IA
+  api_key: ***              # Clé API Gemini (masquée ici)
+  model: gemini-1.5-flash   # Modèle utilisé pour l’analyse comportementale
+  object_prompts:          # Prompts personnalisés pour chaque type d’objet, a vous de l'adapter si besoin.
+    personne: >
+      Commence IMMÉDIATEMENT et DIRECTEMENT la description de l'action...
+    vehicule: >
+      Décris IMMÉDIATEMENT et DIRECTEMENT le comportement du véhicule...
+    animale: >
+      Analyse IMMÉDIATEMENT et DIRECTEMENT le comportement de l'animal...
+
+cameras:
+  frigate1:                 # Nom de la caméra
+    detect:
+      fps: 5                # Taux d’analyse des images pour la détection
+      enabled: true         # Active la détection pour cette caméra
+      width: 640            # Largeur du flux vidéo analysé
+      height: 360           # Hauteur du flux vidéo analysé
+      stationary:
+        interval: 50        # Vérifie les objets immobiles toutes les 50 frames
+        threshold: 30       # Seuil de mouvement à partir duquel un objet est considéré comme "mobile"
+    ffmpeg:
+      inputs:
+        - path: rtsp://127.0.0.1:8554/frigate1_high  # Flux principal haute résolution
+          input_args: preset-rtsp-restream
+          roles:
+            - record        # Utilisé pour l’enregistrement
+        - path: rtsp://127.0.0.1:8554/frigate1_low   # Flux secondaire basse résolution
+          input_args: preset-rtsp-restream
+          roles:
+            - detect        # Utilisé pour la détection
+    objects:
+      track:                # Liste des objets à détecter
+        - personne
+        - vehicule
+        - animale
+      filters:              # Filtres pour chaque type d’objet
+        personne:
+          min_score: 0.65   # Score minimum pour commencer à suivre
+          threshold: 0.7    # Score minimum pour déclencher un événement
+        vehicule:
+          min_score: 0.7
+          threshold: 0.8
+        animale:
+          min_score: 0.7
+          threshold: 0.8
+
+go2rtc:
+  streams:                  # Flux vidéo déclarés pour usage interne (re-streaming)
+    frigate1_low: rtsp://***:***@192.168.2.36:554/2   # Flux basse qualité
+    frigate1_high: rtsp://***:***@192.168.2.36:554/1  # Flux haute qualité
+
+version: 0.16-0             # Version utilisée de Frigate
+```
 
 

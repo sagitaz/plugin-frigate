@@ -44,7 +44,7 @@
   <div class="frigateEvent">
 
     <!-- div img -->
-    <div class="img-container" onmouseenter="handleHover(this)">
+    <div class="img-container" onmouseenter="if (typeof handleHover === 'function') handleHover(this)">
       <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
       <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
 
@@ -95,11 +95,19 @@
     </div>
 
     <!-- div buttons -->
-    <div class="eventBtns" <?php if ($hasSnapshot == 1)
-                              echo 'data-snapshot="' . $snapshot . '"'; ?> <?php if ($hasClip == 1)
-                                                                              echo 'data-video="' . $clip . '"'; ?>
-      data-title="<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?><div class='percentage <?= getPercentageClass($topScore) ?>'><?= $topScore ?> %</div><br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?><br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
+    <?php $confirmDelete = config::byKey('event::confirmDelete', 'frigate', 1) == 1; ?>
+    <div class="eventBtns" 
+      data-eventid="<?= $id ?>"
+      data-confirmdelete="<?= $confirmDelete ? 1 : 0 ?>"
+      <?= $hasSnapshot == 1 ? 'data-snapshot="' . $snapshot . '"' : '' ?>
+      <?= $hasClip == 1 ? 'data-video="' . $clip . '"' : '' ?>
+      data-title="
+      	<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?>
+        <div class='percentage <?= getPercentageClass($topScore) ?>'><?= $topScore ?> %</div>
+        <br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?>
+        <br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
 	    data-description="<?= $description ?>">
+
       <?php if ($hasSnapshot == 1): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
           <i class="fas fa-camera"></i>
@@ -110,7 +118,7 @@
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
-      <button class="hover-button" onclick="deleteEvent('<?= $id ?>', <?= config::byKey('event::confirmDelete', 'frigate', 1) == 1 ? 'true' : 'false' ?>)"
+      <button class="hover-button" onclick="deleteEvent('<?= $id ?>')"
         title="{{Supprimer l'évènement sur votre serveur Frigate}}">
         <i class="fas fa-trash"></i>
       </button>
