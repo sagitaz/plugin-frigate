@@ -872,7 +872,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     if ($stats == null) {
-      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les stats de Frigate.");
+      log::add(__CLASS__, 'debug', "║ Erreur: Impossible de récupérer les stats de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return;
     }
@@ -887,7 +887,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/" . $camera . "/ptz/info";
     $presets = self::getcURL("Presets", $resultURL);
     if ($presets == null) {
-      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les presets de Frigate.");
+      log::add(__CLASS__, 'debug', "║ Erreur: Impossible de récupérer les presets de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return;
     }
@@ -968,7 +968,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/logs/" . $service;
     $logs = self::getcURL("Logs", $resultURL, null, false);
     if ($logs == null) {
-      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les logs de Frigate.");
+      log::add(__CLASS__, 'debug', "║ Erreur: Impossible de récupérer les logs de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return;
     }
@@ -1021,13 +1021,13 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "║ Recupération des évènements sur 0 jour, processus stoppé.");
         log::add(__CLASS__, 'debug', "╚════════════════════════ END ═══════════════════");
         return;
-        }
-      
+      }
+
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events";
       $events = self::getcURL("Events", $resultURL);
       if ($events == null) {
-        log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les événements de Frigate.");
+        log::add(__CLASS__, 'debug', "║ Erreur: Impossible de récupérer les événements de Frigate.");
         log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
         return;
       }
@@ -1044,7 +1044,7 @@ class frigate extends eqLogic
       }
       $events = $newEvents;
     }
-    
+
     if ($recoveryDays != 1) {
       // Nombre de jours a filtrer et enregistrer en DB
       $recoveryDays = config::byKey('recovery_days', 'frigate');
@@ -3058,19 +3058,27 @@ class frigate extends eqLogic
           break;
 
         case 'detect':
+          if (isset($innerValue['state'])) {
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_DETECT_STATE");
+          }
           break;
 
         case 'recordings':
+          if (isset($innerValue['state'])) {
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_NVR_STATE");
+          }
           break;
 
         case 'snapshots':
+          if (isset($innerValue['state'])) {
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_SNAPSHOT_STATE");
+          }
           break;
 
         case 'audio':
+          if (isset($innerValue['state'])) {
           self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_AUDIO_STATE");
+          }
           break;
 
         case 'all':

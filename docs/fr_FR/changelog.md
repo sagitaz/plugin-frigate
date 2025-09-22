@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 22/09/2025 Stable 1.4.2
+- Correction warning PHP
+- Correction logs
+
 # 12/07/2025 Stable 1.4.0
 - Ajout FAQ dans la documentation
 
