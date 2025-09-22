@@ -14,22 +14,21 @@ document.querySelectorAll('.snapshot-btn, .video-btn').forEach(function (button)
         const title = eventBtns.getAttribute('data-title');
         const description = eventBtns.getAttribute('data-description');
         const eventId = eventBtns.getAttribute('data-eventid');
-        const confirmDelete = eventBtns.getAttribute('data-confirmdelete');
         const hasVideo = !!videoSrc;
         const hasSnapshot = !!snapshotSrc;
 
         if (this.classList.contains('video-btn')) {
-          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId);
         }
         else {
-          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId);
         }
 
         document.getElementById('showVideo').onclick = function () {
-          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
+          showMedia('video', videoSrc, hasVideo, hasSnapshot, title, description, eventId);
         };
         document.getElementById('showImage').onclick = function () {
-          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId, confirmDelete);
+          showMedia('snapshot', snapshotSrc, hasVideo, hasSnapshot, title, description, eventId);
         };
       }
     }, 300);
@@ -219,7 +218,7 @@ function truncateText(element, fullText, maxLength) {
   }
 }
 
-function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description, eventId, confirmDelete) {
+function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description, eventId) {
   const mediaModal = document.getElementById('mediaModal');
   const videoContainer = document.querySelector('.video-container');
   const imageContainer = document.querySelector('.image-container');
@@ -251,11 +250,11 @@ function showMedia(mediaType, src, hasVideo, hasSnapshot, title, description, ev
   }
 
   downloadBtn.onclick = function () {
-      downloadMedia (src);
+    downloadMedia(src);
   };
 
   deleteBtn.onclick = function () {
-    deleteEvent(eventId, confirmDelete !== "false");
+    deleteEvent(eventId);
   };
 
   showVideoBtn.classList.toggle('hidden-btn', !hasVideo);
@@ -276,11 +275,14 @@ function downloadMedia (mediaSrc) {
   window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
 }
 
-function deleteEvent(eventId, askConfirm) {
+function deleteEvent(eventId) {
+  const el = document.querySelector(`.eventBtns[data-eventid="${eventId}"]`);
+  const askConfirm = el?.dataset.confirmdelete === "1";
+
   if (askConfirm) {
     jeeDialog.confirm('{{Êtes-vous sûr de vouloir supprimer cet évènement ?<br/>Cela le supprimera aussi de votre serveur Frigate ! Continuer ?}}', function (result) {
       if (result) {
-        console.log("suppression de : " + eventId);
+        console.log("suppression confirmée de : " + eventId);
         deleteAllEvents(eventId);
       }
     });
@@ -329,7 +331,14 @@ function deleteAllEvents(eventId) {
           message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
-        window.location.reload(true);
+
+        // Sauvegarde de la position Y de la liste
+        const el = document.getElementById("frigateEventList");
+        if (el) {
+          localStorage.setItem("frigateScrollTop", -parseFloat(el.getBoundingClientRect().top));
+        }
+
+        location.reload();         
       }
     }
   })
