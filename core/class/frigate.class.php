@@ -583,11 +583,11 @@ class frigate extends eqLogic
 
 
       if (
-        is_object($this->getCmd('action', 'action_ptz_down')) ||
-        is_object($this->getCmd('action', 'action_ptz_up')) ||
-        is_object($this->getCmd('action', 'action_ptz_left')) ||
-        is_object($this->getCmd('action', 'action_ptz_right')) ||
-        is_object($this->getCmd('action', 'action_ptz_stop'))
+        ((is_object($this->getCmd('action', 'action_ptz_down'))) ? (($this->getCmd('action', 'action_ptz_down')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
+        ((is_object($this->getCmd('action', 'action_ptz_up')))  ? ( ($this->getCmd('action', 'action_ptz_up')->getIsVisible() == 1) ? 1 : 0) : 0)     ||
+        ((is_object($this->getCmd('action', 'action_ptz_left'))) ? (($this->getCmd('action', 'action_ptz_left')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
+        ((is_object($this->getCmd('action', 'action_ptz_right'))) ? (($this->getCmd('action', 'action_ptz_right')->getIsVisible() == 1) ? 1 : 0) : 0) ||
+        ((is_object($this->getCmd('action', 'action_ptz_stop'))) ? (($this->getCmd('action', 'action_ptz_stop')->getIsVisible() == 1) ? 1 : 0) : 0)
       ) {
         $replace['#ptzWidget#'] = '<div class="circle-overlay"></div>';
       }
@@ -3751,3 +3751,4 @@ class frigateCmd extends cmd
 
   /*     * **********************Getteur Setteur*************************** */
 }
+
