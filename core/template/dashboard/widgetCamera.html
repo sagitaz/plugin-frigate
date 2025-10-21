@@ -1,7 +1,7 @@
 <div class="eqLogic eqLogic-widget allowResize allowReorderCmd frigate_widget frigate #custom_layout# #eqLogic_class# #class#"
-    data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#" data-eqType="#eqType#" data-tags="#tags#"
+    id="frigate_widget#id#" data-version="#version#" data-eqLogic_id="#id#" data-eqLogic_uid="#uid#"
+    data-eqType="#eqType#" data-tags="#tags#"
     style="text-align:center; border:#border#; border-radius:#border-radius#; color: #color#;#style#; width: #width#;height: #height#">
-
     <center class="widget-name">
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
@@ -45,6 +45,8 @@
     </div>
 
     <script>
+        var scale#id# = 1;
+        var zIndex#id# = 1000;
         if (window.imgSrc === undefined) {
             let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
             console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
@@ -113,14 +115,20 @@
 
         function openModal#id#(imgElement) {
             var modal = document.getElementById("myModal#id#");
-            var modalImg = document.getElementById("modalImg#id#");
-
+            var modalImg = document.getElementById("modalImg#id#"); 
+            scale#id# = $("#frigate_widget#id#").css("scale");        
+            zIndex#id# = $("#frigate_widget#id#").css("z-index");
+            console.log('z-index : ' + zIndex#id#);
+            console.log('scale   : ' + scale#id#);
+            $("#frigate_widget#id#").attr('style', 'z-index: ' + (zIndex#id# + 60) + ' !important; scale : unset !important;');
             modal.style.display = "block";
             modalImg.src = imgElement.src;  // Assurez-vous que l'image de la modal utilise l'URL actuelle
         }
 
         function closeModal#id#() {
             var modal = document.getElementById("myModal#id#");
+
+            $("#frigate_widget#id#").attr('style', 'scale: ' + scale#id# + ' !important; z-index: ' + zIndex#id# + ' !important');
             modal.style.display = "none";
         }
 
@@ -449,6 +457,7 @@
             border-color: rgb(var(--defaultText-color)) !important;
             border-width: 1px !important;
             height: auto !important;
+            text-align: center !important;                                 /* added by t0urista*/
         }
 
         /* Bouton fermer la modal */
