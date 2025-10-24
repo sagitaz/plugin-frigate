@@ -1661,6 +1661,7 @@ class frigate extends eqLogic
   {
 
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:CREATION DES CAMERAS:/fg: ═══════════════════");
+    $urlFrigateWithoutPort = config::byKey('URL', 'frigate');
     $urlfrigate = self::getUrlFrigate();
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $addToName = "";
@@ -1686,6 +1687,9 @@ class frigate extends eqLogic
       }
       // Recherche équipement caméra
       $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
+      // position de la caméra sur l'ui / panel
+      $panelOrder = isset($cameraConfig['ui']['order']) ? $cameraConfig['ui']['order'] : ($n);
+
       if (!is_object($frigate)) {
         $n++;
         $urlLatest = "http://" . $urlfrigate . "/api/" . $name . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
@@ -1707,7 +1711,7 @@ class frigate extends eqLogic
         $frigate->setConfiguration('motion', 0);
         $frigate->setConfiguration('regions', 0);
         $frigate->setConfiguration('img', $img);
-        $frigate->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $urlfrigate . ':8554/' . $cameraName);
+        $frigate->setConfiguration('cameraStreamAccessUrl', 'rtsp://' . $urlFrigateWithoutPort . ':8554/' . $cameraName);
         $frigate->setConfiguration('urlStream', "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img);
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
@@ -1716,6 +1720,7 @@ class frigate extends eqLogic
       } else {
         log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }
+      $frigate->setConfiguration('panelOrder', $panelOrder);
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
       // commandes identique pour toutes les caméras
@@ -2722,12 +2727,14 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $eqLogic = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate");
     $timestamp = $eqLogic->getConfiguration('timestamp');
+    $snapshotQuality = $eqLogic->getConfiguration('snapshotQuality') ?? "70";;
+    $snapshotHeight = '&height=' . $eqLogic->getConfiguration('snapshotHeight') ?? "";;
     $extra = "";
     if ($type == "preview") {
       $format = "gif";
     } elseif ($type == "snapshot") {
       $format = "jpg";
-      $extra = '?timestamp=' . $timestamp . '&bbox=1';
+      $extra = '?timestamp=' . $timestamp . '&bbox=1' . '&quality=' . $snapshotQuality . $snapshotHeight;
     } else {
       $format = "mp4";
     }
