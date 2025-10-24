@@ -2735,15 +2735,22 @@ class frigate extends eqLogic
     $snapshotWebp = $eqLogic->getConfiguration('snapshotWebp') ?? "0";
     $extra = "";
     if ($type == "preview") {
+      $lienExtention = "gif";
       $format = "gif";
     } elseif ($type == "snapshot") {
+      $lienExtention = "jpg";
+      if ($snapshotWebp == "1") {
+        $format = "webp";
+      } else {
         $format = "jpg";
+      }
       $extra = '?timestamp=' . $timestamp . '&bbox=1';
     } else {
+      $lienExtention = "mp4";
       $format = "mp4";
     }
 
-    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $format . $extra;
+    $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/" . $type . "." . $lienExtention . $extra;
     $path = "/data/" . $camera . "/" . $eventId . "_" . $type . "." . $format;
     if ($mode == 1) {
       $lien = "http://" . $urlfrigate . "/api/events/" . $eventId . "/thumbnail.jpg";
@@ -2799,11 +2806,29 @@ class frigate extends eqLogic
     }
 
     if ($content !== false) {
+      // Récupérer les configurations de qualité et de hauteur
+      $eqLogic = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate");
+      $snapshotQuality = $eqLogic->getConfiguration('snapshotQuality') ?? "70";
+      $snapshotHeight = $eqLogic->getConfiguration('snapshotHeight');
+
+      // Redimensionner l'image si nécessaire
+      if ($snapshotHeight != "" && $snapshotHeight != "0") {
+        $isWebp = (pathinfo($path, PATHINFO_EXTENSION) === 'webp');
+        $content = self::resizeImage($content, (int)$snapshotHeight, (int)$snapshotQuality, $isWebp);
+        if ($content === false) {
+          log::add(__CLASS__, 'error', "║ Échec du redimensionnement de l'image pour : " . $lien);
+          $result = "error";
+          return $result;
+        }
+      }
+
       // Enregistrer l'image ou la vidéo dans le dossier spécifié
       $fullPath = dirname(__FILE__, 3) . $path;
       if (pathinfo($path, PATHINFO_EXTENSION) === 'webp') {
+        // Si le fichier est censé être un WebP, utiliser convertImg (qui gère déjà l'enregistrement)
         $fileSaved = self::convertImg($fullPath, $fullPath, $content);
       } else {
+        // Sinon, enregistrer directement le contenu (potentiellement redimensionné)
         $fileSaved = file_put_contents($fullPath, $content);
       }
 
@@ -2931,8 +2956,42 @@ class frigate extends eqLogic
         default:
           log::add(__CLASS__, 'error', "║ Type de fichier non supporté pour la conversion : " . $mime);
           return false;
+        }
+      
+        public static function resizeImage($imageContent, $targetHeight, $quality, $isWebp = false)
+        {
+          $image = imagecreatefromstring($imageContent);
+          if ($image === false) {
+            log::add(__CLASS__, 'error', "║ Impossible de créer l'image à partir de la chaîne pour le redimensionnement.");
+            return false;
+          }
+      
+          $originalWidth = imagesx($image);
+          $originalHeight = imagesy($image);
+      
+          if ($targetHeight == 0 || $targetHeight >= $originalHeight) {
+            // Pas de redimensionnement si la hauteur cible est 0 ou plus grande que l'originale
+            $resizedImage = $image;
+          } else {
+            $targetWidth = ($originalWidth / $originalHeight) * $targetHeight;
+            $resizedImage = imagecreatetruecolor($targetWidth, $targetHeight);
+            imagecopyresampled($resizedImage, $image, 0, 0, 0, 0, $targetWidth, $targetHeight, $originalWidth, $originalHeight);
+          }
+      
+          ob_start();
+          if ($isWebp) {
+            imagewebp($resizedImage, null, $quality);
+          } else {
+            imagejpeg($resizedImage, null, $quality);
+          }
+          $resizedContent = ob_get_clean();
+      
+          imagedestroy($image);
+          imagedestroy($resizedImage);
+      
+          return $resizedContent;
+        }
       }
-    }
 
     if ($formatRatio) {
       // Logique de formatRatio si nécessaire, à implémenter ici
