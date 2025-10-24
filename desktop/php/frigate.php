@@ -253,7 +253,12 @@ sendVarToJS('refresh', $refresh);
                                     <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="snapshotHeight" placeholder="{{}}">
                                 </div>
                             </div>
-
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Convertir en WEBP}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="snapshotWebp" title="{{les snapshots seront convertit au format webp}}"></label>
+                                </div>
+                            </div>
                             <div class="form-group eqEvents">
                                 <label class="col-sm-4 control-label">{{Autoriser les actions}}</label>
                                 <div class="col-sm-6">

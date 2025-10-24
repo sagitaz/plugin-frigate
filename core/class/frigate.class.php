@@ -2732,12 +2732,13 @@ class frigate extends eqLogic
     if ($eqLogic->getConfiguration('snapshotHeight') != "" && $eqLogic->getConfiguration('snapshotHeight') != "0") {
       $snapshotHeight = "&height=" . $eqLogic->getConfiguration('snapshotHeight');
     }
+    $snapshotWebp = $eqLogic->getConfiguration('snapshotWebp') ?? "0";
     $extra = "";
     if ($type == "preview") {
       $format = "gif";
     } elseif ($type == "snapshot") {
-      $format = "jpg";
-      $extra = '?timestamp=' . $timestamp . '&bbox=1' . '&quality=' . $snapshotQuality . $snapshotHeight;
+        $format = "jpg";
+      $extra = '?timestamp=' . $timestamp . '&bbox=1';
     } else {
       $format = "mp4";
     }
@@ -2752,7 +2753,11 @@ class frigate extends eqLogic
       $path = "/data/" . $camera . "/latest.jpg";
     } elseif ($mode == 3) {
       $lien = urldecode($file);
-      $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
+      if ($snapshotWebp == "1") {
+        $path = "/data/snapshots/" . $eventId . "_snapshot.webp";
+      } else {
+        $path = "/data/snapshots/" . $eventId . "_snapshot.jpg";
+      }
     } elseif ($mode == 4) {
       $path = "/data/" . $camera . "/" . $eventId . "_clip.mp4";
       $newpath = dirname(__FILE__, 3) . $path;
@@ -2795,8 +2800,14 @@ class frigate extends eqLogic
 
     if ($content !== false) {
       // Enregistrer l'image ou la vidéo dans le dossier spécifié
-      $file = file_put_contents(dirname(__FILE__, 3) . $path, $content);
-      if ($file !== false) {
+      $fullPath = dirname(__FILE__, 3) . $path;
+      if (pathinfo($path, PATHINFO_EXTENSION) === 'webp') {
+        $fileSaved = self::convertImg($fullPath, $fullPath, $content);
+      } else {
+        $fileSaved = file_put_contents($fullPath, $content);
+      }
+
+      if ($fileSaved !== false) {
         $result = "/plugins/frigate" . $path;
         log::add(__CLASS__, 'debug', "║ Le fichier a été enregistré : " . $lien);
       } else {
@@ -2863,6 +2874,131 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════");
   }
 
+  public static function saveWebpWithCorrectOrientation($image, $source, $destination)
+  {
+    if (function_exists('exif_read_data')) {
+      $exif = exif_read_data($source);
+      if ($exif && isset($exif['Orientation'])) {
+        $orientation = $exif['Orientation'];
+        if ($orientation != 1) {
+          $deg = 0;
+          switch ($orientation) {
+            case 3:
+              $deg = 180;
+              break;
+            case 6:
+              $deg = 270;
+              break;
+            case 8:
+              $deg = 90;
+              break;
+          }
+          if ($deg) {
+            $image = imagerotate($image, $deg, 0);
+          }
+        }
+      }
+    }
+
+    imagewebp($image, $destination, 80);
+  }
+
+  public static function convertImg($sourcePath, $destinationPath, $content = null, $formatRatio = false, $ratio = 16 / 9): bool
+  {
+    if ($content !== null) {
+      $image = imagecreatefromstring($content);
+      if ($image === false) {
+        log::add(__CLASS__, 'error', "║ Impossible de créer l'image à partir de la chaîne.");
+        return false;
+      }
+    } else {
+      $info = getimagesize($sourcePath);
+      if ($info === false) {
+        log::add(__CLASS__, 'error', "║ Impossible d'obtenir les informations de l'image source : " . $sourcePath);
+        return false;
+      }
+      $mime = $info['mime'];
+      switch ($mime) {
+        case 'image/jpeg':
+          $image = imagecreatefromjpeg($sourcePath);
+          break;
+        case 'image/png':
+          $image = imagecreatefrompng($sourcePath);
+          break;
+        case 'image/gif':
+          $image = imagecreatefromgif($sourcePath);
+          break;
+        default:
+          log::add(__CLASS__, 'error', "║ Type de fichier non supporté pour la conversion : " . $mime);
+          return false;
+      }
+    }
+
+    if ($formatRatio) {
+      // Logique de formatRatio si nécessaire, à implémenter ici
+    }
+
+    if (isset($image)) {
+      self::saveWebpWithCorrectOrientation($image, $sourcePath, $destinationPath);
+      imagedestroy($image);
+      return true;
+    }
+    return false;
+
+    $isAlpha = false;
+    if ($info['mime'] == 'image/jpeg') {
+      $image = imagecreatefromjpeg($source);
+    } elseif ($isAlpha = $info['mime'] == 'image/png') {
+      $image = imagecreatefrompng($source);
+    } elseif ($isAlpha = $info['mime'] == 'image/gif') {
+      $image = imagecreatefromgif($source);
+    } else {
+      return FALSE;
+    }
+    if ($isAlpha) {
+      imagepalettetotruecolor($image);
+      imagealphablending($image, true);
+      imagesavealpha($image, true);
+    }
+
+    if ($formatRatio) {
+      $width = imagesx($image);
+      $height = imagesy($image);
+
+      // Calculer les dimensions pour le format 16:9
+      $currentRatio = $width / $height;
+
+      if ($currentRatio < $ratio) {
+        // L'image est trop haute, ajouter des bandes sur les côtés
+        $newHeight = $height;
+        $newWidth = round($height * $ratio);
+        $offsetX = round(($newWidth - $width) / 2);
+        $offsetY = 0;
+      } else {
+        // L'image est trop large, ajouter des bandes en haut et en bas
+        $newWidth = $width;
+        $newHeight = round($width / $ratio);
+        $offsetX = 0;
+        $offsetY = round(($newHeight - $height) / 2);
+      }
+
+      // Créer une nouvelle image avec fond transparent
+      $newImage = imagecreatetruecolor($newWidth, $newHeight);
+      imagealphablending($newImage, false);
+      imagesavealpha($newImage, true);
+      $transparent = imagecolorallocatealpha($newImage, 0, 0, 0, 127);
+      imagefilledrectangle($newImage, 0, 0, $newWidth, $newHeight, $transparent);
+
+      // Copier l'image d'origine au centre
+      imagecopy($newImage, $image, $offsetX, $offsetY, 0, 0, $width, $height);
+      imagedestroy($image);
+      $image = $newImage;
+    }
+
+    self::saveWebpWithCorrectOrientation($image, $source, $destination);
+    imagedestroy($image);
+    return TRUE;
+  }
   public static function createUniqueId($timestamp)
   {
     // Generate a random string of 6 characters
@@ -3130,7 +3266,8 @@ class frigate extends eqLogic
   private static function handleObject($eqCamera, $key, $innerValue)
   {
     // Traiter le cas où $innerValue est un nombre ou un tableau avec "active"
-    if (is_array($innerValue)) {
+    $value = 0;
+    if (is_array($innerValue) && isset($innerValue["active"])) {
       $value = ($innerValue["active"] !== 0) ? 1 : 0;
     } else {
       $value = ($innerValue !== 0) ? 1 : 0;
