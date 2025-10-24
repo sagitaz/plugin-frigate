@@ -2728,7 +2728,10 @@ class frigate extends eqLogic
     $eqLogic = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate");
     $timestamp = $eqLogic->getConfiguration('timestamp');
     $snapshotQuality = $eqLogic->getConfiguration('snapshotQuality') ?? "70";;
-    $snapshotHeight = '&height=' . $eqLogic->getConfiguration('snapshotHeight') ?? "";;
+    $snapshotHeight = "";
+    if ($eqLogic->getConfiguration('snapshotHeight') != "" && $eqLogic->getConfiguration('snapshotHeight') != "0") {
+      $snapshotHeight = "&height=" . $eqLogic->getConfiguration('snapshotHeight');
+    }
     $extra = "";
     if ($type == "preview") {
       $format = "gif";
