@@ -2957,6 +2957,7 @@ class frigate extends eqLogic
           log::add(__CLASS__, 'error', "║ Type de fichier non supporté pour la conversion : " . $mime);
           return false;
         }
+      }}
       
         public static function resizeImage($imageContent, $targetHeight, $quality, $isWebp = false)
         {
