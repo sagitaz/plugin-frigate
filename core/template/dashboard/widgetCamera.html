@@ -12,23 +12,34 @@
         </span>
     </center>
 
-    <div class="column">
-        <div class="img-container">
-            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
-            <div class="detect-container">
-                #detectNow#
-            </div>
-            #ptzWidget#
-            #ptzZoom#
-        </div>
-        <div class="btn-container">
-            <div class="btn-actions">
+    <?php
+    $model = "1";
+    if ($model == "2") {
+        // version complète pour dashboard
+        echo '<div class="column">';
+        echo '<div class="img-container">';
+        echo '<img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />';
+        echo '<div class="detect-container">';
+        echo '#detectNow#';
+        echo '</div>';
+        echo '#ptzWidget#';
+        echo '#ptzZoom#';
+        echo '</div>';
+        echo '<div class="btn-container">';
+        echo '<div class="btn-actions">';
+        echo '#actions#';
+        echo '#actionsPreset#';
+        echo '</div>';
+        echo '</div>';
+        echo '</div>';
+    } else {
+        // version avec seulement l'image
+        echo '<div class="img-container">';
+        echo '<img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />';
+        echo '</div>';
+    }
+    ?>
 
-                #actions#
-                #actionsPreset#
-            </div>
-        </div>
-    </div>
 
     <!-- Modal Structure -->
     <div id="myModal#id#" class="modal">

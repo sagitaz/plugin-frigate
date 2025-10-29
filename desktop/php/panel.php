@@ -59,7 +59,6 @@ if (init('object_id') == '') {
       // Sinon tri alphabétique sur "name"
       return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
     });
-    log::add('frigate', 'Affichage des widgets caméras dans le panneau : ' . count($frigate_widgets) . ' widgets trouvés.', 'debug');
     
     echo '<div class="col-lg-12" style="width: 100%;">';
     foreach ($frigate_widgets as $widget) {

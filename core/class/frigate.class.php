@@ -440,7 +440,8 @@ class frigate extends eqLogic
       if (!is_array($replace)) {
         return $replace;
       }
-      $version = jeedom::versionAlias($_version);
+    //  $version = jeedom::versionAlias($_version);
+      $version = "dashboard"; // je ne gère pas de version mobile.
 
       $replace['#cameraEqlogicId#'] = $this->getLogicalId();
       $replace['#cameraName#'] = $this->getConfiguration("name");
@@ -1267,14 +1268,14 @@ class frigate extends eqLogic
 
   private static function processImage($dir, $event, $isThumbnail = false, $force = false)
   {
+    log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Image:/fg: ═══════════════════");
+
     $id = $event['id'];
     $camera = $event['camera'];
     $type = $isThumbnail ? 'thumbnail' : 'snapshot';
     $basePath = $dir . '/' . $id . "_{$type}";
     $jpgPath = $basePath . '.jpg';
     $webpPath = $basePath . '.webp';
-
-    log::add(__CLASS__, 'debug', "║ :b:Process Image:/b: type=$type, ID=$id");
 
     // --- PRIORITÉ AU WEBP ---
     if (file_exists($webpPath) && !$force) {
@@ -1312,7 +1313,8 @@ class frigate extends eqLogic
 
   private static function processClip($dir, $event, $type, $force)
   {
-    log::add(__CLASS__, 'debug', "║ :b:Process Clip:/b: pour l'event ID: " . $event['id']);
+    log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Clip:/fg: ═══════════════════");
+
     if ($type != "end") {
       log::add(__CLASS__, 'debug', "║ Pas de clip, le type n'est pas 'end' " . json_encode($event));
       return ['url' => "null", 'has' => 0];
@@ -1337,7 +1339,8 @@ class frigate extends eqLogic
   }
   private static function processPreview($dir, $event)
   {
-    log::add(__CLASS__, 'debug', "║ :b:Process Preview:/b: pour l'event ID: " . $event['id']);
+    log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Preview:/fg: ═══════════════════");
+
     if (!file_exists($dir . '/' . $event['id'] . '_preview.gif')) {
       log::add(__CLASS__, 'debug', "║ Fichier preview non trouvé: " . $dir . '/' . $event['id'] . '_preview.gif');
       $preview = self::saveURL($event['id'], "preview", $event['camera']);
@@ -1399,6 +1402,9 @@ class frigate extends eqLogic
 
     // --- Enregistrer en JPG ---
     $jpgPath = preg_replace('/\.(png|webp)$/i', '.jpg', $filePath);
+    if ($quality === 0) {
+      $quality = 80;
+    }
     imagejpeg($newImage, $jpgPath, $quality);
     log::add(__CLASS__, 'debug', "║ JPEG sauvegardé avec qualité = $quality");
 
@@ -2935,7 +2941,7 @@ class frigate extends eqLogic
     }
 
     $result = "/plugins/frigate" . $path;
-    log::add(__CLASS__, 'debug', "║ :b:Fichier enregistré:/b: " . $result);
+    // log::add(__CLASS__, 'debug', "║ :b:Fichier enregistré:/b: " . $result);
     return $result;
   }
 
