@@ -4,6 +4,15 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 30/09/2025 Stable 1.4.5
+- Ajout position sur panel (prise en compte s'il existe du réglage Frigate)
+- Ajout configuration qualité et hauteur des captures
+- Possibilité de convertir les captures en webp
+- Checkbox pour cacher les boutons sur les templates dashboard et panel
+- Le widget dashboard (et design) est reglable en hauteur et largeur librement
+- Le widget panel est fixe en hauteur et largeur (435px et 315px)
+- Correction de bugs (merci @t0urista)
+
 # 22/09/2025 Stable 1.4.2
 - Correction warning PHP
 - Correction logs
