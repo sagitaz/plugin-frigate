@@ -4,7 +4,7 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 30/09/2025 Stable 1.4.5
+# 30/09/2025 Beta 1.4.5
 - Ajout position sur panel (prise en compte s'il existe du réglage Frigate)
 - Ajout configuration qualité et hauteur des captures
 - Possibilité de convertir les captures en webp
