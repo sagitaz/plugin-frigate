@@ -741,12 +741,34 @@ class frigate extends eqLogic
 
 
       if (!$panel) {
+        if ($this->getConfiguration('templateDashboardImgOnly', 0) == 1) {
+          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
+          $replace['#detectNow#'] = "";
+          $replace['#ptzWidget#'] = "";
+          $replace['#ptzZoom#'] = "";
+          $replace['#actions#'] = "";
+          $replace['#actionsPreset#'] = "";
+        }
+        log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:WIDGET CAMERA:/fg: ═══════════════════");
+        log::add(__CLASS__, 'debug', json_encode($replace));
+        log::add(__CLASS__, 'debug', "╚════════════════════════ END WIDGET CAMERA ═══════════════════");
         $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
         $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
         $html = $this->postToHtml($_version, $html);
         cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
         return $html;
       } else {
+        if ($this->getConfiguration('templatePanelImgOnly', 0) == 1) {
+          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
+          $replace['#detectNow#'] = "";
+          $replace['#ptzWidget#'] = "";
+          $replace['#ptzZoom#'] = "";
+          $replace['#actions#'] = "";
+          $replace['#actionsPreset#'] = "";
+        }
+        log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:WIDGET PANEL:/fg: ═══════════════════");
+        log::add(__CLASS__, 'debug', json_encode($replace));
+        log::add(__CLASS__, 'debug', "╚════════════════════════ END WIDGET PANEL ═══════════════════");
         $html = template_replace($replace, getTemplate('core', $version, 'widgetPanel', __CLASS__));
         $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetPanel.html');
         $html = $this->postToHtml($_version, $html);

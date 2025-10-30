@@ -262,7 +262,19 @@ sendVarToJS('refresh', $refresh);
                             <div class="form-group eqEvents">
                                 <label class="col-sm-4 control-label">{{Autoriser les actions}}</label>
                                 <div class="col-sm-6">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="autorizeActions" title="{{les actions sont exécutées même s'il y en a sur les caméras}}"></label>
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="autorizeActions" title="{{les actions sont exécutées même s\'il y en a sur les caméras}}"></label>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Template dashboard}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="templateDashboardImgOnly" title="{{Affiché seulement l'image sur le dashboard}}"></label>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Template panel}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="templatePanelImgOnly" title="{{Affiché seulement l'image sur le panel}}"></label>
                                 </div>
                             </div>
                         </div>
