@@ -2008,7 +2008,8 @@ class frigate extends eqLogic
       $cmd->save();
       // mettre a jour la DB aussi
       log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la description générée");
-      $frigateEvent->setRecognition_description = $trackedObjects['description'];
+      $frigateEvent->setRecognition_type("description");
+      $frigateEvent->setRecognition_description($trackedObjects['description']);
       $frigateEvent->save();
     } elseif ($type == "face") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance faciale pour l'événement ID : " . $id);
@@ -2024,8 +2025,9 @@ class frigate extends eqLogic
       $cmd->save();
       // mettre a jour la DB aussi
       log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance faciale");
-      $frigateEvent->setRecognition_name = $trackedObjects['name'];
-      $frigateEvent->setRecognition_score = $trackedObjects['score'];
+      $frigateEvent->setRecognition_type("face");
+      $frigateEvent->setRecognition_name($trackedObjects['name']);
+      $frigateEvent->setRecognition_score($trackedObjects['score']);
       $frigateEvent->save();
     } elseif ($type == "lpr") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance de plaque d'immatriculation pour l'événement ID : " . $id);
@@ -2046,9 +2048,10 @@ class frigate extends eqLogic
       $cmd->save();
       // mettre a jour la DB aussi
       log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance de plaque d'immatriculation");
-      $frigateEvent->setRecognition_plate = $trackedObjects['plate'];
-      $frigateEvent->setRecognition_name = $trackedObjects['name'];
-      $frigateEvent->setRecognition_score = $trackedObjects['score'];
+      $frigateEvent->setRecognition_type("lpr");
+      $frigateEvent->setRecognition_plate($trackedObjects['plate']);
+      $frigateEvent->setRecognition_name($trackedObjects['name']);
+      $frigateEvent->setRecognition_score($trackedObjects['score']);
       $frigateEvent->save();
     }
     log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
