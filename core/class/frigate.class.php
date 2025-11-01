@@ -1998,22 +1998,39 @@ class frigate extends eqLogic
     }
     $eqlogicId = $frigate->getId();
     $frigateEvent = frigate_events::byEventId($id);
-
+    if (is_array($frigateEvent) && !empty($frigateEvent)) {
+      $frigateEvent = $frigateEvent[0];
+    }
+    log::add(__CLASS__, 'debug', "║ Json  : " . json_encode($trackedObjects));
     if ($type == "description") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la description générée pour l'événement ID : " . $id);
       // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("description");
+      $cmd->save();
+
       $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_id", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['description']);
       $cmd->save();
       // mettre a jour la DB aussi
       log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la description générée");
+      if (!is_object($frigateEvent)) {
+        log::add(__CLASS__, 'error', "║ Impossible de trouver l'événement pour l'ID : " . $id);
+        return;
+      }
       $frigateEvent->setRecognition_type("description");
       $frigateEvent->setRecognition_description($trackedObjects['description']);
       $frigateEvent->save();
     } elseif ($type == "face") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance faciale pour l'événement ID : " . $id);
       // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("face");
+      $cmd->save();
+
       $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['name']);
@@ -2032,6 +2049,11 @@ class frigate extends eqLogic
     } elseif ($type == "lpr") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance de plaque d'immatriculation pour l'événement ID : " . $id);
       // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("lpr");
+      $cmd->save();
+
       $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['plate']);
