@@ -22,5 +22,10 @@ CREATE TABLE IF NOT EXISTS `frigate_events` (
     `zones` text DEFAULT NULL,
     `type` text DEFAULT NULL,
     `isFavorite` tinyint(1),
+    `recognition_type` text DEFAULT NULL,
+    `recognition_description` text DEFAULT NULL,
+    `recognition_name` text DEFAULT NULL,
+    `recognition_plate` text DEFAULT NULL,
+    `recognition_score` int(11) DEFAULT NULL,
     PRIMARY KEY (`id`)
 ) ENGINE=InnoDB DEFAULT CHARSET=utf8mb4;

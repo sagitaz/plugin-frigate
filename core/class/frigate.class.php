@@ -440,7 +440,7 @@ class frigate extends eqLogic
       if (!is_array($replace)) {
         return $replace;
       }
-    //  $version = jeedom::versionAlias($_version);
+      //  $version = jeedom::versionAlias($_version);
       $version = "dashboard"; // je ne gère pas de version mobile.
 
       $replace['#cameraEqlogicId#'] = $this->getLogicalId();
@@ -1174,6 +1174,11 @@ class frigate extends eqLogic
         if ($updated) {
           $frigate->setData($event['data']);
           log::add(__CLASS__, 'debug', "║ Mise à jour du champ data pour event ID: " . $event['id']);
+
+          // si data description existe, le mettre à jour aussi
+          if (isset($event['data']['description'])) {
+            $frigate->setRecognition_description($event['data']['description']);
+          }
           $frigate->save();
           self::majEventsCmds($frigate);
           log::add(__CLASS__, 'debug', "║ Evénement Frigate mis à jour et sauvegardé, event ID: " . $event['id']);
@@ -1216,7 +1221,7 @@ class frigate extends eqLogic
       "type" => $event->getType(),
       "isFavorite" => $event->getIsFavorite() ?? 0,
       "zones" => $event->getZones() ?? '',
-      "description" => $dataArray['description'] ?? ''
+      "description" => $event->getRecognition_description() ?? ''
     );
 
 
@@ -1738,7 +1743,7 @@ class frigate extends eqLogic
         "type" => $event->getType(),
         "isFavorite" => $event->getIsFavorite() ?? 0,
         "zones" => $event->getZones() ?? '',
-        "description" => $dataArray['description'] ?? ''
+        "description" => $event->getRecognition_description() ?? ''
       );
     }
 
@@ -1977,6 +1982,103 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
     self::createEqStatsCmd($eqlogicId);
   }
+
+  public static function updateTrackedObjects($trackedObjects)
+  {
+    $type = $trackedObjects['type'];
+    $camera = $trackedObjects['camera'];
+    $id = $trackedObjects['id'];
+    log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:UPDATE TRACKED OBJECTS:/fg: ═══════════════════");
+    log::add(__CLASS__, 'debug', "║ Type d'objet suivi : " . $type . " pour l'événement ID : " . $id . " sur la caméra : " . $camera);
+    // mettre a jour ou créer les commandes 
+    $frigate = frigate::byLogicalId("eqFrigateCamera_" . $camera, 'frigate');
+    if (!is_object($frigate)) {
+      log::add(__CLASS__, 'error', "║ Impossible de trouver l'équipement pour la caméra : " . $camera);
+      return;
+    }
+    $eqlogicId = $frigate->getId();
+    $frigateEvent = frigate_events::byEventId($id);
+    if (is_array($frigateEvent) && !empty($frigateEvent)) {
+      $frigateEvent = $frigateEvent[0];
+    }
+    log::add(__CLASS__, 'debug', "║ Json  : " . json_encode($trackedObjects));
+    if ($type == "description") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la description générée pour l'événement ID : " . $id);
+      // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("description");
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_id", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['description']);
+      $cmd->save();
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la description générée");
+      if (!is_object($frigateEvent)) {
+        log::add(__CLASS__, 'error', "║ Impossible de trouver l'événement pour l'ID : " . $id);
+        return;
+      }
+      $frigateEvent->setRecognition_type("description");
+      $frigateEvent->setRecognition_description($trackedObjects['description']);
+      $frigateEvent->save();
+    } elseif ($type == "face") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance faciale pour l'événement ID : " . $id);
+      // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("face");
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['name']);
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['score']);
+      $cmd->save();
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance faciale");
+      $frigateEvent->setRecognition_type("face");
+      $frigateEvent->setRecognition_name($trackedObjects['name']);
+      $frigateEvent->setRecognition_score($trackedObjects['score']);
+      $frigateEvent->save();
+    } elseif ($type == "lpr") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance de plaque d'immatriculation pour l'événement ID : " . $id);
+      // mettre à jour les commandes
+      $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event("lpr");
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['plate']);
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['name']);
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['score']);
+      $cmd->save();
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance de plaque d'immatriculation");
+      $frigateEvent->setRecognition_type("lpr");
+      $frigateEvent->setRecognition_plate($trackedObjects['plate']);
+      $frigateEvent->setRecognition_name($trackedObjects['name']);
+      $frigateEvent->setRecognition_score($trackedObjects['score']);
+      $frigateEvent->save();
+    }
+    log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
+  }
+
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
@@ -3174,6 +3276,11 @@ class frigate extends eqLogic
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
+          break;
+
+        case 'tracked_object_update':
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt tracked_object_update');
+          self::updateTrackedObjects($value);
           break;
 
         default:
