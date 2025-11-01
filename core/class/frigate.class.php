@@ -440,7 +440,7 @@ class frigate extends eqLogic
       if (!is_array($replace)) {
         return $replace;
       }
-    //  $version = jeedom::versionAlias($_version);
+      //  $version = jeedom::versionAlias($_version);
       $version = "dashboard"; // je ne gère pas de version mobile.
 
       $replace['#cameraEqlogicId#'] = $this->getLogicalId();
@@ -1977,6 +1977,74 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
     self::createEqStatsCmd($eqlogicId);
   }
+
+  public static function updateTrackedObjects($trackedObjects)
+  {
+    /*
+    exemple pour Generative AI description
+    {
+  "type": "description",
+  "id": "1607123955.475377-mxklsc",
+  "description": "The car is a red sedan moving away from the camera.",
+  "camera": "front_door_cam"
+}
+  Exemple pour face recognition
+  {
+  "type": "face",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John",
+  "score": 0.95,
+  "camera": "front_door_cam",
+  "timestamp": 1607123958.748393
+}
+  Exemple pour License Plate Recognition
+  {
+  "type": "lpr",
+  "id": "1607123955.475377-mxklsc",
+  "name": "John's Car",
+  "plate": "123ABC",
+  "score": 0.95,
+  "camera": "driveway_cam",
+  "timestamp": 1607123958.748393
+}
+    */
+    $type = $trackedObjects['type'];
+    $camera = $trackedObjects['camera'];
+    $id = $trackedObjects['id'];
+    // mettre a jour ou créer les commandes 
+    $frigate = frigate::byLogicalId("eqFrigateCamera_" . $camera, 'frigate');
+    if (!is_object($frigate)) {
+      log::add(__CLASS__, 'error', "║ Impossible de trouver l'équipement pour la caméra : " . $camera);
+      return;
+    }
+    $eqlogicId = $frigate->getId();
+
+    if ($type == "description") {
+      // Pour description, mettre a jour ou creer les commandes ayant le logicalid suivants: info_id
+      $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_id", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($id);
+    } elseif ($type == "face") {
+      // Pour face, mettre a jour ou creer les commandes ayant le logicalid suivants: info_name
+      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_face_name", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['name']);
+
+      $cmd = self::createCmd($eqlogicId, "Score de detection de visage", "numeric", "%", "info_face_score", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['name']);
+    } elseif ($type == "lpr") {
+      // Pour lpr, mettre a jour ou creer les commandes ayant le logicalid suivants: info_plate
+      $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['plate']);
+
+      $cmd = self::createCmd($eqlogicId, "Score de detection de plaque", "numeric", "%", "info_lpr_score", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['score']);
+    }
+  }
+
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
@@ -3174,6 +3242,11 @@ class frigate extends eqLogic
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
+          break;
+
+        case 'tracked_object_update ':
+          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt tracked_object_update');
+          self::updateTrackedObjects($value);
           break;
 
         default:
