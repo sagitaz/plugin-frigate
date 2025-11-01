@@ -68,7 +68,22 @@ function frigate_update()
     // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0UPDATE `frigate_events`
     $sqlUpdate = "UPDATE `jeedom`.`frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` != 1 AND `isFavorite` != 0;";
     DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
-    
+
+    // Vérifier si les colonnes recognition_* existent déjà dans la table 'frigate_events'
+    $columns = ['recognition_type', 'recognition_description', 'recognition_name', 'recognition_plate', 'recognition_score'];
+    foreach ($columns as $column) {
+        $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE '" . $column . "';";
+        $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
+        if (empty($resultCheck)) {
+            // Création de la nouvelle colonne si elle n'existe pas
+            if ($column == 'recognition_score') {
+                $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `" . $column . "` int(11) DEFAULT NULL;";
+            } else {
+                $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `" . $column . "` text DEFAULT NULL;";
+            }
+            DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+        }
+    }
     frigate::setConfig();
     frigate::addMessages();
     frigate::deleteLatestFile();

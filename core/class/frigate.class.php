@@ -1174,6 +1174,11 @@ class frigate extends eqLogic
         if ($updated) {
           $frigate->setData($event['data']);
           log::add(__CLASS__, 'debug', "║ Mise à jour du champ data pour event ID: " . $event['id']);
+
+          // si data description existe, le mettre à jour aussi
+          if (isset($event['data']['description'])) {
+            $frigate->setRecognition_description($event['data']['description']);
+          }
           $frigate->save();
           self::majEventsCmds($frigate);
           log::add(__CLASS__, 'debug', "║ Evénement Frigate mis à jour et sauvegardé, event ID: " . $event['id']);
@@ -1216,7 +1221,7 @@ class frigate extends eqLogic
       "type" => $event->getType(),
       "isFavorite" => $event->getIsFavorite() ?? 0,
       "zones" => $event->getZones() ?? '',
-      "description" => $dataArray['description'] ?? ''
+      "description" => $event->getRecognition_description() ?? ''
     );
 
 
@@ -1980,34 +1985,6 @@ class frigate extends eqLogic
 
   public static function updateTrackedObjects($trackedObjects)
   {
-    /*
-    exemple pour Generative AI description
-    {
-  "type": "description",
-  "id": "1607123955.475377-mxklsc",
-  "description": "The car is a red sedan moving away from the camera.",
-  "camera": "front_door_cam"
-}
-  Exemple pour face recognition
-  {
-  "type": "face",
-  "id": "1607123955.475377-mxklsc",
-  "name": "John",
-  "score": 0.95,
-  "camera": "front_door_cam",
-  "timestamp": 1607123958.748393
-}
-  Exemple pour License Plate Recognition
-  {
-  "type": "lpr",
-  "id": "1607123955.475377-mxklsc",
-  "name": "John's Car",
-  "plate": "123ABC",
-  "score": 0.95,
-  "camera": "driveway_cam",
-  "timestamp": 1607123958.748393
-}
-    */
     $type = $trackedObjects['type'];
     $camera = $trackedObjects['camera'];
     $id = $trackedObjects['id'];
@@ -2020,6 +1997,7 @@ class frigate extends eqLogic
       return;
     }
     $eqlogicId = $frigate->getId();
+    $frigateEvent = frigate_events::byEventId($id);
 
     if ($type == "description") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la description générée pour l'événement ID : " . $id);
@@ -2027,26 +2005,54 @@ class frigate extends eqLogic
       $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_id", "", 0, null, 0);
       $cmd->save();
       $cmd->event($id);
+      $cmd->save();
+
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la description générée");
+      $frigateEvent->recognition_description = $trackedObjects['description'];
+      $frigateEvent->save();
     } elseif ($type == "face") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance faciale pour l'événement ID : " . $id);
-      // Pour face, mettre a jour ou creer les commandes ayant le logicalid suivants: info_name
-      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_face_name", "", 0, null, 0);
+      // Pour face, mettre a jour ou creer les commandes et la DB
+      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['name']);
+      $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "Score de detection de visage", "numeric", "%", "info_face_score", "", 0, null, 0);
+      $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
       $cmd->save();
-      $cmd->event($trackedObjects['name']);
+      $cmd->event($trackedObjects['score']);
+      $cmd->save();
+
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance faciale");
+      $frigateEvent->recognition_name = $trackedObjects['name'];
+      $frigateEvent->recognition_score = $trackedObjects['score'];
+      $frigateEvent->save();
     } elseif ($type == "lpr") {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance de plaque d'immatriculation pour l'événement ID : " . $id);
       // Pour lpr, mettre a jour ou creer les commandes ayant le logicalid suivants: info_plate
       $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['plate']);
+      $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "Score de detection de plaque", "numeric", "%", "info_lpr_score", "", 0, null, 0);
+      $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($trackedObjects['name']);
+      $cmd->save();
+
+      $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
       $cmd->save();
       $cmd->event($trackedObjects['score']);
+      $cmd->save();
+
+      // mettre a jour la DB aussi
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la DB pour la reconnaissance de plaque d'immatriculation");
+      $frigateEvent->recognition_plate = $trackedObjects['plate'];
+      $frigateEvent->recognition_name = $trackedObjects['name'];
+      $frigateEvent->recognition_score = $trackedObjects['score'];
+      $frigateEvent->save();
     }
     log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
   }
