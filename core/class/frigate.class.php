@@ -2011,6 +2011,8 @@ class frigate extends eqLogic
     $type = $trackedObjects['type'];
     $camera = $trackedObjects['camera'];
     $id = $trackedObjects['id'];
+    log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:UPDATE TRACKED OBJECTS:/fg: ═══════════════════");
+    log::add(__CLASS__, 'debug', "║ Type d'objet suivi : " . $type . " pour l'événement ID : " . $id . " sur la caméra : " . $camera);
     // mettre a jour ou créer les commandes 
     $frigate = frigate::byLogicalId("eqFrigateCamera_" . $camera, 'frigate');
     if (!is_object($frigate)) {
@@ -2020,11 +2022,13 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
 
     if ($type == "description") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la description générée pour l'événement ID : " . $id);
       // Pour description, mettre a jour ou creer les commandes ayant le logicalid suivants: info_id
       $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_id", "", 0, null, 0);
       $cmd->save();
       $cmd->event($id);
     } elseif ($type == "face") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance faciale pour l'événement ID : " . $id);
       // Pour face, mettre a jour ou creer les commandes ayant le logicalid suivants: info_name
       $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_face_name", "", 0, null, 0);
       $cmd->save();
@@ -2034,6 +2038,7 @@ class frigate extends eqLogic
       $cmd->save();
       $cmd->event($trackedObjects['name']);
     } elseif ($type == "lpr") {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la reconnaissance de plaque d'immatriculation pour l'événement ID : " . $id);
       // Pour lpr, mettre a jour ou creer les commandes ayant le logicalid suivants: info_plate
       $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
       $cmd->save();
@@ -2043,6 +2048,7 @@ class frigate extends eqLogic
       $cmd->save();
       $cmd->event($trackedObjects['score']);
     }
+    log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
   }
 
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
@@ -3244,8 +3250,8 @@ class frigate extends eqLogic
           $cmd->save();
           break;
 
-        case 'tracked_object_update ':
-          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt tracked_object_update');
+        case 'tracked_object_update':
+          log::add("frigate_MQTT", 'info', ' => Traitement mqtt tracked_object_update');
           self::updateTrackedObjects($value);
           break;
 
