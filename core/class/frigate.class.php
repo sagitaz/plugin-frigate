@@ -2006,14 +2006,9 @@ class frigate extends eqLogic
       $frigateEvent = $frigateEvent[0];
     }
 
-    if (!is_object($frigateEvent)) {
-      log::add(__CLASS__, 'error', "║ Événement introuvable pour l'ID : $id");
-      return;
-    }
-
     log::add(__CLASS__, 'debug', "║ Données reçues : " . json_encode($trackedObjects));
 
-    // Mise à jour de la base de données
+    // Création / Mise à jour de la base de données
     self::updateDatabase($frigateEvent, $type, $trackedObjects);
 
     // Création / mise à jour des commandes Jeedom
@@ -2024,6 +2019,13 @@ class frigate extends eqLogic
 
   private static function updateDatabase($frigateEvent, $type, $trackedObjects)
   {
+    if (!is_object($frigateEvent)) {
+      log::add(__CLASS__, 'error', "║ Événement introuvable pour l'ID : $id, il est créé dans la DB.");
+      $frigateEvent = new frigate_events();
+      $frigateEvent->setCamera($trackedObjects['camera']);
+      $frigateEvent->setEventId($trackedObjects['id']);
+    }
+
     switch ($type) {
       case "description":
         log::add(__CLASS__, 'debug', "║ MAJ DB → Description générée");
