@@ -192,7 +192,7 @@ class frigate extends eqLogic
   public static function cron()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. Cron non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -202,7 +202,7 @@ class frigate extends eqLogic
   public static function cron5()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron5 non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. Cron5 non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -212,7 +212,7 @@ class frigate extends eqLogic
   public static function cron10()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron10 non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. Cron10 non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -222,7 +222,7 @@ class frigate extends eqLogic
   public static function cron15()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron15 non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. Cron15 non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -232,7 +232,7 @@ class frigate extends eqLogic
   public static function cron30()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. Cron30 non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. Cron30 non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -242,7 +242,7 @@ class frigate extends eqLogic
   public static function cronHourly()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. CronHourly non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. CronHourly non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -252,7 +252,7 @@ class frigate extends eqLogic
   public static function cronDaily()
   {
     if (!self::isFrigateServerAvailable()) {
-      log::add(__CLASS__, 'warning', "Le serveur Frigate n'est pas disponible. CronDaily non exécuté.");
+      log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. CronDaily non exécuté.");
       return;
     }
     self::checkFrigateStatus();
@@ -785,12 +785,12 @@ class frigate extends eqLogic
   {
     $url = config::byKey('URL', 'frigate');
     if ($url == "") {
-      log::add(__CLASS__, 'error', "║ Erreur: L'URL ne peut être vide.");
+      log::add(__CLASS__, "error", "║ Erreur: L'URL ne peut être vide.");
       return false;
     }
     $port = config::byKey('port', 'frigate');
     if ($port == "") {
-      log::add(__CLASS__, 'error', "║ Erreur: Le port ne peut être vide");
+      log::add(__CLASS__, "error", "║ Erreur: Le port ne peut être vide");
       return false;
     }
     $urlFrigate = $url . ":" . $port;
@@ -844,7 +844,7 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'error', "║ Erreur getcURL (" . $method . "): " . curl_error($ch));
+      log::add(__CLASS__, "error", "║ Erreur getcURL (" . $method . "): " . curl_error($ch));
       return null;
     }
     curl_close($ch);
@@ -873,7 +873,7 @@ class frigate extends eqLogic
     $data = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add(__CLASS__, 'error', "║ Erreur: deletecURL" . curl_error($ch));
+      log::add(__CLASS__, "error", "║ Erreur: deletecURL" . curl_error($ch));
       die();
     }
     curl_close($ch);
@@ -1123,6 +1123,7 @@ class frigate extends eqLogic
         $updated = false;
 
         $fieldsToUpdate = [
+          'StartTime' => $infos["startTime"] ?? $infos['endTime'],
           'EndTime' => $infos["endTime"],
           'HasClip' => $infos["hasClip"],
           'Clip' => $infos["clip"],
@@ -1135,6 +1136,7 @@ class frigate extends eqLogic
           'PlusId' => $event['plus_id'],
           'SubLabel' => $event['sub_label'],
           'Thumbnail' => $infos["thumbnail"],
+          'Lasted' => $infos["image"],
           'Type' => $type,
           'TopScore' => $infos["topScore"],
           'Score' => $infos["score"],
@@ -1251,10 +1253,10 @@ class frigate extends eqLogic
     // Fonction de vérification et téléchargement
     sleep($sleep);
     $img = self::processImage($dir, $event, true, $force);
-    log::add(__CLASS__, 'warning', "║ Thumbnail: " . json_encode($img));
+    log::add(__CLASS__, "debug", "║ Thumbnail: " . json_encode($img));
 
     $snapshot = self::processImage($dir, $event,  false, $force);
-    log::add(__CLASS__, 'warning', "║ Snapshot: " . json_encode($snapshot));
+    log::add(__CLASS__, "debug", "║ Snapshot: " . json_encode($snapshot));
 
     $clip = self::processClip($dir, $event, $type, $force);
     self::processPreview($dir, $event);
@@ -1491,14 +1493,14 @@ class frigate extends eqLogic
               if (unlink($path)) {
                 log::add(__CLASS__, 'debug', "║ Suppresion reussie: " . $path);
               } else {
-                log::add(__CLASS__, 'error', "║ Suppresion echouée: " . $path);
+                log::add(__CLASS__, "error", "║ Suppresion echouée: " . $path);
               }
             }
           }
         }
       }
     } else {
-      log::add(__CLASS__, 'error', "║ Dossier inexistant: " . $folder);
+      log::add(__CLASS__, "error", "║ Dossier inexistant: " . $folder);
     }
   }
 
@@ -1510,11 +1512,11 @@ class frigate extends eqLogic
     $days = config::byKey('remove_days', 'frigate', "7");
     $recoveryDays = config::byKey('recovery_days', 'frigate', "7");
     if (!is_numeric($days) || $days <= 0) {
-      log::add(__CLASS__, 'error', "║ Configuration invalide pour 'remove_days': " . $days . " Cela doit être un nombre positif.");
+      log::add(__CLASS__, "error", "║ Configuration invalide pour 'remove_days': " . $days . " Cela doit être un nombre positif.");
       return;
     }
     if ($days < $recoveryDays) {
-      log::add(__CLASS__, 'warning', "║ 'remove_days' doit être supérieur à 'recovery_days'");
+      log::add(__CLASS__, "warning", "║ 'remove_days' doit être supérieur à 'recovery_days'");
       $days = $recoveryDays;
     }
     log::add(__CLASS__, 'info', "║ Nettoyage des fichiers datant de plus de " . $days . " jours.");
@@ -1532,7 +1534,7 @@ class frigate extends eqLogic
         if ($result) {
           log::add(__CLASS__, 'info', "║ Événement ID: " . $eventId . " nettoyé avec succès.");
         } else {
-          log::add(__CLASS__, 'error', "║ Échec du nettoyage de l'événement ID: " . $eventId);
+          log::add(__CLASS__, "error", "║ Échec du nettoyage de l'événement ID: " . $eventId);
         }
       }
     } else {
@@ -1555,7 +1557,7 @@ class frigate extends eqLogic
         if ($result) {
           log::add(__CLASS__, 'info', "║ Événement ID: " . $eventId . " nettoyé avec succès.");
         } else {
-          log::add(__CLASS__, 'error', "║ Échec du nettoyage de l'événement ID: " . $eventId);
+          log::add(__CLASS__, "error", "║ Échec du nettoyage de l'événement ID: " . $eventId);
         }
       }
     }
@@ -1773,14 +1775,14 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
     $urlfrigate = self::getUrlFrigate();
     if (empty($urlfrigate)) {
-      log::add(__CLASS__, 'error', "║ Impossible de récupérer l'URL de Frigate.");
+      log::add(__CLASS__, "error", "║ Impossible de récupérer l'URL de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
       return false;
     }
     // récupérer le json de configuration
     $configurationArray = self::jsonFromUrl("http://" . $urlfrigate . "/api/config");
     if ($configurationArray == null) {
-      log::add(__CLASS__, 'error', "║ Impossible de récupérer le fichier de configuration de Frigate.");
+      log::add(__CLASS__, "error", "║ Impossible de récupérer le fichier de configuration de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
       return false;
     }
@@ -1996,7 +1998,7 @@ class frigate extends eqLogic
     // Vérification équipement Frigate
     $frigate = frigate::byLogicalId("eqFrigateCamera_" . $camera, 'frigate');
     if (!is_object($frigate)) {
-      log::add(__CLASS__, 'error', "║ Équipement introuvable pour la caméra : $camera");
+      log::add(__CLASS__, "error", "║ Équipement introuvable pour la caméra : $camera");
       return;
     }
 
@@ -2019,11 +2021,12 @@ class frigate extends eqLogic
 
   private static function updateDatabase($frigateEvent, $type, $trackedObjects)
   {
+    $id = $trackedObjects['id'] ?? null;
     if (!is_object($frigateEvent)) {
-      log::add(__CLASS__, 'error', "║ Événement introuvable pour l'ID : $id, il est créé dans la DB.");
+      log::add(__CLASS__, "error", "║ Événement introuvable (id: $id), il sera est créé dans la DB.");
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
-      $frigateEvent->setEventId($trackedObjects['id']);
+      $frigateEvent->setEventId($id);
     }
 
     switch ($type) {
@@ -3156,7 +3159,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return false;
     } else if ($config == null) {
-      log::add(__CLASS__, 'error', "║Erreur: Impossible de récupérer la configuration de Frigate.");
+      log::add(__CLASS__, "error", "║Erreur: Impossible de récupérer la configuration de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return false;
     } else {
@@ -3513,7 +3516,7 @@ class frigate extends eqLogic
     if ($curlResponse === false) {
       $error = 'Erreur cURL : ' . curl_error($ch);
       curl_close($ch);
-      log::add(__CLASS__, 'error', '║ getFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, "error", '║ getFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3526,7 +3529,7 @@ class frigate extends eqLogic
     if ($httpCode != 200) {
       $error = 'Erreur : Impossible de récupérer la configuration. Code de statut : ' . $httpCode;
       curl_close($ch);
-      log::add(__CLASS__, 'error', '║ getFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, "error", '║ getFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3571,7 +3574,7 @@ class frigate extends eqLogic
     if ($curlResponse === false) {
       $error = 'Erreur cURL : ' . curl_error($ch);
       curl_close($ch);
-      log::add(__CLASS__, 'error', '║ sendFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, "error", '║ sendFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3584,7 +3587,7 @@ class frigate extends eqLogic
     if ($httpCode != 200) {
       $error = 'Erreur : Impossible de sauvegarder la configuration. Code de statut : ' . $httpCode;
       curl_close($ch);
-      log::add(__CLASS__, 'error', '║ sendFrigateConfiguration :: ' . $error);
+      log::add(__CLASS__, "error", '║ sendFrigateConfiguration :: ' . $error);
       $response = array(
         'status' => 'error',
         'message' => $error
@@ -3612,12 +3615,12 @@ class frigate extends eqLogic
       $jsonContent = file_get_contents($jsonUrl);
     } else {
       $jsonContent = false;
-      log::add(__CLASS__, 'error', "║ jsonFromUrl : HTTP Error $code lors du téléchargement de $jsonUrl");
+      log::add(__CLASS__, "error", "║ jsonFromUrl : HTTP Error $code lors du téléchargement de $jsonUrl");
     }
 
     // Vérifier si le téléchargement a réussi
     if ($jsonContent === false) {
-      log::add(__CLASS__, 'error', "║ jsonFromUrl : Failed to retrieve JSON from URL");
+      log::add(__CLASS__, "error", "║ jsonFromUrl : Failed to retrieve JSON from URL");
       return null;
     }
 
@@ -3626,7 +3629,7 @@ class frigate extends eqLogic
 
     // Vérifier si la conversion a réussi
     if ($jsonArray === null && json_last_error() !== JSON_ERROR_NONE) {
-      log::add(__CLASS__, 'error', "║ jsonFromUrl : Failed to decode JSON content");
+      log::add(__CLASS__, "error", "║ jsonFromUrl : Failed to decode JSON content");
       return null;
     }
 
@@ -3639,14 +3642,14 @@ class frigate extends eqLogic
     $yamlContent = file_get_contents($yamlUrl);
     // Vérifier si le téléchargement a réussi
     if ($yamlContent === false) {
-      log::add(__CLASS__, 'error', "yamlToJsonFromUrl : Failed to retrieve YAML from URL");
+      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Failed to retrieve YAML from URL");
       return json_encode(["error" => "Failed to retrieve YAML from URL: $yamlUrl"]);
     }
     // Parser le contenu YAML
     $yamlArray = yaml_parse($yamlContent);
     // Vérifier si le parsing est réussi
     if ($yamlArray === false) {
-      log::add(__CLASS__, 'error', "yamlToJsonFromUrl : Invalid YAML content or file not found");
+      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Invalid YAML content or file not found");
       return json_encode(["error" => "Invalid YAML content or file not found"]);
     }
     // Convertir le tableau PHP en JSON
@@ -3691,7 +3694,7 @@ class frigate extends eqLogic
     $resultURL = $urlfrigate . "/api/stats";
     $stats = self::getcURL("Stats", $resultURL);
     if ($stats == null) {
-      log::add(__CLASS__, 'error', "║ Erreur: Impossible de récupérer les stats de Frigate.");
+      log::add(__CLASS__, "error", "║ Erreur: Impossible de récupérer les stats de Frigate.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return;
     }
@@ -3709,16 +3712,16 @@ class frigate extends eqLogic
     $pluginVersion = '0.0.0';
     try {
       if (!file_exists(dirname(__FILE__) . '/../../plugin_info/info.json')) {
-        log::add('frigate', 'warning', '[Plugin-Version] fichier info.json manquant');
+        log::add('frigate', "warning", '[Plugin-Version] fichier info.json manquant');
       }
       $data = json_decode(file_get_contents(dirname(__FILE__) . '/../../plugin_info/info.json'), true);
       if (!is_array($data)) {
-        log::add('frigate', 'warning', '[Plugin-Version] Impossible de décoder le fichier info.json');
+        log::add('frigate', "warning", '[Plugin-Version] Impossible de décoder le fichier info.json');
       }
       try {
         $pluginVersion = $data['pluginVersion'];
       } catch (\Exception $e) {
-        log::add('frigate', 'warning', '[Plugin-Version] Impossible de récupérer la version du plugin');
+        log::add('frigate', "warning", '[Plugin-Version] Impossible de récupérer la version du plugin');
       }
     } catch (\Exception $e) {
       log::add('frigate', 'debug', '[Plugin-Version] Get ERROR :: ' . $e->getMessage());
@@ -3973,7 +3976,7 @@ class frigateCmd extends cmd
         if ($response !== false) {
           $frigate->getCmd(null, 'info_http')->event($response);
         } else {
-          log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+          log::add('frigate', "error", "Erreur lors de l'appel HTTP: $link");
         }
         break;
       default:
@@ -3983,7 +3986,7 @@ class frigateCmd extends cmd
           if ($response !== false) {
             $frigate->getCmd(null, 'info_http')->event($response);
           } else {
-            log::add('frigate', 'error', "Erreur lors de l'appel HTTP: $link");
+            log::add('frigate', "error", "Erreur lors de l'appel HTTP: $link");
           }
         }
     }
@@ -4005,7 +4008,7 @@ class frigateCmd extends cmd
     $response = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add('frigate', 'error', "Erreur cURL: " . curl_error($ch));
+      log::add('frigate', "error", "Erreur cURL: " . curl_error($ch));
     } else {
       log::add('frigate', 'debug', "║ Resultat de la commande HTTP : " . $response);
     }
