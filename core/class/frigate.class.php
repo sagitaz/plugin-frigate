@@ -2035,7 +2035,7 @@ class frigate extends eqLogic
   {
     $id = $trackedObjects['id'] ?? null;
     if (!is_object($frigateEvent)) {
-      log::add(__CLASS__, "error", "║ Événement introuvable (id: $id), il sera est créé dans la DB.");
+      log::add(__CLASS__, "debug", "║ Événement introuvable (id: $id), il sera est créé dans la DB.");
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
