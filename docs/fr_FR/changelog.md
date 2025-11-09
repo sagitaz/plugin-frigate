@@ -4,6 +4,11 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 09/11/2025 Beta 1.4.7
+- Modification de la colonne data en DB
+- Ajout de logs
+- petites corrections de bugs
+
 # 01/11/2025 Beta 1.4.6
 - Ajout des commandes pour la reconnaissance de la face
 - Ajout des commandes pour la reconnaissance de la plaque d'immatriculation
