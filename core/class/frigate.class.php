@@ -1073,8 +1073,24 @@ class frigate extends eqLogic
     self::cleanFolderDataIfFull();
 
     $filteredRecoveryEvents = array_filter($events, function ($event) use ($recoveryDays) {
-      return $event['start_time'] >= time() - $recoveryDays * 86400;
+      if (!is_array($event)) {
+        log::add(__CLASS__, 'error', "║ Erreur: Événement invalide, ce n'est pas un tableau.");
+        log::add(__CLASS__, 'debug', "║ Événement concerné : " . json_encode($event));
+        return false;
+      }
+
+      // On choisit start_time si dispo, sinon end_time
+      $time = $event['start_time'] ?? $event['end_time'] ?? null;
+
+      if ($time === null) {
+        log::add(__CLASS__, 'error', "║ Erreur: Événement invalide, le champ start_time ou end_time est manquant.");
+        log::add(__CLASS__, 'debug', "║ Événement concerné : " . json_encode($event));
+        return false; // rien à comparer
+      }
+
+      return $time >= time() - $recoveryDays * 86400;
     });
+
     $filteredRecoveryEvents = array_values($filteredRecoveryEvents);
 
     foreach ($filteredRecoveryEvents as $event) {
@@ -1200,8 +1216,6 @@ class frigate extends eqLogic
     $duree = round($event->getEndTime() - $event->getStartTime(), 0);
     $box = $event->getBox();
     $boxArray = is_array($box) ? $box : json_decode($box, true);
-    $data = $event->getData();
-    $dataArray = is_array($data) ? $data : json_decode($data, true);
 
     $result = array(
       "id" => $event->getId(),
@@ -1722,8 +1736,6 @@ class frigate extends eqLogic
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
       $box = $event->getBox();
       $boxArray = is_array($box) ? $box : json_decode($box, true);
-      $data = $event->getData();
-      $dataArray = is_array($data) ? $data : json_decode($data, true);
 
       $result[] = array(
         "id" => $event->getId(),
