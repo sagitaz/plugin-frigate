@@ -84,6 +84,14 @@ function frigate_update()
             DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
         }
     }
+    // Vérifier le type de la colonne data, si c'est text le passer en mediumtext
+    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'data';";
+    $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
+    if (!empty($resultCheck) && isset($resultCheck['Type']) && $resultCheck['Type'] == 'text') {
+        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` MODIFY COLUMN `data` MEDIUMTEXT;";
+        DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
+    }
+
     frigate::setConfig();
     frigate::addMessages();
     frigate::deleteLatestFile();
