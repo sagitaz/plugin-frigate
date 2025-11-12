@@ -9,12 +9,16 @@ Le plugin et le support sont gratuits, vous souhaitez néanmoins m'offrir un caf
 - Community Jeedom
 - Discord JeeMate
 
-Pour toute demande d'aide sur Community ou Discord, merci de fournir le maximum d'informations possibles.
+Pour toute demande d'aide sur Community ou Discord, merci de fournir le maximum d'informations possibles. (matériel, type de caméra, version de Jeedom, de Frigate, de votre système, etc...)
 
 Sur la page configuration, le bouton assistance permet déjà d'en remplir automatiquement certaines.
 
-Donner aussi des logs en mode debug.
+Assurer vous d'avoir le matériel compatible pour Frigate et que ce dernier fonctionne correctement avant de demander de l'aide sur le plugin. (voir la documentation officielle de Frigate pour les configurations matérielle recommandées).
+
+Donner aussi des logs en mode debug. (ceux du plugin et du serveur Frigate).
+
 Aucun support ne sera apporté sur d'autres moyens de communication que ceux-ci.
+
 Merci
 
 
