@@ -2695,6 +2695,7 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
 
     // Mise à jour des statistiques des détecteurs
+    if (isset($stats['detectors']) &&is_array($stats['detectors'])) {
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
         // Créer un nom de commande en combinant le nom du détecteur et la clé
@@ -2714,9 +2715,12 @@ class frigate extends eqLogic
           $cmdMem->save();
         }
       }
+    }} else {
+      log::add(__CLASS__, 'debug', "La clé 'detectors' n'existe pas ou n'est pas un tableau dans les statistiques.");
     }
 
     // Mise à jour des usages GPU
+    if (isset($stats['gpu_usages']) && is_array($stats['gpu_usages'])) {
     foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
       foreach ($gpuStats as $key => $value) {
         // Créer un nom de commande en combinant le nom du GPU et la clé
@@ -2728,9 +2732,12 @@ class frigate extends eqLogic
         $cmd->save();
       }
     }
+    } else {
+      log::add(__CLASS__, 'debug', "La clé 'gpu_usages' n'existe pas ou n'est pas un tableau dans les statistiques.");
+    }
 
     // Mise à jour des usages CPU
-    if (isset($stats['cpu_usages']['frigate.full_system'])) {
+    if (isset($stats['cpu_usages']['frigate.full_system']) && is_array($stats['cpu_usages']['frigate.full_system'])) {
       foreach ($stats['cpu_usages']['frigate.full_system'] as $key => $value) {
         $cmdName = 'Full system_' . $key;
         $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "cpu_" . $key, "GENERIC_INFO");
