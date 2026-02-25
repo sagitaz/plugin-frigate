@@ -44,6 +44,11 @@ class frigate_events
 	private $zones;
 	private $type;
 	private $isFavorite;
+	private $recognition_type;
+	private $recognition_description;
+	private $recognition_name;
+	private $recognition_plate;
+	private $recognition_score;
 
 	/*     * ***********************Methode static*************************** */
 
@@ -95,7 +100,8 @@ class frigate_events
 			FROM frigate_events
 			WHERE type=:type';
 
-		return DB::Prepare($sql,
+		return DB::Prepare(
+			$sql,
 			$values,
 			DB::FETCH_TYPE_ALL,
 			PDO::FETCH_CLASS,
@@ -104,9 +110,7 @@ class frigate_events
 	}
 	/*     * *********************Methode d'instance************************* */
 
-	public function preSave()
-	{
-	}
+	public function preSave() {}
 
 	public function save()
 	{
@@ -376,8 +380,53 @@ class frigate_events
 	}
 
 	public function setIsFavorite($isFavorite)
-	{		
+	{
 		// Force la valeur à 0 si différent de 1
 		$this->isFavorite = ($isFavorite === 1 || $isFavorite === '1') ? 1 : 0;
+	}
+
+	public function setRecognition_type($recognition_type)
+	{
+		$this->recognition_type = $recognition_type;
+	}
+	public function getRecognition_type()
+	{
+		return $this->recognition_type;
+	}
+	public function setRecognition_description($recognition_description)
+	{
+		$this->recognition_description = $recognition_description;
+	}
+	public function getRecognition_description()
+	{
+		return $this->recognition_description;
+	}
+
+	public function setRecognition_name($recognition_name)
+	{
+		$this->recognition_name = $recognition_name;
+	}
+	public function getRecognition_name()
+	{
+		return $this->recognition_name;
+	}
+
+	public function setRecognition_plate($recognition_plate)
+	{
+		$this->recognition_plate = $recognition_plate;
+	}
+
+	public function getRecognition_plate()
+	{
+		return $this->recognition_plate;
+	}
+
+	public function setRecognition_score($recognition_score)
+	{
+		$this->recognition_score = $recognition_score;
+	}
+	public function getRecognition_score()
+	{
+		return $this->recognition_score;
 	}
 }

@@ -10,7 +10,7 @@ if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, false, 'frigate') as $frigate) {
       if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration("panel") == true) {
-        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'));
+        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'), 'order' => $frigate->getConfiguration('panelOrder') ?? 0);
       }
     }
   }
@@ -20,15 +20,15 @@ if (init('object_id') == '') {
 
 
 <script language="javascript">
-    window.onload = function(){  
-      const el = document.getElementById("div_configuration");
-      const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
-      if (el && savedScroll !== null) {
-        // Repositionnement de la liste à sa position Y 
-        el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
-        localStorage.removeItem("frigateScrollTop");
-      }
-	}
+  window.onload = function() {
+    const el = document.getElementById("div_configuration");
+    const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
+    if (el && savedScroll !== null) {
+      // Repositionnement de la liste à sa position Y 
+      el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
+      localStorage.removeItem("frigateScrollTop");
+    }
+  }
 </script>
 
 <ul class="nav nav-tabs" role="tablist">
@@ -38,17 +38,28 @@ if (init('object_id') == '') {
   <li role="presentation">
     <a href="#Events" aria-controls="Events" role="tab" data-toggle="tab" data-url="/get-events-content">Evènements</a>
   </li>
- <!-- <li role="presentation">
-    <a href="#Health" aria-controls="Health" role="tab" data-toggle="tab" data-url="/get-health-content">Santé</a>
-  </li> -->
-  <!--<li role="presentation">
-    <a href="#Snapshots" aria-controls="Snapshots" role="tab" data-toggle="tab" data-url="/get-snapshots-content">Captures</a>
-  </li>-->
 </ul>
 
 <div class="tab-content" id="div_configuration" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
   <div role="tabpanel" class="tab-pane active" id="Cameras">
     <?php
+    usort($frigate_widgets, function ($a, $b) {
+      $orderA = $a['order'] ?? 0;
+      $orderB = $b['order'] ?? 0;
+
+      // Si les deux ont un "order" > 0 → tri par ordre numérique
+      if ($orderA > 0 && $orderB > 0) {
+        return $orderA <=> $orderB;
+      }
+
+      // Si un seul a un "order" défini → celui-là passe avant
+      if ($orderA > 0 && $orderB == 0) return -1;
+      if ($orderA == 0 && $orderB > 0) return 1;
+
+      // Sinon tri alphabétique sur "name"
+      return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+    });
+    
     echo '<div class="col-lg-12" style="width: 100%;">';
     foreach ($frigate_widgets as $widget) {
       echo '<div class="col-lg-4" style="padding-top: 10px">';
@@ -112,43 +123,43 @@ if (init('object_id') == '') {
         return $formattedDuration;
       }
 
-function timeElapsedString($datetime, $full = false)
-{
-  $now = new DateTime;
-  $ago = new DateTime($datetime);
-  $diff = $now->diff($ago);
+      function timeElapsedString($datetime, $full = false)
+      {
+        $now = new DateTime;
+        $ago = new DateTime($datetime);
+        $diff = $now->diff($ago);
 
-  // Ajout des semaines à partir des jours
-  $diff->w = floor($diff->d / 7);
-  $diff->d -= $diff->w * 7;
+        // Ajout des semaines à partir des jours
+        $diff->w = floor($diff->d / 7);
+        $diff->d -= $diff->w * 7;
 
-  // Tableau des unités de temps avec singulier/pluriel
-  $units = [
-    'y' => ['année', 'années'],
-    'm' => ['mois', 'mois'],
-    'w' => ['semaine', 'semaines'],
-    'd' => ['jour', 'jours'],
-    'h' => ['heure', 'heures'],
-    'i' => ['minute', 'minutes'],
-    's' => ['seconde', 'secondes'],
-  ];
+        // Tableau des unités de temps avec singulier/pluriel
+        $units = [
+          'y' => ['année', 'années'],
+          'm' => ['mois', 'mois'],
+          'w' => ['semaine', 'semaines'],
+          'd' => ['jour', 'jours'],
+          'h' => ['heure', 'heures'],
+          'i' => ['minute', 'minutes'],
+          's' => ['seconde', 'secondes'],
+        ];
 
-  foreach ($units as $key => [$singular, $plural]) {
-    if ($diff->$key) {
-      $count = $diff->$key;
-      $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
-    }
-  }
+        foreach ($units as $key => [$singular, $plural]) {
+          if ($diff->$key) {
+            $count = $diff->$key;
+            $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
+          }
+        }
 
-  if (!$full) {
-    $strings = array_slice($strings, 0, 1);
-  }
+        if (!$full) {
+          $strings = array_slice($strings, 0, 1);
+        }
 
-  return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
-}
+        return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
+      }
 
 
-$events = frigate::showEvents();
+      $events = frigate::showEvents();
 
       // cameras variables
       $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
@@ -204,7 +215,7 @@ $events = frigate::showEvents();
           //echo "Erreur : " . $e->getMessage();
         }
         $topScore = $event['top_score'];
-    	  $description = $event['description'];
+        $description = $event['description'];
         $duree = $event['duree'];
         $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
         $formattedDurationTitle = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';

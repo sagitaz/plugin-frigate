@@ -216,6 +216,14 @@ sendVarToJS('refresh', $refresh);
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Position sur le panel}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Voir documentation.}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="panelOrder" placeholder="{{}}">
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
                                 <label class="col-sm-4 control-label">{{Flux vidéo}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.}}"></i></sup>
                                 </label>
@@ -229,11 +237,44 @@ sendVarToJS('refresh', $refresh);
                                     <input type="number" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="presetMax" placeholder="{{Nombre de preset à importer}}" min="0" max="10">
                                 </div>
                             </div>
-
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Qualité des snapshots}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Voir documentation.}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="snapshotQuality" placeholder="{{70 % par défaut}}">
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Hauteur des snapshots}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Voir documentation.}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="snapshotHeight" placeholder="{{}}">
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Convertir en WEBP}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="snapshotWebp" title="{{les snapshots seront convertit au format webp}}"></label>
+                                </div>
+                            </div>
                             <div class="form-group eqEvents">
                                 <label class="col-sm-4 control-label">{{Autoriser les actions}}</label>
                                 <div class="col-sm-6">
-                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="autorizeActions" title="{{les actions sont exécutées même s'il y en a sur les caméras}}"></label>
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="autorizeActions" title="{{les actions sont exécutées même s\'il y en a sur les caméras}}"></label>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Template dashboard}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="templateDashboardImgOnly" title="{{Affiché seulement l'image sur le dashboard}}"></label>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Template panel}}</label>
+                                <div class="col-sm-6">
+                                    <input type="checkbox" class="eqLogicAttr" data-l1key="configuration" data-l2key="templatePanelImgOnly" title="{{Affiché seulement l'image sur le panel}}"></label>
                                 </div>
                             </div>
                         </div>
