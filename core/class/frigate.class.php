@@ -2023,10 +2023,10 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "║ Données reçues : " . json_encode($trackedObjects));
 
     // Création / Mise à jour de la base de données
-    self::updateDatabase($frigateEvent, $type, $trackedObjects);
+    $frigateEvent = self::updateDatabase($frigateEvent, $type, $trackedObjects);
 
     // Création / mise à jour des commandes Jeedom
-    self::updateCommands($eqlogicId, $type, $trackedObjects);
+    self::updateCommands($eqlogicId, $type, $frigateEvent);
 
     log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
   }
@@ -2052,7 +2052,13 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "║ MAJ DB → Reconnaissance faciale");
         $frigateEvent->setRecognition_type("face");
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        $frigateEvent->setRecognition_score($trackedObjects['score'] ?? '');
+        // le score doit etre multiplié par 100 pour être en pourcentage
+        $score = $trackedObjects['score'] ?? '';
+        if (is_numeric($score)) {
+          $score = round($score * 100, 2);
+        }
+        $frigateEvent->setRecognition_score($score);
+
         break;
 
       case "lpr":
@@ -2060,17 +2066,23 @@ class frigate extends eqLogic
         $frigateEvent->setRecognition_type("lpr");
         $frigateEvent->setRecognition_plate($trackedObjects['plate'] ?? '');
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        $frigateEvent->setRecognition_score($trackedObjects['score'] ?? '');
+        // le score doit etre multiplié par 100 pour être en pourcentage
+        $score = $trackedObjects['score'] ?? '';
+        if (is_numeric($score)) {
+          $score = round($score * 100, 2);
+        }
+        $frigateEvent->setRecognition_score($score);
         break;
 
       default:
         log::add(__CLASS__, 'debug', "║ Type de suivi inconnu : $type");
-        return;
+        return null;
     }
 
     $frigateEvent->save();
+    return $frigateEvent;
   }
-  private static function updateCommands($eqlogicId, $type, $trackedObjects)
+  private static function updateCommands($eqlogicId, $type, $frigateEvent)
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
 
@@ -2084,36 +2096,36 @@ class frigate extends eqLogic
       case "description":
         $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['description'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_description() ?? '');
         $cmd->save();
         break;
 
       case "face":
-        $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
+        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['name'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_name() ?? '');
         $cmd->save();
 
-        $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
+        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['score'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_score() ?? '');
         $cmd->save();
         break;
 
       case "lpr":
         $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['plate'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_plate() ?? '');
         $cmd->save();
 
-        $cmd = self::createCmd($eqlogicId, "Nom", "string", "", "info_detection_name", "", 0, null, 0);
+        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['name'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_name() ?? '');
         $cmd->save();
 
-        $cmd = self::createCmd($eqlogicId, "Score de detection", "numeric", "%", "info_detection_score", "", 0, null, 0);
+        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
         $cmd->save();
-        $cmd->event($trackedObjects['score'] ?? '');
+        $cmd->event($frigateEvent->getRecognition_score() ?? '');
         $cmd->save();
         break;
     }
@@ -2683,6 +2695,7 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
 
     // Mise à jour des statistiques des détecteurs
+    if (isset($stats['detectors']) &&is_array($stats['detectors'])) {
     foreach ($stats['detectors'] as $detectorName => $detectorStats) {
       foreach ($detectorStats as $key => $value) {
         // Créer un nom de commande en combinant le nom du détecteur et la clé
@@ -2702,9 +2715,12 @@ class frigate extends eqLogic
           $cmdMem->save();
         }
       }
+    }} else {
+      log::add(__CLASS__, 'debug', "La clé 'detectors' n'existe pas ou n'est pas un tableau dans les statistiques.");
     }
 
     // Mise à jour des usages GPU
+    if (isset($stats['gpu_usages']) && is_array($stats['gpu_usages'])) {
     foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
       foreach ($gpuStats as $key => $value) {
         // Créer un nom de commande en combinant le nom du GPU et la clé
@@ -2716,9 +2732,12 @@ class frigate extends eqLogic
         $cmd->save();
       }
     }
+    } else {
+      log::add(__CLASS__, 'debug', "La clé 'gpu_usages' n'existe pas ou n'est pas un tableau dans les statistiques.");
+    }
 
     // Mise à jour des usages CPU
-    if (isset($stats['cpu_usages']['frigate.full_system'])) {
+    if (isset($stats['cpu_usages']['frigate.full_system']) && is_array($stats['cpu_usages']['frigate.full_system'])) {
       foreach ($stats['cpu_usages']['frigate.full_system'] as $key => $value) {
         $cmdName = 'Full system_' . $key;
         $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "cpu_" . $key, "GENERIC_INFO");
