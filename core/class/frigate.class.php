@@ -2651,9 +2651,7 @@ class frigate extends eqLogic
             }
           }
         }
-      } else {
-        log::add(__CLASS__, 'debug', "L'équipement camera " . $cameraName . " n'existe pas.");
-      }
+      } 
     }
 
     // Statistiques pour eqLogic statistiques générales
@@ -2681,9 +2679,7 @@ class frigate extends eqLogic
           $cmdMem->save();
         }
       }
-    }} else {
-      log::add(__CLASS__, 'debug', "La clé 'detectors' n'existe pas ou n'est pas un tableau dans les statistiques.");
-    }
+    }} 
 
     // Mise à jour des usages GPU
     if (isset($stats['gpu_usages']) && is_array($stats['gpu_usages'])) {
@@ -2698,9 +2694,7 @@ class frigate extends eqLogic
         $cmd->save();
       }
     }
-    } else {
-      log::add(__CLASS__, 'debug', "La clé 'gpu_usages' n'existe pas ou n'est pas un tableau dans les statistiques.");
-    }
+    } 
 
     // Mise à jour des usages CPU
     if (isset($stats['cpu_usages']['frigate.full_system']) && is_array($stats['cpu_usages']['frigate.full_system'])) {
@@ -2710,8 +2704,6 @@ class frigate extends eqLogic
         $cmd->event($value);
         $cmd->save();
       }
-    } else {
-      log::add('frigate', 'debug', "La clé 'frigate.full_system' n'existe pas dans cpu_usages.");
     }
 
     // Mise a jour storage
