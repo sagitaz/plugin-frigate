@@ -70,17 +70,29 @@ if (!isConnect('admin')) {
     return $formattedDuration;
   }
 
+/**
+ * @param string $datetime
+ * @param bool $full
+ * @return string
+ */
 function timeElapsedString($datetime, $full = false)
 {
-  $now = new DateTime;
+  $now = new DateTime();
   $ago = new DateTime($datetime);
   $diff = $now->diff($ago);
 
-  // Ajout des semaines à partir des jours
-  $diff->w = floor($diff->d / 7);
-  $diff->d -= $diff->w * 7;
+  // On extrait les valeurs dans un tableau pour pouvoir ajouter les semaines
+  // sans modifier l'objet DateInterval original
+  $diffValues = [
+    'y' => $diff->y,
+    'm' => $diff->m,
+    'w' => (int)floor($diff->d / 7),
+    'd' => $diff->d % 7, // Le reste des jours après avoir retiré les semaines
+    'h' => $diff->h,
+    'i' => $diff->i,
+    's' => $diff->s,
+  ];
 
-  // Tableau des unités de temps avec singulier/pluriel
   $units = [
     'y' => ['année', 'années'],
     'm' => ['mois', 'mois'],
@@ -92,10 +104,10 @@ function timeElapsedString($datetime, $full = false)
   ];
 
   $strings = [];
-  foreach ($units as $key => [$singular, $plural]) {
-    if ($diff->$key) {
-      $count = $diff->$key;
-      $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
+  foreach ($units as $key => $names) {
+    if ($diffValues[$key] > 0) {
+      $count = $diffValues[$key];
+      $strings[] = $count . ' ' . ($count > 1 ? $names[1] : $names[0]);
     }
   }
 
