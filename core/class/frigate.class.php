@@ -3468,22 +3468,23 @@ class frigate extends eqLogic
     }
   }
 
-
-
+  /**
+   * @param string $eventId
+   * @param int|bool $isFav
+   * @return int|null
+   */
   public static function setFavorite($eventId, $isFav)
   {
-    $events = frigate_events::byEventId($eventId) ?? [];
-    
-    foreach ($events as $event) {
-      $event->setIsFavorite($isFav);
-      $event->save();
+    $event = frigate_events::byEventId($eventId);
+
+    if (!is_object($event)) {
+      log::add(__CLASS__, 'error', "║ setFavorite :: Aucun événement trouvé avec l'eventId : " . (string)$eventId);
+      return null;
     }
-    if (empty($events)) {
-      log::add(__CLASS__, 'error', "║ setFavorite :: Aucun événement trouvé avec l'eventId : " . $eventId);
-    } else {
-     $state = $event->getIsFavorite() ?? 0; 
-    }
-    return $state;
+    $event->setIsFavorite($isFav);
+    $event->save();
+
+    return (int)$event->getIsFavorite();
   }
 
 
