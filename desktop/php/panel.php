@@ -18,7 +18,6 @@ if (init('object_id') == '') {
 
 ?>
 
-
 <script language="javascript">
   window.onload = function() {
     const el = document.getElementById("div_configuration");
@@ -143,7 +142,8 @@ if (init('object_id') == '') {
           'i' => ['minute', 'minutes'],
           's' => ['seconde', 'secondes'],
         ];
-
+         
+        $strings = [];
         foreach ($units as $key => [$singular, $plural]) {
           if ($diff->$key) {
             $count = $diff->$key;

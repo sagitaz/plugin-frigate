@@ -91,6 +91,7 @@ function timeElapsedString($datetime, $full = false)
     's' => ['seconde', 'secondes'],
   ];
 
+  $strings = [];
   foreach ($units as $key => [$singular, $plural]) {
     if ($diff->$key) {
       $count = $diff->$key;
