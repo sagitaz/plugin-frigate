@@ -3639,28 +3639,6 @@ class frigate extends eqLogic
     return $jsonArray;
   }
 
-  /* private static function yamlToJsonFromUrl($yamlUrl)
- {
-    // Télécharger le contenu YAML depuis l'URL
-    $yamlContent = file_get_contents($yamlUrl);
-    // Vérifier si le téléchargement a réussi
-    if ($yamlContent === false) {
-      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Failed to retrieve YAML from URL");
-      return json_encode(["error" => "Failed to retrieve YAML from URL: $yamlUrl"]);
-    }
-    // Parser le contenu YAML
-    $yamlArray = yaml_parse($yamlContent);
-    // Vérifier si le parsing est réussi
-    if ($yamlArray === false) {
-      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Invalid YAML content or file not found");
-      return json_encode(["error" => "Invalid YAML content or file not found"]);
-    }
-    // Convertir le tableau PHP en JSON
-    $jsonContent = json_encode($yamlArray, JSON_PRETTY_PRINT);
-    return $jsonContent;
-  }
-
-  */
   private static function checkFrigateStatus()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -3729,6 +3707,88 @@ class frigate extends eqLogic
     }
     log::add('frigate', 'info', '[Plugin-Version] PluginVersion :: ' . $pluginVersion);
     return $pluginVersion;
+  }
+
+
+  public static function timeElapsedString($datetime, $full = false)
+  {
+    $now = new DateTime();
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    // On extrait les valeurs dans un tableau pour pouvoir ajouter les semaines
+    // sans modifier l'objet DateInterval original
+    $diffValues = [
+      'y' => $diff->y,
+      'm' => $diff->m,
+      'w' => (int)floor($diff->d / 7),
+      'd' => $diff->d % 7, // Le reste des jours après avoir retiré les semaines
+      'h' => $diff->h,
+      'i' => $diff->i,
+      's' => $diff->s,
+    ];
+
+    $units = [
+      'y' => ['année', 'années'],
+      'm' => ['mois', 'mois'],
+      'w' => ['semaine', 'semaines'],
+      'd' => ['jour', 'jours'],
+      'h' => ['heure', 'heures'],
+      'i' => ['minute', 'minutes'],
+      's' => ['seconde', 'secondes'],
+    ];
+
+    $strings = [];
+    foreach ($units as $key => $names) {
+      if ($diffValues[$key] > 0) {
+        $count = $diffValues[$key];
+        $strings[] = $count . ' ' . ($count > 1 ? $names[1] : $names[0]);
+      }
+    }
+
+    if (!$full) {
+      $strings = array_slice($strings, 0, 1);
+    }
+
+    return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
+  }
+
+  public static function getPercentageClass($score)
+  {
+    $score = (int) $score;
+    if ($score === 100) return 'percentage-100';
+    if ($score >= 90) return 'percentage-99';
+    if ($score >= 80) return 'percentage-89';
+    if ($score >= 70) return 'percentage-79';
+    if ($score >= 60) return 'percentage-69';
+    if ($score >= 50) return 'percentage-59';
+    if ($score >= 40) return 'percentage-49';
+    if ($score >= 30) return 'percentage-39';
+    if ($score >= 20) return 'percentage-29';
+    if ($score >= 10) return 'percentage-19';
+    if ($score > 0) return 'percentage-9';
+
+    return 'percentage-0';
+  }
+
+  public static function formatDuration($seconds)
+  {
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    $remainingSeconds = $seconds % 60;
+
+    $formattedDuration = '';
+    if ($hours > 0) {
+      $formattedDuration .= $hours . 'h';
+      $formattedDuration .= ' ' . str_pad((string)$minutes, 2, '0', STR_PAD_LEFT) . 'mn';
+    } elseif ($minutes > 0) {
+      $formattedDuration .= $minutes . 'mn';
+      $formattedDuration .= ' ' . str_pad((string)$remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    } else {
+      $formattedDuration .= str_pad((string)$remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    }
+
+    return $formattedDuration;
   }
 }
 class frigateCmd extends cmd

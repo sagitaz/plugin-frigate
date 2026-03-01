@@ -43,22 +43,16 @@ if (init('object_id') == '') {
   <div role="tabpanel" class="tab-pane active" id="Cameras">
     <?php
     usort($frigate_widgets, function ($a, $b) {
-      $orderA = $a['order'] ?? 0;
-      $orderB = $b['order'] ?? 0;
 
-      // Si les deux ont un "order" > 0 → tri par ordre numérique
-      if ($orderA > 0 && $orderB > 0) {
-        return $orderA <=> $orderB;
+      if ($a['order'] > 0 && $b['order'] > 0) {
+        return $a['order'] <=> $b['order'];
       }
+      if ($a['order'] > 0 && $b['order'] == 0) return -1;
+      if ($a['order'] == 0 && $b['order'] > 0) return 1;
 
-      // Si un seul a un "order" défini → celui-là passe avant
-      if ($orderA > 0 && $orderB == 0) return -1;
-      if ($orderA == 0 && $orderB > 0) return 1;
-
-      // Sinon tri alphabétique sur "name"
       return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
     });
-    
+
     echo '<div class="col-lg-12" style="width: 100%;">';
     foreach ($frigate_widgets as $widget) {
       echo '<div class="col-lg-4" style="padding-top: 10px">';
@@ -81,96 +75,6 @@ if (init('object_id') == '') {
       </div>
 
       <?php
-
-      // functions
-      function getPercentageClass($score)
-      {
-        $score = (int) $score;
-        if ($score === 100) return 'percentage-100';
-        if ($score >= 90) return 'percentage-99';
-        if ($score >= 80) return 'percentage-89';
-        if ($score >= 70) return 'percentage-79';
-        if ($score >= 60) return 'percentage-69';
-        if ($score >= 50) return 'percentage-59';
-        if ($score >= 40) return 'percentage-49';
-        if ($score >= 30) return 'percentage-39';
-        if ($score >= 20) return 'percentage-29';
-        if ($score >= 10) return 'percentage-19';
-        if ($score > 0) return 'percentage-9';
-
-        return 'percentage-0';
-      }
-
-      function formatDuration($seconds)
-      {
-        $hours = floor($seconds / 3600);
-        $minutes = floor(($seconds % 3600) / 60);
-        $remainingSeconds = $seconds % 60;
-
-        $formattedDuration = '';
-        if ($hours > 0) {
-          $formattedDuration .= $hours . 'h';
-          $formattedDuration .= ' ' . str_pad($minutes, 2, '0', STR_PAD_LEFT) . 'mn';
-          //$formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-        } elseif ($minutes > 0) {
-          $formattedDuration .= $minutes . 'mn';
-          $formattedDuration .= ' ' . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-        } else {
-          $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-        }
-
-        return $formattedDuration;
-      }
-
-/**
- * @param string $datetime
- * @param bool $full
- * @return string
- */
-function timeElapsedString($datetime, $full = false)
-{
-  $now = new DateTime();
-  $ago = new DateTime($datetime);
-  $diff = $now->diff($ago);
-
-  // On extrait les valeurs dans un tableau pour pouvoir ajouter les semaines
-  // sans modifier l'objet DateInterval original
-  $diffValues = [
-    'y' => $diff->y,
-    'm' => $diff->m,
-    'w' => (int)floor($diff->d / 7),
-    'd' => $diff->d % 7, // Le reste des jours après avoir retiré les semaines
-    'h' => $diff->h,
-    'i' => $diff->i,
-    's' => $diff->s,
-  ];
-
-  $units = [
-    'y' => ['année', 'années'],
-    'm' => ['mois', 'mois'],
-    'w' => ['semaine', 'semaines'],
-    'd' => ['jour', 'jours'],
-    'h' => ['heure', 'heures'],
-    'i' => ['minute', 'minutes'],
-    's' => ['seconde', 'secondes'],
-  ];
-
-  $strings = [];
-  foreach ($units as $key => $names) {
-    if ($diffValues[$key] > 0) {
-      $count = $diffValues[$key];
-      $strings[] = $count . ' ' . ($count > 1 ? $names[1] : $names[0]);
-    }
-  }
-
-  if (!$full) {
-    $strings = array_slice($strings, 0, 1);
-  }
-
-  return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
-}
-
-
       $events = frigate::showEvents();
 
       // cameras variables
@@ -190,7 +94,7 @@ function timeElapsedString($datetime, $full = false)
         '6h' => '- 6h',
         '12h' => '- 12h',
         '1j' => '- 1 jour',
-        '2j' => '- 2 jour',
+        '2j' => '- 2 jours',
         '1s' => '- 1 semaine'
       ];
 
@@ -205,7 +109,7 @@ function timeElapsedString($datetime, $full = false)
         $label = $event['label'];
         $type = $event['type'];
         $date = $event['date'];
-        $timeElapsed = timeElapsedString($date);
+        $timeElapsed = frigate::timeElapsedString($date);
         $percentage = $event['percentage'] ?? 0;
         $duration = $event['duration'] ?? 0;
         $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
@@ -229,8 +133,7 @@ function timeElapsedString($datetime, $full = false)
         $topScore = $event['top_score'];
         $description = $event['description'];
         $duree = $event['duree'];
-        $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
-        $formattedDurationTitle = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
+        $formattedDuration = '<div class=\'duration\'>' . frigate::formatDuration($duree) . '</div>';
         $img = $event['img'];
         $hasSnapshot = $event['hasSnapshot'];
         $snapshot = $event['snapshot'];
@@ -254,63 +157,8 @@ function timeElapsedString($datetime, $full = false)
       ?>
 
     </div>
-  </div>
 
-  <div role="tabpanel" class="tab-pane" id="Health">
-  </div>
-
-  <div role="tabpanel" class="tab-pane" id="Snapshots">
-    <?php
-    // Définit le chemin du dossier
-    $dir = dirname(__FILE__, 3) . "/data/snapshots/";
-
-    // Initialise une variable pour le HTML
-    $div = '<div class="row gallery-container" style="padding-top: 10px;">';
-
-    // Vérifie si le répertoire existe
-    if (is_dir($dir)) {
-      // Scanne le répertoire et récupère tous les fichiers
-      $files = array_diff(scandir($dir), array('..', '.')); // Exclut les dossiers parent et courant
-
-      // Parcourt les fichiers dans l'ordre inverse
-      foreach (array_reverse($files) as $val) {
-        // Construit le chemin du fichier complet
-        $file = str_replace("/var/www/html/", "", $dir . $val);
-        $timestamp = explode('.', $val)[0];
-        $timestamp = (int) $timestamp;
-        $name = date('Y-m-d H:i:s', $timestamp);
-
-        // Vérifie si c'est bien un fichier avant de l'afficher
-        if (is_file($file)) {
-          // Construit le contenu HTML pour chaque fichier
-          $div .= '<div class="col-12 col-sm-6 col-md-4 col-lg-3 gallery-item">';
-          $div .= '<div class="img-container">';
-          $div .= '<img src="' . $file . '" alt="" class="img-fluid gallery-img" onclick="openModal(this)" />';
-          $div .= '<div class="image-caption"><label>' . $name . '</label></div>';
-          $div .= '<a class="btn btn-xs btn-danger delete-btn" id="' . $file . '" onclick="removeImg(this)"><i class="fas fa-trash"></i> {{supprimer}}</a>';
-          $div .= '</div>';
-          $div .= '</div>';
-        }
-      }
-    }
-
-    $div .= '</div>'; // Fermeture de la rangée
-    // Affiche la div contenant toutes les images
-    echo $div;
-    ?>
-  </div>
-
-  <!-- Modal Structure -->
-  <div id="modalSnap" class="modal" onclick="closeModal()">
-    <span class="close">&times;</span>
-    <img class="modal-content" id="modalSnapImg">
-    <div id="caption"></div>
-  </div>
-
-
-</div>
-
-<?php include_file('desktop', 'events', 'css', 'frigate'); ?>
-<?php include_file('desktop', 'events', 'js', 'frigate'); ?>
-<?php include_file('desktop', 'panel', 'js', 'frigate'); ?>
-<?php include_file('desktop', 'panel', 'css', 'frigate'); ?>
+    <?php include_file('desktop', 'events', 'css', 'frigate'); ?>
+    <?php include_file('desktop', 'events', 'js', 'frigate'); ?>
+    <?php include_file('desktop', 'panel', 'js', 'frigate'); ?>
+    <?php include_file('desktop', 'panel', 'css', 'frigate'); ?>
