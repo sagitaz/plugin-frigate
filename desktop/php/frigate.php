@@ -14,7 +14,7 @@ sendVarToJS('frigateURL', $urlFrigate);
 $urlExterne = config::byKey('URLexterne', 'frigate');
 sendVarToJS('frigateURLexterne', $urlExterne);
 
-$refresh = config::byKey('refresh_snapshot', 'frigate') * 1000;
+$refresh = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
 sendVarToJS('refresh', $refresh);
 ?>
 <style type="text/css">

@@ -78,7 +78,7 @@
       <span class="inline-subtitle duration"> <?= $timeElapsed ?></span><br /><br />
       <i class="fas fa-minus-square"></i>
       <span> <?= $label ?>
-        <div class="percentage <?= getPercentageClass($topScore) ?>"><?= $topScore ?>%</div>
+        <div class="percentage <?= frigate::getPercentageClass($topScore) ?>"><?= $topScore ?>%</div>
       </span><br>
       <?php if ($cameraFound): ?>
         <div style='display: flex;align-items: center;gap: 10px;'>
@@ -103,7 +103,7 @@
       <?= $hasClip == 1 ? 'data-video="' . $clip . '"' : '' ?>
       data-title="
       	<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?>
-        <div class='percentage <?= getPercentageClass($topScore) ?>'><?= $topScore ?> %</div>
+        <div class='percentage <?= frigate::getPercentageClass($topScore) ?>'><?= $topScore ?> %</div>
         <br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?>
         <br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
 	    data-description="<?= $description ?>">

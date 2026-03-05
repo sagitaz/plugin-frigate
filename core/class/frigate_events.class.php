@@ -88,7 +88,7 @@ class frigate_events
 			FROM frigate_events
 			WHERE event_id=:event_id';
 
-		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
+		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
 	}
 
 	public static function byType($_type)
