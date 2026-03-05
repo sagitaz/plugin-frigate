@@ -1983,6 +1983,10 @@ class frigate extends eqLogic
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
     }
+    $score = $trackedObjects['score'] ?? '';
+    if (is_numeric($score)) {
+      $score = round($score * 100, 2);
+    }
 
     switch ($type) {
       case "description":
@@ -1995,13 +1999,6 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "║ MAJ DB → Reconnaissance faciale");
         $frigateEvent->setRecognition_type("face");
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        // le score doit etre multiplié par 100 pour être en pourcentage
-        $score = $trackedObjects['score'] ?? '';
-        if (is_numeric($score)) {
-          $score = round($score * 100, 2);
-        }
-        $frigateEvent->setRecognition_score($score);
-
         break;
 
       case "lpr":
@@ -2009,12 +2006,12 @@ class frigate extends eqLogic
         $frigateEvent->setRecognition_type("lpr");
         $frigateEvent->setRecognition_plate($trackedObjects['plate'] ?? '');
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        // le score doit etre multiplié par 100 pour être en pourcentage
-        $score = $trackedObjects['score'] ?? '';
-        if (is_numeric($score)) {
-          $score = round($score * 100, 2);
-        }
-        $frigateEvent->setRecognition_score($score);
+        break;
+
+      case "classification":
+        log::add(__CLASS__, 'debug', "║ MAJ DB → Classification d'objet");
+        $frigateEvent->setRecognition_type("classification");
+        $frigateEvent->setRecognition_name($trackedObjects['sub_label'] ?? '');
         break;
 
       default:
@@ -2022,6 +2019,7 @@ class frigate extends eqLogic
         return null;
     }
 
+    $frigateEvent->setRecognition_score($score);
     $frigateEvent->save();
     return $frigateEvent;
   }
@@ -3242,7 +3240,6 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      //log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
       log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
 
       switch ($key) {
