@@ -423,7 +423,9 @@ class frigate_events
 
 	public function setRecognition_score($recognition_score)
 	{
-		$this->recognition_score = $recognition_score;
+		$this->recognition_score = ($recognition_score === '' || $recognition_score === null)
+			? null
+			: (float) $recognition_score;
 	}
 	public function getRecognition_score()
 	{

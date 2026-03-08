@@ -2915,7 +2915,7 @@ class frigate extends eqLogic
         $options = str_replace(
           $tags,
           array_map('strval', $values),
-          (string)$options
+          $options
         );
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
