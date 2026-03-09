@@ -2201,9 +2201,11 @@ class frigate extends eqLogic
 
     foreach ($groupDefs as $key => $prefix) {
       $infoCmd = self::createCmd($eqlogicId, "{$key} Etat", "binary", "", "info_{$key}", "JEEMATE_CAMERA_{$prefix}_STATE", 0);
-      $currentState = $infoCmd->execCmd();
-      if ($currentState !== $value[$key]) {
-        $infoCmd->event($value[$key]);
+      if (isset($value[$key])) {
+        $currentState = $infoCmd->execCmd();
+        if ($currentState !== $value[$key]) {
+          $infoCmd->event($value[$key]);
+        }
       }
       $infoCmd->save();
 
