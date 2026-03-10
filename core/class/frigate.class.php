@@ -2186,83 +2186,53 @@ class frigate extends eqLogic
 
   public static function createMQTTcmds($eqlogicId, $value)
   {
-    $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["detect"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
+    $groupDefs = [
+      'detect'              => 'DETECT',
+      'recordings'          => 'NVR',
+      'snapshots'           => 'SNAPSHOT',
+      'motion'              => 'MOTION',
+      'review_alerts'       => 'REVIEW_ALERTS',
+      'review_detections'   => 'REVIEW_DETECTIONS',
+      'object_descriptions' => 'OBJECT_DESCRIPTIONS',
+      'review_descriptions' => 'REVIEW_DESCRIPTIONS',
+      'notifications'       => 'NOTIFICATIONS',
+      'improve_contrast'    => 'IMPROVE_CONTRAST'
+    ];
+
+    foreach ($groupDefs as $key => $prefix) {
+      $infoCmd = self::createCmd($eqlogicId, "{$key} Etat", "binary", "", "info_{$key}", "JEEMATE_CAMERA_{$prefix}_STATE", 0);
+      if (isset($value[$key])) {
+        $currentState = $infoCmd->execCmd();
+        if ($currentState !== $value[$key]) {
+          $infoCmd->event($value[$key]);
+        }
+      }
+      $infoCmd->save();
+
+      foreach (['off' => [1, 'stop'], 'on' => [1, 'start'], 'toggle' => [0, 'toggle']] as $action => [$showOn, $logicalAction]) {
+        $cmd = self::createCmd(
+          $eqlogicId,
+          "{$key} {$action}",
+          "other",
+          "",
+          "action_{$logicalAction}_{$key}",   // stop/start/toggle
+          "JEEMATE_CAMERA_{$prefix}_SET_" . strtoupper($action),  // OFF/ON/TOGGLE
+          $showOn,
+          $infoCmd,
+          0,
+          "action"
+        );
+        $cmd->save();
+      }
     }
-    $infoCmd->save();
 
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "detect off", "other", "", "action_stop_detect", "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "detect on", "other", "", "action_start_detect", "JEEMATE_CAMERA_DETECT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "detect toggle", "other", "", "action_toggle_detect", "JEEMATE_CAMERA_DETECT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
-
-    $infoCmd = self::createCmd($eqlogicId, "recordings Etat", "binary", "", "info_recordings", "JEEMATE_CAMERA_NVR_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["recordings"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
-    }
-    $infoCmd->save();
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "recordings off", "other", "", "action_stop_recordings", "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "recordings on", "other", "", "action_start_recordings", "JEEMATE_CAMERA_NVR_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "recordings toggle", "other", "", "action_toggle_recordings", "JEEMATE_CAMERA_NVR_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
-
-    $infoCmd = self::createCmd($eqlogicId, "snapshots Etat", "binary", "", "info_snapshots", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["snapshots"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
-    }
-    $infoCmd->save();
-
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "snapshots off", "other", "", "action_stop_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "snapshots on", "other", "", "action_start_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
+    // Cas particulier : "détection en cours" (pas de on/off/toggle)
     $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 1);
-    $infoCmd->save();
     $valueDetectNow = $infoCmd->execCmd();
     if (!isset($valueDetectNow) || $valueDetectNow == null || $valueDetectNow == '') {
       $infoCmd->event(1);
-      $infoCmd->save();
-    }
-    $infoCmd = self::createCmd($eqlogicId, "motion Etat", "binary", "", "info_motion", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["motion"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
     }
     $infoCmd->save();
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "motion off", "other", "", "action_stop_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "motion on", "other", "", "action_start_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "motion toggle", "other", "", "action_toggle_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
   }
 
   public static function createHTTPcmd($eqlogicId, $name, $link)
@@ -2318,22 +2288,21 @@ class frigate extends eqLogic
   private static function createPTZcmds($eqlogicId)
   {
     log::add("frigate", 'debug', '║ création des commandes PTZ move et zoom pour ' . $eqlogicId);
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "PTZ move left", "other", "", "action_ptz_left", "CAMERA_LEFT", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move right", "other", "", "action_ptz_right", "CAMERA_RIGHT", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move up", "other", "", "action_ptz_up", "CAMERA_UP", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move down", "other", "", "action_ptz_down", "CAMERA_DOWN", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move stop", "other", "", "action_ptz_stop", "CAMERA_STOP", 0, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom in", "other", "", "action_ptz_zoom_in", "CAMERA_ZOOM", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom out", "other", "", "action_ptz_zoom_out", "CAMERA_DEZOOM", 1, "", 0, "action");
-    $cmd->save();
 
+    $ptzCmds = [
+      'left'     => ['CAMERA_LEFT',   1, 'PTZ move left'],
+      'right'    => ['CAMERA_RIGHT',  1, 'PTZ move right'],
+      'up'       => ['CAMERA_UP',     1, 'PTZ move up'],
+      'down'     => ['CAMERA_DOWN',   1, 'PTZ move down'],
+      'stop'     => ['CAMERA_STOP',   0, 'PTZ move stop'],
+      'zoom_in'  => ['CAMERA_ZOOM',   1, 'PTZ zoom in'],
+      'zoom_out' => ['CAMERA_DEZOOM', 1, 'PTZ zoom out'],
+    ];
+
+    foreach ($ptzCmds as $action => [$const, $showOn, $label]) {
+      $cmd = self::createCmd($eqlogicId, $label, "other", "", "action_ptz_{$action}", $const, $showOn, "", 0, "action");
+      $cmd->save();
+    }
     return true;
   }
 
@@ -3294,68 +3263,64 @@ class frigate extends eqLogic
 
   private static function processCameraData($eqCamera, $key, $data)
   {
-    // recupérer la liste des object a surveiller
     $eqEvent = eqLogic::byLogicalId("eqFrigateEvents", "frigate");
     $objects = $eqEvent->getConfiguration("objects");
-    foreach ($data as $innerKey => $innerValue) {
-      if (in_array($innerKey, ['birdeye', 'improve_constrast', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'])) {
 
+    $stateMap = [
+      'detect'              => 'DETECT',
+      'recordings'          => 'NVR',
+      'snapshots'           => 'SNAPSHOT',
+      'audio'               => 'AUDIO',
+      'review_alerts'       => 'REVIEW_ALERTS',
+      'review_detections'   => 'REVIEW_DETECTIONS',
+      'object_descriptions' => 'OBJECT_DESCRIPTIONS',
+      'review_descriptions' => 'REVIEW_DESCRIPTIONS',
+      'notifications'       => 'NOTIFICATIONS',
+      'improve_contrast'    => 'IMPROVE_CONTRAST',
+    ];
+
+    $skipKeys = ['birdseye', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'];
+
+    foreach ($data as $innerKey => $innerValue) {
+
+      // clés ignorées
+      if (in_array($innerKey, $skipKeys)) {
         continue;
       }
 
+      // objet détecté (person, car, etc.)
       if (in_array($innerKey, $objects)) {
         log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ════════════════════════════════╗");
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
         log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
-        // mise à jour pour la caméra
         self::handleObject($eqCamera, $innerKey, $innerValue);
-        // mise à jour pour l'équipement event
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
         self::handleObject($eqEvent, $innerKey, $innerValue);
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
 
-      switch ($innerKey) {
-        case 'motion':
-          self::handleMotion($eqCamera, $key, $innerValue);
-          break;
+      // mouvement en cours
+      if ($innerKey === 'motion') {
+        self::handleMotion($eqCamera, $key, $innerValue);
+        continue;
+      }
 
-        case 'detect':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_DETECT_STATE");
-          }
-          break;
+      // tous les objets (all)
+      if ($innerKey === 'all') {
+        log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+        log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
+        self::handleAllObject($eqCamera, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
+        self::handleAllObject($eqEvent, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
+        continue;
+      }
 
-        case 'recordings':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_NVR_STATE");
-          }
-          break;
-
-        case 'snapshots':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_SNAPSHOT_STATE");
-          }
-          break;
-
-        case 'audio':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_AUDIO_STATE");
-          }
-          break;
-
-        case 'all':
-          log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
-          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-          log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
-          // mise à jour pour la caméra
-          self::handleAllObject($eqCamera, $innerKey, $innerValue);
-          // mise à jour pour l'équipement event
-          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-          self::handleAllObject($eqEvent, $innerKey, $innerValue);
-          log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
-          break;
+      // états on/off génériques
+      if (isset($stateMap[$innerKey], $innerValue['state'])) {
+        self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_{$stateMap[$innerKey]}_STATE");
       }
     }
   }
@@ -3922,6 +3887,48 @@ class frigateCmd extends cmd
         break;
       case 'action_toggle_motion':
         $this->toggleCameraSetting($frigate, $camera, 'info_motion', 'motion/set');
+        break;
+      case 'action_start_improve_contrast':
+      case 'action_stop_improve_contrast':
+        $this->publishCameraMessage($camera, 'improve_contrast/set', $logicalId === 'action_start_improve_contrast' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_improve_contrast':
+        $this->toggleCameraSetting($frigate, $camera, 'info_improve_contrast', 'improve_contrast/set');
+        break;
+      case 'action_start_review_alerts':
+      case 'action_stop_review_alerts':
+        $this->publishCameraMessage($camera, 'review_alerts/set', $logicalId === 'action_start_review_alerts' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_alerts':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_alerts', 'review_alerts/set');
+        break;
+      case 'action_start_review_detections':
+      case 'action_stop_review_detections':
+        $this->publishCameraMessage($camera, 'review_detections/set', $logicalId === 'action_start_review_detections' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_detections':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_detections', 'review_detections/set');
+        break;
+      case 'action_start_review_descriptions':
+      case 'action_stop_review_descriptions':
+        $this->publishCameraMessage($camera, 'review_descriptions/set', $logicalId === 'action_start_review_descriptions' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_descriptions':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_descriptions', 'review_descriptions/set');
+        break;
+      case 'action_start_object_descriptions':
+      case 'action_stop_object_descriptions':
+        $this->publishCameraMessage($camera, 'object_descriptions/set', $logicalId === 'action_start_object_descriptions' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_object_descriptions':
+        $this->toggleCameraSetting($frigate, $camera, 'info_object_descriptions', 'object_descriptions/set');
+        break;
+      case 'action_start_notifications':
+      case 'action_stop_notifications':
+        $this->publishCameraMessage($camera, 'notifications/set', $logicalId === 'action_start_notifications' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_notifications':
+        $this->toggleCameraSetting($frigate, $camera, 'info_notifications', 'notifications/set');
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');
