@@ -2027,48 +2027,27 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
 
-    // Commande de type
-    $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
-    $cmd->save();
-    $cmd->event($type);
-    $cmd->save();
+    $update = function ($label, $subtype, $unit, $logicalId, $value) use ($eqlogicId) {
+      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($value ?? '');
+      $cmd->save();
+    };
 
-    switch ($type) {
-      case "description":
-        $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_description() ?? '');
-        $cmd->save();
-        break;
+    $update("Type de détection", "string", "", "info_detection_type", $type);
 
-      case "face":
-        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_name() ?? '');
-        $cmd->save();
+    $withNameScore = ['face', 'lpr', 'classification'];
+    if (in_array($type, $withNameScore)) {
+      $update("Nom de la reconnaissance",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
+      $update("Score de la reconnaissance", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
+    }
 
-        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_score() ?? '');
-        $cmd->save();
-        break;
+    if ($type === 'description') {
+      $update("description", "string", "", "info_description", $frigateEvent->getRecognition_description());
+    }
 
-      case "lpr":
-        $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_plate() ?? '');
-        $cmd->save();
-
-        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_name() ?? '');
-        $cmd->save();
-
-        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_score() ?? '');
-        $cmd->save();
-        break;
+    if ($type === 'lpr') {
+      $update("Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
     }
   }
 
@@ -2501,72 +2480,34 @@ class frigate extends eqLogic
 
 
     foreach ($eqlogicIds as $eqlogicId) {
-      // Creation des commandes infos
-      $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0, null, 0);
-      $cmd->event($event->getCamera());
-      $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "JEEMATE_CAMERA_DETECT_TYPE_STATE", 0, null, 0);
-      $cmd->event($event->getLabel());
-      $cmd->save();
+      $duration = $event->getEndTime() != null
+        ? round($event->getEndTime() - $event->getStartTime(), 0)
+        : 0;
 
-      $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "");
-      $cmd->event($event->getHasClip());
-      $cmd->save();
+      $cmds = [
+        ["caméra",           "string",  "",   "info_camera",         "GENERIC_INFO",                   $event->getCamera()],
+        ["label",            "string",  "",   "info_label",          "JEEMATE_CAMERA_DETECT_TYPE_STATE", $event->getLabel()],
+        ["clip disponible",  "binary",  "",   "info_clips",          "",                                $event->getHasClip()],
+        ["snapshot disponible", "binary", "",   "info_snapshot",       "",                                $event->getHasSnapshot()],
+        ["top score",        "numeric", "%",  "info_topscore",       "GENERIC_INFO",                   $event->getTopScore()],
+        ["score",            "numeric", "%",  "info_score",          "",                                $event->getScore()],
+        ["zones",            "string",  "",   "info_zones",          "",                                $event->getZones()],
+        ["description",      "string",  "",   "info_description",    "",                                $event->getRecognition_description()],
+        ["id",               "string",  "",   "info_id",             "",                                $event->getEventId()],
+        ["type",             "string",  "",   "info_type",           "",                                $event->getType()],
+        ["timestamp",        "numeric", "",   "info_timestamp",      "GENERIC_INFO",                   $event->getStartTime()],
+        ["durée",            "numeric", "sc", "info_duree",          "GENERIC_INFO",                   $duration],
+        ["URL snapshot",     "string",  "",   "info_url_snapshot",   "",                                $event->getSnapshot()],
+        ["URL clip",         "string",  "",   "info_url_clip",       "",                                $event->getClip()],
+        ["URL thumbnail",    "string",  "",   "info_url_thumbnail",  "",                                $event->getThumbnail()],
+      ];
 
-      $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "");
-      $cmd->event($event->getHasSnapshot());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "info_topscore", "GENERIC_INFO");
-      $cmd->event($event->getTopScore());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "");
-      $cmd->event($event->getScore());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones", "", 0, null, 0);
-      $cmd->event($event->getZones());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
-      $cmd->event($event->getRecognition_description());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "", 0, null, 0);
-      $cmd->event($event->getEventId());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "type", "string", "", "info_type", "", 0, null, 0);
-      $cmd->event($event->getType());
-
-      $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO");
-      $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO");
-      $cmd->event($event->getStartTime());
-      $cmd->save();
-      if ($event->getEndTime() != NULL) {
-        $value = round($event->getEndTime() - $event->getStartTime(), 0);
-      } else {
-        $value = 0;
+      foreach ($cmds as [$label, $subtype, $unit, $logicalId, $const, $value]) {
+        $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $const, 0, null, 0);
+        $cmd->event($value);
+        $cmd->save();
       }
-      $cmd2->event($value);
-      $cmd2->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL snapshot", "string", "", "info_url_snapshot", "", 0, null, 0);
-      $cmd->event($event->getSnapshot());
-      $cmd->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL clip", "string", "", "info_url_clip", "", 0, null, 0);
-      $cmd->event($event->getClip());
-      $cmd->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL thumbnail", "string", "", "info_url_thumbnail", "", 0, null, 0);
-      $cmd->event($event->getThumbnail());
-      $cmd->save();
     }
   }
 
