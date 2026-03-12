@@ -2694,7 +2694,7 @@ class frigate extends eqLogic
     $label = $event->getLabel();
     $description = $event->getRecognition_description() ?? "";
     $attributes = $event->getRecognition_attributes() ?? "";
-    $sublabel = $event->getRecognition_sublabel() ?? "";
+    $sublabel = $event->getRecognition_subname() ?? "";
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
