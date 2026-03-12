@@ -1982,6 +1982,15 @@ class frigate extends eqLogic
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
+      // on commence par vidér les champs de reconnaissance pour éviter d'avoir des données obsolètes
+      $frigateEvent->setRecognition_type('');
+      $frigateEvent->setRecognition_name('');
+      $frigateEvent->setRecognition_description('');
+      $frigateEvent->setRecognition_plate('');
+      $frigateEvent->setRecognition_subname('');
+      $frigateEvent->setRecognition_attributes('');
+      $frigateEvent->setRecognition_score(0);
+
     }
     $score = $trackedObjects['score'] ?? '';
     if (is_numeric($score)) {
