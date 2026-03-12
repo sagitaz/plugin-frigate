@@ -1760,6 +1760,7 @@ class frigate extends eqLogic
     $urlFrigateWithoutPort = config::byKey('URL', 'frigate');
     $urlfrigate = self::getUrlFrigate();
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
+    $classificationCmds = isset($configurationArray['classification']['custom']) && !empty($configurationArray['classification']['custom']);
     $addToName = "";
     $create = 1;
     $name = "";
@@ -1862,6 +1863,26 @@ class frigate extends eqLogic
         $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled'];
 
         self::createAudioCmds($frigate->getId(), $valueAudio);
+      }
+
+      // commandes etat des classifications
+      if ($classificationCmds) {
+        foreach ($configurationArray['classification']['custom'] as $key => $item) {
+          if (!isset($item['state_config'])) {
+            continue;
+          }
+          $cameras = $item['state_config']['cameras'] ?? [];
+
+          if (!array_key_exists($cameraName, $cameras)) {
+            continue;
+          }
+          log::add(__CLASS__, 'debug', "║ Création de la commande d'état : " . $key . " pour la caméra : " . $cameraName);
+          $cleankey = strtolower($key);
+          $cleankey = iconv('UTF-8', 'ASCII//TRANSLIT', $cleankey);
+          $cleankey = str_replace(' ', '_', $cleankey);
+          $cleankey = preg_replace('/[^a-z0-9_]/i', '', $cleankey);
+          self::createCmd($frigate->getId(), "Reconnaissance - Etat " . $key , "string", "", "info_classification_etat_" . $cleankey, "", 0);
+          }
       }
     }
     message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
@@ -1990,7 +2011,6 @@ class frigate extends eqLogic
       $frigateEvent->setRecognition_subname('');
       $frigateEvent->setRecognition_attributes('');
       $frigateEvent->setRecognition_score(0);
-
     }
     $score = $trackedObjects['score'] ?? '';
     if (is_numeric($score)) {
