@@ -25,6 +25,8 @@ CREATE TABLE IF NOT EXISTS `frigate_events` (
     `recognition_type` text DEFAULT NULL,
     `recognition_description` text DEFAULT NULL,
     `recognition_name` text DEFAULT NULL,
+    `recognition_subname` text DEFAULT NULL,
+    `recognition_attributes` text DEFAULT NULL,
     `recognition_plate` text DEFAULT NULL,
     `recognition_score` int(11) DEFAULT NULL,
     PRIMARY KEY (`id`)

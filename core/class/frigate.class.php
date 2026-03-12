@@ -2011,7 +2011,15 @@ class frigate extends eqLogic
       case "classification":
         log::add(__CLASS__, 'debug', "║ MAJ DB → Classification d'objet");
         $frigateEvent->setRecognition_type("classification");
-        $frigateEvent->setRecognition_name($trackedObjects['sub_label'] ?? '');
+        $frigateEvent->setRecognition_name($trackedObjects['model'] ?? '');
+        if (isset($trackedObjects['sub_labels'])) {
+          $frigateEvent->setRecognition_subname($trackedObjects['sub_label'] ?? '');
+          $frigateEvent->setRecognition_attributes('');
+        }
+        if (isset($trackedObjects['attributes'])) {
+          $frigateEvent->setRecognition_attributes($trackedObjects['attributes']);
+          $frigateEvent->setRecognition_subname('');
+        }
         break;
 
       default:
@@ -2034,20 +2042,25 @@ class frigate extends eqLogic
       $cmd->save();
     };
 
-    $update("Type de détection", "string", "", "info_detection_type", $type);
+    $update("Reconnaissance - Type", "string", "", "info_detection_type", $type);
 
     $withNameScore = ['face', 'lpr', 'classification'];
     if (in_array($type, $withNameScore)) {
-      $update("Nom de la reconnaissance",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
-      $update("Score de la reconnaissance", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
+      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
+      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
     }
 
     if ($type === 'description') {
-      $update("description", "string", "", "info_description", $frigateEvent->getRecognition_description());
+      $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
     }
 
     if ($type === 'lpr') {
-      $update("Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
+      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
+    }
+
+    if ($type === 'classification') {
+      $update("Reconnaissance - Label", "string", "", "info_detection_subname", $frigateEvent->getRecognition_subname());
+      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", $frigateEvent->getRecognition_attributes());
     }
   }
 
@@ -2493,7 +2506,7 @@ class frigate extends eqLogic
         ["top score",        "numeric", "%",  "info_topscore",       "GENERIC_INFO",                   $event->getTopScore()],
         ["score",            "numeric", "%",  "info_score",          "",                                $event->getScore()],
         ["zones",            "string",  "",   "info_zones",          "",                                $event->getZones()],
-        ["description",      "string",  "",   "info_description",    "",                                $event->getRecognition_description()],
+        ["Reconnaissance - Description",      "string",  "",   "info_description",    "",                                $event->getRecognition_description()],
         ["id",               "string",  "",   "info_id",             "",                                $event->getEventId()],
         ["type",             "string",  "",   "info_type",           "",                                $event->getType()],
         ["timestamp",        "numeric", "",   "info_timestamp",      "GENERIC_INFO",                   $event->getStartTime()],
@@ -2670,7 +2683,9 @@ class frigate extends eqLogic
     $camera = $event->getCamera();
     $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
-    $description = $event->getRecognition_description();
+    $description = $event->getRecognition_description() ?? "";
+    $attributes = $event->getRecognition_attributes() ?? "";
+    $sublabel = $event->getRecognition_sublabel() ?? "";
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
@@ -2819,8 +2834,8 @@ class frigate extends eqLogic
           continue;
         }
 
-        $tags = ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'];
-        $values = [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath];
+        $tags = ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#', '#attributes#', '#sublabel#'];
+        $values = [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath, $attributes, $sublabel];
 
         $options = str_replace(
           $tags,

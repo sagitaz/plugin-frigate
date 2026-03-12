@@ -47,6 +47,8 @@ class frigate_events
 	private $recognition_type;
 	private $recognition_description;
 	private $recognition_name;
+	private $recognition_subname;
+	private $recognition_attributes;
 	private $recognition_plate;
 	private $recognition_score;
 
@@ -409,6 +411,24 @@ class frigate_events
 	public function getRecognition_name()
 	{
 		return $this->recognition_name;
+	}
+
+	public function setRecognition_subname($recognition_subname)
+	{
+		$this->recognition_subname = $recognition_subname;
+	}
+	public function getRecognition_subname()
+	{
+		return $this->recognition_subname;
+	}
+
+	public function setRecognition_attributes($recognition_attributes)
+	{
+		$this->recognition_attributes = $recognition_attributes;
+	}
+	public function getRecognition_attributes()
+	{
+		return $this->recognition_attributes;
 	}
 
 	public function setRecognition_plate($recognition_plate)

@@ -70,7 +70,7 @@ function frigate_update()
     DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
 
     // Vérifier si les colonnes recognition_* existent déjà dans la table 'frigate_events'
-    $columns = ['recognition_type', 'recognition_description', 'recognition_name', 'recognition_plate', 'recognition_score'];
+    $columns = ['recognition_type', 'recognition_description', 'recognition_name', 'recognition_subname', 'recognition_attributes', 'recognition_plate', 'recognition_score'];
     foreach ($columns as $column) {
         $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE '" . $column . "';";
         $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
