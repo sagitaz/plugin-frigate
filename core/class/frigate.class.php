@@ -3286,6 +3286,23 @@ class frigate extends eqLogic
         continue;
       }
 
+      // classification en cours
+      if ($innerKey === 'classification') {
+        log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-info:START CLASSIFICATION:/fg: ═══════════════════════════════════╗");
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+        log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
+        $cleankey = strtolower($key);
+        $cleankey = iconv('UTF-8', 'ASCII//TRANSLIT', $cleankey);
+        $cleankey = str_replace(' ', '_', $cleankey);
+        $cleankey = preg_replace('/[^a-z0-9_]/i', '', $cleankey);
+        $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_etat_" . $cleankey, "", 0);
+        $infoCmd->event($innerValue);
+        $infoCmd->save();
+        $eqCamera->refreshWidget();
+        log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
+        continue;
+      }
+
       // tous les objets (all)
       if ($innerKey === 'all') {
         log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
