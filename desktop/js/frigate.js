@@ -541,6 +541,9 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     level: 'success'
                 });
             }
+            setTimeout(function () {
+                window.location.reload();
+            }, 5000);
         }
     })
 });
