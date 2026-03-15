@@ -531,8 +531,6 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
                     level: 'success'
                 });
-                sleep(5000);
-                window.location.reload(true);
             }
         }
     })
