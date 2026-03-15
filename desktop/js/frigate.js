@@ -522,6 +522,15 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     level: 'warning'
                 });
                 return;
+            } else if (data.result == "aucun") {
+                jeedomUtils.showAlert({
+                    message: '{{Aucun nouveau équipement caméra découvert}}.',
+                    level: 'success'
+                });
+                jeedomUtils.showAlert({
+                    message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
+                    level: 'success'
+                });
             } else {
                 jeedomUtils.showAlert({
                     message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
