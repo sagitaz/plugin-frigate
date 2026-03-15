@@ -391,356 +391,233 @@ class frigate extends eqLogic
   // Permet de modifier l'affichage du widget (également utilisable par les commandes)
   public function toHtml($_version = 'dashboard')
   {
-    $type = "";
-    $logicalId = $this->getLogicalId();
-    if (strpos($logicalId, "eqFrigateCamera_") !== false) {
-      $type = "camera";
-    }
+    $type = $this->detectType();
+    $panel = $this->isPanelVersion($_version);
+    if ($panel) $_version = 'dashboard';
 
-    // panel ou dashbord
-    $panel = false;
-    if ($_version == 'panel') {
-      $panel = true;
+    if ($type !== 'camera') return parent::toHtml($_version);
+
+    $replace = $this->preToHtml($_version);
+    if (!is_array($replace)) return $replace;
+
+    $version = "dashboard";
+    $replace['#cameraEqlogicId#'] = $this->getLogicalId();
+    $replace['#cameraName#']      = $this->getConfiguration("name");
+    $replace['#imgUrl#']          = $this->getConfiguration("img");
+    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
+
+    $replace['#actions#']      = $this->buildActions();
+    $replace['#detectNow#']    = $this->buildDetectNow();
+    $replace['#actionsPreset#'] = $this->buildPresetsSelect();
+    $replace['#ptzWidget#']    = $this->buildPtzWidget();
+    $replace['#ptzZoom#']      = $this->buildPtzZoom();
+    $replace['#actionsModal#'] = $replace['#actions#'] . $this->buildPtzModal() . $replace['#actionsPreset#'];
+
+    return $this->renderTemplate($replace, $_version, $panel);
+  }
+
+  private function detectType(): string
+  {
+    return strpos($this->getLogicalId(), "eqFrigateCamera_") !== false ? "camera" : "";
+  }
+
+  private function isPanelVersion(string &$_version): bool
+  {
+    if ($_version === 'panel') {
       $_version = 'dashboard';
+      return true;
     }
+    return false;
+  }
 
-    if ($type == 'camera') {
-      $replace = $this->preToHtml($_version);
-      if (!is_array($replace)) {
-        return $replace;
-      }
-      //  $version = jeedom::versionAlias($_version);
-      $version = "dashboard"; // je ne gère pas de version mobile.
+  // Construit un bouton icône générique
+  private function buildBtnIcon(string $icon, string $title, int $cmdId, string $cssClass): string
+  {
+    return '<div class="btn-icon">'
+      . '<i class="' . $icon . ' ' . $cssClass . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmdId . ')"></i>'
+      . '</div>';
+  }
 
-      $replace['#cameraEqlogicId#'] = $this->getLogicalId();
-      $replace['#cameraName#'] = $this->getConfiguration("name");
-      $replace['#imgUrl#'] = $this->getConfiguration("img");
-      $replace['#refresh#'] = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
+  // Construit un toggle start/stop selon l'état d'une info cmd
+  private function buildToggleAction(string $startLogical, string $stopLogical, string $infoLogical, string $iconOn, string $iconOff, string $titleOn, string $titleOff): string
+  {
+    $on   = $this->getCmd('action', $startLogical);
+    $off  = $this->getCmd('action', $stopLogical);
+    $etat = $this->getCmd('info', $infoLogical);
 
+    if (!is_object($on) || !is_object($off)) return '';
+    if ($on->getIsVisible() != 1 || $off->getIsVisible() != 1) return '';
 
-      $replace['#actions#'] = '';
-      // Commandes recording
-      if (is_object($this->getCmd('action', 'action_start_recordings')) && is_object($this->getCmd('action', 'action_stop_recordings'))) {
-        $on = $this->getCmd("action", 'action_start_recordings');
-        $off = $this->getCmd("action", 'action_stop_recordings');
-        $etat = $this->getCmd("info", 'info_recordings');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconActionOff' . $this->getId() . '" title="recording ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconAction' . $this->getId() . '" title="recording OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // Commandes snapshot
-      if (is_object($this->getCmd('action', 'action_start_snapshots')) && is_object($this->getCmd('action', 'action_stop_snapshots'))) {
-        $on = $this->getCmd("action", 'action_start_snapshots');
-        $off = $this->getCmd("action", 'action_stop_snapshots');
-        $etat = $this->getCmd("info", 'info_snapshots');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="snapshot ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconAction' . $this->getId() . '" title="snapshot OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commandes détections
-      if (is_object($this->getCmd('action', 'action_start_detect')) && is_object($this->getCmd('action', 'action_stop_detect'))) {
-        $on = $this->getCmd("action", 'action_start_detect');
-        $off = $this->getCmd("action", 'action_stop_detect');
-        $etat = $this->getCmd("info", 'info_detect');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconActionOff' . $this->getId() . '" title="detection ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconAction' . $this->getId() . '" title="detection OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commandes audio
-      if (is_object($this->getCmd('action', 'action_start_audio')) && is_object($this->getCmd('action', 'action_stop_audio'))) {
-        $on = $this->getCmd("action", 'action_start_audio');
-        $off = $this->getCmd("action", 'action_stop_audio');
-        $etat = $this->getCmd("info", 'info_audio');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-off iconActionOff' . $this->getId() . '" title="audio ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-down iconAction' . $this->getId() . '" title="audio OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commantes motions
-      $replace['#detectNow#'] = "";
-      $cmds = $this->getCmd('info');
-      foreach ($cmds as $cmd) {
-        if (strpos($cmd->getLogicalId(), 'info_detect_') === 0 && $cmd->getLogicalId() != 'info_detect_all') {
-          $icon = $cmd->getDisplay("icon", "fas fa-exclamation-circle");
-          $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
-          // Vérifier si la commande est visible
-          if ($cmd->getIsVisible() == 1) {
-            $value = $cmd->execCmd(); // Exécuter la commande et obtenir la valeur
-
-            // Si la valeur est égale à 1, ajouter l'icône à l'affichage
-            if ($value == 1) {
-              $replace['#detectNow#'] .= '<div class="btn-detect">';
-              $replace['#detectNow#'] .= '<i class="' . $icon . ' iconDetect' . $this->getId() . '"></i>';
-              $replace['#detectNow#'] .= '</div>';
-            }
-          }
-        }
-      }
-
-
-      if (is_object($this->getCmd('action', 'action_start_motion')) && is_object($this->getCmd('action', 'action_stop_motion'))) {
-        $on = $this->getCmd("action", 'action_start_motion');
-        $off = $this->getCmd("action", 'action_stop_motion');
-        $etat = $this->getCmd("info", 'info_motion');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-male iconActionOff' . $this->getId() . '" title="motion ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-walking iconAction' . $this->getId() . '" title="motion OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-
-      // commandes make snapshot
-      if (is_object($this->getCmd('action', 'action_make_api_event'))) {
-        $make_snapshot = $this->getCmd("action", 'action_make_api_event');
-        if ($make_snapshot->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera-retro iconActionOff' . $this->getId() . '" title="' . __("Créer un évènement", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes create capture
-      if (is_object($this->getCmd('action', 'action_create_snapshot'))) {
-        $make_snapshot = $this->getCmd("action", 'action_create_snapshot');
-        if ($make_snapshot->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-image iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes dispo sur la modale
-      $replace['#actionsModal#'] = $replace['#actions#'];
-      $replace['#ptzWidget#'] = "";
-      $replace['#ptzZoom#'] = "";
-
-
-      if (
-        ((is_object($this->getCmd('action', 'action_ptz_down'))) ? (($this->getCmd('action', 'action_ptz_down')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
-        ((is_object($this->getCmd('action', 'action_ptz_up')))  ? (($this->getCmd('action', 'action_ptz_up')->getIsVisible() == 1) ? 1 : 0) : 0)     ||
-        ((is_object($this->getCmd('action', 'action_ptz_left'))) ? (($this->getCmd('action', 'action_ptz_left')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
-        ((is_object($this->getCmd('action', 'action_ptz_right'))) ? (($this->getCmd('action', 'action_ptz_right')->getIsVisible() == 1) ? 1 : 0) : 0) ||
-        ((is_object($this->getCmd('action', 'action_ptz_stop'))) ? (($this->getCmd('action', 'action_ptz_stop')->getIsVisible() == 1) ? 1 : 0) : 0)
-      ) {
-        $replace['#ptzWidget#'] = '<div class="circle-overlay"></div>';
-      }
-
-      // commandes PTZ down
-      if (is_object($this->getCmd('action', 'action_ptz_down'))) {
-        $down = $this->getCmd("action", 'action_ptz_down');
-        if ($down->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-down">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ up
-      if (is_object($this->getCmd('action', 'action_ptz_up'))) {
-        $up = $this->getCmd("action", 'action_ptz_up');
-        if ($up->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-up">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ left
-      if (is_object($this->getCmd('action', 'action_ptz_left'))) {
-        $left = $this->getCmd("action", 'action_ptz_left');
-        if ($left->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-left">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ right
-      if (is_object($this->getCmd('action', 'action_ptz_right'))) {
-        $right = $this->getCmd("action", 'action_ptz_right');
-        if ($right->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-right">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ stop
-      if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
-        $stop = $this->getCmd("action", 'action_ptz_stop');
-        if ($stop->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-stop">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-stop iconPTZstop' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom in
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
-        $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
-        if ($zoom_in->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-in">';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-plus iconZoomIn' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom out
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
-        $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
-        if ($zoom_out->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-out">';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-minus iconZoomOut' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-
-
-      $replace['#actionsPreset#'] = '';
-      $hasPresets = false; // Variable pour vérifier si des presets sont disponibles
-
-      // Créer la structure HTML du select
-      $selectHtml = '<div class="btn-icon">';
-      $selectHtml .= '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">';
-      $selectHtml .= '<option value="" disabled selected hidden>{{action}}</option>';
-      // Boucle sur les presets disponibles
-      for ($i = 0; $i <= 10; $i++) {
-        $presetCmd = 'action_preset_' . $i;
-        if (is_object($this->getCmd('action', $presetCmd))) {
-          $preset = $this->getCmd("action", $presetCmd);
-          if ($preset->getIsVisible() == 1) {
-            $hasPresets = true; // Des presets sont disponibles
-            $selectHtml .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
-          }
-        }
-      }
-      // Boucle pour ajouter les commandes HTTP
-      $httpCommands = cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true);
-      foreach ($httpCommands as $httpCmd) {
-        if ($httpCmd && $httpCmd->getIsVisible() == 1) {
-          $hasPresets = true; // Des presets sont disponibles
-          $selectHtml .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
-        }
-      }
-
-      $selectHtml .= '</select>';
-      $selectHtml .= '</div>';
-
-      // Fermer le select si des presets sont disponibles
-      if ($hasPresets) {
-        $replace['#actionsModal#'] = $replace['#actionsModal#'] . $selectHtml;
-        $replace['#actionsPreset#'] = $selectHtml;
-      }
-
-
-
-
-
-      if (!$panel) {
-        if ($this->getConfiguration('templateDashboardImgOnly', 0) == 1) {
-          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
-          $replace['#detectNow#'] = "";
-          $replace['#ptzWidget#'] = "";
-          $replace['#ptzZoom#'] = "";
-          $replace['#actions#'] = "";
-          $replace['#actionsPreset#'] = "";
-        }
-        $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
-        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
-        $html = $this->postToHtml($_version, $html);
-        cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
-        return $html;
-      } else {
-        if ($this->getConfiguration('templatePanelImgOnly', 0) == 1) {
-          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
-          $replace['#detectNow#'] = "";
-          $replace['#ptzWidget#'] = "";
-          $replace['#ptzZoom#'] = "";
-          $replace['#actions#'] = "";
-          $replace['#actionsPreset#'] = "";
-        }
-        $html = template_replace($replace, getTemplate('core', $version, 'widgetPanel', __CLASS__));
-        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetPanel.html');
-        $html = $this->postToHtml($_version, $html);
-        cache::set('widgetPanel' . $_version . $this->getId(), $html, 0);
-        return $html;
-      }
+    if ($etat->execCmd() == 0) {
+      return $this->buildBtnIcon($iconOn, $titleOn, $on->getId(), 'iconActionOff');
     } else {
-      return parent::toHtml($_version);
+      return $this->buildBtnIcon($iconOff, $titleOff, $off->getId(), 'iconAction');
     }
+  }
+
+  private function buildActions(): string
+  {
+    $html  = $this->buildToggleAction('action_start_recordings', 'action_stop_recordings', 'info_recordings', 'fas fa-video', 'fas fa-video', 'recording ON', 'recording OFF');
+    $html .= $this->buildToggleAction('action_start_snapshots', 'action_stop_snapshots', 'info_snapshots', 'fas fa-camera', 'fas fa-camera', 'snapshot ON', 'snapshot OFF');
+    $html .= $this->buildToggleAction('action_start_detect', 'action_stop_detect', 'info_detect', 'fas fa-user-shield', 'fas fa-user-shield', 'detection ON', 'detection OFF');
+    $html .= $this->buildToggleAction('action_start_audio', 'action_stop_audio', 'info_audio', 'fas fa-volume-off', 'fas fa-volume-down', 'audio ON', 'audio OFF');
+    $html .= $this->buildToggleAction('action_start_motion', 'action_stop_motion', 'info_motion', 'fas fa-male', 'fas fa-walking', 'motion ON', 'motion OFF');
+    $html .= $this->buildToggleAction('action_start_review_alerts', 'action_stop_review_alerts', 'info_review_alerts', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review alerts ON', 'review alerts OFF');
+    $html .= $this->buildToggleAction('action_start_review_detections', 'action_stop_review_detections', 'info_review_detections', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review detections ON', 'review detections OFF');
+    $html .= $this->buildToggleAction('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review descriptions ON', 'review descriptions OFF');
+    $html .= $this->buildToggleAction('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', 'fas fa-toggle-off', 'fas fa-toggle-on', 'object descriptions ON', 'objet descriptions OFF');
+    // Boutons simples
+    foreach (
+      [
+        ['action_make_api_event',  'fas fa-camera-retro', __("Créer un évènement", __FILE__)],
+        ['action_create_snapshot', 'fas fa-image',        __("Créer une capture", __FILE__)],
+      ] as [$logical, $icon, $title]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (is_object($cmd) && $cmd->getIsVisible() == 1) {
+        $html .= $this->buildBtnIcon($icon, $title, $cmd->getId(), 'iconActionOff');
+      }
+    }
+
+    return $html;
+  }
+
+  private function buildDetectNow(): string
+  {
+    $html = '';
+    foreach ($this->getCmd('info') as $cmd) {
+      $logicalId = $cmd->getLogicalId();
+      if (strpos($logicalId, 'info_detect_') !== 0 || $logicalId === 'info_detect_all') continue;
+      if ($cmd->getIsVisible() != 1 || $cmd->execCmd() != 1) continue;
+
+      $icon = $cmd->getDisplay("icon", "fas fa-exclamation-circle");
+      $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
+      $html .= '<div class="btn-detect"><i class="' . $icon . ' iconDetect' . $this->getId() . '"></i></div>';
+    }
+    return $html;
+  }
+
+  private function buildPresetsSelect(): string
+  {
+    $options   = '';
+    $hasPresets = false;
+
+    for ($i = 0; $i <= 10; $i++) {
+      $preset = $this->getCmd('action', 'action_preset_' . $i);
+      if (is_object($preset) && $preset->getIsVisible() == 1) {
+        $hasPresets = true;
+        $options .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
+      }
+    }
+
+    foreach (cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true) as $httpCmd) {
+      if ($httpCmd && $httpCmd->getIsVisible() == 1) {
+        $hasPresets = true;
+        $options .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
+      }
+    }
+
+    if (!$hasPresets) return '';
+
+    return '<div class="btn-icon">'
+      . '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">'
+      . '<option value="" disabled selected hidden>{{action}}</option>'
+      . $options
+      . '</select>'
+      . '</div>';
+  }
+
+  // PTZ : définition des boutons [logical, iconWidget, cssWidget, titleWidget, iconModal]
+  private function ptzButtonsConfig(): array
+  {
+    return [
+      ['action_ptz_down',  'fas fa-caret-down',  'iconPTZdown',  'btn-ptz-down',  'PTZ DOWN',  'fas fa-chevron-circle-down'],
+      ['action_ptz_up',    'fas fa-caret-up',    'iconPTZup',    'btn-ptz-up',    'PTZ UP',    'fas fa-chevron-circle-up'],
+      ['action_ptz_left',  'fas fa-caret-left',  'iconPTZleft',  'btn-ptz-left',  'PTZ LEFT',  'fas fa-chevron-circle-left'],
+      ['action_ptz_right', 'fas fa-caret-right', 'iconPTZright', 'btn-ptz-right', 'PTZ RIGHT', 'fas fa-chevron-circle-right'],
+      ['action_ptz_stop',  'fas fa-stop',        'iconPTZstop',  'btn-ptz-stop',  'PTZ STOP',  'fas fa-stop-circle'],
+    ];
+  }
+
+  private function buildPtzWidget(): string
+  {
+    $hasPtz = false;
+    foreach ($this->ptzButtonsConfig() as [$logical]) {
+      $cmd = $this->getCmd('action', $logical);
+      if (is_object($cmd) && $cmd->getIsVisible() == 1) {
+        $hasPtz = true;
+        break;
+      }
+    }
+
+    $html = $hasPtz ? '<div class="circle-overlay"></div>' : '';
+
+    foreach ($this->ptzButtonsConfig() as [$logical, $icon, $css, $btnClass, $title]) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $html .= '<div class="' . $btnClass . '">'
+        . '<i class="' . $icon . ' ' . $css . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmd->getId() . ')"></i>'
+        . '</div>';
+    }
+    return $html;
+  }
+
+  private function buildPtzModal(): string
+  {
+    $html = '';
+    foreach (
+      array_merge($this->ptzButtonsConfig(), [
+        ['action_ptz_zoom_in',  '', '', '', 'PTZ ZOOM IN',  'fas fa-plus-circle'],
+        ['action_ptz_zoom_out', '', '', '', 'PTZ ZOOM OUT', 'fas fa-minus-circle'],
+      ]) as [$logical,,,, $title, $iconModal]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $html .= $this->buildBtnIcon($iconModal, $title, $cmd->getId(), 'iconActionOff');
+    }
+    return $html;
+  }
+
+  private function buildPtzZoom(): string
+  {
+    $html = '';
+    foreach (
+      [
+        ['action_ptz_zoom_in',  'fas fa-plus',  'iconZoomIn',  'PTZ ZOOM IN',  'fas fa-plus-circle'],
+        ['action_ptz_zoom_out', 'fas fa-minus', 'iconZoomOut', 'PTZ ZOOM OUT', 'fas fa-minus-circle'],
+      ] as [$logical, $icon, $css, $title]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $btnClass = ($logical === 'action_ptz_zoom_in') ? 'btn-ptz-zoom-in' : 'btn-ptz-zoom-out';
+      $html .= '<div class="' . $btnClass . '"><i class="' . $icon . ' ' . $css . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmd->getId() . ')"></i></div>';
+    }
+    return $html;
+  }
+
+
+
+  private function renderTemplate(array $replace, string $_version, bool $panel): string
+  {
+    $version  = "dashboard";
+    $imgOnly  = $panel
+      ? $this->getConfiguration('templatePanelImgOnly', 0)
+      : $this->getConfiguration('templateDashboardImgOnly', 0);
+
+    if ($imgOnly == 1) {
+      foreach (['#detectNow#', '#ptzWidget#', '#ptzZoom#', '#actions#', '#actionsPreset#'] as $key) {
+        $replace[$key] = '';
+      }
+    }
+
+    $templateName = $panel ? 'widgetPanel' : 'widgetCamera';
+    $cacheKey     = ($panel ? 'widgetPanel' : 'widgetCamera') . $_version . $this->getId();
+
+    $html = template_replace($replace, getTemplate('core', $version, $templateName, __CLASS__));
+    $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/' . $templateName . '.html');
+    $html = $this->postToHtml($_version, $html);
+    cache::set($cacheKey, $html, 0);
+    return $html;
   }
 
 
@@ -1877,8 +1754,8 @@ class frigate extends eqLogic
             continue;
           }
           log::add(__CLASS__, 'debug', "║ Création de la commande d'état : " . $key . " pour la caméra : " . $cameraName);
-          self::createCmd($frigate->getId(), "Reconnaissance - Etat " . $key , "string", "", "info_classification_state", "", 0);
-          }
+          self::createCmd($frigate->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
+        }
       }
     }
     message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
@@ -3285,14 +3162,14 @@ class frigate extends eqLogic
       // classification en cours
       if ($innerKey === 'classification') {
         foreach ($innerValue as $key => $value) {
-        log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-info:START CLASSIFICATION:/fg: ═══════════════════════════════════╗");
-        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-        log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
-        $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
-        $infoCmd->event($value);
-        $infoCmd->save();
-        $eqCamera->refreshWidget();
-        log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
+          log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-info:START CLASSIFICATION:/fg: ═══════════════════════════════════╗");
+          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+          log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
+          $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
+          $infoCmd->event($value);
+          $infoCmd->save();
+          $eqCamera->refreshWidget();
+          log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
         }
         continue;
       }
