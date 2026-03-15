@@ -293,7 +293,7 @@ function deleteEvent(eventId) {
   }
 }
 function deleteAllEvents(eventId) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
     url: "plugins/frigate/core/ajax/frigate.ajax.php",
     data: {
@@ -301,33 +301,36 @@ function deleteAllEvents(eventId) {
       eventId: eventId
     },
     dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
     success: function (data) {
       if (data.state != 'ok') {
-        $('#div_alert').showAlert({ message: data.result, level: 'danger' });
+        jeedomUtils.showAlert({ message: data.result, level: 'danger' });
         return;
       } else if (data.result == 'Error 01') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{L\'évènement est un favori. Suppression impossible. Veuillez d\'abord le supprimer de la liste des favoris.}}',
           level: 'warning'
         });
         return;
       } else if (data.result == 'Error 02') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{L\'URL du serveur Frigate n\'est pas configurée.}}',
           level: 'warning'
         });
         return;
       } else if (data.result == 'Error 03') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{Le port du serveur Frigate n\'est pas configuré.}}',
           level: 'warning'
         });
         return;
       } else if (data.result == 'OK') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{Suppression de l\'évènement réussie.}}',
           level: 'success'
         });
@@ -457,7 +460,7 @@ function toggleFavorite(button) {
 }
 
 function setFavorite(eventId, isFav) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
     url: "plugins/frigate/core/ajax/frigate.ajax.php",
     data: {
@@ -466,18 +469,21 @@ function setFavorite(eventId, isFav) {
       isFav: isFav
     },
     dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
     success: function (data) {
       if (data.result == '0') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{L\'évènement a été retiré de la liste des favoris.}}',
           level: 'success'
         });
         return;
       } else if (data.result == '1') {
-        $('#div_alert').showAlert({
+        jeedomUtils.showAlert({
           message: '{{L\'évènement a été ajouté à la liste des favoris.}}',
           level: 'success'
         });

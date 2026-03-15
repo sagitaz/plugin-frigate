@@ -141,6 +141,66 @@ function printTable(_cmd, tr, tableName) {
     jeedom.cmd.changeType($('#' + tableName + ' tbody tr:last'), init(_cmd.subType));
 }
 
+function sortTableByName(tableId) {
+    const tbody = document.querySelector('#' + tableId + ' tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const elA = a.querySelector('[data-l1key="name"]');
+        const elB = b.querySelector('[data-l1key="name"]');
+
+        // Gère input (value) et span (textContent)
+        const nomA = (elA?.value || elA?.textContent || '').trim().toLowerCase();
+        const nomB = (elB?.value || elB?.textContent || '').trim().toLowerCase();
+
+        return nomA.localeCompare(nomB, 'fr', { sensitivity: 'base' });
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function sortTableById(tableId) {
+    const tbody = document.querySelector('#' + tableId + ' tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const elA = a.querySelector('[data-l1key="id"]');
+        const elB = b.querySelector('[data-l1key="id"]');
+
+        const idA = parseInt(elA?.value || elA?.textContent || '0', 10);
+        const idB = parseInt(elB?.value || elB?.textContent || '0', 10);
+
+        return idA - idB;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+document.querySelector('#table_infos th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_infos');
+});
+
+document.querySelector('#table_cmd th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_cmd');
+});
+document.querySelector('#table_stats th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_stats');
+});
+
+document.querySelector('#table_infos th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_infos');
+});
+
+document.querySelector('#table_cmd th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_cmd');
+});
+document.querySelector('#table_stats th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_stats');
+});
 function addAction(_action, _type) {
     if (!isset(_action)) {
         _action = {}
@@ -276,7 +336,7 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
         if (frigateURLexterne) {
             window.open(frigateURLexterne, '_blank');
         } else {
-            $('#div_alert').showAlert({
+            jeedomUtils.showAlert({
                 message: '{{Aucune URL externe n\'est configurée.}}',
                 level: 'warning'
             });
@@ -427,7 +487,7 @@ function printEqLogic(_eqLogic) {
                 params: actionOptions,
                 async: false,
                 error: function (error) {
-                    $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+                    jeedomUtils.showAlert({ message: error.message, level: 'danger' })
                 },
                 success: function (data) {
                     for (var i in data) {
@@ -505,52 +565,69 @@ function printEqLogic(_eqLogic) {
 }
 
 document.getElementById('searchAndCreate').addEventListener('click', function () {
-    $.ajax({
+    domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
             action: "searchAndCreate"
         },
         dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
         },
         success: function (data) {
             if (data.result == false) {
-                $('#div_alert').showAlert({
+                jeedomUtils.showAlert({
                     message: '{{Erreur dans la configuration.}}',
                     level: 'warning'
                 });
                 return;
-            } else {
-                $('#div_alert').showAlert({
-                    message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
+            } else if (data.result == "aucun") {
+                jeedomUtils.showAlert({
+                    message: '{{Aucun nouveau équipement caméra découvert}}.',
                     level: 'success'
                 });
-                $('#div_alert').showAlert({
+                jeedomUtils.showAlert({
                     message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
                     level: 'success'
                 });
-                sleep(5000);
-                window.location.reload(true);
+            } else {
+                jeedomUtils.showAlert({
+                    message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
+                    level: 'success'
+                });
+                jeedomUtils.showAlert({
+                    message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
+                    level: 'success'
+                });
             }
+
+            setTimeout(function () {
+                window.location.reload();
+            }, 5000);
         }
-    })
+    });
 });
 
 document.getElementById('restartFrigate').addEventListener('click', function () {
-    $.ajax({
+    domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
             action: "restartFrigate"
         },
         dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
         },
         success: function (data) {
-            $('#div_alert').showAlert({
+            jeedomUtils.showAlert({
                 message: '{{Le redémarrage de Frigate est en cours.}}',
                 level: 'info'
             });
@@ -569,7 +646,7 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
         inputType: false,
         callback: function (result) {
             if (result !== null) {
-                $.ajax({
+                domUtils.ajax({
                     type: "POST",
                     url: "plugins/frigate/core/ajax/frigate.ajax.php",
                     data: {
@@ -580,11 +657,14 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
 
                     },
                     dataType: 'json',
-                    error: function (request, status, error) {
-                        handleAjaxError(request, status, error);
-                    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
                     success: function (data) {
-                        $('#div_alert').showAlert({
+                        jeedomUtils.showAlert({
                             message: '{{Création de la commande réussie.}}',
                             level: 'info'
                         });
@@ -608,7 +688,7 @@ function editHTTP(cmd) {
         value: data,
         callback: function (result) {
             if (result !== null) {
-                $.ajax({
+                domUtils.ajax({
                     type: "POST",
                     url: "plugins/frigate/core/ajax/frigate.ajax.php",
                     data: {
@@ -618,11 +698,14 @@ function editHTTP(cmd) {
 
                     },
                     dataType: 'json',
-                    error: function (request, status, error) {
-                        handleAjaxError(request, status, error);
-                    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
                     success: function (data) {
-                        $('#div_alert').showAlert({
+                        jeedomUtils.showAlert({
                             message: '{{Modification de la commande réussie.}}',
                             level: 'info'
                         });

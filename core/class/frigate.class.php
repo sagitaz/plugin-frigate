@@ -1625,10 +1625,14 @@ class frigate extends eqLogic
 
     frigate::generateEqEvents($configurationArray);
     frigate::generateEqStats();
-    frigate::generateEqCameras($configurationArray);
-
+    $n = 0;
+    $n = frigate::generateEqCameras($configurationArray);
+    if ($n === 0) {
+      $n = "aucun";
+    }
+    
     log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-success:FIN CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
-    return true;
+    return $n;
   }
   public static function generateEqCameras($configurationArray)
   {
