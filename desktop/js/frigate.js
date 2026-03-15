@@ -276,7 +276,7 @@ document.getElementById('gotoFrigate').addEventListener('click', function () {
         if (frigateURLexterne) {
             window.open(frigateURLexterne, '_blank');
         } else {
-            $('#div_alert').showAlert({
+            jeedomUtils.showAlert({
                 message: '{{Aucune URL externe n\'est configurée.}}',
                 level: 'warning'
             });
@@ -427,7 +427,7 @@ function printEqLogic(_eqLogic) {
                 params: actionOptions,
                 async: false,
                 error: function (error) {
-                    $('#div_alert').showAlert({ message: error.message, level: 'danger' })
+                    jeedomUtils.showAlert({ message: error.message, level: 'danger' })
                 },
                 success: function (data) {
                     for (var i in data) {
@@ -517,17 +517,17 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
         },
         success: function (data) {
             if (data.result == false) {
-                $('#div_alert').showAlert({
+                jeedomUtils.showAlert({
                     message: '{{Erreur dans la configuration.}}',
                     level: 'warning'
                 });
                 return;
             } else {
-                $('#div_alert').showAlert({
+                jeedomUtils.showAlert({
                     message: '{{Découverte de }}' + data.result + ' équipement(s) caméra réussie.',
                     level: 'success'
                 });
-                $('#div_alert').showAlert({
+                jeedomUtils.showAlert({
                     message: '{{Mise à jour des commandes et statistiques. Cela peut prendre du temps.}}',
                     level: 'success'
                 });
@@ -550,7 +550,7 @@ document.getElementById('restartFrigate').addEventListener('click', function () 
             handleAjaxError(request, status, error);
         },
         success: function (data) {
-            $('#div_alert').showAlert({
+            jeedomUtils.showAlert({
                 message: '{{Le redémarrage de Frigate est en cours.}}',
                 level: 'info'
             });
@@ -584,7 +584,7 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
                         handleAjaxError(request, status, error);
                     },
                     success: function (data) {
-                        $('#div_alert').showAlert({
+                        jeedomUtils.showAlert({
                             message: '{{Création de la commande réussie.}}',
                             level: 'info'
                         });
@@ -622,7 +622,7 @@ function editHTTP(cmd) {
                         handleAjaxError(request, status, error);
                     },
                     success: function (data) {
-                        $('#div_alert').showAlert({
+                        jeedomUtils.showAlert({
                             message: '{{Modification de la commande réussie.}}',
                             level: 'info'
                         });
