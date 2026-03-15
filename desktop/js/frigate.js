@@ -505,15 +505,18 @@ function printEqLogic(_eqLogic) {
 }
 
 document.getElementById('searchAndCreate').addEventListener('click', function () {
-    $.ajax({
+    domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
             action: "searchAndCreate"
         },
         dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
         },
         success: function (data) {
             if (data.result == false) {
@@ -541,23 +544,27 @@ document.getElementById('searchAndCreate').addEventListener('click', function ()
                     level: 'success'
                 });
             }
+
             setTimeout(function () {
                 window.location.reload();
             }, 5000);
         }
-    })
+    });
 });
 
 document.getElementById('restartFrigate').addEventListener('click', function () {
-    $.ajax({
+    domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
             action: "restartFrigate"
         },
         dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
         },
         success: function (data) {
             jeedomUtils.showAlert({
@@ -579,7 +586,7 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
         inputType: false,
         callback: function (result) {
             if (result !== null) {
-                $.ajax({
+                domUtils.ajax({
                     type: "POST",
                     url: "plugins/frigate/core/ajax/frigate.ajax.php",
                     data: {
@@ -590,9 +597,12 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
 
                     },
                     dataType: 'json',
-                    error: function (request, status, error) {
-                        handleAjaxError(request, status, error);
-                    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
                     success: function (data) {
                         jeedomUtils.showAlert({
                             message: '{{Création de la commande réussie.}}',
@@ -618,7 +628,7 @@ function editHTTP(cmd) {
         value: data,
         callback: function (result) {
             if (result !== null) {
-                $.ajax({
+                domUtils.ajax({
                     type: "POST",
                     url: "plugins/frigate/core/ajax/frigate.ajax.php",
                     data: {
@@ -628,9 +638,12 @@ function editHTTP(cmd) {
 
                     },
                     dataType: 'json',
-                    error: function (request, status, error) {
-                        handleAjaxError(request, status, error);
-                    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
                     success: function (data) {
                         jeedomUtils.showAlert({
                             message: '{{Modification de la commande réussie.}}',

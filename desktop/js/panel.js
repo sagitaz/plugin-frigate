@@ -41,21 +41,34 @@ window.onclick = function (event) {
 
 
 function removeImg(img) {
-    $.hideAlert();
-    var filepath = img.id;
-    bootbox.confirm('{{Êtes-vous sûr de vouloir supprimer cette image}} : <span style="font-weight: bold ;">' + img.id + '</span> ?', function (result) {
-        if (result) {
-            jeedom.removeImageIcon({
-                filepath: img.id,
-                error: function (error) {
-                    $('#div_iconSelectorAlert').showAlert({ message: error.message, level: 'danger' });
-                },
-                success: function (data) {
-                    $('#div_iconSelectorAlert').showAlert({ message: '{{Fichier supprimé avec succès}}', level: 'success' });
+    jeedomUtils.hideAlert();
 
-                    window.location.reload();
-                }
-            })
+    jeeDialog.confirm(
+        '{{Êtes-vous sûr de vouloir supprimer cette image}} : <span style="font-weight: bold;">' + img.id + '</span> ?',
+        function (result) {
+            if (result) {
+                jeedom.removeImageIcon({
+                    filepath: img.id,
+                    error: function (error) {
+                        jeedomUtils.showAlert({
+                            message: error.message,
+                            level: 'danger',
+                            attachTo: '#div_iconSelectorAlert'
+                        });
+                    },
+                    success: function (data) {
+                        jeedomUtils.showAlert({
+                            message: '{{Fichier supprimé avec succès}}',
+                            level: 'success',
+                            attachTo: '#div_iconSelectorAlert'
+                        });
+
+                        setTimeout(function () {
+                            window.location.reload();
+                        }, 3000);
+                    }
+                });
+            }
         }
-    })
+    );
 }

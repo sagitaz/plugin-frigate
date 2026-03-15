@@ -24,7 +24,7 @@ function createNewEvent() {
       return;
     }
 
-    $.ajax({
+    domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
@@ -36,8 +36,11 @@ function createNewEvent() {
             duration: $('.eventAttr[data-l1key=duration]').value()            
         },
         dataType: 'json',
-        error: function (request, status, error) {
-            handleAjaxError(request, status, error);
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
         },
         success: function (data) {
             if (data.state != 'ok') {

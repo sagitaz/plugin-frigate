@@ -293,7 +293,7 @@ function deleteEvent(eventId) {
   }
 }
 function deleteAllEvents(eventId) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
     url: "plugins/frigate/core/ajax/frigate.ajax.php",
     data: {
@@ -301,9 +301,12 @@ function deleteAllEvents(eventId) {
       eventId: eventId
     },
     dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
     success: function (data) {
       if (data.state != 'ok') {
         jeedomUtils.showAlert({ message: data.result, level: 'danger' });
@@ -457,7 +460,7 @@ function toggleFavorite(button) {
 }
 
 function setFavorite(eventId, isFav) {
-  $.ajax({
+  domUtils.ajax({
     type: "POST",
     url: "plugins/frigate/core/ajax/frigate.ajax.php",
     data: {
@@ -466,9 +469,12 @@ function setFavorite(eventId, isFav) {
       isFav: isFav
     },
     dataType: 'json',
-    error: function (request, status, error) {
-      handleAjaxError(request, status, error);
-    },
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
     success: function (data) {
       if (data.result == '0') {
         jeedomUtils.showAlert({
