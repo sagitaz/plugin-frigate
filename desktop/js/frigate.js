@@ -141,6 +141,66 @@ function printTable(_cmd, tr, tableName) {
     jeedom.cmd.changeType($('#' + tableName + ' tbody tr:last'), init(_cmd.subType));
 }
 
+function sortTableByName(tableId) {
+    const tbody = document.querySelector('#' + tableId + ' tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const elA = a.querySelector('[data-l1key="name"]');
+        const elB = b.querySelector('[data-l1key="name"]');
+
+        // Gère input (value) et span (textContent)
+        const nomA = (elA?.value || elA?.textContent || '').trim().toLowerCase();
+        const nomB = (elB?.value || elB?.textContent || '').trim().toLowerCase();
+
+        return nomA.localeCompare(nomB, 'fr', { sensitivity: 'base' });
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+function sortTableById(tableId) {
+    const tbody = document.querySelector('#' + tableId + ' tbody');
+    if (!tbody) return;
+
+    const rows = Array.from(tbody.querySelectorAll('tr'));
+
+    rows.sort((a, b) => {
+        const elA = a.querySelector('[data-l1key="id"]');
+        const elB = b.querySelector('[data-l1key="id"]');
+
+        const idA = parseInt(elA?.value || elA?.textContent || '0', 10);
+        const idB = parseInt(elB?.value || elB?.textContent || '0', 10);
+
+        return idA - idB;
+    });
+
+    rows.forEach(row => tbody.appendChild(row));
+}
+
+document.querySelector('#table_infos th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_infos');
+});
+
+document.querySelector('#table_cmd th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_cmd');
+});
+document.querySelector('#table_stats th:nth-child(2)').addEventListener('click', function () {
+    sortTableByName('table_stats');
+});
+
+document.querySelector('#table_infos th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_infos');
+});
+
+document.querySelector('#table_cmd th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_cmd');
+});
+document.querySelector('#table_stats th:nth-child(1)').addEventListener('click', function () {
+    sortTableById('table_stats');
+});
 function addAction(_action, _type) {
     if (!isset(_action)) {
         _action = {}

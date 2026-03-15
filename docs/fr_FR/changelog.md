@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 15/03/2026 Beta 1.4.94
+- Ajout pour trier les commandes (click sur le nom ou l'id)
+
 # 15/03/2026 Beta 1.4.93
 - Creation des commandes infos sur etats de classification
 - Ajout des boutons on/off sur le panel
