@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 16/03/2026 Beta 1.4.95
+- Nettoyage du nom des commandes de la même façon que Jeedom
+- Correction classification sub_label, j'avais mis un s (sub_labels) 
+
 # 15/03/2026 Beta 1.4.94
 - Ajout pour trier les commandes (click sur le nom ou l'id)
 
