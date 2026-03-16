@@ -1918,7 +1918,7 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "║ MAJ DB → Classification d'objet");
         $frigateEvent->setRecognition_type("classification");
         $frigateEvent->setRecognition_name($trackedObjects['model'] ?? '');
-        if (isset($trackedObjects['sub_labels'])) {
+        if (isset($trackedObjects['sub_label'])) {
           $frigateEvent->setRecognition_subname($trackedObjects['sub_label'] ?? '');
           $frigateEvent->setRecognition_attributes('');
         }
@@ -1972,13 +1972,17 @@ class frigate extends eqLogic
 
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
-    $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
+    // Nettoyer le nom exactement comme Jeedom le fera en base
+    $cleanName = substr(cleanComponanteName($name), 0, 127);
+    $cleanName = trim($cleanName);
+
+    $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $cleanName);
 
     if (!is_object($cmd)) {
       $cmd = new frigateCmd();
       $cmd->setLogicalId($logicalId);
       $cmd->setEqLogic_id($eqLogicId);
-      $cmd->setName($name);
+      $cmd->setName($cleanName); // déjà nettoyé, setName ne changera rien
       $cmd->setType($type);
       $cmd->setSubType($subType);
       $cmd->setGeneric_type($genericType);
