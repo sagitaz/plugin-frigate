@@ -19,9 +19,21 @@
             </div>
             #ptzWidget#
             #ptzZoom#
+          
+                  <!-- Overlay toggle -->
+        <div class="tools-overlay" id="toolsOverlay#id#">
+            <div class="tools-overlay-content">
+                #iaActions#
+            </div>
+        </div>
+          
         </div>
         <div class="btn-container">
             <div class="btn-actions">
+              <!-- Bouton toggle -->
+        <div class="btn-icon" id="iconAction#id#" onclick="toggleToolsOverlay#id#()">
+            <i class="fas fa-tools" title="IA on/off"></i>
+        </div>
                 #actions#
                 #actionsPreset#
             </div>
@@ -136,6 +148,15 @@
             if (presetId) {
                 execAction(presetId);
             }
+        }
+      
+      function toggleToolsOverlay#id#() {
+    const overlay = document.getElementById('toolsOverlay#id#');
+    const btn     = document.getElementById('btnToolsToggle#id#');
+    const visible = overlay.style.display === 'flex';
+
+    overlay.style.display = visible ? 'none' : 'flex';
+    btn.classList.toggle('active', !visible);
         }
     </script>
 
@@ -382,8 +403,8 @@
         }
 
         .frigate_widget .iconAction#id# {
-            padding: 10px;
-            font-size: 20px;
+            padding: 5px;
+            font-size: 18px;
             color: var(--frigate-icone-color#id#) !important;
             transition: transform 1s ease;
         }
@@ -393,8 +414,8 @@
         }
 
         .frigate_widget .iconActionOff#id# {
-            padding: 10px;
-            font-size: 20px;
+            padding: 5px;
+            font-size: 18px;
             color: var(--txt-color) !important;
             transition: transform 1s ease;
         }
@@ -490,6 +511,49 @@
                 max-width: 100%;
                 max-height: 100%;
             }
+        }
+      
+      .frigate_widget .tools-overlay {
+    position: absolute;
+    inset: 0; /* top/right/bottom/left: 0 = même taille que le parent */
+    background: rgba(0, 0, 0, 0.75);
+    display: none; /* caché par défaut */
+    z-index: 10;
+    border-radius: inherit;
+}
+
+.frigate_widget .tools-overlay-content {
+    flex-direction: column;
+    align-items: stretch;       /* les lignes prennent toute la largeur */
+    justify-content: center;
+    gap: 8px;
+    padding: 16px;
+}
+
+.frigate_widget .ia-toggle-row {
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    color: white;
+    padding: 4px 0;
+}
+
+.frigate_widget .ia-toggle-label {
+    font-size: 13px;
+    opacity: 0.9;
+}
+
+.frigate_widget .ia-toggle-icon {
+    font-size: 22px;
+    cursor: pointer;
+    transition: color 0.2s;
+}
+
+.frigate_widget .fa-toggle-on  { color: #4caf50; }
+.frigate_widget .fa-toggle-off { color: #aaaaaa; }
+
+.frigate_widget .ia-toggle-icon:hover {
+    opacity: 0.8;
         }
     </style>
 </div>

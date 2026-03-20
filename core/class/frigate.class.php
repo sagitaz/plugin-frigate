@@ -1979,6 +1979,7 @@ class frigate extends eqLogic
     }
 
     if ($type === 'description') {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la description : " . $frigateEvent->getRecognition_description());
       $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
     }
 
