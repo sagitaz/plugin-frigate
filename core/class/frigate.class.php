@@ -407,6 +407,7 @@ class frigate extends eqLogic
     $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
 
     $replace['#actions#']      = $this->buildActions();
+    $replace['#iaActions#'] = $this->buildIaActions();
     $replace['#detectNow#']    = $this->buildDetectNow();
     $replace['#actionsPreset#'] = $this->buildPresetsSelect();
     $replace['#ptzWidget#']    = $this->buildPtzWidget();
@@ -462,11 +463,7 @@ class frigate extends eqLogic
     $html .= $this->buildToggleAction('action_start_detect', 'action_stop_detect', 'info_detect', 'fas fa-user-shield', 'fas fa-user-shield', 'detection ON', 'detection OFF');
     $html .= $this->buildToggleAction('action_start_audio', 'action_stop_audio', 'info_audio', 'fas fa-volume-off', 'fas fa-volume-down', 'audio ON', 'audio OFF');
     $html .= $this->buildToggleAction('action_start_motion', 'action_stop_motion', 'info_motion', 'fas fa-male', 'fas fa-walking', 'motion ON', 'motion OFF');
-    $html .= $this->buildToggleAction('action_start_review_alerts', 'action_stop_review_alerts', 'info_review_alerts', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review alerts ON', 'review alerts OFF');
-    $html .= $this->buildToggleAction('action_start_review_detections', 'action_stop_review_detections', 'info_review_detections', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review detections ON', 'review detections OFF');
-    $html .= $this->buildToggleAction('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', 'fas fa-toggle-off', 'fas fa-toggle-on', 'review descriptions ON', 'review descriptions OFF');
-    $html .= $this->buildToggleAction('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', 'fas fa-toggle-off', 'fas fa-toggle-on', 'object descriptions ON', 'objet descriptions OFF');
-    // Boutons simples
+   // Boutons simples
     foreach (
       [
         ['action_make_api_event',  'fas fa-camera-retro', __("Créer un évènement", __FILE__)],
@@ -482,6 +479,31 @@ class frigate extends eqLogic
     return $html;
   }
 
+  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label): string
+  {
+    $on   = $this->getCmd('action', $startLogical);
+    $off  = $this->getCmd('action', $stopLogical);
+    $etat = $this->getCmd('info', $infoLogical);
+
+    if (!is_object($on) || !is_object($off) || !is_object($etat)) return '';
+    if ($on->getIsVisible() != 1 || $off->getIsVisible() != 1) return '';
+
+    $isActive = $etat->execCmd() != 0;
+    $cmdId    = $isActive ? $off->getId() : $on->getId();
+
+    return '<div class="ia-toggle-row">'
+      . '<span class="ia-toggle-label">' . $label . '</span>'
+      . '<i class="' . ($isActive ? 'fas fa-toggle-on' : 'fas fa-toggle-off') . ' ia-toggle-icon" onclick="execAction(' . $cmdId . ')"></i>'
+      . '</div>';
+  }
+
+  private function buildIaActions(): string
+  {
+    return $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Review alerts}}')
+      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
+      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
+      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}');
+  }
   private function buildDetectNow(): string
   {
     $html = '';
@@ -1957,6 +1979,7 @@ class frigate extends eqLogic
     }
 
     if ($type === 'description') {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la description : " . $frigateEvent->getRecognition_description());
       $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
     }
 
