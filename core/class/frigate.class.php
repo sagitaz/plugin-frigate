@@ -21,96 +21,69 @@ require_once __DIR__ . '/frigate_events.class.php';
 
 class frigate extends eqLogic
 {
-  /*     * *************************Attributs****************************** */
-
-  /*
-  * Permet de définir les possibilités de personnalisation du widget (en cas d'utilisation de la fonction 'toHtml' par exemple)
-  * Tableau multidimensionnel - exemple: array('custom' => true, 'custom::layout' => false)
-  public static $_widgetPossibility = array();
-  */
-
-  /*
-  * Permet de crypter/décrypter automatiquement des champs de configuration du plugin
-  * Exemple : "param1" & "param2" seront cryptés mais pas "param3"
-  public static $_encryptConfigKey = array('param1', 'param2');
-  */
-
   /*     * ***********************Methode static*************************** */
-
-  // Fonction exécutée à l'installation du plugin
-  public static function setConfig()
+  /**
+   * Initialise la configuration générale du plugin avec des valeurs par défaut.
+   * @return void
+   */
+  public static function setConfig(): void
   {
-    // Configuration par défaut
-    if (!config::byKey('URL', 'frigate')) {
-      config::save('URL', '', 'frigate');
-    }
-    if (!config::byKey('port', 'frigate')) {
-      config::save('port', '5000', 'frigate');
-    }
-    if (!config::byKey('recovery_days', 'frigate')) {
-      config::save('recovery_days', '7', 'frigate');
-    }
-    if (!config::byKey('remove_days', 'frigate')) {
-      config::save('remove_days', '7', 'frigate');
-    }
-    if (!config::byKey('datas_weight', 'frigate')) {
-      config::save('datas_weight', '500', 'frigate');
-    }
-    if (!config::byKey('refresh_snapshot', 'frigate')) {
-      config::save('refresh_snapshot', '5', 'frigate');
-    }
-    if (!config::byKey('cron', 'frigate')) {
-      config::save('cron', '5', 'frigate');
-    }
-    if (!config::byKey('cron::run', 'frigate')) {
-      config::save('cron::run', 0, 'frigate');
-    }
-    if (!config::byKey('excludeBackup', 'frigate')) {
-      config::save('excludeBackup', 1, 'frigate');
-    }
-    // seulement si mqtt2 est installé
+    $defaultConfigs = [
+      'URL'                  => '',
+      'port'                 => '5000',
+      'recovery_days'        => '7',
+      'remove_days'          => '7',
+      'datas_weight'         => '500',
+      'refresh_snapshot'     => '5',
+      'cron'                 => '5',
+      'cron::run'            => '0',
+      'excludeBackup'        => '1',
+      'event::displayVideo'  => '1',
+      'event::confirmDelete' => '1',
+    ];
+
     if (class_exists('mqtt2')) {
-      if (!config::byKey('topic', 'frigate')) {
-        config::save('topic', 'frigate', 'frigate');
-      }
-      if (!config::byKey('presetMax', 'frigate')) {
-        config::save('presetMax', '0', 'frigate');
-      }
+      $defaultConfigs['topic']     = 'frigate';
+      $defaultConfigs['presetMax'] = '0';
     }
-    if (!config::byKey('event::displayVideo', 'frigate')) {
-      config::save('event::displayVideo', true, 'frigate');
-    }
-    if (!config::byKey('event::confirmDelete', 'frigate')) {
-      config::save('event::confirmDelete', true, 'frigate');
-    }
-  }
-  // configuration par defaut des crons
-  public static function setConfigCron()
-  {
-    // cron par défaut
-    if (!config::byKey('functionality::cron::enable', 'frigate')) {
-      config::save('functionality::cron::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cron5::enable', 'frigate')) {
-      config::save('functionality::cron5::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cron10::enable', 'frigate')) {
-      config::save('functionality::cron10::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cron15::enable', 'frigate')) {
-      config::save('functionality::cron15::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cron30::enable', 'frigate')) {
-      config::save('functionality::cron30::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cronHourly::enable', 'frigate')) {
-      config::save('functionality::cronHourly::enable', 0, 'frigate');
-    }
-    if (!config::byKey('functionality::cronDaily::enable', 'frigate')) {
-      config::save('functionality::cronDaily::enable', 1, 'frigate');
-    }
+
+    self::configSave($defaultConfigs);
   }
 
+  /**
+   * Initialise l'activation par défaut des différents crons Jeedom.
+   * @return void
+   */
+  public static function setConfigCron(): void
+  {
+    $defaultCrons = [
+      'functionality::cron::enable'       => '0',
+      'functionality::cron5::enable'      => '0',
+      'functionality::cron10::enable'     => '0',
+      'functionality::cron15::enable'     => '0',
+      'functionality::cron30::enable'     => '0',
+      'functionality::cronHourly::enable' => '0',
+      'functionality::cronDaily::enable'  => '1',
+    ];
+
+    self::configSave($defaultCrons);
+  }
+
+  /**
+   * Parcourt un tableau de configurations et les sauvegarde si elles n'existent pas.
+   * @param array<string, string> $array Tableau associatif [clé => valeur]
+   * @return void
+   */
+  private static function configSave(array $array = []): void
+  {
+    foreach ($array as $key => $value) {
+      $current = config::byKey($key, 'frigate');
+
+      if ($current === null || $current === '') {
+        config::save($key, $value, 'frigate');
+      }
+    }
+  }
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CRON:/fg: ════════════════════════");
@@ -320,7 +293,7 @@ class frigate extends eqLogic
     $port = config::byKey('port', 'frigate');
 
 
-    if ($this->getLogicalId() != 'eqFrigateStats' || $this->getLogicalId() != 'eqFrigateEvents') {
+    if ($this->getLogicalId() != 'eqFrigateStats' && $this->getLogicalId() != 'eqFrigateEvents') {
       if ($this->getConfiguration('ptz') == '') {
         $this->setConfiguration('ptz', '0');
       }
@@ -354,10 +327,8 @@ class frigate extends eqLogic
           }
           $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
           $this->setConfiguration('urlStream', $urlStream);
-          if (is_object($cmd)) {
-            $cmd->event($urlJeedom . $urlStream);
-            $cmd->save();
-          }
+          $cmd->event($urlJeedom . $urlStream);
+          $cmd->save();
         }
       }
 
@@ -375,10 +346,8 @@ class frigate extends eqLogic
 
           $this->setConfiguration('cameraStreamAccessUrl', $rtsp);
 
-          if (is_object($cmd)) {
-            $cmd->event($rtsp);
-            $cmd->save();
-          }
+          $cmd->event($rtsp);
+          $cmd->save();
         }
       }
     }
@@ -422,356 +391,255 @@ class frigate extends eqLogic
   // Permet de modifier l'affichage du widget (également utilisable par les commandes)
   public function toHtml($_version = 'dashboard')
   {
-    $type = "";
-    $logicalId = $this->getLogicalId();
-    if (strpos($logicalId, "eqFrigateCamera_") !== false) {
-      $type = "camera";
-    }
+    $type = $this->detectType();
+    $panel = $this->isPanelVersion($_version);
+    if ($panel) $_version = 'dashboard';
 
-    // panel ou dashbord
-    $panel = false;
-    if ($_version == 'panel') {
-      $panel = true;
+    if ($type !== 'camera') return parent::toHtml($_version);
+
+    $replace = $this->preToHtml($_version);
+    if (!is_array($replace)) return $replace;
+
+    $version = "dashboard";
+    $replace['#cameraEqlogicId#'] = $this->getLogicalId();
+    $replace['#cameraName#']      = $this->getConfiguration("name");
+    $replace['#imgUrl#']          = $this->getConfiguration("img");
+    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
+
+    $replace['#actions#']      = $this->buildActions();
+    $replace['#iaActions#'] = $this->buildIaActions();
+    $replace['#detectNow#']    = $this->buildDetectNow();
+    $replace['#actionsPreset#'] = $this->buildPresetsSelect();
+    $replace['#ptzWidget#']    = $this->buildPtzWidget();
+    $replace['#ptzZoom#']      = $this->buildPtzZoom();
+    $replace['#actionsModal#'] = $replace['#actions#'] . $this->buildPtzModal() . $replace['#actionsPreset#'];
+
+    return $this->renderTemplate($replace, $_version, $panel);
+  }
+
+  private function detectType(): string
+  {
+    return strpos($this->getLogicalId(), "eqFrigateCamera_") !== false ? "camera" : "";
+  }
+
+  private function isPanelVersion(string &$_version): bool
+  {
+    if ($_version === 'panel') {
       $_version = 'dashboard';
+      return true;
     }
+    return false;
+  }
 
-    if ($type == 'camera') {
-      $replace = $this->preToHtml($_version);
-      if (!is_array($replace)) {
-        return $replace;
-      }
-      //  $version = jeedom::versionAlias($_version);
-      $version = "dashboard"; // je ne gère pas de version mobile.
+  // Construit un bouton icône générique
+  private function buildBtnIcon(string $icon, string $title, int $cmdId, string $cssClass): string
+  {
+    return '<div class="btn-icon">'
+      . '<i class="' . $icon . ' ' . $cssClass . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmdId . ')"></i>'
+      . '</div>';
+  }
 
-      $replace['#cameraEqlogicId#'] = $this->getLogicalId();
-      $replace['#cameraName#'] = $this->getConfiguration("name");
-      $replace['#imgUrl#'] = $this->getConfiguration("img");
-      $replace['#refresh#'] = config::byKey('refresh_snapshot', 'frigate') * 1000;
+  // Construit un toggle start/stop selon l'état d'une info cmd
+  private function buildToggleAction(string $startLogical, string $stopLogical, string $infoLogical, string $iconOn, string $iconOff, string $titleOn, string $titleOff): string
+  {
+    $on   = $this->getCmd('action', $startLogical);
+    $off  = $this->getCmd('action', $stopLogical);
+    $etat = $this->getCmd('info', $infoLogical);
 
+    if (!is_object($on) || !is_object($off)) return '';
+    if ($on->getIsVisible() != 1 || $off->getIsVisible() != 1) return '';
 
-      $replace['#actions#'] = '';
-      // Commandes recording
-      if (is_object($this->getCmd('action', 'action_start_recordings')) && is_object($this->getCmd('action', 'action_stop_recordings'))) {
-        $on = $this->getCmd("action", 'action_start_recordings');
-        $off = $this->getCmd("action", 'action_stop_recordings');
-        $etat = $this->getCmd("info", 'info_recordings');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconActionOff' . $this->getId() . '" title="recording ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-video iconAction' . $this->getId() . '" title="recording OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // Commandes snapshot
-      if (is_object($this->getCmd('action', 'action_start_snapshots')) && is_object($this->getCmd('action', 'action_stop_snapshots'))) {
-        $on = $this->getCmd("action", 'action_start_snapshots');
-        $off = $this->getCmd("action", 'action_stop_snapshots');
-        $etat = $this->getCmd("info", 'info_snapshots');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconActionOff' . $this->getId() . '" title="snapshot ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera iconAction' . $this->getId() . '" title="snapshot OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commandes détections
-      if (is_object($this->getCmd('action', 'action_start_detect')) && is_object($this->getCmd('action', 'action_stop_detect'))) {
-        $on = $this->getCmd("action", 'action_start_detect');
-        $off = $this->getCmd("action", 'action_stop_detect');
-        $etat = $this->getCmd("info", 'info_detect');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconActionOff' . $this->getId() . '" title="detection ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-user-shield iconAction' . $this->getId() . '" title="detection OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commandes audio
-      if (is_object($this->getCmd('action', 'action_start_audio')) && is_object($this->getCmd('action', 'action_stop_audio'))) {
-        $on = $this->getCmd("action", 'action_start_audio');
-        $off = $this->getCmd("action", 'action_stop_audio');
-        $etat = $this->getCmd("info", 'info_audio');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-off iconActionOff' . $this->getId() . '" title="audio ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-volume-down iconAction' . $this->getId() . '" title="audio OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-      // commantes motions
-      $replace['#detectNow#'] = "";
-      $cmds = $this->getCmd('info');
-      foreach ($cmds as $cmd) {
-        if (strpos($cmd->getLogicalId(), 'info_detect_') === 0 && $cmd->getLogicalId() != 'info_detect_all') {
-          $icon = $cmd->getDisplay("icon", "fas fa-exclamation-circle");
-          $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
-          // Vérifier si la commande est visible
-          if ($cmd->getIsVisible() == 1) {
-            $value = $cmd->execCmd(); // Exécuter la commande et obtenir la valeur
-
-            // Si la valeur est égale à 1, ajouter l'icône à l'affichage
-            if ($value == 1) {
-              $replace['#detectNow#'] .= '<div class="btn-detect">';
-              $replace['#detectNow#'] .= '<i class="' . $icon . ' iconDetect' . $this->getId() . '"></i>';
-              $replace['#detectNow#'] .= '</div>';
-            }
-          }
-        }
-      }
-
-
-      if (is_object($this->getCmd('action', 'action_start_motion')) && is_object($this->getCmd('action', 'action_stop_motion'))) {
-        $on = $this->getCmd("action", 'action_start_motion');
-        $off = $this->getCmd("action", 'action_stop_motion');
-        $etat = $this->getCmd("info", 'info_motion');
-        if ($on->getIsVisible() == 1 && $off->getIsVisible() == 1) {
-          if ($etat->execCmd() == 0) {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-male iconActionOff' . $this->getId() . '" title="motion ON" onclick="execAction(' . $on->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          } else {
-            $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-            $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-walking iconAction' . $this->getId() . '" title="motion OFF" onclick="execAction(' . $off->getId() . ')"></i>';
-            $replace['#actions#'] = $replace['#actions#'] . '</div>';
-          }
-        }
-      }
-
-      // commandes make snapshot
-      if (is_object($this->getCmd('action', 'action_make_api_event'))) {
-        $make_snapshot = $this->getCmd("action", 'action_make_api_event');
-        if ($make_snapshot->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-camera-retro iconActionOff' . $this->getId() . '" title="' . __("Créer un évènement", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes create capture
-      if (is_object($this->getCmd('action', 'action_create_snapshot'))) {
-        $make_snapshot = $this->getCmd("action", 'action_create_snapshot');
-        if ($make_snapshot->getIsVisible() == 1) {
-          $replace['#actions#'] = $replace['#actions#'] . '<div class="btn-icon">';
-          $replace['#actions#'] = $replace['#actions#'] . '<i class="fas fa-image iconActionOff' . $this->getId() . '" title="' . __("Créer une capture", __FILE__) . '" onclick="execAction(' . $make_snapshot->getId() . ')"></i>';
-          $replace['#actions#'] = $replace['#actions#'] . '</div>';
-        }
-      }
-
-      // commandes dispo sur la modale
-      $replace['#actionsModal#'] = $replace['#actions#'];
-      $replace['#ptzWidget#'] = "";
-      $replace['#ptzZoom#'] = "";
-
-
-      if (
-        ((is_object($this->getCmd('action', 'action_ptz_down'))) ? (($this->getCmd('action', 'action_ptz_down')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
-        ((is_object($this->getCmd('action', 'action_ptz_up')))  ? (($this->getCmd('action', 'action_ptz_up')->getIsVisible() == 1) ? 1 : 0) : 0)     ||
-        ((is_object($this->getCmd('action', 'action_ptz_left'))) ? (($this->getCmd('action', 'action_ptz_left')->getIsVisible() == 1) ? 1 : 0) : 0)   ||
-        ((is_object($this->getCmd('action', 'action_ptz_right'))) ? (($this->getCmd('action', 'action_ptz_right')->getIsVisible() == 1) ? 1 : 0) : 0) ||
-        ((is_object($this->getCmd('action', 'action_ptz_stop'))) ? (($this->getCmd('action', 'action_ptz_stop')->getIsVisible() == 1) ? 1 : 0) : 0)
-      ) {
-        $replace['#ptzWidget#'] = '<div class="circle-overlay"></div>';
-      }
-
-      // commandes PTZ down
-      if (is_object($this->getCmd('action', 'action_ptz_down'))) {
-        $down = $this->getCmd("action", 'action_ptz_down');
-        if ($down->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-down">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-down iconPTZdown' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-down iconActionOff' . $this->getId() . '" title="PTZ DOWN" onclick="execAction(' . $down->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ up
-      if (is_object($this->getCmd('action', 'action_ptz_up'))) {
-        $up = $this->getCmd("action", 'action_ptz_up');
-        if ($up->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-up">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-up iconPTZup' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-up iconActionOff' . $this->getId() . '" title="PTZ UP" onclick="execAction(' . $up->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ left
-      if (is_object($this->getCmd('action', 'action_ptz_left'))) {
-        $left = $this->getCmd("action", 'action_ptz_left');
-        if ($left->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-left">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-left iconPTZleft' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-left iconActionOff' . $this->getId() . '" title="PTZ LEFT" onclick="execAction(' . $left->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ right
-      if (is_object($this->getCmd('action', 'action_ptz_right'))) {
-        $right = $this->getCmd("action", 'action_ptz_right');
-        if ($right->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-right">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-caret-right iconPTZright' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-chevron-circle-right iconActionOff' . $this->getId() . '" title="PTZ RIGHT" onclick="execAction(' . $right->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ stop
-      if (is_object($this->getCmd('action', 'action_ptz_stop'))) {
-        $stop = $this->getCmd("action", 'action_ptz_stop');
-        if ($stop->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<div class="btn-ptz-stop">';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '<i class="fas fa-stop iconPTZstop' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
-          $replace['#ptzWidget#'] = $replace['#ptzWidget#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-stop-circle iconActionOff' . $this->getId() . '" title="PTZ STOP" onclick="execAction(' . $stop->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom in
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_in'))) {
-        $zoom_in = $this->getCmd("action", 'action_ptz_zoom_in');
-        if ($zoom_in->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-in">';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-plus iconZoomIn' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-plus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM IN" onclick="execAction(' . $zoom_in->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-      // commandes PTZ zoom out
-      if (is_object($this->getCmd('action', 'action_ptz_zoom_out'))) {
-        $zoom_out = $this->getCmd("action", 'action_ptz_zoom_out');
-        if ($zoom_out->getIsVisible() == 1) {
-          // config pour le widget
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<div class="btn-ptz-zoom-out">';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '<i class="fas fa-minus iconZoomOut' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
-          $replace['#ptzZoom#'] = $replace['#ptzZoom#'] . '</div>';
-          // config pour la modal
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<div class="btn-icon">';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '<i class="fas fa-minus-circle iconActionOff' . $this->getId() . '" title="PTZ ZOOM OUT" onclick="execAction(' . $zoom_out->getId() . ')"></i>';
-          $replace['#actionsModal#'] = $replace['#actionsModal#'] . '</div>';
-        }
-      }
-
-
-
-      $replace['#actionsPreset#'] = '';
-      $hasPresets = false; // Variable pour vérifier si des presets sont disponibles
-
-      // Créer la structure HTML du select
-      $selectHtml = '<div class="btn-icon">';
-      $selectHtml .= '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">';
-      $selectHtml .= '<option value="" disabled selected hidden>{{action}}</option>';
-      // Boucle sur les presets disponibles
-      for ($i = 0; $i <= 10; $i++) {
-        $presetCmd = 'action_preset_' . $i;
-        if (is_object($this->getCmd('action', $presetCmd))) {
-          $preset = $this->getCmd("action", $presetCmd);
-          if ($preset->getIsVisible() == 1) {
-            $hasPresets = true; // Des presets sont disponibles
-            $selectHtml .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
-          }
-        }
-      }
-      // Boucle pour ajouter les commandes HTTP
-      $httpCommands = cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true);
-      foreach ($httpCommands as $httpCmd) {
-        if ($httpCmd && $httpCmd->getIsVisible() == 1) {
-          $hasPresets = true; // Des presets sont disponibles
-          $selectHtml .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
-        }
-      }
-
-      $selectHtml .= '</select>';
-      $selectHtml .= '</div>';
-
-      // Fermer le select si des presets sont disponibles
-      if ($hasPresets) {
-        $replace['#actionsModal#'] = $replace['#actionsModal#'] . $selectHtml;
-        $replace['#actionsPreset#'] = $selectHtml;
-      }
-
-
-
-
-
-      if (!$panel) {
-        if ($this->getConfiguration('templateDashboardImgOnly', 0) == 1) {
-          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
-          $replace['#detectNow#'] = "";
-          $replace['#ptzWidget#'] = "";
-          $replace['#ptzZoom#'] = "";
-          $replace['#actions#'] = "";
-          $replace['#actionsPreset#'] = "";
-        }
-        $html = template_replace($replace, getTemplate('core', $version, 'widgetCamera', __CLASS__));
-        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetCamera.html');
-        $html = $this->postToHtml($_version, $html);
-        cache::set('widgetCamera' . $_version . $this->getId(), $html, 0);
-        return $html;
-      } else {
-        if ($this->getConfiguration('templatePanelImgOnly', 0) == 1) {
-          // effacer les champs #detectNow#, #ptzWidget#, #ptzZoom#,  #actions# et #actionsPreset#
-          $replace['#detectNow#'] = "";
-          $replace['#ptzWidget#'] = "";
-          $replace['#ptzZoom#'] = "";
-          $replace['#actions#'] = "";
-          $replace['#actionsPreset#'] = "";
-        }
-        $html = template_replace($replace, getTemplate('core', $version, 'widgetPanel', __CLASS__));
-        $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/widgetPanel.html');
-        $html = $this->postToHtml($_version, $html);
-        cache::set('widgetPanel' . $_version . $this->getId(), $html, 0);
-        return $html;
-      }
+    if ($etat->execCmd() == 0) {
+      return $this->buildBtnIcon($iconOn, $titleOn, $on->getId(), 'iconActionOff');
     } else {
-      return parent::toHtml($_version);
+      return $this->buildBtnIcon($iconOff, $titleOff, $off->getId(), 'iconAction');
     }
+  }
+
+  private function buildActions(): string
+  {
+    $html  = $this->buildToggleAction('action_start_recordings', 'action_stop_recordings', 'info_recordings', 'fas fa-video', 'fas fa-video', 'recording ON', 'recording OFF');
+    $html .= $this->buildToggleAction('action_start_snapshots', 'action_stop_snapshots', 'info_snapshots', 'fas fa-camera', 'fas fa-camera', 'snapshot ON', 'snapshot OFF');
+    $html .= $this->buildToggleAction('action_start_detect', 'action_stop_detect', 'info_detect', 'fas fa-user-shield', 'fas fa-user-shield', 'detection ON', 'detection OFF');
+    $html .= $this->buildToggleAction('action_start_audio', 'action_stop_audio', 'info_audio', 'fas fa-volume-off', 'fas fa-volume-down', 'audio ON', 'audio OFF');
+    $html .= $this->buildToggleAction('action_start_motion', 'action_stop_motion', 'info_motion', 'fas fa-male', 'fas fa-walking', 'motion ON', 'motion OFF');
+   // Boutons simples
+    foreach (
+      [
+        ['action_make_api_event',  'fas fa-camera-retro', __("Créer un évènement", __FILE__)],
+        ['action_create_snapshot', 'fas fa-image',        __("Créer une capture", __FILE__)],
+      ] as [$logical, $icon, $title]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (is_object($cmd) && $cmd->getIsVisible() == 1) {
+        $html .= $this->buildBtnIcon($icon, $title, $cmd->getId(), 'iconActionOff');
+      }
+    }
+
+    return $html;
+  }
+
+  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label): string
+  {
+    $on   = $this->getCmd('action', $startLogical);
+    $off  = $this->getCmd('action', $stopLogical);
+    $etat = $this->getCmd('info', $infoLogical);
+
+    if (!is_object($on) || !is_object($off) || !is_object($etat)) return '';
+    if ($on->getIsVisible() != 1 || $off->getIsVisible() != 1) return '';
+
+    $isActive = $etat->execCmd() != 0;
+    $cmdId    = $isActive ? $off->getId() : $on->getId();
+
+    return '<div class="ia-toggle-row">'
+      . '<span class="ia-toggle-label">' . $label . '</span>'
+      . '<i class="' . ($isActive ? 'fas fa-toggle-on' : 'fas fa-toggle-off') . ' ia-toggle-icon" onclick="execAction(' . $cmdId . ')"></i>'
+      . '</div>';
+  }
+
+  private function buildIaActions(): string
+  {
+    return $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Review alerts}}')
+      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
+      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
+      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}');
+  }
+  private function buildDetectNow(): string
+  {
+    $html = '';
+    foreach ($this->getCmd('info') as $cmd) {
+      $logicalId = $cmd->getLogicalId();
+      if (strpos($logicalId, 'info_detect_') !== 0 || $logicalId === 'info_detect_all') continue;
+      if ($cmd->getIsVisible() != 1 || $cmd->execCmd() != 1) continue;
+
+      $icon = $cmd->getDisplay("icon", "fas fa-exclamation-circle");
+      $icon = preg_replace('/<i class="([^"]+)"><\/i>/', '$1', $icon);
+      $html .= '<div class="btn-detect"><i class="' . $icon . ' iconDetect' . $this->getId() . '"></i></div>';
+    }
+    return $html;
+  }
+
+  private function buildPresetsSelect(): string
+  {
+    $options   = '';
+    $hasPresets = false;
+
+    for ($i = 0; $i <= 10; $i++) {
+      $preset = $this->getCmd('action', 'action_preset_' . $i);
+      if (is_object($preset) && $preset->getIsVisible() == 1) {
+        $hasPresets = true;
+        $options .= '<option value="' . $preset->getId() . '">' . $preset->getName() . '</option>';
+      }
+    }
+
+    foreach (cmd::byEqLogicIdAndLogicalId($this->getId(), "action_http", true) as $httpCmd) {
+      if ($httpCmd && $httpCmd->getIsVisible() == 1) {
+        $hasPresets = true;
+        $options .= '<option value="' . $httpCmd->getId() . '">' . $httpCmd->getName() . '</option>';
+      }
+    }
+
+    if (!$hasPresets) return '';
+
+    return '<div class="btn-icon">'
+      . '<select class="preset-select' . $this->getId() . '" id="presetSelect' . $this->getId() . '" onchange="execSelectedPreset' . $this->getId() . '()">'
+      . '<option value="" disabled selected hidden>{{action}}</option>'
+      . $options
+      . '</select>'
+      . '</div>';
+  }
+
+  // PTZ : définition des boutons [logical, iconWidget, cssWidget, titleWidget, iconModal]
+  private function ptzButtonsConfig(): array
+  {
+    return [
+      ['action_ptz_down',  'fas fa-caret-down',  'iconPTZdown',  'btn-ptz-down',  'PTZ DOWN',  'fas fa-chevron-circle-down'],
+      ['action_ptz_up',    'fas fa-caret-up',    'iconPTZup',    'btn-ptz-up',    'PTZ UP',    'fas fa-chevron-circle-up'],
+      ['action_ptz_left',  'fas fa-caret-left',  'iconPTZleft',  'btn-ptz-left',  'PTZ LEFT',  'fas fa-chevron-circle-left'],
+      ['action_ptz_right', 'fas fa-caret-right', 'iconPTZright', 'btn-ptz-right', 'PTZ RIGHT', 'fas fa-chevron-circle-right'],
+      ['action_ptz_stop',  'fas fa-stop',        'iconPTZstop',  'btn-ptz-stop',  'PTZ STOP',  'fas fa-stop-circle'],
+    ];
+  }
+
+  private function buildPtzWidget(): string
+  {
+    $hasPtz = false;
+    foreach ($this->ptzButtonsConfig() as [$logical]) {
+      $cmd = $this->getCmd('action', $logical);
+      if (is_object($cmd) && $cmd->getIsVisible() == 1) {
+        $hasPtz = true;
+        break;
+      }
+    }
+
+    $html = $hasPtz ? '<div class="circle-overlay"></div>' : '';
+
+    foreach ($this->ptzButtonsConfig() as [$logical, $icon, $css, $btnClass, $title]) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $html .= '<div class="' . $btnClass . '">'
+        . '<i class="' . $icon . ' ' . $css . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmd->getId() . ')"></i>'
+        . '</div>';
+    }
+    return $html;
+  }
+
+  private function buildPtzModal(): string
+  {
+    $html = '';
+    foreach (
+      array_merge($this->ptzButtonsConfig(), [
+        ['action_ptz_zoom_in',  '', '', '', 'PTZ ZOOM IN',  'fas fa-plus-circle'],
+        ['action_ptz_zoom_out', '', '', '', 'PTZ ZOOM OUT', 'fas fa-minus-circle'],
+      ]) as [$logical,,,, $title, $iconModal]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $html .= $this->buildBtnIcon($iconModal, $title, $cmd->getId(), 'iconActionOff');
+    }
+    return $html;
+  }
+
+  private function buildPtzZoom(): string
+  {
+    $html = '';
+    foreach (
+      [
+        ['action_ptz_zoom_in',  'fas fa-plus',  'iconZoomIn',  'PTZ ZOOM IN',  'fas fa-plus-circle'],
+        ['action_ptz_zoom_out', 'fas fa-minus', 'iconZoomOut', 'PTZ ZOOM OUT', 'fas fa-minus-circle'],
+      ] as [$logical, $icon, $css, $title]
+    ) {
+      $cmd = $this->getCmd('action', $logical);
+      if (!is_object($cmd) || $cmd->getIsVisible() != 1) continue;
+      $btnClass = ($logical === 'action_ptz_zoom_in') ? 'btn-ptz-zoom-in' : 'btn-ptz-zoom-out';
+      $html .= '<div class="' . $btnClass . '"><i class="' . $icon . ' ' . $css . $this->getId() . '" title="' . $title . '" onclick="execAction(' . $cmd->getId() . ')"></i></div>';
+    }
+    return $html;
+  }
+
+
+
+  private function renderTemplate(array $replace, string $_version, bool $panel): string
+  {
+    $version  = "dashboard";
+    $imgOnly  = $panel
+      ? $this->getConfiguration('templatePanelImgOnly', 0)
+      : $this->getConfiguration('templateDashboardImgOnly', 0);
+
+    if ($imgOnly == 1) {
+      foreach (['#detectNow#', '#ptzWidget#', '#ptzZoom#', '#actions#', '#actionsPreset#'] as $key) {
+        $replace[$key] = '';
+      }
+    }
+
+    $templateName = $panel ? 'widgetPanel' : 'widgetCamera';
+    $cacheKey     = ($panel ? 'widgetPanel' : 'widgetCamera') . $_version . $this->getId();
+
+    $html = template_replace($replace, getTemplate('core', $version, $templateName, __CLASS__));
+    $html = translate::exec($html, 'plugins/frigate/core/template/' . $version . '/' . $templateName . '.html');
+    $html = $this->postToHtml($_version, $html);
+    cache::set($cacheKey, $html, 0);
+    return $html;
   }
 
 
@@ -799,14 +667,14 @@ class frigate extends eqLogic
 
   public static function addMessages()
   {
-    message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__), null, null);
+    message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__));
     $system = system::getOsVersion();
     if (version_compare($system, "11", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version " . $system . " de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__), null, null);
+      message::add('frigate', __("Attention, vous utilisez la version " . $system . " de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__));
     }
     $jeedom = jeedom::version();
     if (version_compare($jeedom, "4.4", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version " . $jeedom . " de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__), null, null);
+      message::add('frigate', __("Attention, vous utilisez la version " . $jeedom . " de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__));
     }
   }
 
@@ -1131,11 +999,6 @@ class frigate extends eqLogic
         self::majEventsCmds($frigate);
         log::add(__CLASS__, 'debug', "║ Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
       } else {
-
-        if (is_array($frigate) && !empty($frigate)) {
-          $frigate = $frigate[0];
-        }
-
         $updated = false;
 
         $fieldsToUpdate = [
@@ -1259,7 +1122,7 @@ class frigate extends eqLogic
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     $sleep = config::byKey('sleep', 'frigate');
-    if (!isset($sleep) || $sleep < 0 || $sleep > 10) {
+    if ($sleep < 0 || $sleep > 10) {
       $sleep = 5;
     } else {
       $sleep = intval($sleep);
@@ -1296,9 +1159,9 @@ class frigate extends eqLogic
       "clip" => isset($clip['url']) ? $clip['url'] : "",
       "hasClip" => isset($clip['has']) ? $clip['has'] : 0,
       "startTime" => isset($event['start_time']) && is_numeric($event['start_time']) && ceil($event['start_time']) > 0 ? ceil($event['start_time']) : (isset($event['start_time']) ? $event['start_time'] : ""),
-      "endTime" => is_numeric($endTime) ? $endTime : "",
-      "topScore" => is_numeric($newTopScore) ? $newTopScore : "",
-      "score" => is_numeric($newScore) ? $newScore : "",
+      "endTime" => $endTime,
+      "topScore" => $newTopScore,
+      "score" => $newScore,
       "zones" => $newZones,
       "label" => isset($event['label']) ? self::cleanLabel($event['label']) : ""
     );
@@ -1640,55 +1503,48 @@ class frigate extends eqLogic
   public static function cleanDbEvent($id)
   {
     $frigate = frigate_events::byEventId($id);
-    if (!empty($frigate) && isset($frigate[0])) {
-      $frigate = $frigate[0];
-      // Vérifier si le fichier est un favori
-      $isFavorite = $frigate->getIsFavorite() ?? 0;
-      if (
-        $isFavorite == 1
-      ) {
-        log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la base de données.");
-      } else {
-        // Recherche si clip et snapshot existent dans le dossier de sauvegarde
-        $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
-        $snapshot = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.jpg";
-        $snapshotWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.webp";
-        $thumbnail = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.jpg";
-        $thumbnailWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.webp";
-        $preview = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_preview.gif";
-
-        if (file_exists($clip)) {
-          unlink($clip);
-          log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
-        }
-        if (file_exists($snapshot)) {
-          unlink($snapshot);
-          log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
-        }
-        if (file_exists($snapshotWebp)) {
-          unlink($snapshotWebp);
-          log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
-        }
-        if (file_exists($thumbnail)) {
-          unlink($thumbnail);
-          log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
-        }
-        if (file_exists($thumbnailWebp)) {
-          unlink($thumbnailWebp);
-          log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
-        }
-        if (file_exists($preview)) {
-          unlink($preview);
-          log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
-        }
-
-        $frigate->remove();
-        log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " supprimé de la base de données.");
-      }
-      return true;
+    // Vérifier si le fichier est un favori
+    $isFavorite = $frigate->getIsFavorite() ?? 0;
+    if ($isFavorite == 1) {
+      log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la base de données.");
     } else {
-      return false;
+      // Recherche si clip et snapshot existent dans le dossier de sauvegarde
+      $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
+      $snapshot = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.jpg";
+      $snapshotWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.webp";
+      $thumbnail = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.jpg";
+      $thumbnailWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.webp";
+      $preview = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_preview.gif";
+
+      if (file_exists($clip)) {
+        unlink($clip);
+        log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
+      }
+      if (file_exists($snapshot)) {
+        unlink($snapshot);
+        log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
+      }
+      if (file_exists($snapshotWebp)) {
+        unlink($snapshotWebp);
+        log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
+      }
+      if (file_exists($thumbnail)) {
+        unlink($thumbnail);
+        log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
+      }
+      if (file_exists($thumbnailWebp)) {
+        unlink($thumbnailWebp);
+        log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
+      }
+      if (file_exists($preview)) {
+        unlink($preview);
+        log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
+      }
+
+      $frigate->remove();
+      log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " supprimé de la base de données.");
     }
+    return true;
   }
 
   public static function deleteEvents($ids)
@@ -1702,29 +1558,24 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:SUPPRESSION EVENEMENT:/fg: ═══════════════════");
     $frigate = frigate_events::byEventId($id);
-    if (!empty($frigate) && isset($frigate[0])) {
-      $isFavorite = $frigate[0]->getIsFavorite() ?? 0;
-      if ($isFavorite == 1) {
-        log::add(__CLASS__, 'debug', "║ Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
-        message::add('frigate', __("L'évènement est un favori, il ne peut pas être supprimé de la DB.", __FILE__), null, null);
-        return "Error 01";
-      }
-
-      $urlfrigate = self::getUrlFrigate();
-      $resultURL = $urlfrigate . "/api/events/" . $id;
-
-      if ($all) {
-        self::deletecURL($resultURL);
-        self::cleanDbEvent($id);
-      } else {
-        self::cleanDbEvent($id);
-      }
-      log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
-      return "OK";
-    } else {
-      log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
-      return "Error 02";
+    $isFavorite = $frigate->getIsFavorite() ?? 0;
+    if ($isFavorite == 1) {
+      log::add(__CLASS__, 'debug', "║ Evènement " . $frigate[0]->getEventId() . " est un favori, il ne doit pas être supprimé de la DB.");
+      message::add('frigate', __("L'évènement est un favori, il ne peut pas être supprimé de la DB.", __FILE__));
+      return "Error 01";
     }
+
+    $urlfrigate = self::getUrlFrigate();
+    $resultURL = $urlfrigate . "/api/events/" . $id;
+
+    if ($all) {
+      self::deletecURL($resultURL);
+      self::cleanDbEvent($id);
+    } else {
+      self::cleanDbEvent($id);
+    }
+    log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
+    return "OK";
   }
   public static function showEvents()
   {
@@ -1762,9 +1613,8 @@ class frigate extends eqLogic
       );
     }
 
-    if (isset($result)) {
-      usort($result, 'frigate::orderByDate');
-    }
+    usort($result, [self::class, 'orderByDate']);
+
 
     return $result;
   }
@@ -1774,11 +1624,6 @@ class frigate extends eqLogic
     $dateA = new DateTime($a['date']);
     $dateB = new DateTime($b['date']);
     return $dateB <=> $dateA;
-  }
-
-  private static function orderByScore($a, $b)
-  {
-    return $b['top_score'] <=> $a['top_score'];
   }
 
   public static function generateAllEqs()
@@ -1802,10 +1647,14 @@ class frigate extends eqLogic
 
     frigate::generateEqEvents($configurationArray);
     frigate::generateEqStats();
-    frigate::generateEqCameras($configurationArray);
-
+    $n = 0;
+    $n = frigate::generateEqCameras($configurationArray);
+    if ($n === 0) {
+      $n = "aucun";
+    }
+    
     log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-success:FIN CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
-    return true;
+    return $n;
   }
   public static function generateEqCameras($configurationArray)
   {
@@ -1814,8 +1663,10 @@ class frigate extends eqLogic
     $urlFrigateWithoutPort = config::byKey('URL', 'frigate');
     $urlfrigate = self::getUrlFrigate();
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
+    $classificationCmds = isset($configurationArray['classification']['custom']) && !empty($configurationArray['classification']['custom']);
     $addToName = "";
     $create = 1;
+    $name = "";
     //  $stats = self::getcURL("create eqCameras", $resultURL);
     $defaultRoom = intval(config::byKey('parentObject', 'frigate', '', true));
     $n = 0;
@@ -1915,6 +1766,22 @@ class frigate extends eqLogic
         $valueAudio = $isAudioEnabledForCamera ? $cameraConfig['audio']['enabled'] : $configurationArray['audio']['enabled'];
 
         self::createAudioCmds($frigate->getId(), $valueAudio);
+      }
+
+      // commandes etat des classifications
+      if ($classificationCmds) {
+        foreach ($configurationArray['classification']['custom'] as $key => $item) {
+          if (!isset($item['state_config'])) {
+            continue;
+          }
+          $cameras = $item['state_config']['cameras'] ?? [];
+
+          if (!array_key_exists($cameraName, $cameras)) {
+            continue;
+          }
+          log::add(__CLASS__, 'debug', "║ Création de la commande d'état : " . $key . " pour la caméra : " . $cameraName);
+          self::createCmd($frigate->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
+        }
       }
     }
     message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
@@ -2016,10 +1883,6 @@ class frigate extends eqLogic
 
     $eqlogicId = $frigate->getId();
     $frigateEvent = frigate_events::byEventId($id);
-    if (is_array($frigateEvent) && !empty($frigateEvent)) {
-      $frigateEvent = $frigateEvent[0];
-    }
-
     log::add(__CLASS__, 'debug', "║ Données reçues : " . json_encode($trackedObjects));
 
     // Création / Mise à jour de la base de données
@@ -2039,6 +1902,18 @@ class frigate extends eqLogic
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
+      // on commence par vidér les champs de reconnaissance pour éviter d'avoir des données obsolètes
+      $frigateEvent->setRecognition_type('');
+      $frigateEvent->setRecognition_name('');
+      $frigateEvent->setRecognition_description('');
+      $frigateEvent->setRecognition_plate('');
+      $frigateEvent->setRecognition_subname('');
+      $frigateEvent->setRecognition_attributes('');
+      $frigateEvent->setRecognition_score(0);
+    }
+    $score = $trackedObjects['score'] ?? '';
+    if (is_numeric($score)) {
+      $score = round($score * 100, 2);
     }
 
     switch ($type) {
@@ -2052,13 +1927,6 @@ class frigate extends eqLogic
         log::add(__CLASS__, 'debug', "║ MAJ DB → Reconnaissance faciale");
         $frigateEvent->setRecognition_type("face");
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        // le score doit etre multiplié par 100 pour être en pourcentage
-        $score = $trackedObjects['score'] ?? '';
-        if (is_numeric($score)) {
-          $score = round($score * 100, 2);
-        }
-        $frigateEvent->setRecognition_score($score);
-
         break;
 
       case "lpr":
@@ -2066,12 +1934,20 @@ class frigate extends eqLogic
         $frigateEvent->setRecognition_type("lpr");
         $frigateEvent->setRecognition_plate($trackedObjects['plate'] ?? '');
         $frigateEvent->setRecognition_name($trackedObjects['name'] ?? '');
-        // le score doit etre multiplié par 100 pour être en pourcentage
-        $score = $trackedObjects['score'] ?? '';
-        if (is_numeric($score)) {
-          $score = round($score * 100, 2);
+        break;
+
+      case "classification":
+        log::add(__CLASS__, 'debug', "║ MAJ DB → Classification d'objet");
+        $frigateEvent->setRecognition_type("classification");
+        $frigateEvent->setRecognition_name($trackedObjects['model'] ?? '');
+        if (isset($trackedObjects['sub_label'])) {
+          $frigateEvent->setRecognition_subname($trackedObjects['sub_label'] ?? '');
+          $frigateEvent->setRecognition_attributes('');
         }
-        $frigateEvent->setRecognition_score($score);
+        if (isset($trackedObjects['attributes'])) {
+          $frigateEvent->setRecognition_attributes($trackedObjects['attributes']);
+          $frigateEvent->setRecognition_subname('');
+        }
         break;
 
       default:
@@ -2079,6 +1955,7 @@ class frigate extends eqLogic
         return null;
     }
 
+    $frigateEvent->setRecognition_score($score);
     $frigateEvent->save();
     return $frigateEvent;
   }
@@ -2086,60 +1963,49 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
 
-    // Commande de type
-    $cmd = self::createCmd($eqlogicId, "Type de détection", "string", "", "info_detection_type", "", 0, null, 0);
-    $cmd->save();
-    $cmd->event($type);
-    $cmd->save();
+    $update = function ($label, $subtype, $unit, $logicalId, $value) use ($eqlogicId) {
+      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, "", 0, null, 0);
+      $cmd->save();
+      $cmd->event($value ?? '');
+      $cmd->save();
+    };
 
-    switch ($type) {
-      case "description":
-        $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_description() ?? '');
-        $cmd->save();
-        break;
+    $update("Reconnaissance - Type", "string", "", "info_detection_type", $type);
 
-      case "face":
-        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_name() ?? '');
-        $cmd->save();
+    $withNameScore = ['face', 'lpr', 'classification'];
+    if (in_array($type, $withNameScore)) {
+      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
+      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
+    }
 
-        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_score() ?? '');
-        $cmd->save();
-        break;
+    if ($type === 'description') {
+      log::add(__CLASS__, 'debug', "║ Mise à jour de la description : " . $frigateEvent->getRecognition_description());
+      $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
+    }
 
-      case "lpr":
-        $cmd = self::createCmd($eqlogicId, "Plaque d'immatriculation", "string", "", "info_plate", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_plate() ?? '');
-        $cmd->save();
+    if ($type === 'lpr') {
+      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
+    }
 
-        $cmd = self::createCmd($eqlogicId, "Nom de la reconnaissance", "string", "", "info_detection_name", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_name() ?? '');
-        $cmd->save();
-
-        $cmd = self::createCmd($eqlogicId, "Score de la reconnaissance", "numeric", "%", "info_detection_score", "", 0, null, 0);
-        $cmd->save();
-        $cmd->event($frigateEvent->getRecognition_score() ?? '');
-        $cmd->save();
-        break;
+    if ($type === 'classification') {
+      $update("Reconnaissance - Label", "string", "", "info_detection_subname", $frigateEvent->getRecognition_subname());
+      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", $frigateEvent->getRecognition_attributes());
     }
   }
 
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
-    $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $name);
+    // Nettoyer le nom exactement comme Jeedom le fera en base
+    $cleanName = substr(cleanComponanteName($name), 0, 127);
+    $cleanName = trim($cleanName);
+
+    $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $cleanName);
 
     if (!is_object($cmd)) {
       $cmd = new frigateCmd();
       $cmd->setLogicalId($logicalId);
       $cmd->setEqLogic_id($eqLogicId);
-      $cmd->setName($name);
+      $cmd->setName($cleanName); // déjà nettoyé, setName ne changera rien
       $cmd->setType($type);
       $cmd->setSubType($subType);
       $cmd->setGeneric_type($genericType);
@@ -2245,83 +2111,53 @@ class frigate extends eqLogic
 
   public static function createMQTTcmds($eqlogicId, $value)
   {
-    $infoCmd = self::createCmd($eqlogicId, "detect Etat", "binary", "", "info_detect", "JEEMATE_CAMERA_DETECT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["detect"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
+    $groupDefs = [
+      'detect'              => 'DETECT',
+      'recordings'          => 'NVR',
+      'snapshots'           => 'SNAPSHOT',
+      'motion'              => 'MOTION',
+      'review_alerts'       => 'REVIEW_ALERTS',
+      'review_detections'   => 'REVIEW_DETECTIONS',
+      'object_descriptions' => 'OBJECT_DESCRIPTIONS',
+      'review_descriptions' => 'REVIEW_DESCRIPTIONS',
+      'notifications'       => 'NOTIFICATIONS',
+      'improve_contrast'    => 'IMPROVE_CONTRAST'
+    ];
+
+    foreach ($groupDefs as $key => $prefix) {
+      $infoCmd = self::createCmd($eqlogicId, "{$key} Etat", "binary", "", "info_{$key}", "JEEMATE_CAMERA_{$prefix}_STATE", 0);
+      if (isset($value[$key])) {
+        $currentState = $infoCmd->execCmd();
+        if ($currentState !== $value[$key]) {
+          $infoCmd->event($value[$key]);
+        }
+      }
+      $infoCmd->save();
+
+      foreach (['off' => [1, 'stop'], 'on' => [1, 'start'], 'toggle' => [0, 'toggle']] as $action => [$showOn, $logicalAction]) {
+        $cmd = self::createCmd(
+          $eqlogicId,
+          "{$key} {$action}",
+          "other",
+          "",
+          "action_{$logicalAction}_{$key}",   // stop/start/toggle
+          "JEEMATE_CAMERA_{$prefix}_SET_" . strtoupper($action),  // OFF/ON/TOGGLE
+          $showOn,
+          $infoCmd,
+          0,
+          "action"
+        );
+        $cmd->save();
+      }
     }
-    $infoCmd->save();
 
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "detect off", "other", "", "action_stop_detect", "JEEMATE_CAMERA_DETECT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "detect on", "other", "", "action_start_detect", "JEEMATE_CAMERA_DETECT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "detect toggle", "other", "", "action_toggle_detect", "JEEMATE_CAMERA_DETECT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
-
-    $infoCmd = self::createCmd($eqlogicId, "recordings Etat", "binary", "", "info_recordings", "JEEMATE_CAMERA_NVR_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["recordings"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
-    }
-    $infoCmd->save();
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "recordings off", "other", "", "action_stop_recordings", "JEEMATE_CAMERA_NVR_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "recordings on", "other", "", "action_start_recordings", "JEEMATE_CAMERA_NVR_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "recordings toggle", "other", "", "action_toggle_recordings", "JEEMATE_CAMERA_NVR_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
-
-    $infoCmd = self::createCmd($eqlogicId, "snapshots Etat", "binary", "", "info_snapshots", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["snapshots"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
-    }
-    $infoCmd->save();
-
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "snapshots off", "other", "", "action_stop_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "snapshots on", "other", "", "action_start_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "snapshots toggle", "other", "", "action_toggle_snapshots", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
-
+    // Cas particulier : "détection en cours" (pas de on/off/toggle)
     $infoCmd = self::createCmd($eqlogicId, "détection en cours", "binary", "", "info_detectNow", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 1);
-    $infoCmd->save();
     $valueDetectNow = $infoCmd->execCmd();
     if (!isset($valueDetectNow) || $valueDetectNow == null || $valueDetectNow == '') {
       $infoCmd->event(1);
-      $infoCmd->save();
-    }
-    $infoCmd = self::createCmd($eqlogicId, "motion Etat", "binary", "", "info_motion", "JEEMATE_CAMERA_SNAPSHOT_STATE", 0);
-    //On vérifie la valeur présente et mets à jour que dans le cas ou elle est différente
-    $currentState = $infoCmd->execCmd();
-    $stateValue = $value["motion"];
-    if ($currentState !== $stateValue) {
-      $infoCmd->event($stateValue);
     }
     $infoCmd->save();
-
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "motion off", "other", "", "action_stop_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_OFF", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "motion on", "other", "", "action_start_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_ON", 1, $infoCmd, 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "motion toggle", "other", "", "action_toggle_motion", "JEEMATE_CAMERA_SNAPSHOT_SET_TOGGLE", 0, $infoCmd, 0, "action");
-    $cmd->save();
   }
 
   public static function createHTTPcmd($eqlogicId, $name, $link)
@@ -2377,22 +2213,21 @@ class frigate extends eqLogic
   private static function createPTZcmds($eqlogicId)
   {
     log::add("frigate", 'debug', '║ création des commandes PTZ move et zoom pour ' . $eqlogicId);
-    // commande action
-    $cmd = self::createCmd($eqlogicId, "PTZ move left", "other", "", "action_ptz_left", "CAMERA_LEFT", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move right", "other", "", "action_ptz_right", "CAMERA_RIGHT", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move up", "other", "", "action_ptz_up", "CAMERA_UP", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move down", "other", "", "action_ptz_down", "CAMERA_DOWN", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ move stop", "other", "", "action_ptz_stop", "CAMERA_STOP", 0, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom in", "other", "", "action_ptz_zoom_in", "CAMERA_ZOOM", 1, "", 0, "action");
-    $cmd->save();
-    $cmd = self::createCmd($eqlogicId, "PTZ zoom out", "other", "", "action_ptz_zoom_out", "CAMERA_DEZOOM", 1, "", 0, "action");
-    $cmd->save();
 
+    $ptzCmds = [
+      'left'     => ['CAMERA_LEFT',   1, 'PTZ move left'],
+      'right'    => ['CAMERA_RIGHT',  1, 'PTZ move right'],
+      'up'       => ['CAMERA_UP',     1, 'PTZ move up'],
+      'down'     => ['CAMERA_DOWN',   1, 'PTZ move down'],
+      'stop'     => ['CAMERA_STOP',   0, 'PTZ move stop'],
+      'zoom_in'  => ['CAMERA_ZOOM',   1, 'PTZ zoom in'],
+      'zoom_out' => ['CAMERA_DEZOOM', 1, 'PTZ zoom out'],
+    ];
+
+    foreach ($ptzCmds as $action => [$const, $showOn, $label]) {
+      $cmd = self::createCmd($eqlogicId, $label, "other", "", "action_ptz_{$action}", $const, $showOn, "", 0, "action");
+      $cmd->save();
+    }
     return true;
   }
 
@@ -2439,7 +2274,7 @@ class frigate extends eqLogic
     }
 
     $presetMaxforEqloc = $eqlogic->getConfiguration("presetMax") ?? 0;
-    $presetMaxforall = config::byKey("presetMax", "frigate") ?? 0;
+    $presetMaxforall = config::byKey("presetMax", "frigate");
     if ($presetMaxforEqloc > 0) {
       $max = $presetMaxforEqloc;
     } else {
@@ -2491,6 +2326,7 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-warning:MAJ EVENTS:/fg: ═══════════════════");
     $eqlogicIds = [];
+    $cameraAction = [];
     $cameraActionsExist = false;
     // Maj des commandes de l'équipement events général
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -2590,72 +2426,34 @@ class frigate extends eqLogic
 
 
     foreach ($eqlogicIds as $eqlogicId) {
-      // Creation des commandes infos
-      $cmd = self::createCmd($eqlogicId, "caméra", "string", "", "info_camera", "GENERIC_INFO", 0, null, 0);
-      $cmd->event($event->getCamera());
-      $cmd->save();
 
-      $cmd = self::createCmd($eqlogicId, "label", "string", "", "info_label", "JEEMATE_CAMERA_DETECT_TYPE_STATE", 0, null, 0);
-      $cmd->event($event->getLabel());
-      $cmd->save();
+      $duration = $event->getEndTime() != null
+        ? round($event->getEndTime() - $event->getStartTime(), 0)
+        : 0;
 
-      $cmd = self::createCmd($eqlogicId, "clip disponible", "binary", "", "info_clips", "");
-      $cmd->event($event->getHasClip());
-      $cmd->save();
+      $cmds = [
+        ["caméra",           "string",  "",   "info_camera",         "GENERIC_INFO",                   $event->getCamera()],
+        ["label",            "string",  "",   "info_label",          "JEEMATE_CAMERA_DETECT_TYPE_STATE", $event->getLabel()],
+        ["clip disponible",  "binary",  "",   "info_clips",          "",                                $event->getHasClip()],
+        ["snapshot disponible", "binary", "",   "info_snapshot",       "",                                $event->getHasSnapshot()],
+        ["top score",        "numeric", "%",  "info_topscore",       "GENERIC_INFO",                   $event->getTopScore()],
+        ["score",            "numeric", "%",  "info_score",          "",                                $event->getScore()],
+        ["zones",            "string",  "",   "info_zones",          "",                                $event->getZones()],
+        ["Reconnaissance - Description",      "string",  "",   "info_description",    "",                                $event->getRecognition_description()],
+        ["id",               "string",  "",   "info_id",             "",                                $event->getEventId()],
+        ["type",             "string",  "",   "info_type",           "",                                $event->getType()],
+        ["timestamp",        "numeric", "",   "info_timestamp",      "GENERIC_INFO",                   $event->getStartTime()],
+        ["durée",            "numeric", "sc", "info_duree",          "GENERIC_INFO",                   $duration],
+        ["URL snapshot",     "string",  "",   "info_url_snapshot",   "",                                $event->getSnapshot()],
+        ["URL clip",         "string",  "",   "info_url_clip",       "",                                $event->getClip()],
+        ["URL thumbnail",    "string",  "",   "info_url_thumbnail",  "",                                $event->getThumbnail()],
+      ];
 
-      $cmd = self::createCmd($eqlogicId, "snapshot disponible", "binary", "", "info_snapshot", "");
-      $cmd->event($event->getHasSnapshot());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "top score", "numeric", "%", "info_topscore", "GENERIC_INFO");
-      $cmd->event($event->getTopScore());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "score", "numeric", "%", "info_score", "");
-      $cmd->event($event->getScore());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "zones", "string", "", "info_zones", "", 0, null, 0);
-      $cmd->event($event->getZones());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "description", "string", "", "info_description", "", 0, null, 0);
-      $cmd->event($event->getRecognition_description());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "id", "string", "", "info_id", "", 0, null, 0);
-      $cmd->event($event->getEventId());
-      $cmd->save();
-
-      $cmd = self::createCmd($eqlogicId, "type", "string", "", "info_type", "", 0, null, 0);
-      $cmd->event($event->getType());
-
-      $cmd = self::createCmd($eqlogicId, "timestamp", "numeric", "", "info_timestamp", "GENERIC_INFO");
-      $cmd2 = self::createCmd($eqlogicId, "durée", "numeric", "sc", "info_duree", "GENERIC_INFO");
-      $cmd->event($event->getStartTime());
-      $cmd->save();
-      if ($event->getEndTime() != NULL) {
-        $value = round($event->getEndTime() - $event->getStartTime(), 0);
-      } else {
-        $value = 0;
+      foreach ($cmds as [$label, $subtype, $unit, $logicalId, $const, $value]) {
+        $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $const, 0, null, 0);
+        $cmd->event($value);
+        $cmd->save();
       }
-      $cmd2->event($value);
-      $cmd2->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL snapshot", "string", "", "info_url_snapshot", "", 0, null, 0);
-      $cmd->event($event->getSnapshot());
-      $cmd->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL clip", "string", "", "info_url_clip", "", 0, null, 0);
-      $cmd->event($event->getClip());
-      $cmd->save();
-
-
-      $cmd = self::createCmd($eqlogicId, "URL thumbnail", "string", "", "info_url_thumbnail", "", 0, null, 0);
-      $cmd->event($event->getThumbnail());
-      $cmd->save();
     }
   }
 
@@ -2685,8 +2483,6 @@ class frigate extends eqLogic
             }
           }
         }
-      } else {
-        log::add(__CLASS__, 'debug', "L'équipement camera " . $cameraName . " n'existe pas.");
       }
     }
 
@@ -2695,45 +2491,42 @@ class frigate extends eqLogic
     $eqlogicId = $frigate->getId();
 
     // Mise à jour des statistiques des détecteurs
-    if (isset($stats['detectors']) &&is_array($stats['detectors'])) {
-    foreach ($stats['detectors'] as $detectorName => $detectorStats) {
-      foreach ($detectorStats as $key => $value) {
-        // Créer un nom de commande en combinant le nom du détecteur et la clé
-        $cmdName = $detectorName . '_' . $key;
-        // Créer ou récupérer la commande
-        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO");
-        // Enregistrer la valeur de l'évènement
-        $cmd->event($value);
-        $cmd->save();
+    if (isset($stats['detectors']) && is_array($stats['detectors'])) {
+      foreach ($stats['detectors'] as $detectorName => $detectorStats) {
+        foreach ($detectorStats as $key => $value) {
+          // Créer un nom de commande en combinant le nom du détecteur et la clé
+          $cmdName = $detectorName . '_' . $key;
+          // Créer ou récupérer la commande
+          $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO");
+          // Enregistrer la valeur de l'évènement
+          $cmd->event($value);
+          $cmd->save();
 
-        if ($detectorName === "pid") {
-          $cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "", "detectors_cpu", "GENERIC_INFO");
-          $cmdCpu->event($stats['cpu_usages'][$value]['cpu']);
-          $cmdCpu->save();
-          $cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "", "detectors_memory", "GENERIC_INFO");
-          $cmdMem->event($stats['cpu_usages'][$value]['mem']);
-          $cmdMem->save();
+          if ($detectorName === "pid") {
+            $cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "", "detectors_cpu", "GENERIC_INFO");
+            $cmdCpu->event($stats['cpu_usages'][$value]['cpu']);
+            $cmdCpu->save();
+            $cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "", "detectors_memory", "GENERIC_INFO");
+            $cmdMem->event($stats['cpu_usages'][$value]['mem']);
+            $cmdMem->save();
+          }
         }
       }
-    }} else {
-      log::add(__CLASS__, 'debug', "La clé 'detectors' n'existe pas ou n'est pas un tableau dans les statistiques.");
     }
 
     // Mise à jour des usages GPU
     if (isset($stats['gpu_usages']) && is_array($stats['gpu_usages'])) {
-    foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
-      foreach ($gpuStats as $key => $value) {
-        // Créer un nom de commande en combinant le nom du GPU et la clé
-        $cmdName = $gpuName . '_' . $key;
-        // Créer ou récupérer la commande
-        $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "gpu_" . $key, "GENERIC_INFO");
-        // Enregistrer la valeur de l'événement
-        $cmd->event($value);
-        $cmd->save();
+      foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
+        foreach ($gpuStats as $key => $value) {
+          // Créer un nom de commande en combinant le nom du GPU et la clé
+          $cmdName = $gpuName . '_' . $key;
+          // Créer ou récupérer la commande
+          $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "gpu_" . $key, "GENERIC_INFO");
+          // Enregistrer la valeur de l'événement
+          $cmd->event($value);
+          $cmd->save();
+        }
       }
-    }
-    } else {
-      log::add(__CLASS__, 'debug', "La clé 'gpu_usages' n'existe pas ou n'est pas un tableau dans les statistiques.");
     }
 
     // Mise à jour des usages CPU
@@ -2744,8 +2537,6 @@ class frigate extends eqLogic
         $cmd->event($value);
         $cmd->save();
       }
-    } else {
-      log::add('frigate', 'debug', "La clé 'frigate.full_system' n'existe pas dans cpu_usages.");
     }
 
     // Mise a jour storage
@@ -2825,7 +2616,9 @@ class frigate extends eqLogic
     $camera = $event->getCamera();
     $cameraId = eqLogic::byLogicalId("eqFrigateCamera_" . $camera, "frigate")->getId();
     $label = $event->getLabel();
-    $description = $event->getRecognition_description();
+    $description = $event->getRecognition_description() ?? "";
+    $attributes = $event->getRecognition_attributes() ?? "";
+    $sublabel = $event->getRecognition_subname() ?? "";
     $zones = $event->getZones();
     $score = $event->getScore();
     $type = $event->getType();
@@ -2874,7 +2667,7 @@ class frigate extends eqLogic
 
         if (!$conditionIsActived) {
           log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution.");
-        } elseif ($conditionIsActived && $actionForced) {
+        } elseif ($actionForced) {
           log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution car la condition principale est ignorée");
         } else {
           log::add("frigate_Actions", 'info', "║ Action non exécutées car la condition principale " . $conditionIf .  " est vrai.");
@@ -2921,9 +2714,15 @@ class frigate extends eqLogic
         $cmdTypes = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdTypeName));
 
         // Ajouter aux tableaux si nécessaire une valeur par défaut
-        if (empty($cmdLabels)) $cmdLabels[] = "all";
-        if (empty($cmdZones)) $cmdZones[] = "all";
-        if (empty($cmdTypes)) $cmdTypes[] = "end";
+        if ($cmdLabelName == '') {
+          $cmdLabels = ["all"];
+        }
+        if ($cmdZoneName == '') {
+          $cmdZones = ["all"];
+        }
+        if ($cmdTypes == '') {
+          $cmdTypes = ["end"];
+        }
         log::add("frigate_Actions", 'info', "║ Labels configurés : " . json_encode($cmdLabels) . ", labels de l'évènement : " . json_encode($label));
 
         log::add("frigate_Actions", 'info', "║ Zones configurées : " . json_encode($cmdZones) . ", zones de l'évènement : " . json_encode($eventZones));
@@ -2968,9 +2767,12 @@ class frigate extends eqLogic
           continue;
         }
 
+        $tags = ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#', '#attributes#', '#sublabel#'];
+        $values = [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath, $attributes, $sublabel];
+
         $options = str_replace(
-          ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#'],
-          [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath],
+          $tags,
+          array_map('strval', $values),
           $options
         );
 
@@ -3007,7 +2809,7 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId = null, $type = null, $camera, $mode = 0, $file = "")
+  public static function saveURL($eventId = null, $type = null, $camera = null, $mode = 0, $file = "")
   {
     // mode de fonctionnement : 0 = defaut, 1 = thumbnail, 2 = latest, 3 = snapshot, 4 = clip
     $result = "";
@@ -3030,7 +2832,6 @@ class frigate extends eqLogic
         $extension = "mp4";
     }
 
-    // --- Chemin et lien par défaut ---
     $lien = "http://{$urlFrigate}/api/events/{$eventId}/{$type}.{$extension}{$extra}";
     $path = "/data/{$camera}/{$eventId}_{$type}.{$extension}";
 
@@ -3297,36 +3098,31 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      //log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b:');
       log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
 
       switch ($key) {
         case 'events':
           if (version_compare($version, "0.14", "<")) {
             log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
+            log::add("frigate_MQTT", 'warning', ' => Version < 0.14, mettre à jour votre serveur frigate !');
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
-          } else {
-            log::add("frigate_MQTT", 'info', ' => Traitement mqtt events non exécuté, version >= 0.14, utilisation de reviews. Penser a mettre record enabled true dans votre configuration.');
           }
           break;
 
         case 'reviews':
           $eventId = $value['after']['data']['detections'][0];
           $eventType = $value['type'];
-          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt manual event <=');
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));
           break;
 
         case 'stats':
-          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt stats');
           self::majStatsCmds($value, true);
           break;
 
         case 'available':
-          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt available');
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
@@ -3343,7 +3139,6 @@ class frigate extends eqLogic
             continue 2;
           }
 
-          //log::add("frigate_MQTT", 'info', ' => Traitement mqtt camera ' . $key);
           self::processCameraData($eqCamera, $key, $value);
           break;
       }
@@ -3352,68 +3147,79 @@ class frigate extends eqLogic
 
   private static function processCameraData($eqCamera, $key, $data)
   {
-    // recupérer la liste des object a surveiller
     $eqEvent = eqLogic::byLogicalId("eqFrigateEvents", "frigate");
     $objects = $eqEvent->getConfiguration("objects");
-    foreach ($data as $innerKey => $innerValue) {
-      if (in_array($innerKey, ['birdeye', 'improve_constrast', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker'])) {
 
+    $stateMap = [
+      'detect'              => 'DETECT',
+      'recordings'          => 'NVR',
+      'snapshots'           => 'SNAPSHOT',
+      'audio'               => 'AUDIO',
+      'review_alerts'       => 'REVIEW_ALERTS',
+      'review_detections'   => 'REVIEW_DETECTIONS',
+      'object_descriptions' => 'OBJECT_DESCRIPTIONS',
+      'review_descriptions' => 'REVIEW_DESCRIPTIONS',
+      'notifications'       => 'NOTIFICATIONS',
+      'improve_contrast'    => 'IMPROVE_CONTRAST',
+    ];
+
+    $skipKeys = ['birdseye', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker', 'model_state'];
+
+    foreach ($data as $innerKey => $innerValue) {
+
+      // clés ignorées
+      if (in_array($innerKey, $skipKeys)) {
         continue;
       }
 
+      // objet détecté (person, car, etc.)
       if (in_array($innerKey, $objects)) {
         log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ════════════════════════════════╗");
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
         log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
-        // mise à jour pour la caméra
         self::handleObject($eqCamera, $innerKey, $innerValue);
-        // mise à jour pour l'équipement event
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
         self::handleObject($eqEvent, $innerKey, $innerValue);
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
 
-      switch ($innerKey) {
-        case 'motion':
-          self::handleMotion($eqCamera, $key, $innerValue);
-          break;
+      // mouvement en cours
+      if ($innerKey === 'motion') {
+        self::handleMotion($eqCamera, $key, $innerValue);
+        continue;
+      }
 
-        case 'detect':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_DETECT_STATE");
-          }
-          break;
-
-        case 'recordings':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_NVR_STATE");
-          }
-          break;
-
-        case 'snapshots':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_SNAPSHOT_STATE");
-          }
-          break;
-
-        case 'audio':
-          if (isset($innerValue['state'])) {
-            self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_AUDIO_STATE");
-          }
-          break;
-
-        case 'all':
-          log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
+      // classification en cours
+      if ($innerKey === 'classification') {
+        foreach ($innerValue as $key => $value) {
+          log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-info:START CLASSIFICATION:/fg: ═══════════════════════════════════╗");
           log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
           log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
-          // mise à jour pour la caméra
-          self::handleAllObject($eqCamera, $innerKey, $innerValue);
-          // mise à jour pour l'équipement event
-          log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-          self::handleAllObject($eqEvent, $innerKey, $innerValue);
-          log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
-          break;
+          $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
+          $infoCmd->event($value);
+          $infoCmd->save();
+          $eqCamera->refreshWidget();
+          log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
+        }
+        continue;
+      }
+
+      // tous les objets (all)
+      if ($innerKey === 'all') {
+        log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
+        log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
+        self::handleAllObject($eqCamera, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
+        self::handleAllObject($eqEvent, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
+        continue;
+      }
+
+      // états on/off génériques
+      if (isset($stateMap[$innerKey], $innerValue['state'])) {
+        self::updateCameraState($eqCamera, $innerKey, $innerValue['state'], "JEEMATE_CAMERA_{$stateMap[$innerKey]}_STATE");
       }
     }
   }
@@ -3494,17 +3300,23 @@ class frigate extends eqLogic
     }
   }
 
-
-
+  /**
+   * @param string $eventId
+   * @param int|bool $isFav
+   * @return int|null
+   */
   public static function setFavorite($eventId, $isFav)
   {
-    $events = frigate_events::byEventId($eventId);
-    foreach ($events as $event) {
-      $event->setIsFavorite($isFav);
-      $event->save();
+    $event = frigate_events::byEventId($eventId);
+
+    if (!is_object($event)) {
+      log::add(__CLASS__, 'error', "║ setFavorite :: Aucun événement trouvé avec l'eventId : " . (string)$eventId);
+      return null;
     }
-    $state = $event->getIsFavorite();
-    return $state;
+    $event->setIsFavorite($isFav);
+    $event->save();
+
+    return (int)$event->getIsFavorite();
   }
 
 
@@ -3667,28 +3479,6 @@ class frigate extends eqLogic
     return $jsonArray;
   }
 
-  /* private static function yamlToJsonFromUrl($yamlUrl)
- {
-    // Télécharger le contenu YAML depuis l'URL
-    $yamlContent = file_get_contents($yamlUrl);
-    // Vérifier si le téléchargement a réussi
-    if ($yamlContent === false) {
-      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Failed to retrieve YAML from URL");
-      return json_encode(["error" => "Failed to retrieve YAML from URL: $yamlUrl"]);
-    }
-    // Parser le contenu YAML
-    $yamlArray = yaml_parse($yamlContent);
-    // Vérifier si le parsing est réussi
-    if ($yamlArray === false) {
-      log::add(__CLASS__, "error", "yamlToJsonFromUrl : Invalid YAML content or file not found");
-      return json_encode(["error" => "Invalid YAML content or file not found"]);
-    }
-    // Convertir le tableau PHP en JSON
-    $jsonContent = json_encode($yamlArray, JSON_PRETTY_PRINT);
-    return $jsonContent;
-  }
-
-  */
   private static function checkFrigateStatus()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -3733,7 +3523,7 @@ class frigate extends eqLogic
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
       config::save('frigate_maj', 1, 'frigate');
-      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__), null, null);
+      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__));
     } else {
       config::save('frigate_maj', 0, 'frigate');
     }
@@ -3749,16 +3539,95 @@ class frigate extends eqLogic
       if (!is_array($data)) {
         log::add('frigate', "warning", '[Plugin-Version] Impossible de décoder le fichier info.json');
       }
-      try {
-        $pluginVersion = $data['pluginVersion'];
-      } catch (\Exception $e) {
-        log::add('frigate', "warning", '[Plugin-Version] Impossible de récupérer la version du plugin');
-      }
+
+      $pluginVersion = $data['pluginVersion'];
     } catch (\Exception $e) {
       log::add('frigate', 'debug', '[Plugin-Version] Get ERROR :: ' . $e->getMessage());
     }
     log::add('frigate', 'info', '[Plugin-Version] PluginVersion :: ' . $pluginVersion);
     return $pluginVersion;
+  }
+
+
+  public static function timeElapsedString($datetime, $full = false)
+  {
+    $now = new DateTime();
+    $ago = new DateTime($datetime);
+    $diff = $now->diff($ago);
+
+    // On extrait les valeurs dans un tableau pour pouvoir ajouter les semaines
+    // sans modifier l'objet DateInterval original
+    $diffValues = [
+      'y' => $diff->y,
+      'm' => $diff->m,
+      'w' => (int)floor($diff->d / 7),
+      'd' => $diff->d % 7, // Le reste des jours après avoir retiré les semaines
+      'h' => $diff->h,
+      'i' => $diff->i,
+      's' => $diff->s,
+    ];
+
+    $units = [
+      'y' => ['année', 'années'],
+      'm' => ['mois', 'mois'],
+      'w' => ['semaine', 'semaines'],
+      'd' => ['jour', 'jours'],
+      'h' => ['heure', 'heures'],
+      'i' => ['minute', 'minutes'],
+      's' => ['seconde', 'secondes'],
+    ];
+
+    $strings = [];
+    foreach ($units as $key => $names) {
+      if ($diffValues[$key] > 0) {
+        $count = $diffValues[$key];
+        $strings[] = $count . ' ' . ($count > 1 ? $names[1] : $names[0]);
+      }
+    }
+
+    if (!$full) {
+      $strings = array_slice($strings, 0, 1);
+    }
+
+    return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
+  }
+
+  public static function getPercentageClass($score)
+  {
+    $score = (int) $score;
+    if ($score === 100) return 'percentage-100';
+    if ($score >= 90) return 'percentage-99';
+    if ($score >= 80) return 'percentage-89';
+    if ($score >= 70) return 'percentage-79';
+    if ($score >= 60) return 'percentage-69';
+    if ($score >= 50) return 'percentage-59';
+    if ($score >= 40) return 'percentage-49';
+    if ($score >= 30) return 'percentage-39';
+    if ($score >= 20) return 'percentage-29';
+    if ($score >= 10) return 'percentage-19';
+    if ($score > 0) return 'percentage-9';
+
+    return 'percentage-0';
+  }
+
+  public static function formatDuration($seconds)
+  {
+    $hours = floor($seconds / 3600);
+    $minutes = floor(($seconds % 3600) / 60);
+    $remainingSeconds = $seconds % 60;
+
+    $formattedDuration = '';
+    if ($hours > 0) {
+      $formattedDuration .= $hours . 'h';
+      $formattedDuration .= ' ' . str_pad((string)$minutes, 2, '0', STR_PAD_LEFT) . 'mn';
+    } elseif ($minutes > 0) {
+      $formattedDuration .= $minutes . 'mn';
+      $formattedDuration .= ' ' . str_pad((string)$remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    } else {
+      $formattedDuration .= str_pad((string)$remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
+    }
+
+    return $formattedDuration;
   }
 }
 class frigateCmd extends cmd
@@ -3917,6 +3786,48 @@ class frigateCmd extends cmd
         break;
       case 'action_toggle_motion':
         $this->toggleCameraSetting($frigate, $camera, 'info_motion', 'motion/set');
+        break;
+      case 'action_start_improve_contrast':
+      case 'action_stop_improve_contrast':
+        $this->publishCameraMessage($camera, 'improve_contrast/set', $logicalId === 'action_start_improve_contrast' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_improve_contrast':
+        $this->toggleCameraSetting($frigate, $camera, 'info_improve_contrast', 'improve_contrast/set');
+        break;
+      case 'action_start_review_alerts':
+      case 'action_stop_review_alerts':
+        $this->publishCameraMessage($camera, 'review_alerts/set', $logicalId === 'action_start_review_alerts' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_alerts':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_alerts', 'review_alerts/set');
+        break;
+      case 'action_start_review_detections':
+      case 'action_stop_review_detections':
+        $this->publishCameraMessage($camera, 'review_detections/set', $logicalId === 'action_start_review_detections' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_detections':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_detections', 'review_detections/set');
+        break;
+      case 'action_start_review_descriptions':
+      case 'action_stop_review_descriptions':
+        $this->publishCameraMessage($camera, 'review_descriptions/set', $logicalId === 'action_start_review_descriptions' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_review_descriptions':
+        $this->toggleCameraSetting($frigate, $camera, 'info_review_descriptions', 'review_descriptions/set');
+        break;
+      case 'action_start_object_descriptions':
+      case 'action_stop_object_descriptions':
+        $this->publishCameraMessage($camera, 'object_descriptions/set', $logicalId === 'action_start_object_descriptions' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_object_descriptions':
+        $this->toggleCameraSetting($frigate, $camera, 'info_object_descriptions', 'object_descriptions/set');
+        break;
+      case 'action_start_notifications':
+      case 'action_stop_notifications':
+        $this->publishCameraMessage($camera, 'notifications/set', $logicalId === 'action_start_notifications' ? 'ON' : 'OFF');
+        break;
+      case 'action_toggle_notifications':
+        $this->toggleCameraSetting($frigate, $camera, 'info_notifications', 'notifications/set');
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');

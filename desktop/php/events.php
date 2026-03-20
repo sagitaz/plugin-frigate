@@ -7,15 +7,15 @@ if (!isConnect('admin')) {
 ?>
 
 <script language="javascript">
-    window.onload = function(){  
-      const el = document.getElementById("div_mainContainer");
-      const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
-      if (el && savedScroll !== null) {
-		    // Repositionnement de la liste à sa position Y 
-        el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
-        localStorage.removeItem("frigateScrollTop");
-      }
-	}
+  window.onload = function() {
+    const el = document.getElementById("div_mainContainer");
+    const savedScroll = parseFloat(localStorage.getItem("frigateScrollTop"));
+    if (el && savedScroll !== null) {
+      // Repositionnement de la liste à sa position Y 
+      el.scrollTo(0, document.getElementById("frigateEventList").getBoundingClientRect().top + savedScroll);
+      localStorage.removeItem("frigateScrollTop");
+    }
+  }
 </script>
 
 <div class="col-lg-12">
@@ -30,83 +30,7 @@ if (!isConnect('admin')) {
 
   <?php
 
-  // functions
-  function getPercentageClass($score)
-  {
-    $score = (int) $score;
-    if ($score === 100) return 'percentage-100';
-    if ($score >= 90) return 'percentage-99';
-    if ($score >= 80) return 'percentage-89';
-    if ($score >= 70) return 'percentage-79';
-    if ($score >= 60) return 'percentage-69';
-    if ($score >= 50) return 'percentage-59';
-    if ($score >= 40) return 'percentage-49';
-    if ($score >= 30) return 'percentage-39';
-    if ($score >= 20) return 'percentage-29';
-    if ($score >= 10) return 'percentage-19';
-    if ($score > 0) return 'percentage-9';
-
-    return 'percentage-0';
-  }
-
-  function formatDuration($seconds)
-  {
-    $hours = floor($seconds / 3600);
-    $minutes = floor(($seconds % 3600) / 60);
-    $remainingSeconds = $seconds % 60;
-
-    $formattedDuration = '';
-    if ($hours > 0) {
-      $formattedDuration .= $hours . 'h';
-      $formattedDuration .= ' ' . str_pad($minutes, 2, '0', STR_PAD_LEFT) . 'mn';
-      //$formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-    } elseif ($minutes > 0) {
-      $formattedDuration .= $minutes . 'mn';
-      $formattedDuration .= ' ' . str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-    } else {
-      $formattedDuration .= str_pad($remainingSeconds, 2, '0', STR_PAD_LEFT) . 's';
-    }
-
-    return $formattedDuration;
-  }
-
-function timeElapsedString($datetime, $full = false)
-{
-  $now = new DateTime;
-  $ago = new DateTime($datetime);
-  $diff = $now->diff($ago);
-
-  // Ajout des semaines à partir des jours
-  $diff->w = floor($diff->d / 7);
-  $diff->d -= $diff->w * 7;
-
-  // Tableau des unités de temps avec singulier/pluriel
-  $units = [
-    'y' => ['année', 'années'],
-    'm' => ['mois', 'mois'],
-    'w' => ['semaine', 'semaines'],
-    'd' => ['jour', 'jours'],
-    'h' => ['heure', 'heures'],
-    'i' => ['minute', 'minutes'],
-    's' => ['seconde', 'secondes'],
-  ];
-
-  foreach ($units as $key => [$singular, $plural]) {
-    if ($diff->$key) {
-      $count = $diff->$key;
-      $strings[] = $count . ' ' . ($count > 1 ? $plural : $singular);
-    }
-  }
-
-  if (!$full) {
-    $strings = array_slice($strings, 0, 1);
-  }
-
-  return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
-}
-
-
-$events = frigate::showEvents();
+  $events = frigate::showEvents();
 
   // cameras variables
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];
@@ -140,7 +64,7 @@ $events = frigate::showEvents();
     $label = $event['label'];
     $type = $event['type'];
     $date = $event['date'];
-    $timeElapsed = timeElapsedString($date);
+    $timeElapsed = frigate::timeElapsedString($date);
     $percentage = $event['percentage'] ?? 0;
     $duration = $event['duration'] ?? 0;
     $favoriteClass = $event['isFavorite'] ? 'fas fa-star' : 'far fa-star';
@@ -164,7 +88,7 @@ $events = frigate::showEvents();
     $topScore = $event['top_score'];
     $description = $event['description'];
     $duree = $event['duree'];
-    $formattedDuration = '<div class=\'duration\'>' . formatDuration($duree) . '</div>';
+    $formattedDuration = '<div class=\'duration\'>' . frigate::formatDuration($duree) . '</div>';
     $img = $event['img'];
     $hasSnapshot = $event['hasSnapshot'];
     $snapshot = $event['snapshot'];

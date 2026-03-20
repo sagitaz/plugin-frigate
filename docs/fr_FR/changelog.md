@@ -4,6 +4,23 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 16/03/2026 Beta 1.4.95
+- Nettoyage du nom des commandes de la même façon que Jeedom
+- Correction classification sub_label, j'avais mis un s (sub_labels) 
+
+# 15/03/2026 Beta 1.4.94
+- Ajout pour trier les commandes (click sur le nom ou l'id)
+
+# 15/03/2026 Beta 1.4.93
+- Creation des commandes infos sur etats de classification
+- Ajout des boutons on/off sur le panel
+
+# 10/03/2026 Beta 1.4.9
+- Ajout des nouvelles commandes pour la reconnaissance de la face
+- Ajout des nouvelles commandes pour la reconnaissance de la plaque d'immatriculation
+- Ajout des nouvelles commandes genAI
+- Corrections d'un bug sur debian12 et debian13
+
 # 09/11/2025 Beta 1.4.7
 - Modification de la colonne data en DB
 - Ajout de logs

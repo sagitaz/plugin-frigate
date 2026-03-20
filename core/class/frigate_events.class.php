@@ -47,6 +47,8 @@ class frigate_events
 	private $recognition_type;
 	private $recognition_description;
 	private $recognition_name;
+	private $recognition_subname;
+	private $recognition_attributes;
 	private $recognition_plate;
 	private $recognition_score;
 
@@ -88,7 +90,7 @@ class frigate_events
 			FROM frigate_events
 			WHERE event_id=:event_id';
 
-		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
+		return DB::Prepare($sql, $values, DB::FETCH_TYPE_ROW, PDO::FETCH_CLASS, __CLASS__);
 	}
 
 	public static function byType($_type)
@@ -411,6 +413,24 @@ class frigate_events
 		return $this->recognition_name;
 	}
 
+	public function setRecognition_subname($recognition_subname)
+	{
+		$this->recognition_subname = $recognition_subname;
+	}
+	public function getRecognition_subname()
+	{
+		return $this->recognition_subname;
+	}
+
+	public function setRecognition_attributes($recognition_attributes)
+	{
+		$this->recognition_attributes = $recognition_attributes;
+	}
+	public function getRecognition_attributes()
+	{
+		return $this->recognition_attributes;
+	}
+
 	public function setRecognition_plate($recognition_plate)
 	{
 		$this->recognition_plate = $recognition_plate;
@@ -423,7 +443,9 @@ class frigate_events
 
 	public function setRecognition_score($recognition_score)
 	{
-		$this->recognition_score = $recognition_score;
+		$this->recognition_score = ($recognition_score === '' || $recognition_score === null)
+			? null
+			: (float) $recognition_score;
 	}
 	public function getRecognition_score()
 	{

@@ -80,7 +80,7 @@ var app_config = {
 
     // Gestion des appels Ajax
     this.ajaxRequest = function (action, data, successCallback) {
-      $.ajax({
+      domUtils.ajax({
         type: "POST",
         url: "plugins/frigate/core/ajax/frigate.ajax.php",
         data: {
