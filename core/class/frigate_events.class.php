@@ -60,7 +60,8 @@ class frigate_events
 	public static function all(bool $_onlyEnable = FALSE)
 	{
 		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
-		FROM frigate_events';
+		FROM frigate_events
+		WHERE type IS NOT NULL';
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
 
