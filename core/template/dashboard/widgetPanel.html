@@ -6,20 +6,30 @@
         <span class="reportModeVisible">#name_display# <span class="object_name">#object_name#</span></span>
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
 
-        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#" onclick="gotoPanelEvents#id#()"
-            title="{{Afficher les évènements de la caméra}}">
-            <i class="fas fa-photo-video iconGotoCameraEvents#id#"></i>
+        <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#">
+            <i class="fas fa-photo-video iconGotoCameraEvents#id#"  onclick="gotoPanelEvents#id#()"
+            title="{{Afficher les évènements de la caméra}}"></i>
+         <div class="btn-icon" id="iconAction#id#">
+            <i class="fas fa-tools" title="IA on/off" onclick="toggleToolsOverlay#id#()"></i>
+        </div>
         </span>
     </center>
 
     <div class="column">
         <div class="img-container">
             <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openPanelModal#id#(this)" />
+          
+            <div id="cameraDisabled#id#" class="camera-disabled-overlay" style="display:none;">
+    			<i class="fas fa-video-slash"></i>
+    			<span>{{La caméra est désactivée.}}</span>
+			</div>
             <div class="detect-container">
                 #detectNow#
             </div>
+          <div id="btnPTZ#id#">
             #ptzWidget#
             #ptzZoom#
+          </div>
           
                   <!-- Overlay toggle -->
         <div class="tools-overlay" id="toolsOverlay#id#">
@@ -28,18 +38,17 @@
             </div>
         </div>
           
-        </div>
-        <div class="btn-container">
+    </div>
+        <div class="btn-container" id="btnContainer#id#">
             <div class="btn-actions">       
               <!-- Bouton toggle -->
-        <div class="btn-icon" id="iconAction#id#" onclick="toggleToolsOverlay#id#()">
-            <i class="fas fa-tools" title="IA on/off"></i>
-        </div>
                 #actions#
                 #actionsPreset#
             </div>
         </div>
     </div>
+      
+  
 
     <!-- Modal Structure -->
     <div id="myModal#id#" class="modal">
@@ -57,6 +66,25 @@
 
     <script>
         if (window.imgSrc === undefined) {
+            // Gestion état enabled
+const isEnabled#id# = '#enabled#' === '1';
+const imgEl#id#     = document.getElementById('imgFrigate#id#');
+const disabledEl#id# = document.getElementById('cameraDisabled#id#');
+const btnEl#id# = document.getElementById('btnContainer#id#');
+const btnPtz#id# = document.getElementById('btnPTZ#id#');
+
+if (!isEnabled#id#) {
+    imgEl#id#.style.display    = 'none';
+    btnEl#id#.style.display    = 'none';
+    btnPtz#id#.style.display    = 'none';
+    disabledEl#id#.style.display = 'flex';
+} else {
+    imgEl#id#.style.display    = '';
+    btnEl#id#.style.display    = '';
+    btnPtz#id#.style.display    = '';
+    disabledEl#id#.style.display = 'none';
+}
+
             let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
             console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
             let imgElement = document.getElementById('imgFrigate' + #id#);
@@ -513,9 +541,9 @@
       .frigate_widget .tools-overlay {
     position: absolute;
     inset: 0; /* top/right/bottom/left: 0 = même taille que le parent */
-    background: rgba(0, 0, 0, 0.75);
+    background: rgba(0, 0, 0, 0.95);
     display: none; /* caché par défaut */
-    z-index: 10;
+    z-index: 20;
     border-radius: inherit;
 }
 
@@ -551,6 +579,30 @@
 .frigate_widget .fa-toggle-off { color: #aaaaaa; }
 
 .frigate_widget .ia-toggle-icon:hover {
+    opacity: 0.8;
+}
+.frigate_widget .camera-disabled-overlay {
+    position: absolute;
+    inset: 0;
+    display: none;
+    width: 435px !important;
+    height: 300px !important;
+    flex-direction: column;
+    align-items: center;
+    justify-content: center;
+    gap: 12px;
+    background-color: rgb(var(--defaultBkg-color));
+    z-index: 5;
+    color: rgb(var(--defaultText-color));
+}
+
+.frigate_widget .camera-disabled-overlay i {
+    font-size: 64px;
+    opacity: 0.8;
+}
+
+.frigate_widget .camera-disabled-overlay span {
+    font-size: 14px;
     opacity: 0.8;
 }
     </style>
