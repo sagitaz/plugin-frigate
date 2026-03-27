@@ -127,13 +127,14 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
       $cmd = $frigate->getCmd(null, 'info_Cron');
+      $enabled = $frigate->getCmd(null, 'info_enabled');
       $execute = "1";
       // Vérification si la commande existe
       if (is_object($cmd)) {
         $execute = $cmd->execCmd();
       }
 
-      if ($execute == "1") {
+      if ($execute == "1" && $enabled == "1") {
         self::getEvents();
         self::getStats();
       }
@@ -256,15 +257,13 @@ class frigate extends eqLogic
   // en lors de la création semi-automatique d'un post sur le forum community
   public static function getConfigForCommunity()
   {
-    $system = system::getOsVersion();
-
-    $CommunityInfo = "```\n";
-    $CommunityInfo = $CommunityInfo . 'URL : ' . self::getUrlFrigate() . "\n";
-    $CommunityInfo = $CommunityInfo . 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
-    $CommunityInfo = $CommunityInfo . 'Debian : ' . $system . "\n";
-    $CommunityInfo = $CommunityInfo . 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
-    $CommunityInfo = $CommunityInfo . 'Plugin : ' . config::byKey('pluginVersion', 'frigate') . "\n";
-    $CommunityInfo = $CommunityInfo . "```";
+    $CommunityInfo = "### Informations supplémentaires \n";
+    $CommunityInfo .= "```\n";
+    $CommunityInfo .= 'URL : ' . self::getUrlFrigate() . "\n";
+    $CommunityInfo .= 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
+    $CommunityInfo .= 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
+    $CommunityInfo .= 'Plugin : ' . config::byKey('pluginVersion', 'frigate') . "\n";
+    $CommunityInfo .= "```";
     return $CommunityInfo;
   }
 
@@ -502,7 +501,8 @@ class frigate extends eqLogic
     return $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Review alerts}}')
       . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
       . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
-      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}');
+      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}')
+       . $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activations}}');
   }
   private function buildDetectNow(): string
   {
@@ -2121,7 +2121,8 @@ class frigate extends eqLogic
       'object_descriptions' => 'OBJECT_DESCRIPTIONS',
       'review_descriptions' => 'REVIEW_DESCRIPTIONS',
       'notifications'       => 'NOTIFICATIONS',
-      'improve_contrast'    => 'IMPROVE_CONTRAST'
+      'improve_contrast'    => 'IMPROVE_CONTRAST',
+      'enabled'              => 'ENABLED'
     ];
 
     foreach ($groupDefs as $key => $prefix) {
@@ -3161,6 +3162,7 @@ class frigate extends eqLogic
       'review_descriptions' => 'REVIEW_DESCRIPTIONS',
       'notifications'       => 'NOTIFICATIONS',
       'improve_contrast'    => 'IMPROVE_CONTRAST',
+      'enabled'              => 'ENABLED'
     ];
 
     $skipKeys = ['birdseye', 'motion_contour_area', 'motion_threshold', 'ptz_autotracker', 'model_state'];
@@ -3828,6 +3830,13 @@ class frigateCmd extends cmd
         break;
       case 'action_toggle_notifications':
         $this->toggleCameraSetting($frigate, $camera, 'info_notifications', 'notifications/set');
+        break;
+        case 'action_start_enabled':
+        case 'action_stop_enabled':
+          $this->publishCameraMessage($camera, 'enabled/set', $logicalId === 'action_start_enabled' ? 'ON' : 'OFF');
+          break;
+      case 'action_toggle_enabled':
+        $this->toggleCameraSetting($frigate, $camera, 'info_enabled', 'enabled/set');
         break;
       case 'action_ptz_left':
         $this->publishCameraMessage($camera, 'ptz', 'MOVE_LEFT');
