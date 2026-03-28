@@ -7,48 +7,46 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
 
         <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#">
-            <i class="fas fa-photo-video iconGotoCameraEvents#id#"  onclick="gotoPanelEvents#id#()"
-            title="{{Afficher les évènements de la caméra}}"></i>
-         <div class="btn-icon" id="iconAction#id#">
-            <i class="fas fa-tools" title="IA on/off" onclick="toggleToolsOverlay#id#()"></i>
-        </div>
+            <i class="fas fa-photo-video iconGotoCameraEvents#id#" onclick="gotoPanelEvents#id#()"
+                title="{{Afficher les évènements de la caméra}}"></i>
+            <div class="btn-icon" id="iconAction#id#">
+                <i class="fas fa-tools" title="IA on/off" onclick="toggleToolsOverlay#id#()"></i>
+            </div>
         </span>
     </center>
 
     <div class="column">
         <div class="img-container">
             <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openPanelModal#id#(this)" />
-          
+
             <div id="cameraDisabled#id#" class="camera-disabled-overlay" style="display:none;">
-    			<i class="fas fa-video-slash"></i>
-    			<span>{{La caméra est désactivée.}}</span>
-			</div>
+                <i class="fas fa-video-slash"></i>
+                <span>{{La caméra est désactivée.}}</span>
+            </div>
             <div class="detect-container">
                 #detectNow#
             </div>
-          <div id="btnPTZ#id#">
-            #ptzWidget#
-            #ptzZoom#
-          </div>
-          
-                  <!-- Overlay toggle -->
-        <div class="tools-overlay" id="toolsOverlay#id#">
-            <div class="tools-overlay-content">
-                #iaActions#
+            <div id="btnPTZ#id#">
+                #ptzWidget#
+                #ptzZoom#
             </div>
+
+            <div class="tools-overlay" id="toolsOverlay#id#">
+                <div class="tools-overlay-content">
+                    #iaActions#
+                </div>
+            </div>
+
         </div>
-          
-    </div>
         <div class="btn-container" id="btnContainer#id#">
-            <div class="btn-actions">       
-              <!-- Bouton toggle -->
+            <div class="btn-actions">
                 #actions#
                 #actionsPreset#
             </div>
         </div>
     </div>
-      
-  
+
+
 
     <!-- Modal Structure -->
     <div id="myModal#id#" class="modal">
@@ -66,27 +64,25 @@
 
     <script>
         if (window.imgSrc === undefined) {
-            // Gestion état enabled
-const isEnabled#id# = '#enabled#' === '1';
-const imgEl#id#     = document.getElementById('imgFrigate#id#');
-const disabledEl#id# = document.getElementById('cameraDisabled#id#');
-const btnEl#id# = document.getElementById('btnContainer#id#');
-const btnPtz#id# = document.getElementById('btnPTZ#id#');
+            const isEnabled#id# = '#enabled#' === '1';
+            const imgEl#id# = document.getElementById('imgFrigate#id#');
+            const disabledEl#id# = document.getElementById('cameraDisabled#id#');
+            const btnEl#id# = document.getElementById('btnContainer#id#');
+            const btnPtz#id# = document.getElementById('btnPTZ#id#');
 
-if (!isEnabled#id#) {
-    imgEl#id#.style.display    = 'none';
-    btnEl#id#.style.display    = 'none';
-    btnPtz#id#.style.display    = 'none';
-    disabledEl#id#.style.display = 'flex';
-} else {
-    imgEl#id#.style.display    = '';
-    btnEl#id#.style.display    = '';
-    btnPtz#id#.style.display    = '';
-    disabledEl#id#.style.display = 'none';
-}
+            if (!isEnabled#id#) {
+                imgEl#id#.style.display = 'none';
+                btnEl#id#.style.display = 'none';
+                btnPtz#id#.style.display = 'none';
+                disabledEl#id#.style.display = 'flex';
+            } else {
+                imgEl#id#.style.display = '';
+                btnEl#id#.style.display = '';
+                btnPtz#id#.style.display = '';
+                disabledEl#id#.style.display = 'none';
+            }
 
             let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=#imgUrl#";
-            console.log('Image Source URL: ' + decodeURIComponent(imgSrc));
             let imgElement = document.getElementById('imgFrigate' + #id#);
 
             let intervalId;
@@ -125,18 +121,14 @@ if (!isEnabled#id#) {
 
             function refreshImage() {
                 let newSrc = imgSrc + encodeURIComponent("&t=" + new Date().getTime());
-                console.log('Refreshing image with URL: ' + decodeURIComponent(newSrc));
                 imgElement.src = newSrc;
-                // Vérifiez si la modal est ouverte et rafraîchissez l'image dans la modal également
                 var modal = document.getElementById("myModal#id#");
                 var modalImg = document.getElementById("modalImg#id#");
                 if (modal.style.display === "block") {
                     modalImg.src = newSrc;
                 }
             }
-
-            // setInterval(refreshImage, 2000); // Refresh every 20 seconds
-            refreshImage(); // Initial call to display the image immediately            
+            refreshImage();
 
         }
         function gotoPanelEvents#id#() {
@@ -144,7 +136,7 @@ if (!isEnabled#id#) {
             document.querySelector('a[href="#Events"]').click();
 
             document.querySelectorAll('input.cameraFilter')
-                .forEach(cb => cb.checked = cb.value === camera);            
+                .forEach(cb => cb.checked = cb.value === camera);
             filterEvents();
         }
 
@@ -169,19 +161,17 @@ if (!isEnabled#id#) {
 
         function execSelectedPreset#id#() {
             var presetId = document.getElementById("presetSelect#id#").value;
-            console.log(presetId);
             if (presetId) {
                 execAction(presetId);
             }
         }
-      
-      function toggleToolsOverlay#id#() {
-    const overlay = document.getElementById('toolsOverlay#id#');
-    const btn     = document.getElementById('btnToolsToggle#id#');
-    const visible = overlay.style.display === 'flex';
 
-    overlay.style.display = visible ? 'none' : 'flex';
-}
+        function toggleToolsOverlay#id#() {
+            const overlay = document.getElementById('toolsOverlay#id#');
+            const btn = document.getElementById('btnToolsToggle#id#');
+            const visible = overlay.style.display === 'flex';
+            overlay.style.display = visible ? 'none' : 'flex';
+        }
     </script>
 
     <style>
@@ -196,8 +186,6 @@ if (!isEnabled#id#) {
             flex-direction: column;
             justify-content: flex-start;
         }
-
-
 
         .frigate_widget .iconGotoCameraEvents#id# {
             font-size: 12px;
@@ -231,11 +219,9 @@ if (!isEnabled#id#) {
             width: 100%;
             height: auto;
             object-position: top;
-            /* object-fit: cover; */
             object-fit: contain;
         }
 
-        /* Boutons en bas de l'image */
         .frigate_widget .btn-container {
             width: 100%;
             height: auto !important;
@@ -243,17 +229,9 @@ if (!isEnabled#id#) {
             text-align: center;
             background-color: rgb(var(--defaultBkg-color)) !important;
             z-index: 98;
-            /*
-            bottom: 0;
-            left: 0;
-            right: 0;
-            margin-left: auto;
-            margin-right: auto;
-            */
             margin-top: 0px;
         }
 
-        /* Boutons d'action */
         .frigate_widget .btn-icon {
             display: inline-flex;
             text-align: right;
@@ -303,9 +281,7 @@ if (!isEnabled#id#) {
         .circle-overlay {
             position: absolute;
             bottom: 4px;
-            /* Ajuster selon l'espacement voulu */
             left: 4px;
-            /* Ajuster selon l'espacement voulu */
             width: 60px;
             height: 60px;
             background-color: rgba(0, 0, 0, 0.5);
@@ -325,37 +301,27 @@ if (!isEnabled#id#) {
 
         .frigate_widget .btn-ptz-left {
             bottom: 21px;
-            /* Positionné au-dessus du cercle */
             left: 6px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-right {
             bottom: 21px;
-            /* Positionné au-dessus du cercle */
             left: 55px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-up {
             bottom: 46px;
-            /* Positionné au-dessus du cercle */
             left: 28px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-down {
             bottom: -1px;
-            /* Positionné au-dessus du cercle */
             left: 28px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-stop {
             bottom: 24px;
-            /* Positionné au-dessus du cercle */
             left: 28px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .iconPTZleft#id#,
@@ -397,16 +363,12 @@ if (!isEnabled#id#) {
 
         .frigate_widget .btn-ptz-zoom-in {
             top: 2px;
-            /* Positionné au-dessus du cercle */
             left: 2px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .btn-ptz-zoom-out {
             top: 24px;
-            /* Positionné au-dessus du cercle */
             left: 2px;
-            /* Ajuster pour aligner avec le cercle */
         }
 
         .frigate_widget .iconZoomIn#id#,
@@ -450,7 +412,6 @@ if (!isEnabled#id#) {
             transform: scale(1.3);
         }
 
-        /* Modal */
         .frigate_widget .modal {
             display: none;
             position: fixed;
@@ -465,10 +426,8 @@ if (!isEnabled#id#) {
             background-color: rgba(0, 0, 0, 0.9);
             border-color: rgb(var(--defaultText-color)) !important;
             border-width: 1px !important;
-            /* Fond noir transparent */
         }
 
-        /* Contenu de la modal (image) */
         .frigate_widget .modal-content {
             margin: auto;
             display: block;
@@ -478,7 +437,6 @@ if (!isEnabled#id#) {
             padding: 10px !important;
         }
 
-        /* Animation de zoom */
         .frigate_widget .modal-content,
         .close {
             animation-name: zoom;
@@ -502,7 +460,6 @@ if (!isEnabled#id#) {
             height: auto !important;
         }
 
-        /* Bouton fermer la modal */
         .frigate_widget .close {
             position: absolute;
             top: 15px;
@@ -520,7 +477,6 @@ if (!isEnabled#id#) {
             cursor: pointer;
         }
 
-        /* Responsiveness pour mobiles */
         @media (max-width: 768px) {
             .frigate_widget .img-container img {
                 width: 100%;
@@ -537,73 +493,80 @@ if (!isEnabled#id#) {
                 max-height: 100%;
             }
         }
-      
-      .frigate_widget .tools-overlay {
-    position: absolute;
-    inset: 0; /* top/right/bottom/left: 0 = même taille que le parent */
-    background: rgba(0, 0, 0, 0.95);
-    display: none; /* caché par défaut */
-    z-index: 20;
-    border-radius: inherit;
-}
 
-.frigate_widget .tools-overlay-content {
-    flex-direction: column;
-    align-items: stretch;       /* les lignes prennent toute la largeur */
-    justify-content: center;
-    gap: 8px;
-    padding: 16px 24px 16px 40px;
-}
+        .frigate_widget .tools-overlay {
+            position: absolute;
+            inset: 0;
+            background: rgba(0, 0, 0, 0.95);
+            display: none;
+            z-index: 20;
+            border-radius: inherit;
+        }
 
-.frigate_widget .ia-toggle-row {
-    display: flex;
-    align-items: center;
-    justify-content: space-between;
-    color: white;
-    padding: 5px 0;
-    gap: 20px;
-}
+        .frigate_widget .tools-overlay-content {
+            flex-direction: column;
+            align-items: stretch;
+            justify-content: center;
+            gap: 8px;
+            padding: 16px 24px 16px 40px;
+        }
 
-.frigate_widget .ia-toggle-label {
-    font-size: 13px;
-    opacity: 0.9;
-}
+        .frigate_widget .ia-toggle-row {
+            display: flex;
+            align-items: center;
+            justify-content: space-between;
+            color: white;
+            padding: 5px 0;
+            gap: 20px;
+        }
 
-.frigate_widget .ia-toggle-icon {
-    font-size: 22px;
-    cursor: pointer;
-    transition: color 0.2s;
-}
+        .frigate_widget .ia-toggle-label {
+            font-size: 13px;
+            opacity: 0.9;
+            color: rgb(var(--defaultText-color)) !important;
+        }
 
-.frigate_widget .fa-toggle-on  { color: var(--frigate-icone-color#id#) !important; }
-.frigate_widget .fa-toggle-off { color: #aaaaaa; }
+        .frigate_widget .ia-toggle-icon {
+            font-size: 22px;
+            cursor: pointer;
+            transition: color 0.2s;
+        }
 
-.frigate_widget .ia-toggle-icon:hover {
-    opacity: 0.8;
-}
-.frigate_widget .camera-disabled-overlay {
-    position: absolute;
-    inset: 0;
-    display: none;
-    width: 435px !important;
-    height: 300px !important;
-    flex-direction: column;
-    align-items: center;
-    justify-content: center;
-    gap: 12px;
-    background-color: rgb(var(--defaultBkg-color));
-    z-index: 5;
-    color: rgb(var(--defaultText-color));
-}
+        .frigate_widget .fa-toggle-on {
+            color: var(--frigate-icone-color#id#) !important;
+        }
 
-.frigate_widget .camera-disabled-overlay i {
-    font-size: 64px;
-    opacity: 0.8;
-}
+        .frigate_widget .fa-toggle-off {
+            color: #aaaaaa;
+        }
 
-.frigate_widget .camera-disabled-overlay span {
-    font-size: 14px;
-    opacity: 0.8;
-}
+        .frigate_widget .ia-toggle-icon:hover {
+            opacity: 0.8;
+        }
+
+        .frigate_widget .camera-disabled-overlay {
+            position: absolute;
+            inset: 0;
+            display: none;
+            width: 435px !important;
+            height: 300px !important;
+            flex-direction: column;
+            align-items: center;
+            justify-content: center;
+            gap: 12px;
+            background-color: rgb(var(--defaultBkg-color));
+            z-index: 5;
+            color: rgb(var(--defaultText-color));
+        }
+
+        .frigate_widget .camera-disabled-overlay i {
+            font-size: 64px;
+            opacity: 0.8;
+        }
+
+        .frigate_widget .camera-disabled-overlay span {
+            font-size: 14px;
+            opacity: 0.8;
+        }
     </style>
 </div>
