@@ -4,6 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 21/03/2026 Beta 1.4.97
+- Ajout de la commande d'activation des cameras par MQTT
+- Désactivation du cron pour les caméras désactivées
+
 # 21/03/2026 Beta 1.4.96
 - Nettoyage liste des évènements
 
