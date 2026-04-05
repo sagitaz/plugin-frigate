@@ -257,13 +257,15 @@ class frigate extends eqLogic
   // en lors de la création semi-automatique d'un post sur le forum community
   public static function getConfigForCommunity()
   {
-    $CommunityInfo = "### Informations supplémentaires \n";
     $CommunityInfo .= "```\n";
     $CommunityInfo .= 'URL : ' . self::getUrlFrigate() . "\n";
     $CommunityInfo .= 'MQTT topic : ' . config::byKey('topic', 'frigate') . "\n";
     $CommunityInfo .= 'Frigate : ' . config::byKey('frigate_version', 'frigate') . "\n";
     $CommunityInfo .= 'Plugin : ' . config::byKey('pluginVersion', 'frigate') . "\n";
-    $CommunityInfo .= "```";
+    $CommunityInfo .= "``` \n";
+    $CommunityInfo .= "<b>Informations à ajouter</b> \n";
+    $CommunityInfo .= "Afin de traiter au mieux votre demande d'aide, merci d'ajouter les logs du plugin Frigate en mode debug et nettoyé, pas de 6 mois. \n";
+    $CommunityInfo .= "Vous pouvez également ajouter les logs HTTP_ERROR s'ils comportent des infos sur Frigate. \n";
     return $CommunityInfo;
   }
 
@@ -402,7 +404,7 @@ class frigate extends eqLogic
     $replace['#cameraEqlogicId#'] = $this->getLogicalId();
     $replace['#cameraName#']      = $this->getConfiguration("name");
     $replace['#imgUrl#']          = $this->getConfiguration("img");
-    $replace['#enabled#']         = $this->getCmd('info', 'info_enabled') ? $this->getCmd('info', 'info_enabled')->execCmd() : 1; 
+    $replace['#enabled#']         = $this->getCmd('info', 'info_enabled') ? $this->getCmd('info', 'info_enabled')->execCmd() : 1;
     $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
 
     $replace['#actions#']      = $this->buildActions();
@@ -462,7 +464,7 @@ class frigate extends eqLogic
     $html .= $this->buildToggleAction('action_start_detect', 'action_stop_detect', 'info_detect', 'fas fa-user-shield', 'fas fa-user-shield', 'detection ON', 'detection OFF');
     $html .= $this->buildToggleAction('action_start_audio', 'action_stop_audio', 'info_audio', 'fas fa-volume-off', 'fas fa-volume-down', 'audio ON', 'audio OFF');
     $html .= $this->buildToggleAction('action_start_motion', 'action_stop_motion', 'info_motion', 'fas fa-male', 'fas fa-walking', 'motion ON', 'motion OFF');
-   // Boutons simples
+    // Boutons simples
     foreach (
       [
         ['action_make_api_event',  'fas fa-camera-retro', __("Créer un évènement", __FILE__)],
@@ -502,7 +504,7 @@ class frigate extends eqLogic
       . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
       . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
       . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}')
-       . $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activations}}');
+      . $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activations}}');
   }
   private function buildDetectNow(): string
   {
@@ -1652,7 +1654,7 @@ class frigate extends eqLogic
     if ($n === 0) {
       $n = "aucun";
     }
-    
+
     log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-success:FIN CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
     return $n;
   }
@@ -1784,12 +1786,12 @@ class frigate extends eqLogic
         }
       }
     }
-    message::add('frigate', 'Frigate : ' . $n . ' caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...');
+    message::add('frigate', __("Frigate : " . $n . " caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...", __FILE__));
     // commandes de statisque
     self::getStats();
     // commandes des events
     self::getEvents(false, array(), 'end', null, 1);
-    message::add('frigate', 'Mise à jour des commandes, évènements et statistiques terminée.');
+    message::add('frigate', __("Mise à jour des commandes, évènements et statistiques terminée.", __FILE__));
 
     log::add(__CLASS__, 'debug', "╚════════════════════════ END CREATION DES CAMERAS ═══════════════════");
     return $n;
@@ -3106,6 +3108,7 @@ class frigate extends eqLogic
           if (version_compare($version, "0.14", "<")) {
             log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
             log::add("frigate_MQTT", 'warning', ' => Version < 0.14, mettre à jour votre serveur frigate !');
+            message::add("frigate",__("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           }
@@ -3831,10 +3834,10 @@ class frigateCmd extends cmd
       case 'action_toggle_notifications':
         $this->toggleCameraSetting($frigate, $camera, 'info_notifications', 'notifications/set');
         break;
-        case 'action_start_enabled':
-        case 'action_stop_enabled':
-          $this->publishCameraMessage($camera, 'enabled/set', $logicalId === 'action_start_enabled' ? 'ON' : 'OFF');
-          break;
+      case 'action_start_enabled':
+      case 'action_stop_enabled':
+        $this->publishCameraMessage($camera, 'enabled/set', $logicalId === 'action_start_enabled' ? 'ON' : 'OFF');
+        break;
       case 'action_toggle_enabled':
         $this->toggleCameraSetting($frigate, $camera, 'info_enabled', 'enabled/set');
         break;
