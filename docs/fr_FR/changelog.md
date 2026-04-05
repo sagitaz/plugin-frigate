@@ -4,6 +4,16 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 05/04/2026 Stable 1.5.0
+- Voir ci-dessous les information sur les versions Beta.
+
+# 21/03/2026 Beta 1.4.97
+- Ajout de la commande d'activation des cameras par MQTT
+- Désactivation du cron pour les caméras désactivées
+
+# 21/03/2026 Beta 1.4.96
+- Nettoyage liste des évènements
+
 # 16/03/2026 Beta 1.4.95
 - Nettoyage du nom des commandes de la même façon que Jeedom
 - Correction classification sub_label, j'avais mis un s (sub_labels) 
