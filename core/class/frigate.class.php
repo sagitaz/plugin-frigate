@@ -1444,49 +1444,81 @@ class frigate extends eqLogic
 
   public static function cleanOldestFile()
   {
-    $events = [];
-    $events = frigate_events::getOldestNotFavorite();
+    $totalSizeGain = 0;
+    // On ne récupère que les 5 ou 10 plus vieux pour ne pas saturer la RAM
+    $events = frigate_events::getOldestNotFavorite(5);
+
     if (!empty($events)) {
       foreach ($events as $event) {
-        self::cleanDbEvent($event->getEventId());
+        $totalSizeGain += self::cleanDbEvent($event->getEventId());
       }
     }
+    return $totalSizeGain; // Renvoie par exemple 15.45 (Mo)
   }
 
   // Supprime le plus vieux si dossier plein
   public static function cleanFolderDataIfFull()
   {
-    $maxSize = config::byKey('datas_weight', 'frigate');
-    $size = self::getFolderSize();
-    log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CLEAN:/fg: ═══════════════════");
-    log::add(__CLASS__, 'debug', "║ Taille du dossier : " . $size);
-    log::add(__CLASS__, 'debug', "║ Taille maximale du dossier : " . $maxSize);
+    $maxSize = (float)config::byKey('datas_weight', 'frigate', 500);
+    $currentSize = (float)self::getFolderSize(); // UNIQUE appel lourd au système
 
-    while ($size > $maxSize) {
-      log::add(__CLASS__, 'debug', "║ Le dossier est plein, nettoyage du fichier le plus ancien");
-      self::cleanOldestFile();
-      $size = self::getFolderSize();
-      log::add(__CLASS__, 'debug', "║ Nouvelle taille du dossier : " . $size);
-    }
+    log::add(__CLASS__, 'debug', "║ Taille actuelle : $currentSize Mo / Max : $maxSize Mo");
 
-    if ($size <= $maxSize) {
-      log::add(__CLASS__, 'debug', "║ Le dossier n'est pas plein");
+    $limit = 0;
+    while ($currentSize > $maxSize && $limit < 100) {
+      $removedSize = self::cleanOldestFile();
+
+      if ($removedSize <= 0) {
+        log::add(__CLASS__, 'debug', "║ [Fin] Plus rien à supprimer ou erreur.");
+        break;
+      }
+
+      $currentSize -= $removedSize;
+      $limit++;
+      log::add(__CLASS__, 'debug', "║ Nettoyage en cours... Taille estimée : " . round($currentSize, 2) . " Mo");
     }
-    log::add(__CLASS__, 'debug', "╚════════════════════════ END CLEAN ═══════════════════");
   }
 
 
-  // Fonction qui calcule la taille du dossier data
+
   public static function getFolderSize()
   {
-    $folder = dirname(__FILE__, 3) . "/data";
-    $size = 0;
-    // Parcourt récursivement tous les fichiers et dossiers
-    foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
-      $size += $file->getSize(); // Ajoute la taille du fichier
+    $t0 = microtime(true);
+    $folder = realpath(__DIR__ . '/../../data');
+
+    if (!$folder || !is_dir($folder)) {
+      return 0;
     }
-    $size = round($size / 1024 / 1024, 2);
-    return $size;
+
+    // 1. Tentative via Shell (Rapide)
+    if (function_exists('shell_exec')) {
+      $output = shell_exec('du -s ' . escapeshellarg($folder) . ' 2>/dev/null');
+      if (is_string($output)) {
+        $sizeInKb = (int)trim(explode("\t", $output)[0]);
+        if ($sizeInKb > 0) {
+          $t1 = microtime(true);
+          log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via shell : " . round($sizeInKb / 1024, 2) . " Mo en " . round($t1 - $t0, 2) . "s");
+          return round($sizeInKb / 1024, 2);
+        }
+      }
+    }
+
+    // 2. Fallback PHP (Moins rapide)
+    $size = 0;
+    try {
+      $files = new RecursiveIteratorIterator(
+        new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS),
+        RecursiveIteratorIterator::LEAVES_ONLY
+      );
+      foreach ($files as $file) {
+        $size += $file->getSize();
+      }
+    } catch (Exception $e) {
+      return 0;
+    }
+      $t1 = microtime(true);
+      log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via PHP : " . round($size / (1024 * 1024), 2) . " Mo en " . round($t1 - $t0, 2) . "s");
+    return round($size / (1024 * 1024), 2);
   }
 
   public static function extractID($filename)
@@ -1505,48 +1537,69 @@ class frigate extends eqLogic
   public static function cleanDbEvent($id)
   {
     $frigate = frigate_events::byEventId($id);
+
+    // Sécurité : vérifier si l'objet existe
+    if (!is_object($frigate)) {
+      return 0;
+    }
+
     // Vérifier si le fichier est un favori
     $isFavorite = $frigate->getIsFavorite() ?? 0;
     if ($isFavorite == 1) {
       log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la base de données.");
-    } else {
-      // Recherche si clip et snapshot existent dans le dossier de sauvegarde
-      $clip = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_clip.mp4";
-      $snapshot = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.jpg";
-      $snapshotWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_snapshot.webp";
-      $thumbnail = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.jpg";
-      $thumbnailWebp = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_thumbnail.webp";
-      $preview = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId() . "_preview.gif";
-
-      if (file_exists($clip)) {
-        unlink($clip);
-        log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
-      }
-      if (file_exists($snapshot)) {
-        unlink($snapshot);
-        log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
-      }
-      if (file_exists($snapshotWebp)) {
-        unlink($snapshotWebp);
-        log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
-      }
-      if (file_exists($thumbnail)) {
-        unlink($thumbnail);
-        log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
-      }
-      if (file_exists($thumbnailWebp)) {
-        unlink($thumbnailWebp);
-        log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
-      }
-      if (file_exists($preview)) {
-        unlink($preview);
-        log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
-      }
-
-      $frigate->remove();
-      log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " supprimé de la base de données.");
+      return 0;
     }
-    return true;
+
+    $totalRemovedSize = 0;
+    $basePath = dirname(__FILE__, 3) . "/data/" . $frigate->getCamera() . "/" . $frigate->getEventId();
+
+    // On définit les fichiers à vérifier
+    $files = [
+      'clip' => $basePath . "_clip.mp4",
+      'snapshot' => $basePath . "_snapshot.jpg",
+      'snapshotWebp' => $basePath . "_snapshot.webp",
+      'thumbnail' => $basePath . "_thumbnail.jpg",
+      'thumbnailWebp' => $basePath . "_thumbnail.webp",
+      'preview' => $basePath . "_preview.gif"
+    ];
+
+    // Traitement des fichiers avec récupération de la taille avant suppression
+    if (file_exists($files['clip'])) {
+      $totalRemovedSize += filesize($files['clip']);
+      unlink($files['clip']);
+      log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
+    }
+    if (file_exists($files['snapshot'])) {
+      $totalRemovedSize += filesize($files['snapshot']);
+      unlink($files['snapshot']);
+      log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
+    }
+    if (file_exists($files['snapshotWebp'])) {
+      $totalRemovedSize += filesize($files['snapshotWebp']);
+      unlink($files['snapshotWebp']);
+      log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
+    }
+    if (file_exists($files['thumbnail'])) {
+      $totalRemovedSize += filesize($files['thumbnail']);
+      unlink($files['thumbnail']);
+      log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
+    }
+    if (file_exists($files['thumbnailWebp'])) {
+      $totalRemovedSize += filesize($files['thumbnailWebp']);
+      unlink($files['thumbnailWebp']);
+      log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
+    }
+    if (file_exists($files['preview'])) {
+      $totalRemovedSize += filesize($files['preview']);
+      unlink($files['preview']);
+      log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
+    }
+
+    $frigate->remove();
+    log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " supprimé de la base de données.");
+
+    // On retourne la taille libérée en Mo pour mettre à jour le compteur global du while
+    return $totalRemovedSize / 1024 / 1024;
   }
 
   public static function deleteEvents($ids)
