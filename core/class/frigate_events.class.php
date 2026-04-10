@@ -130,13 +130,14 @@ class frigate_events
 		return 'frigate_events';
 	}
 
-	public static function getOldestNotFavorite()
-	{
+	public static function getOldestNotFavorite($_limit = 10) {
+
 		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
-				FROM frigate_events
-				WHERE isFavorite != 1
-				ORDER BY startTime ASC
-				LIMIT 1;';
+            FROM frigate_events
+            WHERE isFavorite != 1
+            ORDER BY startTime ASC
+            LIMIT ' . (int)$_limit . ';';
+
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
 
