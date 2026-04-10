@@ -127,11 +127,14 @@ class frigate extends eqLogic
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
     if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
       $cmd = $frigate->getCmd(null, 'info_Cron');
-      $enabled = $frigate->getCmd(null, 'info_enabled');
+      $cmdEnabled = $frigate->getCmd(null, 'info_enabled');
       $execute = "1";
-      // Vérification si la commande existe
+      $enabled = "1";
       if (is_object($cmd)) {
         $execute = $cmd->execCmd();
+      }
+      if (is_object($cmdEnabled)) {
+        $enabled = $cmdEnabled->execCmd();
       }
 
       if ($execute == "1" && $enabled == "1") {
