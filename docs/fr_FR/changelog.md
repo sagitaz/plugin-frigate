@@ -6,6 +6,7 @@
 
 # 09/05/2026 Beta 1.5.1
 - Amélioration du processus de nettoyage des évènements
+- Correction maj sur cron via http
 
 # 05/04/2026 Stable 1.5.0
 - Voir ci-dessous les information sur les versions Beta.
