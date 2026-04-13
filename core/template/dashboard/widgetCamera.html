@@ -7,7 +7,7 @@
         <a href="#eqLink#" class="reportModeHidden">#name_display# <span class="object_name">#object_name#</span></a>
 
         <span class="cmd refresh  pull-right cursor" data-cmd_id="#refreshAll_id#">
-            <i class="fas fa-photo-video iconGotoCameraEvents#id#" onclick="gotoPanelEvents#id#()"
+            <i class="fas fa-photo-video iconGotoCameraEvents#id#" onclick="gotoCameraEvents#id#()"
                 title="{{Afficher les évènements de la caméra}}"></i>
             <div class="btn-icon" id="iconAction#id#">
                 <i class="fas fa-tools" title="IA on/off" onclick="toggleToolsOverlay#id#()"></i>
@@ -17,7 +17,7 @@
 
     <div class="column">
         <div class="img-container">
-            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openPanelModal#id#(this)" />
+            <img id="imgFrigate#id#" class="img-responsive" src="" onclick="openModal#id#(this)" />
 
             <div id="cameraDisabled#id#" class="camera-disabled-overlay" style="display:none;">
                 <i class="fas fa-video-slash"></i>
