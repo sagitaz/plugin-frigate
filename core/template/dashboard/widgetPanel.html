@@ -108,7 +108,8 @@
 
             function startImageFetchInterval() {
                 if (!intervalId) {
-                    intervalId = setInterval(refreshImage, #refresh#);
+                    intervalId = setInterval(refreshImage, #refresh#); 
+                    console.log('Interval started for camera #id# with refresh rate: ' + #refresh# + ' ms');   
                 }
             }
 

@@ -528,10 +528,15 @@ function printEqLogic(_eqLogic) {
         observer.observe(imgElement);
 
         function startImageFetchInterval() {
-            const eqRefresh = $('.eqLogicAttr[data-l1key=configuration][data-l2key=normal::refresh]').val();
+            const eqRefresh = $('.eqLogicAttr[data-l1key="configuration"]')
+                .filter(function () {
+                    return $(this).attr('data-l2key') === 'normal::refresh';
+                })
+                .val();
+
             if (eqRefresh && !isNaN(eqRefresh) && eqRefresh > 0) {
                 refresh = eqRefresh * 1000;
-            } 
+            }
             console.log('Refresh interval in milliseconds: ' + refresh);
             if (!intervalId) {
                 intervalId = setInterval(refreshImage, refresh);
