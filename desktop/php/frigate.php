@@ -13,7 +13,6 @@ $urlFrigate = "http://" . $url . ":" . $port;
 sendVarToJS('frigateURL', $urlFrigate);
 $urlExterne = config::byKey('URLexterne', 'frigate');
 sendVarToJS('frigateURLexterne', $urlExterne);
-
 $refresh = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
 sendVarToJS('refresh', $refresh);
 ?>
@@ -207,6 +206,14 @@ sendVarToJS('refresh', $refresh);
                                     <span class="input-group-btn">
                                         <a class="btn btn-default form-control bt_showPass roundedRight"><i class="fas fa-eye"></i></a>
                                     </span>
+                                </div>
+                            </div>
+                            <div class="form-group eqFrigate">
+                                <label class="col-sm-4 control-label">{{Rafraichissement}}
+                                    <sup><i class="fas fa-question-circle tooltips" title="{{Si aucune configuration, la configuration globale est prise en compte.}}"></i></sup>
+                                </label>
+                                <div class="col-sm-6">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="normal::refresh" placeholder="{{en secondes}}">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">

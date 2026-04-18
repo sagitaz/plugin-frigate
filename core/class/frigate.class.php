@@ -408,7 +408,12 @@ class frigate extends eqLogic
     $replace['#cameraName#']      = $this->getConfiguration("name");
     $replace['#imgUrl#']          = $this->getConfiguration("img");
     $replace['#enabled#']         = $this->getCmd('info', 'info_enabled') ? $this->getCmd('info', 'info_enabled')->execCmd() : 1;
-    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
+    
+    if ($this->getConfiguration('normal::refresh') != '') {
+      $replace['#refresh#']       = (float)$this->getConfiguration('normal::refresh') * 1000;
+    } else {
+    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate', 5)) * 1000;
+    }
 
     $replace['#actions#']      = $this->buildActions();
     $replace['#iaActions#'] = $this->buildIaActions();
