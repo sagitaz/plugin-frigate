@@ -2021,33 +2021,33 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
 
-    $update = function ($label, $subtype, $unit, $logicalId, $value) use ($eqlogicId) {
-      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, "", 0, null, 0);
+    $update = function ($label, $subtype, $unit, $logicalId, $genericType, $value) use ($eqlogicId) {
+      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $genericType, 0, null, 0);
       $cmd->save();
       $cmd->event($value ?? '');
       $cmd->save();
     };
 
-    $update("Reconnaissance - Type", "string", "", "info_detection_type", $type);
+    $update("Reconnaissance - Type", "string", "", "info_detection_type", "", $type);
 
     $withNameScore = ['face', 'lpr', 'classification'];
     if (in_array($type, $withNameScore)) {
-      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
-      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
+      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  "", $frigateEvent->getRecognition_name());
+      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", "", $frigateEvent->getRecognition_score());
     }
 
     if ($type === 'description') {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la description : " . $frigateEvent->getRecognition_description());
-      $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
+      $update("Reconnaissance - Description", "string", "", "info_description", "", $frigateEvent->getRecognition_description());
     }
 
     if ($type === 'lpr') {
-      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
+      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", "", $frigateEvent->getRecognition_plate());
     }
 
     if ($type === 'classification') {
-      $update("Reconnaissance - Label", "string", "", "info_detection_subname", $frigateEvent->getRecognition_subname());
-      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", $frigateEvent->getRecognition_attributes());
+      $update("Reconnaissance - Label", "string", "", "info_detection_subname", "", $frigateEvent->getRecognition_subname());
+      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", "", $frigateEvent->getRecognition_attributes());
     }
   }
 
