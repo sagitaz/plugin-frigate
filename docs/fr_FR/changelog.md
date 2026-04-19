@@ -4,10 +4,13 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 13/05/2026 Beta 1.5.2
+# 19/04/2026 Beta 1.5.4
+- Correction du put curl pour l'activation et la désactivation des caméras via API
+
+# 13/04/2026 Beta 1.5.2
 - Correction widget dashboard
 
-# 09/05/2026 Beta 1.5.1
+# 09/04/2026 Beta 1.5.1
 - Amélioration du processus de nettoyage des évènements
 - Correction maj sur cron via http
 

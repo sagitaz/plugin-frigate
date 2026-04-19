@@ -85,7 +85,8 @@ class frigate extends eqLogic
     }
   }
 
-  public static function setConfigEqlogic() {
+  public static function setConfigEqlogic()
+  {
     $eqLogics = self::byType('frigate');
     foreach ($eqLogics as $eqLogic) {
       $refresh = config::byKey('refresh_snapshot', 'frigate', 5);
@@ -433,7 +434,7 @@ class frigate extends eqLogic
     if ($this->getConfiguration('normal::refresh') != '') {
       $replace['#refresh#']       = (float)$this->getConfiguration('normal::refresh') * 1000;
     } else {
-    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate', 5)) * 1000;
+      $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate', 5)) * 1000;
     }
 
     $replace['#actions#']      = $this->buildActions();
@@ -740,8 +741,19 @@ class frigate extends eqLogic
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
     }
 
+    // log de la commande curl
+    $curl_cmd = "curl -k -X " . $method;
+    if ($method !== 'DELETE') {
+      $curl_cmd .= " -H 'Content-Type: application/json'";
+      $curl_cmd .= " -d '" . json_encode($params) . "'";
+    }
+    $curl_cmd .= " '" . $url . "'";
+    log::add(__CLASS__, 'debug', "║ Commande exécutée : " . $curl_cmd);
+    // Fin du log
+
     $data = curl_exec($ch);
 
+    log::add(__CLASS__, 'debug', "║ Réponse reçue : " . $data);
     if (curl_errno($ch)) {
       log::add(__CLASS__, "error", "║ Erreur getcURL (" . $method . "): " . curl_error($ch));
       return null;
@@ -759,6 +771,9 @@ class frigate extends eqLogic
 
   private static function putcURL($function, $url, $params = null, $decodeJson = true)
   {
+    if (empty($params)) {
+      $params = new stdClass();
+    }
     return self::getcURL($function, $url, $params, $decodeJson, 'PUT');
   }
 
@@ -1545,8 +1560,8 @@ class frigate extends eqLogic
     } catch (Exception $e) {
       return 0;
     }
-      $t1 = microtime(true);
-      log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via PHP : " . round($size / (1024 * 1024), 2) . " Mo en " . round($t1 - $t0, 2) . "s");
+    $t1 = microtime(true);
+    log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via PHP : " . round($size / (1024 * 1024), 2) . " Mo en " . round($t1 - $t0, 2) . "s");
     return round($size / (1024 * 1024), 2);
   }
 
@@ -3190,7 +3205,7 @@ class frigate extends eqLogic
           if (version_compare($version, "0.14", "<")) {
             log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
             log::add("frigate_MQTT", 'warning', ' => Version < 0.14, mettre à jour votre serveur frigate !');
-            message::add("frigate",__("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
+            message::add("frigate", __("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           }
