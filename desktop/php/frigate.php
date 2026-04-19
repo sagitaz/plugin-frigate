@@ -212,8 +212,11 @@ sendVarToJS('refresh', $refresh);
                                 <label class="col-sm-4 control-label">{{Rafraichissement}}
                                     <sup><i class="fas fa-question-circle tooltips" title="{{Si aucune configuration, la configuration globale est prise en compte.}}"></i></sup>
                                 </label>
-                                <div class="col-sm-6">
-                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="normal::refresh" placeholder="{{en secondes}}">
+                                <div class="col-sm-3">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="normal::refresh" placeholder="{{Dashboard et Panel}}">
+                                </div>
+                                <div class="col-sm-3">
+                                    <input type="text" class="eqLogicAttr form-control" data-l1key="configuration" data-l2key="normal::mobilerefresh" placeholder="{{Jeemate}}">
                                 </div>
                             </div>
                             <div class="form-group eqFrigate">

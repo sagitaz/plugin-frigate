@@ -84,6 +84,22 @@ class frigate extends eqLogic
       }
     }
   }
+
+  public static function setConfigEqlogic() {
+    $eqLogics = self::byType('frigate');
+    foreach ($eqLogics as $eqLogic) {
+      $refresh = config::byKey('refresh_snapshot', 'frigate', 5);
+      if ($eqLogic->getConfiguration('normal::refresh') === null) {
+        $eqLogic->setConfiguration('normal::refresh', $refresh);
+        $eqLogic->save();
+      }
+      if ($eqLogic->getConfiguration('normal::mobilerefresh') === null) {
+        $eqLogic->setConfiguration('normal::mobilerefresh', $refresh);
+        $eqLogic->save();
+      }
+    }
+  }
+
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CRON:/fg: ════════════════════════");
