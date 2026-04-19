@@ -423,8 +423,13 @@ class frigate extends eqLogic
     $replace['#cameraEqlogicId#'] = $this->getLogicalId();
     $replace['#cameraName#']      = $this->getConfiguration("name");
     $replace['#imgUrl#']          = $this->getConfiguration("img");
-    $replace['#enabled#']         = $this->getCmd('info', 'info_enabled') ? $this->getCmd('info', 'info_enabled')->execCmd() : 1;
-    
+    $enabledCmd = $this->getCmd('info', 'info_enabled');
+    if ($enabledCmd) {
+      $value = $enabledCmd->execCmd();
+      $replace['#enabled#'] = ($value !== null && $value !== '') ? $value : 1;
+    } else {
+      $replace['#enabled#'] = 1;
+    }
     if ($this->getConfiguration('normal::refresh') != '') {
       $replace['#refresh#']       = (float)$this->getConfiguration('normal::refresh') * 1000;
     } else {
