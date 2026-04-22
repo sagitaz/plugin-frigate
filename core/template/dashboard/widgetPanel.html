@@ -108,8 +108,8 @@
 
             function startImageFetchInterval() {
                 if (!intervalId) {
-                    intervalId = setInterval(refreshImage, #refresh#); 
-                    console.log('Interval started for camera #id# with refresh rate: ' + #refresh# + ' ms');   
+                    intervalId = setInterval(refreshImage, #refresh#);
+                    console.log('Interval started for camera #id# with refresh rate: ' + #refresh# + ' ms');
                 }
             }
 
@@ -229,7 +229,7 @@
             position: relative !important;
             text-align: center;
             background-color: rgb(var(--defaultBkg-color)) !important;
-            z-index: 98;
+            z-index: 100;
             margin-top: 0px;
         }
 
@@ -297,7 +297,7 @@
         .frigate_widget .btn-ptz-stop {
             position: absolute;
             text-align: center;
-            z-index: 0;
+            z-index: 99;
         }
 
         .frigate_widget .btn-ptz-left {
@@ -355,7 +355,7 @@
         .frigate_widget .btn-ptz-zoom-out {
             position: absolute;
             text-align: center;
-            z-index: 100;
+            z-index: 89;
             width: 20px;
             height: 20px;
             background-color: rgba(0, 0, 0, 0.5);
@@ -499,11 +499,11 @@
             position: absolute;
             inset: 0;
             background-color: rgb(var(--defaultBkg-color));
-          	opacity: 0.9;
+            opacity: 0.95;
             width: 435px !important;
             height: 300px !important;
             display: none;
-            z-index: 20;
+            z-index: 90;
             border-radius: inherit;
         }
 
@@ -558,7 +558,7 @@
             justify-content: center;
             gap: 12px;
             background-color: rgb(var(--defaultBkg-color));
-            z-index: 5;
+            z-index: 80;
             color: rgb(var(--defaultText-color));
         }
 
