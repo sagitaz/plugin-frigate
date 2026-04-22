@@ -510,7 +510,7 @@ class frigate extends eqLogic
     return $html;
   }
 
-  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label): string
+  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label, string $title = ''): string
   {
     $on   = $this->getCmd('action', $startLogical);
     $off  = $this->getCmd('action', $stopLogical);
@@ -523,18 +523,19 @@ class frigate extends eqLogic
     $cmdId    = $isActive ? $off->getId() : $on->getId();
 
     return '<div class="ia-toggle-row">'
-      . '<span class="ia-toggle-label">' . $label . '</span>'
+      . '<span class="ia-toggle-label" title="' . $title . '">' . $label . '</span>'
       . '<i class="' . ($isActive ? 'fas fa-toggle-on' : 'fas fa-toggle-off') . ' ia-toggle-icon" onclick="execAction(' . $cmdId . ')"></i>'
       . '</div>';
   }
 
   private function buildIaActions(): string
   {
-    return $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Review alerts}}')
-      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
-      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
-      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}')
-      . $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activations}}');
+    return 
+        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '')
+      . $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Activités : alertes}}', '{{Active ou désactive temporairement les alertes pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
+      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Activités : détections}}', '{{Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
+      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Descriptions des activités}}', '{{Activez ou désactivez temporairement les descriptions d\'activités par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.}}')
+      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Descriptions d\'objets}}', '{{Activez ou désactivez temporairement les descriptions par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra.}}');
   }
   private function buildDetectNow(): string
   {
