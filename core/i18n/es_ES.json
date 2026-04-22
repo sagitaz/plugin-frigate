@@ -5,23 +5,36 @@
         "Impossible de trouver la camera : ": "Imposible encontrar la cámara:"
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
+        "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Activa o desactiva temporalmente las alertas y las detecciones de esta cámara hasta que se reinicie Frigate. Cuando esta opción está desactivada, no se genera ninguna actividad nueva.",
+        "Active ou désactive temporairement les alertes pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Activa o desactiva temporalmente las alertas de esta cámara hasta que se reinicie Frigate. Cuando esta opción está desactivada, no se genera ninguna actividad nueva.",
+        "Activer la caméra": "Activar la cámara",
+        "Activez ou désactivez temporairement les descriptions d\\'activités par IA générative jusqu\\'au redémarrage. Si désactivé, l\\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.": "Activa o desactiva temporalmente las descripciones de actividades mediante IA generativa hasta el reinicio. Si se desactiva, ya no se utilizará la IA para describir las actividades en esta cámara.",
+        "Activez ou désactivez temporairement les descriptions par IA générative jusqu\\'au redémarrage. Si désactivé, l\\'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra.": "Activa o desactiva temporalmente las descripciones generadas por IA hasta el siguiente reinicio. Si se desactiva, ya no se utilizará la IA para describir los objetos que se siguen en esta cámara.",
+        "Activités : alertes": "Actividades: alertas",
+        "Activités : détections": "Actividades: sistemas de detección",
         "Arrêt du démon Frigate": "Detención del demonio Frigate",
         "Créer un évènement": "Crear un evento",
         "Créer une capture": "Crear una captura",
+        "Descriptions d\\'objets": "Descripciones de objetos",
+        "Descriptions des activités": "Descripción de las actividades",
+        "Désactive temporairement la caméra jusqu\\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\\'enregistrement et le débogage deviennent alors indisponibles.": "Desactiva temporalmente la cámara hasta que se reinicie Frigate. La desactivación interrumpe por completo el procesamiento de las transmisiones de la cámara por parte de Frigate. La detección, la grabación y la depuración dejan entonces de estar disponibles.",
         "Informations reçues de MQTT Manager": "Información recibida de MQTT Manager",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "El evento es un favorito y no se puede borrar de la BD.",
         "Le démon MQTT Manager n\\'est pas démarré": "El demonio MQTT Manager no se ha iniciado",
         "Le plugin MQTT Manager n\\'est pas installé": "El plugin MQTT Manager no está instalado",
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Gracias por instalar el plugin. Si necesita ayuda, póngase en contacto con el soporte en Discord o en la Comunidad.",
+        "Mise à jour des commandes, évènements et statistiques terminée.": "Actualización de pedidos, eventos y estadísticas completada.",
         "Topic mqtt pour Frigate non défini.": "Tema mqtt para Fragata no definido.",
         "Veuillez vérifier la configuration": "Compruebe la configuración",
         "action": "acción"
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
-        "Afficher les évènements de la caméra": "Ver eventos de la cámara"
+        "Afficher les évènements de la caméra": "Ver eventos de la cámara",
+        "La caméra est désactivée.": "La cámara está desactivada."
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetPanel.html": {
-        "Afficher les évènements de la caméra": "Ver eventos de la cámara"
+        "Afficher les évènements de la caméra": "Ver eventos de la cámara",
+        "La caméra est désactivée.": "La cámara está desactivada."
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Recuperada la configuración del servidor Frigate.",
@@ -46,6 +59,7 @@
         "Affichage des logs du serveur Frigate": "Visualización de los registros del servidor Frigate",
         "Afficher": "Mostrar",
         "Ajouter une commande HTTP": "Añadir un comando HTTP",
+        "Aucun nouveau équipement caméra découvert": "No se han detectado nuevas cámaras",
         "Aucune URL externe n\\'est configurée.": "No se ha configurado ninguna URL externa.",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Marque la casilla para que la acción se ejecute en paralelo con las demás acciones",
         "Cocher la case pour que l\\'action s\\'exécute malgré la condition générale": "Marque la casilla para que la acción se ejecute a pesar del estado general",
@@ -160,6 +174,7 @@
         "Configuration Frigate": "Configuración de fragatas",
         "Configuration avancée": "Configuración avanzada",
         "Convertir en WEBP": "Convertir a WEBP",
+        "Dashboard et Panel": "Panel de control y panel",
         "Disponible seulement depuis une connexion interne": "Disponible sólo desde una conexión interna",
         "Dupliquer": "Duplicar",
         "Editer le fichier de configuration Frigate": "Editar el archivo de configuración de Frigate",
@@ -175,6 +190,7 @@
         "Identifiant": "IDENTIFICACIÓN",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "ID de acceso para su cámara, sólo para comandos HTTP",
         "Infos": "Información",
+        "Jeemate": "Jeemate",
         "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "La condición general tiene prioridad sobre las condiciones de acción. Marque la casilla para ignorarla",
         "Lien vers votre flux vidéo": "Enlace a su flujo de vídeo",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Enlace a su flujo de vídeo si el predeterminado no es adecuado. consulte la documentación.",
@@ -196,11 +212,13 @@
         "Posez vos questions dans le salon dédié, support officiel": "Haga sus preguntas en la sala dedicada, soporte oficial",
         "Position sur le panel": "Posición en el panel",
         "Qualité des snapshots": "Calidad de las instantáneas",
+        "Rafraichissement": "Actualización",
         "Rechercher": "Buscar",
         "Rechercher \/ MAJ": "Buscar \/ Actualizar",
         "Redémarrer Frigate": "Reiniciar Fragata",
         "Sauvegarder": "Para salvaguardar",
         "Serveur Frigate": "Servidor Frigate",
+        "Si aucune configuration, la configuration globale est prise en compte.": "Si no hay ninguna configuración, se aplica la configuración global.",
         "Si la condition est vraie alors les actions ne seront pas exécutées": "Si la condición es verdadera, las acciones no se ejecutarán",
         "Statistiques": "Estadísticas",
         "Supprimer": "Eliminar",
@@ -227,7 +245,6 @@
     "plugins\/frigate\/desktop\/php\/panel.php": {
         "401 - Accès non autorisé": "401 - Acceso no autorizado",
         "créer un nouvel évènement": "crear un nuevo evento",
-        "supprimer": "borrar",
         "supprimer tous les évènements visibles": "borrar todos los eventos visibles"
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
