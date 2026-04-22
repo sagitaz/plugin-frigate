@@ -531,7 +531,7 @@ class frigate extends eqLogic
   private function buildIaActions(): string
   {
     return 
-        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '')
+        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '{{Désactive temporairement la caméra jusqu\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\'enregistrement et le débogage deviennent alors indisponibles.}}')
       . $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Activités : alertes}}', '{{Active ou désactive temporairement les alertes pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
       . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Activités : détections}}', '{{Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
       . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Descriptions des activités}}', '{{Activez ou désactivez temporairement les descriptions d\'activités par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.}}')
