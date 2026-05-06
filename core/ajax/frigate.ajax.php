@@ -174,7 +174,8 @@ try {
     }
 
     if (init('action') == 'frigateDebug') {
-        $data = frigate_events::all(false, true);
+        $data = frigate::showEvents(false, true);
+
         ajax::success(array(
             "object" => $data,
             "json" => json_encode($data),
