@@ -5,23 +5,36 @@
         "Impossible de trouver la camera : ": "I can't find the camera:"
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
+        "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Temporarily makes alerts and detections active or disables them for this camera until Frigate is restarted. When this option is disabled, no new activity is generated.",
+        "Active ou désactive temporairement les alertes pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Temporarily makes alerts active or disables them for this camera until Frigate is restarted. When this option is disabled, no new activity is generated.",
+        "Activer la caméra": "Turn on the camera",
+        "Activez ou désactivez temporairement les descriptions d\\'activités par IA générative jusqu\\'au redémarrage. Si désactivé, l\\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.": "Temporarily enable or disable generative AI activity descriptions until the next reboot. If disabled, the AI will no longer be used to describe activities on this camera.",
+        "Activez ou désactivez temporairement les descriptions par IA générative jusqu\\'au redémarrage. Si désactivé, l\\'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra.": "Temporarily enable or disable generative AI descriptions until the next reboot. If disabled, the AI will no longer be used to describe objects tracked by this camera.",
+        "Activités : alertes": "Activities: alerts",
+        "Activités : détections": "Activities: detection",
         "Arrêt du démon Frigate": "Stopping the Frigate daemon",
         "Créer un évènement": "Create an event",
         "Créer une capture": "Create a capture",
+        "Descriptions d\\'objets": "Object descriptions",
+        "Descriptions des activités": "Activity Descriptions",
+        "Désactive temporairement la caméra jusqu\\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\\'enregistrement et le débogage deviennent alors indisponibles.": "Temporarily disables the camera until Frigate is restarted. Disabling the camera completely stops Frigate from processing the camera streams. Detection, recording, and debugging are then unavailable.",
         "Informations reçues de MQTT Manager": "Information received from MQTT Manager",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "The event is a favorite and cannot be deleted from the DB.",
         "Le démon MQTT Manager n\\'est pas démarré": "MQTT Manager daemon not started",
         "Le plugin MQTT Manager n\\'est pas installé": "The MQTT Manager plugin is not installed",
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Thank you for installing the plugin. If you need help, please contact support on Discord or on Community.",
+        "Mise à jour des commandes, évènements et statistiques terminée.": "Update of commands, events, and statistics complete.",
         "Topic mqtt pour Frigate non défini.": "Topic mqtt for Frigate not defined.",
         "Veuillez vérifier la configuration": "Please check configuration",
         "action": "action"
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetCamera.html": {
-        "Afficher les évènements de la caméra": "View camera events"
+        "Afficher les évènements de la caméra": "View camera events",
+        "La caméra est désactivée.": "The camera is turned off."
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetPanel.html": {
-        "Afficher les évènements de la caméra": "View camera events"
+        "Afficher les évènements de la caméra": "View camera events",
+        "La caméra est désactivée.": "The camera is turned off."
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Frigate server configuration retrieved.",
@@ -46,6 +59,7 @@
         "Affichage des logs du serveur Frigate": "View Frigate server logs",
         "Afficher": "Show",
         "Ajouter une commande HTTP": "Add an HTTP command",
+        "Aucun nouveau équipement caméra découvert": "No new camera equipment found",
         "Aucune URL externe n\\'est configurée.": "No external URL is configured.",
         "Cocher la case pour que l\\'action s\\'exécute en parallèle des autres actions": "Check the box if you want the action to run in parallel with the other actions",
         "Cocher la case pour que l\\'action s\\'exécute malgré la condition générale": "Check the box if you want the action to be executed despite the general condition",
@@ -160,6 +174,7 @@
         "Configuration Frigate": "Frigate configuration",
         "Configuration avancée": "Advanced configuration",
         "Convertir en WEBP": "Convert to WEBP",
+        "Dashboard et Panel": "Dashboard and Panel",
         "Disponible seulement depuis une connexion interne": "Available only from an internal connection",
         "Dupliquer": "Duplicate",
         "Editer le fichier de configuration Frigate": "Edit Frigate configuration file",
@@ -175,6 +190,8 @@
         "Identifiant": "ID",
         "Identifiant d'accès a votre caméra, seulement pour les commandes HTTP": "Camera access ID, for HTTP commands only",
         "Infos": "News",
+        "Jeemate": "Jeemate",
+        "Json": "JSON",
         "La condition générale est prioritaire sur les conditions d'action, cocher la checkbox pour l'ignorer": "The general condition takes precedence over the action conditions. Check the checkbox to ignore it",
         "Lien vers votre flux vidéo": "Link to your video stream",
         "Lien vers votre flux vidéo si celui par défaut ne convient pas. voir documentation.": "Link to your video stream if the default one is not suitable. see documentation.",
@@ -196,16 +213,19 @@
         "Posez vos questions dans le salon dédié, support officiel": "Ask your questions in the dedicated lounge, official support",
         "Position sur le panel": "Position on the panel",
         "Qualité des snapshots": "Snapshot quality",
+        "Rafraichissement": "Refresh",
         "Rechercher": "Search",
         "Rechercher \/ MAJ": "Search \/ Update",
         "Redémarrer Frigate": "Restart Frigate",
         "Sauvegarder": "Save",
         "Serveur Frigate": "Frigate server",
+        "Si aucune configuration, la configuration globale est prise en compte.": "If no configuration is specified, the global configuration is used.",
         "Si la condition est vraie alors les actions ne seront pas exécutées": "If the condition is true, then the actions will not be executed",
         "Statistiques": "Statistics",
         "Supprimer": "Delete",
         "Template dashboard": "Dashboard template",
         "Template panel": "Template panel",
+        "Télécharger le JSON de tous les événements": "Download the JSON file containing all events",
         "Valeur": "Value",
         "Visible": "Visible",
         "Visualisation": "Visualization",
@@ -227,7 +247,6 @@
     "plugins\/frigate\/desktop\/php\/panel.php": {
         "401 - Accès non autorisé": "401 - Unauthorized access",
         "créer un nouvel évènement": "create a new event",
-        "supprimer": "delete",
         "supprimer tous les évènements visibles": "delete all visible events"
     },
     "plugins\/frigate\/plugin_info\/configuration.php": {
