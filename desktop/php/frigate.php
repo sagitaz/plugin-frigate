@@ -67,6 +67,11 @@ sendVarToJS('refresh', $refresh);
                 <br>
                 <span>{{Logs Frigate}}</span>
             </div>
+            <div class="cursor eqLogicAction" id="frigateDebug" title="{{Télécharger le JSON de tous les événements}}.">
+                <i class="fas fa-file"></i>
+                <br>
+                <span>{{Json}}</span>
+            </div>
         </div>
 
         <?php

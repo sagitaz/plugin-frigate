@@ -302,7 +302,8 @@ class frigate extends eqLogic
   public function preUpdate() {}
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
-  public function postUpdate() {}
+  public function postUpdate() {
+    }
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
