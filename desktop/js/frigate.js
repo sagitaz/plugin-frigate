@@ -528,9 +528,24 @@ function printEqLogic(_eqLogic) {
         observer.observe(imgElement);
 
         function startImageFetchInterval() {
-            if (!intervalId) {
-                intervalId = setInterval(refreshImage, refresh);
+            const eqRefresh = $('.eqLogicAttr[data-l1key="configuration"]')
+                .filter(function () {
+                    return $(this).attr('data-l2key') === 'normal::refresh';
+                })
+                .val();
+            refreshSnap = refresh;
+            if (eqRefresh && !isNaN(eqRefresh) && eqRefresh > 0) {
+                refreshSnap = eqRefresh * 1000;
             }
+
+            // On arrête toujours l'intervalle existant avant d'en créer un nouveau
+            if (intervalId) {
+                clearInterval(intervalId);
+                intervalId = null;
+            }
+
+            console.log('Refresh interval in milliseconds: ' + refreshSnap);
+            intervalId = setInterval(refreshImage, refreshSnap);
         }
 
         function stopImageFetchInterval() {
@@ -657,12 +672,12 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
 
                     },
                     dataType: 'json',
-        error: function (error) {
-            jeedomUtils.showAlert({
-                message: error.message,
-                level: 'danger'
-            });
-        },
+                    error: function (error) {
+                        jeedomUtils.showAlert({
+                            message: error.message,
+                            level: 'danger'
+                        });
+                    },
                     success: function (data) {
                         jeedomUtils.showAlert({
                             message: '{{Création de la commande réussie.}}',
@@ -671,6 +686,31 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
                     }
                 })
             }
+        }
+    })
+});
+
+document.getElementById('frigateDebug').addEventListener('click', function () {
+    domUtils.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "frigateDebug",
+            data: { function: "getAllEvents" }
+        },
+        dataType: 'json',
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
+        success: function (data) {
+            var json = data.result.json;
+            const blob = new Blob([json], {
+                type: "text/plain;charset=utf-8"
+            });
+            saveAs(blob, "getAllEvents.json.txt");
         }
     })
 });
@@ -698,12 +738,12 @@ function editHTTP(cmd) {
 
                     },
                     dataType: 'json',
-        error: function (error) {
-            jeedomUtils.showAlert({
-                message: error.message,
-                level: 'danger'
-            });
-        },
+                    error: function (error) {
+                        jeedomUtils.showAlert({
+                            message: error.message,
+                            level: 'danger'
+                        });
+                    },
                     success: function (data) {
                         jeedomUtils.showAlert({
                             message: '{{Modification de la commande réussie.}}',

@@ -84,6 +84,23 @@ class frigate extends eqLogic
       }
     }
   }
+
+  public static function setConfigEqlogic()
+  {
+    $eqLogics = self::byType('frigate');
+    foreach ($eqLogics as $eqLogic) {
+      $refresh = config::byKey('refresh_snapshot', 'frigate', 5);
+      if ($eqLogic->getConfiguration('normal::refresh') === null) {
+        $eqLogic->setConfiguration('normal::refresh', $refresh);
+        $eqLogic->save();
+      }
+      if ($eqLogic->getConfiguration('normal::mobilerefresh') === null) {
+        $eqLogic->setConfiguration('normal::mobilerefresh', $refresh);
+        $eqLogic->save();
+      }
+    }
+  }
+
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CRON:/fg: ════════════════════════");
@@ -285,7 +302,8 @@ class frigate extends eqLogic
   public function preUpdate() {}
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
-  public function postUpdate() {}
+  public function postUpdate() {
+    }
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
@@ -407,8 +425,18 @@ class frigate extends eqLogic
     $replace['#cameraEqlogicId#'] = $this->getLogicalId();
     $replace['#cameraName#']      = $this->getConfiguration("name");
     $replace['#imgUrl#']          = $this->getConfiguration("img");
-    $replace['#enabled#']         = $this->getCmd('info', 'info_enabled') ? $this->getCmd('info', 'info_enabled')->execCmd() : 1;
-    $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate')) * 1000;
+    $enabledCmd = $this->getCmd('info', 'info_enabled');
+    if ($enabledCmd) {
+      $value = $enabledCmd->execCmd();
+      $replace['#enabled#'] = ($value !== null && $value !== '') ? $value : 1;
+    } else {
+      $replace['#enabled#'] = 1;
+    }
+    if ($this->getConfiguration('normal::refresh') != '') {
+      $replace['#refresh#']       = (float)$this->getConfiguration('normal::refresh') * 1000;
+    } else {
+      $replace['#refresh#']         = (float)(config::byKey('refresh_snapshot', 'frigate', 5)) * 1000;
+    }
 
     $replace['#actions#']      = $this->buildActions();
     $replace['#iaActions#'] = $this->buildIaActions();
@@ -483,7 +511,7 @@ class frigate extends eqLogic
     return $html;
   }
 
-  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label): string
+  private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label, string $title = ''): string
   {
     $on   = $this->getCmd('action', $startLogical);
     $off  = $this->getCmd('action', $stopLogical);
@@ -496,18 +524,19 @@ class frigate extends eqLogic
     $cmdId    = $isActive ? $off->getId() : $on->getId();
 
     return '<div class="ia-toggle-row">'
-      . '<span class="ia-toggle-label">' . $label . '</span>'
+      . '<span class="ia-toggle-label" title="' . $title . '">' . $label . '</span>'
       . '<i class="' . ($isActive ? 'fas fa-toggle-on' : 'fas fa-toggle-off') . ' ia-toggle-icon" onclick="execAction(' . $cmdId . ')"></i>'
       . '</div>';
   }
 
   private function buildIaActions(): string
   {
-    return $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Review alerts}}')
-      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Review detections}}')
-      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Review descriptions}}')
-      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Object descriptions}}')
-      . $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activations}}');
+    return 
+        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '{{Désactive temporairement la caméra jusqu\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\'enregistrement et le débogage deviennent alors indisponibles.}}')
+      . $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Activités : alertes}}', '{{Active ou désactive temporairement les alertes pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
+      . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Activités : détections}}', '{{Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
+      . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Descriptions des activités}}', '{{Activez ou désactivez temporairement les descriptions d\'activités par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.}}')
+      . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Descriptions d\'objets}}', '{{Activez ou désactivez temporairement les descriptions par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra.}}');
   }
   private function buildDetectNow(): string
   {
@@ -714,8 +743,19 @@ class frigate extends eqLogic
       curl_setopt($ch, CURLOPT_CUSTOMREQUEST, $method);
     }
 
+    // log de la commande curl
+    $curl_cmd = "curl -k -X " . $method;
+    if ($method !== 'DELETE') {
+      $curl_cmd .= " -H 'Content-Type: application/json'";
+      $curl_cmd .= " -d '" . json_encode($params) . "'";
+    }
+    $curl_cmd .= " '" . $url . "'";
+    log::add(__CLASS__, 'debug', "║ Commande exécutée : " . $curl_cmd);
+    // Fin du log
+
     $data = curl_exec($ch);
 
+    log::add(__CLASS__, 'debug', "║ Réponse reçue : " . $data);
     if (curl_errno($ch)) {
       log::add(__CLASS__, "error", "║ Erreur getcURL (" . $method . "): " . curl_error($ch));
       return null;
@@ -733,6 +773,9 @@ class frigate extends eqLogic
 
   private static function putcURL($function, $url, $params = null, $decodeJson = true)
   {
+    if (empty($params)) {
+      $params = new stdClass();
+    }
     return self::getcURL($function, $url, $params, $decodeJson, 'PUT');
   }
 
@@ -1519,8 +1562,8 @@ class frigate extends eqLogic
     } catch (Exception $e) {
       return 0;
     }
-      $t1 = microtime(true);
-      log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via PHP : " . round($size / (1024 * 1024), 2) . " Mo en " . round($t1 - $t0, 2) . "s");
+    $t1 = microtime(true);
+    log::add(__CLASS__, 'debug', "║ Taille du dossier calculée via PHP : " . round($size / (1024 * 1024), 2) . " Mo en " . round($t1 - $t0, 2) . "s");
     return round($size / (1024 * 1024), 2);
   }
 
@@ -1635,44 +1678,55 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
     return "OK";
   }
-  public static function showEvents()
+  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
   {
     $result = [];
-    $events = frigate_events::all();
+
+    $events = frigate_events::all($_onlyEnable, $_allType);
 
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
-      $box = $event->getBox();
-      $boxArray = is_array($box) ? $box : json_decode($box, true);
 
       $result[] = array(
-        "id" => $event->getId(),
-        "img" => $event->getLasted(),
-        "camera" => $event->getCamera(),
-        "label" => $event->getLabel(),
-        "box" => $boxArray,
-        "date" => $date,
-        "duree" => $duree,
-        "startTime" => $event->getStartTime(),
-        "endTime" => $event->getEndTime(),
-        "snapshot" => $event->getSnapshot(),
-        "clip" => $event->getClip(),
-        "thumbnail" => $event->getThumbnail(),
-        "hasSnapshot" => $event->getHasSnapshot(),
-        "hasClip" => $event->getHasClip(),
-        "eventId" => $event->getEventId(),
-        "score" => $event->getScore(),
-        "top_score" => $event->getTopScore(),
-        "type" => $event->getType(),
-        "isFavorite" => $event->getIsFavorite() ?? 0,
-        "zones" => $event->getZones() ?? '',
-        "description" => $event->getRecognition_description()
+        "id"           => $event->getId(),
+        "eventId"      => $event->getEventId(),
+        "img"          => $event->getLasted(),
+        "camera"       => $event->getCamera(),
+        "label"        => $event->getLabel(),
+        "subLabel"     => $event->getSubLabel(),
+        "box"          => json_decode($event->getBox(), true),
+        "date"         => $date,
+        "duree"        => $duree,
+        "startTime"    => $event->getStartTime(),
+        "endTime"      => $event->getEndTime(),
+        "falsePositive" => $event->getFalsePositive(),
+        "snapshot"     => $event->getSnapshot(),
+        "clip"         => $event->getClip(),
+        "thumbnail"    => $event->getThumbnail(),
+        "hasSnapshot"  => $event->getHasSnapshot(),
+        "hasClip"      => $event->getHasClip(),
+        "score"        => $event->getScore(),
+        "top_score"     => $event->getTopScore(),
+        "plusId"       => $event->getPlusId(),
+        "retain"       => $event->getRetain(),
+        "type"         => $event->getType(),
+        "isFavorite"   => $event->getIsFavorite() ?? 0,
+        "zones"        => $event->getZones() ?? '',
+        "data"         => $event->getData(),
+        "recognition_type"        => $event->getRecognition_type(),
+        "description" => $event->getRecognition_description(),
+        "recognition_name"        => $event->getRecognition_name(),
+        "recognition_subname"     => $event->getRecognition_subname(),
+        "recognition_attributes"  => $event->getRecognition_attributes(),
+        "recognition_plate"       => $event->getRecognition_plate(),
+        "recognition_score"       => $event->getRecognition_score()
       );
     }
 
-    usort($result, [self::class, 'orderByDate']);
-
+    if (!empty($result)) {
+      usort($result, 'frigate::orderByDate');
+    }
 
     return $result;
   }
@@ -2021,33 +2075,33 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
 
-    $update = function ($label, $subtype, $unit, $logicalId, $value) use ($eqlogicId) {
-      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, "", 0, null, 0);
+    $update = function ($label, $subtype, $unit, $logicalId, $genericType, $value) use ($eqlogicId) {
+      $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $genericType, 0, null, 0);
       $cmd->save();
       $cmd->event($value ?? '');
       $cmd->save();
     };
 
-    $update("Reconnaissance - Type", "string", "", "info_detection_type", $type);
+    $update("Reconnaissance - Type", "string", "", "info_detection_type", "", $type);
 
     $withNameScore = ['face', 'lpr', 'classification'];
     if (in_array($type, $withNameScore)) {
-      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  $frigateEvent->getRecognition_name());
-      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", $frigateEvent->getRecognition_score());
+      $update("Reconnaissance - Nom",   "string",  "",  "info_detection_name",  "", $frigateEvent->getRecognition_name());
+      $update("Reconnaissance - Score", "numeric", "%", "info_detection_score", "", $frigateEvent->getRecognition_score());
     }
 
     if ($type === 'description') {
       log::add(__CLASS__, 'debug', "║ Mise à jour de la description : " . $frigateEvent->getRecognition_description());
-      $update("Reconnaissance - Description", "string", "", "info_description", $frigateEvent->getRecognition_description());
+      $update("Reconnaissance - Description", "string", "", "info_description", "", $frigateEvent->getRecognition_description());
     }
 
     if ($type === 'lpr') {
-      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", $frigateEvent->getRecognition_plate());
+      $update("Reconnaissance - Plaque d'immatriculation", "string", "", "info_plate", "", $frigateEvent->getRecognition_plate());
     }
 
     if ($type === 'classification') {
-      $update("Reconnaissance - Label", "string", "", "info_detection_subname", $frigateEvent->getRecognition_subname());
-      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", $frigateEvent->getRecognition_attributes());
+      $update("Reconnaissance - Label", "string", "", "info_detection_subname", "", $frigateEvent->getRecognition_subname());
+      $update("Reconnaissance - Attributs", "string", "", "info_detection_attributes", "", $frigateEvent->getRecognition_attributes());
     }
   }
 
@@ -3164,7 +3218,7 @@ class frigate extends eqLogic
           if (version_compare($version, "0.14", "<")) {
             log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
             log::add("frigate_MQTT", 'warning', ' => Version < 0.14, mettre à jour votre serveur frigate !');
-            message::add("frigate",__("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
+            message::add("frigate", __("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           }

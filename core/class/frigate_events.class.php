@@ -57,13 +57,25 @@ class frigate_events
 	/**
 	 * @throws Exception
 	 */
-	public static function all(bool $_onlyEnable = FALSE)
+	public static function all(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
 	{
-		$sql = 'SELECT ' . DB::buildField(__CLASS__) . '
-		FROM frigate_events
-		WHERE type IS NOT NULL';
+		$sql = 'SELECT ' . DB::buildField(__CLASS__) . ' FROM frigate_events';
+		$where = [];
+
+		if (!$_allType) {
+			$where[] = 'type IS NOT NULL';
+		}
+		if ($_onlyEnable) {
+			$where[] = 'enabled = 1';
+		}
+		if (!empty($where)) {
+			$sql .= ' WHERE ' . implode(' AND ', $where);
+		}
+
 		return DB::Prepare($sql, array(), DB::FETCH_TYPE_ALL, PDO::FETCH_CLASS, __CLASS__);
 	}
+
+	
 
 	/**
 	 * @throws Exception
