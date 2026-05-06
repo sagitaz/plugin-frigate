@@ -4,7 +4,10 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
-# 19/04/2026 Beta 1.5.4
+# 06/05/2026 Beta & Stable 1.5.4
+- nouveau bouton pour télécharger la liste des évènements (utile pour le debug dev)
+
+# 19/04/2026 Beta 1.5.3
 - Correction du put curl pour l'activation et la désactivation des caméras via API
 
 # 13/04/2026 Beta 1.5.2

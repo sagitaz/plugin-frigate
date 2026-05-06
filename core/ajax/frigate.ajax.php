@@ -173,6 +173,14 @@ try {
         ajax::success();
     }
 
+    if (init('action') == 'frigateDebug') {
+        $data = frigate::showEvents(false, true);
+
+        ajax::success(array(
+            "object" => $data,
+            "json" => json_encode($data),
+        ));
+    }
 
     throw new Exception(__('Aucune méthode correspondante à', __FILE__) . ' : ' . init('action'));
     /*     * *********Catch exeption*************** */

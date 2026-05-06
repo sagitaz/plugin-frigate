@@ -690,6 +690,31 @@ document.getElementById('addCmdHttp').addEventListener('click', function () {
     })
 });
 
+document.getElementById('frigateDebug').addEventListener('click', function () {
+    domUtils.ajax({
+        type: "POST",
+        url: "plugins/frigate/core/ajax/frigate.ajax.php",
+        data: {
+            action: "frigateDebug",
+            data: { function: "getAllEvents" }
+        },
+        dataType: 'json',
+        error: function (error) {
+            jeedomUtils.showAlert({
+                message: error.message,
+                level: 'danger'
+            });
+        },
+        success: function (data) {
+            var json = data.result.json;
+            const blob = new Blob([json], {
+                type: "text/plain;charset=utf-8"
+            });
+            saveAs(blob, "getAllEvents.json.txt");
+        }
+    })
+});
+
 function editHTTP(cmd) {
     var id = cmd.id; // Récupère l'id
     var data = cmd.getAttribute('data-request'); // Récupère la valeur de data-request

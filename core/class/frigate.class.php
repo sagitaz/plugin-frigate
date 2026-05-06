@@ -302,7 +302,8 @@ class frigate extends eqLogic
   public function preUpdate() {}
 
   // Fonction exécutée automatiquement après la mise à jour de l'équipement
-  public function postUpdate() {}
+  public function postUpdate() {
+    }
 
   // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
   public function preSave()
@@ -1677,44 +1678,55 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
     return "OK";
   }
-  public static function showEvents()
+  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
   {
     $result = [];
-    $events = frigate_events::all();
+
+    $events = frigate_events::all($_onlyEnable, $_allType);
 
     foreach ($events as $event) {
       $date = date("d-m-Y H:i:s", $event->getStartTime());
       $duree = round($event->getEndTime() - $event->getStartTime(), 0);
-      $box = $event->getBox();
-      $boxArray = is_array($box) ? $box : json_decode($box, true);
 
       $result[] = array(
-        "id" => $event->getId(),
-        "img" => $event->getLasted(),
-        "camera" => $event->getCamera(),
-        "label" => $event->getLabel(),
-        "box" => $boxArray,
-        "date" => $date,
-        "duree" => $duree,
-        "startTime" => $event->getStartTime(),
-        "endTime" => $event->getEndTime(),
-        "snapshot" => $event->getSnapshot(),
-        "clip" => $event->getClip(),
-        "thumbnail" => $event->getThumbnail(),
-        "hasSnapshot" => $event->getHasSnapshot(),
-        "hasClip" => $event->getHasClip(),
-        "eventId" => $event->getEventId(),
-        "score" => $event->getScore(),
-        "top_score" => $event->getTopScore(),
-        "type" => $event->getType(),
-        "isFavorite" => $event->getIsFavorite() ?? 0,
-        "zones" => $event->getZones() ?? '',
-        "description" => $event->getRecognition_description()
+        "id"           => $event->getId(),
+        "eventId"      => $event->getEventId(),
+        "img"          => $event->getLasted(),
+        "camera"       => $event->getCamera(),
+        "label"        => $event->getLabel(),
+        "subLabel"     => $event->getSubLabel(),
+        "box"          => json_decode($event->getBox(), true),
+        "date"         => $date,
+        "duree"        => $duree,
+        "startTime"    => $event->getStartTime(),
+        "endTime"      => $event->getEndTime(),
+        "falsePositive" => $event->getFalsePositive(),
+        "snapshot"     => $event->getSnapshot(),
+        "clip"         => $event->getClip(),
+        "thumbnail"    => $event->getThumbnail(),
+        "hasSnapshot"  => $event->getHasSnapshot(),
+        "hasClip"      => $event->getHasClip(),
+        "score"        => $event->getScore(),
+        "top_score"     => $event->getTopScore(),
+        "plusId"       => $event->getPlusId(),
+        "retain"       => $event->getRetain(),
+        "type"         => $event->getType(),
+        "isFavorite"   => $event->getIsFavorite() ?? 0,
+        "zones"        => $event->getZones() ?? '',
+        "data"         => $event->getData(),
+        "recognition_type"        => $event->getRecognition_type(),
+        "description" => $event->getRecognition_description(),
+        "recognition_name"        => $event->getRecognition_name(),
+        "recognition_subname"     => $event->getRecognition_subname(),
+        "recognition_attributes"  => $event->getRecognition_attributes(),
+        "recognition_plate"       => $event->getRecognition_plate(),
+        "recognition_score"       => $event->getRecognition_score()
       );
     }
 
-    usort($result, [self::class, 'orderByDate']);
-
+    if (!empty($result)) {
+      usort($result, 'frigate::orderByDate');
+    }
 
     return $result;
   }
