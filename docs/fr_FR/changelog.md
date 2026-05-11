@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 11/05/2026 Beta & Stable 1.5.5
+- Correction de logs ERROR
+
 # 06/05/2026 Beta & Stable 1.5.4
 - nouveau bouton pour télécharger la liste des évènements (utile pour le debug dev)
 

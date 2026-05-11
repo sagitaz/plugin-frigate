@@ -1454,13 +1454,7 @@ class frigate extends eqLogic
 
         log::add(__CLASS__, 'info', "║ Nettoyage de l'événement ID: " . $eventId);
 
-        $result = self::cleanDbEvent($eventId);
-
-        if ($result) {
-          log::add(__CLASS__, 'info', "║ Événement ID: " . $eventId . " nettoyé avec succès.");
-        } else {
-          log::add(__CLASS__, "error", "║ Échec du nettoyage de l'événement ID: " . $eventId);
-        }
+        self::cleanDbEvent($eventId);
       }
     } else {
       log::add(__CLASS__, 'info', "║ Aucun événement trouvé datant de plus de " . $days . " jours.");
@@ -1477,13 +1471,7 @@ class frigate extends eqLogic
 
         log::add(__CLASS__, 'info', "║ Nettoyage de l'événement ID: " . $eventId . " il est de type: " . $type);
 
-        $result = self::cleanDbEvent($eventId);
-
-        if ($result) {
-          log::add(__CLASS__, 'info', "║ Événement ID: " . $eventId . " nettoyé avec succès.");
-        } else {
-          log::add(__CLASS__, "error", "║ Échec du nettoyage de l'événement ID: " . $eventId);
-        }
+        self::cleanDbEvent($eventId);
       }
     }
   }
@@ -1586,6 +1574,7 @@ class frigate extends eqLogic
 
     // Sécurité : vérifier si l'objet existe
     if (!is_object($frigate)) {
+      log::add(__CLASS__, 'debug', "║ Aucune entrée en base de données pour l'événement ID: " . $id . ". Aucun fichier ne sera supprimé.");
       return 0;
     }
 
