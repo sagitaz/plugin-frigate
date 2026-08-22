@@ -500,18 +500,27 @@ function printEqLogic(_eqLogic) {
     }
 
     if (_eqLogic.logicalId === "eqFrigateCamera_" + _eqLogic.configuration.name) {
-
-
+        if (window.frigateIntervalId) {
+            clearInterval(window.frigateIntervalId);
+            window.frigateIntervalId = null;
+        }
+        if (window.frigateObserver) {
+            window.frigateObserver.disconnect();
+            window.frigateObserver = null;
+        }
 
         const img = $('.eqLogicAttr[data-l1key=configuration][data-l2key=img]').val();
         let imgSrc = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" + img;
         const imgElement = document.getElementById('imgFrigate');
-        let intervalId;
+
+        if (imgElement) {
+            imgElement.src = 'plugins/frigate/data/no-image.png';
+        }
 
         const observerOptions = {
             root: null,
             rootMargin: '0px',
-            threshold: 0.1 // image considérée visible si au moins 10% est visible
+            threshold: 0.1
         };
 
         const observerCallback = (entries, observer) => {
@@ -524,8 +533,10 @@ function printEqLogic(_eqLogic) {
             });
         };
 
-        const observer = new IntersectionObserver(observerCallback, observerOptions);
-        observer.observe(imgElement);
+        window.frigateObserver = new IntersectionObserver(observerCallback, observerOptions);
+        if (imgElement) {
+            window.frigateObserver.observe(imgElement);
+        }
 
         function startImageFetchInterval() {
             const eqRefresh = $('.eqLogicAttr[data-l1key="configuration"]')
@@ -533,27 +544,28 @@ function printEqLogic(_eqLogic) {
                     return $(this).attr('data-l2key') === 'normal::refresh';
                 })
                 .val();
-            refreshSnap = refresh;
+
+            let refreshSnap = typeof refresh !== 'undefined' ? refresh : 5000;
             if (eqRefresh && !isNaN(eqRefresh) && eqRefresh > 0) {
                 refreshSnap = eqRefresh * 1000;
             }
 
-            // On arrête toujours l'intervalle existant avant d'en créer un nouveau
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
+            if (window.frigateIntervalId) {
+                clearInterval(window.frigateIntervalId);
+                window.frigateIntervalId = null;
             }
 
             console.log('Refresh interval in milliseconds: ' + refreshSnap);
-            intervalId = setInterval(refreshImage, refreshSnap);
+            window.frigateIntervalId = setInterval(refreshImage, refreshSnap);
         }
 
         function stopImageFetchInterval() {
-            if (intervalId) {
-                clearInterval(intervalId);
-                intervalId = null;
+            if (window.frigateIntervalId) {
+                clearInterval(window.frigateIntervalId);
+                window.frigateIntervalId = null;
             }
         }
+
         function extractFrigatePart(url) {
             // Définir l'expression régulière pour capturer la partie souhaitée de l'URL
             const regex = /\/api\/([^\/]+)\/latest\.jpg/;
