@@ -34,7 +34,7 @@
     },
     "plugins\/frigate\/core\/template\/dashboard\/widgetPanel.html": {
         "Afficher les évènements de la caméra": "Anzeigen von Kameraereignissen",
-        "La caméra est désactivée.": "Die Kamera ist ausgeschaltet."
+        "La caméra est désactivée.": "Die Kamera ist deaktiviert."
     },
     "plugins\/frigate\/desktop\/js\/editConfiguration.js": {
         "Configuration du serveur Frigate récupérée.": "Konfiguration des Frigate-Servers abgerufen.",
