@@ -1396,6 +1396,35 @@ class frigate extends eqLogic
 
     return false; // En cas d'erreur
   }
+
+  /**
+   * Indique si l'URL d'un média du plugin désigne un fichier présent sur le disque.
+   * Tells whether a plugin media URL points to a file present on disk.
+   *
+   * Un évènement garde en base l'URL de ses médias même quand le fichier a disparu,
+   * par exemple quand le dossier data manque après la restauration d'une sauvegarde
+   * faite avec l'option excludeBackup. Afficher cette URL lancerait une requête vouée
+   * à l'échec ; si un dossier du chemin manque, le .htaccess racine de Jeedom la refuse
+   * et l'écrit dans le log http.error.
+   * An event keeps its media URLs in database even once the file is gone, for instance
+   * when the data folder is missing after restoring a backup made with the excludeBackup
+   * option. Displaying such a URL would issue a request bound to fail; when a folder of
+   * the path is missing, the Jeedom root .htaccess denies it and writes it to the
+   * http.error log.
+   *
+   * @param string|null $url URL web du média, de la forme /plugins/frigate/data/... / Media web URL, shaped /plugins/frigate/data/...
+   * @return bool
+   */
+  public static function mediaFileExists($url)
+  {
+    $pluginWebPath = '/plugins/frigate/';
+    if (!is_string($url) || strpos($url, $pluginWebPath) !== 0) {
+      return false;
+    }
+
+    return is_file(dirname(__FILE__, 3) . '/' . substr($url, strlen($pluginWebPath)));
+  }
+
   // Fonction de nettoyage du dossier data, suppression de tous les fichiers n'ayant pas d'event associé en DB Jeedom
   // Exécution en cronDaily
   public static function cleanFolderData()
@@ -1425,7 +1454,13 @@ class frigate extends eqLogic
         }
       }
     } else {
-      log::add(__CLASS__, "error", "║ Dossier inexistant: " . $folder);
+      // Le dossier manque notamment après la restauration d'une sauvegarde faite avec l'option excludeBackup.
+      // Il est recréé vide : les sous-dossiers des caméras le sont au téléchargement des médias.
+      if (mkdir($folder, 0755, true)) {
+        log::add(__CLASS__, 'info', "║ Dossier inexistant, recréé : " . $folder);
+      } else {
+        log::add(__CLASS__, "error", "║ Dossier inexistant, création impossible : " . $folder);
+      }
     }
   }
 
@@ -3428,6 +3463,10 @@ class frigate extends eqLogic
   {
     $folder = dirname(__FILE__, 3) . "/data/";
     $fileName = "latest.jpg";
+    // RecursiveDirectoryIterator lève une exception sur un dossier absent, ce qui interromprait frigate_update()
+    if (!is_dir($folder)) {
+      return;
+    }
     // Parcourt récursivement tous les fichiers et dossiers
     foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
       if ($file->isFile() && $file->getFilename() === $fileName) {

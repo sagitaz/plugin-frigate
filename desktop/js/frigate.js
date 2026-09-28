@@ -514,7 +514,7 @@ function printEqLogic(_eqLogic) {
         const imgElement = document.getElementById('imgFrigate');
 
         if (imgElement) {
-            imgElement.src = 'plugins/frigate/data/no-image.png';
+            imgElement.src = 'plugins/frigate/core/img/no-image.png';
         }
 
         const observerOptions = {
