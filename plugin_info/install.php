@@ -114,18 +114,14 @@ function frigate_update()
 /**
  * Appelée par Jeedom à la suppression du plugin, et aussi à chaque désactivation.
  *
- * Supprime la table des évènements et désabonne le plugin de son topic MQTT.
+ * Désabonne le plugin de son topic MQTT. La table des évènements est conservée : Jeedom appelle cette
+ * fonction à chaque désactivation (plugin::setIsEnable(0)), et la supprimer ferait perdre tous les
+ * évènements, favoris compris, puis leurs fichiers au cron suivant.
  *
  * @return void
- * @todo Jeedom appelle cette fonction à chaque désactivation (plugin::setIsEnable(0)) : la table des évènements, favoris compris, est alors détruite.
  */
 function frigate_remove()
 {
-    Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
-    $sql = "DROP TABLE IF EXISTS `frigate_events`;";
-    DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
-    Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
-
     Log::add("frigate", "info", "==> Désenregistrement du topic Frigate de MQTT2");
     frigate::removeMQTTTopicRegistration();
 }

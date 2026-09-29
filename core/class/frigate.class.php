@@ -1331,7 +1331,8 @@ class frigate extends eqLogic
    * vrai, sinon l'API, dont seuls les évènements absents du fichier de suivi data/frigate_events.json sont
    * traités. Seuls les évènements des recovery_days derniers jours sont gardés (7 par défaut). Le dossier data
    * est d'abord purgé s'il dépasse la taille maximale. Chaque évènement est créé ou mis à jour en base avec
-   * ses médias, puis publié sur les commandes.
+   * ses médias, puis publié sur les commandes. Quand le type d'un évènement change, sa miniature et son
+   * snapshot sont retéléchargés.
    *
    * @param bool                             $mqtt         Évènements reçus par MQTT
    * @param array<int, array<string, mixed>> $events       Évènements reçus par MQTT
@@ -1339,7 +1340,6 @@ class frigate extends eqLogic
    * @param string|null                      $id           Identifiant Frigate d'un évènement précis
    * @param int|null                         $recoveryDays 1 pour limiter la récupération au dernier jour
    * @return void
-   * @todo Le rafraîchissement forcé des médias au changement de type ne s'exécute jamais : la condition lit getType() après sa modification.
    */
   public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null)
   {
@@ -1415,7 +1415,10 @@ class frigate extends eqLogic
 
       log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START EVENT:/fg: ═══════════════════");
 
-      $infos = self::getEventinfos($mqtt, $event, false, $type);
+      // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
+      // au fil de l'évènement, celui du premier message n'est pas le définitif.
+      $force = is_object($frigate) && $frigate->getType() != $type;
+      $infos = self::getEventinfos($mqtt, $event, $force, $type);
 
       if (!$frigate) {
         log::add(__CLASS__, 'debug', "║ Events (type=" . $type . ") => " . json_encode($event));
@@ -1491,13 +1494,6 @@ class frigate extends eqLogic
             log::add(__CLASS__, 'debug', "║ Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
             $frigate->$setMethod($newValue);
             $updated = true;
-            if ($field == 'Type' && $newValue != $frigate->getType()) {
-              $infos = self::getEventinfos($mqtt, $event, true);
-              $frigate->setSnapshot($infos["snapshot"]);
-              $frigate->setClip($infos["clip"]);
-              log::add(__CLASS__, 'debug', "║ Mise à jour forcé des champs snapshot et clip pour event ID: " . $event['id']);
-              $frigate->save();
-            }
           }
         }
 
@@ -1640,7 +1636,8 @@ class frigate extends eqLogic
    * Retourne la miniature ou le snapshot d'un évènement, téléchargé s'il n'est pas déjà présent.
    *
    * Un fichier webp est préféré à un jpg, et un jpg en double est supprimé. Un snapshot n'est téléchargé que
-   * si Frigate en signale un (has_snapshot).
+   * si Frigate en signale un (has_snapshot). Quand un téléchargement forcé échoue, le fichier déjà présent
+   * est conservé.
    *
    * @param string               $dir         Dossier local de la caméra
    * @param array<string, mixed> $event       Évènement Frigate
@@ -1674,17 +1671,22 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "║ Aucun fichier local trouvé pour $type ID: $id");
 
       // Pour les snapshots seulement, on vérifie has_snapshot avant de télécharger
-      if (!$isThumbnail) {
-        if ($event['has_snapshot'] != "true") {
-          log::add(__CLASS__, 'debug', "║ Has Snapshot: false → téléchargement annulé pour ID: $id");
-          return ['url' => 'null', 'has' => 0];
-        }
+      if (!$isThumbnail && $event['has_snapshot'] != "true") {
+        log::add(__CLASS__, 'debug', "║ Has Snapshot: false → téléchargement annulé pour ID: $id");
+        $img = "error";
+      } else {
+        log::add(__CLASS__, 'debug', "║ Téléchargement du fichier $type pour ID: $id");
+        $mode = $isThumbnail ? self::SAVE_MODE_THUMBNAIL : self::SAVE_MODE_DEFAULT;
+        $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $mode, "", $force);
       }
-
-      log::add(__CLASS__, 'debug', "║ Téléchargement du fichier $type pour ID: $id");
-      $mode = $isThumbnail ? self::SAVE_MODE_THUMBNAIL : self::SAVE_MODE_DEFAULT;
-      $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $mode, "", $force);
-      return ['url' => $img == "error" ? "null" : $img, 'has' => ($img != "error") ? 1 : 0];
+      if ($img != "error") {
+        return ['url' => $img, 'has' => 1];
+      }
+      // Un téléchargement forcé qui échoue laisse en place le fichier déjà présent
+      if (!file_exists($jpgPath) && !file_exists($webpPath)) {
+        return ['url' => 'null', 'has' => 0];
+      }
+      log::add(__CLASS__, 'debug', "║ Nouveau téléchargement impossible, fichier local conservé pour $type ID: $id");
     }
 
     // --- Fichier déjà présent ---
