@@ -124,20 +124,24 @@ class frigate extends eqLogic
   /**
    * Donne aux équipements sans fréquence de rafraîchissement celle de la configuration générale (refresh_snapshot).
    *
+   * Une configuration absente vaut une chaîne vide : c'est la valeur par défaut de getConfiguration().
+   * L'équipement n'est sauvegardé que s'il a reçu au moins une valeur.
+   *
    * @return void
-   * @todo La comparaison à null ne détecte aucune configuration absente : getConfiguration() renvoie alors une chaîne vide.
    */
   public static function setConfigEqlogic()
   {
-    $eqLogics = self::byType('frigate');
-    foreach ($eqLogics as $eqLogic) {
-      $refresh = config::byKey('refresh_snapshot', 'frigate', 5);
-      if ($eqLogic->getConfiguration('normal::refresh') === null) {
-        $eqLogic->setConfiguration('normal::refresh', $refresh);
-        $eqLogic->save();
+    $refresh = config::byKey('refresh_snapshot', 'frigate', 5);
+    foreach (self::byType('frigate') as $eqLogic) {
+      $changed = false;
+      foreach (['normal::refresh', 'normal::mobilerefresh'] as $key) {
+        $current = $eqLogic->getConfiguration($key);
+        if ($current === '' || $current === null) {
+          $eqLogic->setConfiguration($key, $refresh);
+          $changed = true;
+        }
       }
-      if ($eqLogic->getConfiguration('normal::mobilerefresh') === null) {
-        $eqLogic->setConfiguration('normal::mobilerefresh', $refresh);
+      if ($changed) {
         $eqLogic->save();
       }
     }
@@ -639,7 +643,6 @@ class frigate extends eqLogic
    * @param string $titleOn      Infobulle quand l'état est à 0
    * @param string $titleOff     Infobulle quand l'état est à 1
    * @return string HTML du bouton, vide s'il n'est pas affichable
-   * @todo La commande info d'état n'est pas vérifiée, contrairement à buildIaToggleRow() : son absence provoque une erreur fatale.
    */
   private function buildToggleAction(string $startLogical, string $stopLogical, string $infoLogical, string $iconOn, string $iconOff, string $titleOn, string $titleOff): string
   {
@@ -647,7 +650,7 @@ class frigate extends eqLogic
     $off  = $this->getCmd('action', $stopLogical);
     $etat = $this->getCmd('info', $infoLogical);
 
-    if (!is_object($on) || !is_object($off)) return '';
+    if (!is_object($on) || !is_object($off) || !is_object($etat)) return '';
     if ($on->getIsVisible() != 1 || $off->getIsVisible() != 1) return '';
 
     if ($etat->execCmd() == 0) {
@@ -1703,8 +1706,7 @@ class frigate extends eqLogic
    * @param array<string, mixed> $event Évènement Frigate
    * @param string               $type  Type d'évènement ; seul end donne lieu à un clip
    * @param bool                 $force Retélécharger le clip même s'il est présent
-   * @return array{url: string, has: int}|null URL du clip (« null » s'il n'y en a pas) et disponibilité
-   * @todo Retourne null quand le clip est déjà présent : getEventInfos() en déduit qu'il n'y a pas de clip.
+   * @return array{url: string, has: int} URL du clip (« null » s'il n'y en a pas) et disponibilité
    */
   private static function processClip($dir, $event, $type, $force)
   {
@@ -1731,6 +1733,9 @@ class frigate extends eqLogic
         return ['url' => "null", 'has' => 0];
       }
     }
+
+    log::add(__CLASS__, 'debug', "║ Clip déjà présent pour ID: " . $event['id']);
+    return ['url' => "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . "_clip.mp4", 'has' => 1];
   }
   /**
    * Télécharge l'aperçu GIF d'un évènement s'il n'est pas déjà présent.
@@ -2426,8 +2431,6 @@ class frigate extends eqLogic
    *
    * @param array<string, mixed> $configurationArray Configuration de Frigate (/api/config)
    * @return int Nombre de caméras créées
-   * @todo Les URL d'image d'une caméra créée utilisent $name, nom du dernier équipement parcouru dans la pièce, au lieu de $cameraName ; preSave() ne corrige que img.
-   * @todo Le suffixe « by frigate plugin » n'est pas réinitialisé d'une caméra à l'autre.
    */
   public static function generateEqCameras($configurationArray)
   {
@@ -2437,7 +2440,6 @@ class frigate extends eqLogic
     $urlfrigate = self::getUrlFrigate();
     $mqttCmds = isset($configurationArray['mqtt']['host']) && !empty($configurationArray['mqtt']['host']);
     $classificationCmds = isset($configurationArray['classification']['custom']) && !empty($configurationArray['classification']['custom']);
-    $addToName = "";
     $create = 1;
     $name = "";
     //  $stats = self::getcURL("create eqCameras", $resultURL);
@@ -2446,6 +2448,7 @@ class frigate extends eqLogic
 
     foreach ($configurationArray['cameras'] as $cameraName => $cameraConfig) {
       $exist = 0;
+      $addToName = "";
       $eqlogics = eqLogic::byObjectId($defaultRoom, false);
       foreach ($eqlogics as $eqlogic) {
         $name = $eqlogic->getName();
@@ -2466,7 +2469,7 @@ class frigate extends eqLogic
 
       if (!is_object($frigate)) {
         $n++;
-        $urlLatest = "http://" . $urlfrigate . "/api/" . $name . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
+        $urlLatest = "http://" . $urlfrigate . "/api/" . $cameraName . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
         $img = urlencode($urlLatest);
 
         $frigate = new frigate();
@@ -2475,7 +2478,7 @@ class frigate extends eqLogic
         $frigate->setConfiguration("name", $cameraName);
         $frigate->setConfiguration('panel', 0);
         $frigate->setConfiguration('ptz', 0);
-        $frigate->setConfiguration('preset_max', 0);
+        $frigate->setConfiguration('presetMax', 0);
         $frigate->setConfiguration('userName', "");
         $frigate->setConfiguration('password', "");
         $frigate->setConfiguration('bbox', 0);
@@ -2557,7 +2560,7 @@ class frigate extends eqLogic
         }
       }
     }
-    message::add('frigate', __("Frigate : " . $n . " caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...", __FILE__));
+    message::add('frigate', str_replace('#count#', $n, __("Frigate : #count# caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...", __FILE__)));
     // commandes de statisque
     self::getStats();
     // commandes des events
@@ -4077,13 +4080,12 @@ class frigate extends eqLogic
    * Arrête le démon : désabonne le plugin de son topic MQTT.
    *
    * @return void
-   * @todo Lit la clé de configuration « frigate » au lieu de « topic » : le topic retiré est vide.
    */
   public static function deamon_stop()
   {
     if (class_exists('mqtt2')) {
       log::add(__CLASS__, 'info', __('Arrêt du démon Frigate', __FILE__));
-      mqtt2::removePluginTopic(config::byKey('frigate', 'frigate'));
+      mqtt2::removePluginTopic(self::getTopic());
     }
   }
 
@@ -4161,7 +4163,7 @@ class frigate extends eqLogic
           if (version_compare($version, "0.14", "<")) {
             log::add("frigate_MQTT", 'info', ' => Traitement mqtt events <0.14');
             log::add("frigate_MQTT", 'warning', ' => Version < 0.14, mettre à jour votre serveur frigate !');
-            message::add("frigate", __("Version de Frigate détectée : " . $version . ", certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__));
+            message::add("frigate", str_replace('#version#', $version, __("Version de Frigate détectée : #version#, certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.", __FILE__)));
             self::getEvents(true, [$value['after']], $value['type']);
             event::add('frigate::events', array('message' => 'mqtt_update', 'type' => 'event'));
           }
@@ -4668,7 +4670,7 @@ class frigate extends eqLogic
     $latestVersion = $stats['service']['latest_version'];
     if (version_compare($version, $latestVersion, "<")) {
       config::save('frigate_maj', 1, 'frigate');
-      message::add('frigate', __("Une nouvelle version de Frigate (" . $latestVersion . ") est disponible.", __FILE__));
+      message::add('frigate', str_replace('#version#', $latestVersion, __("Une nouvelle version de Frigate (#version#) est disponible.", __FILE__)));
     } else {
       config::save('frigate_maj', 0, 'frigate');
     }
