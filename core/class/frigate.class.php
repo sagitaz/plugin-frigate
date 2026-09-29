@@ -727,7 +727,7 @@ class frigate extends eqLogic
   private function buildIaActions(): string
   {
     return
-        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '{{Désactive temporairement la caméra jusqu\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\'enregistrement et le débogage deviennent alors indisponibles.}}')
+        $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '{{Active ou désactive la caméra. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\'enregistrement et le débogage deviennent alors indisponibles. À partir de Frigate 0.18, l\'état est conservé au redémarrage de Frigate ; avant, la caméra revient à sa configuration.}}')
       . $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Activités : alertes}}', '{{Active ou désactive temporairement les alertes pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
       . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Activités : détections}}', '{{Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
       . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Descriptions des activités}}', '{{Activez ou désactivez temporairement les descriptions d\'activités par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.}}')
@@ -1165,15 +1165,17 @@ class frigate extends eqLogic
   /**
    * Crée un évènement manuel dans Frigate.
    *
-   * @param string    $camera   Nom de la caméra dans Frigate
-   * @param string    $label    Label de l'évènement
-   * @param int       $video    1 pour inclure l'enregistrement vidéo
-   * @param int|float $duration Durée en secondes
-   * @param int|float $score    Score en %, ramené entre 0 et 100
-   * @param string    $subLabel Sous-label
+   * @param string    $camera     Nom de la caméra dans Frigate
+   * @param string    $label      Label de l'évènement
+   * @param int       $video      1 pour inclure l'enregistrement vidéo
+   * @param int|float $duration   Durée en secondes
+   * @param int|float $score      Score en %, ramené entre 0 et 100
+   * @param string    $subLabel   Sous-label
+   * @param int|null  $preCapture Secondes enregistrées avant la création (Frigate 0.18 et plus), null pour le
+   *                              pré-enregistrement de la caméra
    * @return mixed Réponse de Frigate, null en cas d'échec
    */
-  public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
+  public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '', $preCapture = null)
   {
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/events/" . $camera . "/" . rawurlencode($label) . "/create";
@@ -1198,6 +1200,11 @@ class frigate extends eqLogic
       'duration' => $duration,
       'include_recording' => $includeRecording
     ];
+    // Frigate antérieur à 0.18 ignore ce champ
+    if ($preCapture !== null) {
+      $params['pre_capture'] = (int)$preCapture;
+      log::add(__CLASS__, 'debug', "║ pre_capture : {$params['pre_capture']}");
+    }
     $response = self::postcURL("CreateEvent", $resultURL, $params);
 
     log::add(__CLASS__, 'debug', "╚════════════════════════ END CREATE EVENT ═══════════════════");
@@ -2581,6 +2588,23 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-warning:RESTART FRIGATE:/fg: ═══════════════════");
     self::publish_message('restart', '');
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════════");
+  }
+
+  /**
+   * Active un profil de Frigate par MQTT (topic profile/set, Frigate 0.18 et plus) ; none désactive le profil
+   * actif.
+   *
+   * @param string $profile Nom du profil dans la configuration de Frigate, ou none
+   * @return void
+   */
+  public static function setProfile($profile)
+  {
+    $profile = trim((string)$profile);
+    if ($profile === '') {
+      log::add(__CLASS__, 'warning', "Changement de profil ignoré : aucun profil indiqué.");
+      return;
+    }
+    self::publish_message('profile/set', $profile);
   }
   /**
    * Crée l'équipement Events s'il n'existe pas, puis ses commandes de cron et de détection.
@@ -4132,8 +4156,8 @@ class frigate extends eqLogic
   /**
    * Traite les messages MQTT reçus sur le topic de Frigate.
    *
-   * events (Frigate antérieur à 0.14 seulement), reviews, stats, available et tracked_object_update ont leur
-   * traitement ; toute autre clé qui désigne une caméra passe par processCameraData().
+   * events (Frigate antérieur à 0.14 seulement), reviews, stats, available, profile et tracked_object_update ont
+   * leur traitement ; toute autre clé qui désigne une caméra passe par processCameraData().
    *
    * @param array<string, mixed> $_message Messages reçus, indexés par topic
    * @return void
@@ -4185,6 +4209,12 @@ class frigate extends eqLogic
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
           $cmd->event($value);
           $cmd->save();
+          break;
+
+        case 'profile':
+          if (isset($value['state'])) {
+            self::updateProfileCmds($eqlogicId, $value['state']);
+          }
           break;
 
         case 'tracked_object_update':
@@ -4278,6 +4308,16 @@ class frigate extends eqLogic
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
         self::handleAllObject($eqEvent, $innerKey, $innerValue);
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
+        continue;
+      }
+
+      // statut des flux (Frigate 0.18 et plus)
+      if ($innerKey === 'status') {
+        if (is_array($innerValue)) {
+          foreach ($innerValue as $role => $status) {
+            self::updateStreamStatus($eqCamera, $role, $status);
+          }
+        }
         continue;
       }
 
@@ -4396,6 +4436,53 @@ class frigate extends eqLogic
         $eqCamera->refreshWidget();
         log::add("frigate_MQTT", 'info', 'L\'etat de la commande ' . $type . ' a été modifié, mise a jour du status.');
       }
+    }
+  }
+
+  /**
+   * Met à jour la commande de statut d'un flux d'une caméra, quand sa valeur change.
+   *
+   * Frigate 0.18 et plus republie ce statut à intervalle régulier, même inchangé.
+   *
+   * @param eqLogic $eqCamera Équipement caméra
+   * @param mixed   $role     Rôle du flux : detect, record ou audio
+   * @param mixed   $status   online, offline ou disabled
+   * @return void
+   */
+  private static function updateStreamStatus($eqCamera, $role, $status)
+  {
+    $names = ['detect' => 'détection', 'record' => 'enregistrement', 'audio' => 'audio'];
+    if (!is_string($role) || !isset($names[$role]) || !is_string($status) || $status === '') {
+      return;
+    }
+
+    $infoCmd = self::createCmd($eqCamera->getId(), "Statut flux " . $names[$role], "string", "", "info_stream_status_" . $role, "", 0);
+    if ($infoCmd->execCmd() !== $status) {
+      $infoCmd->event($status);
+      log::add("frigate_MQTT", 'info', $eqCamera->getHumanName() . ' => statut du flux ' . $role . ' : ' . $status);
+    }
+  }
+
+  /**
+   * Met à jour le profil actif sur l'équipement Statistiques, et crée les commandes de profil si besoin.
+   *
+   * Seul Frigate 0.18 et plus publie le profil actif ; les commandes n'existent donc qu'avec ces versions.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement Statistiques
+   * @param mixed      $profile   Nom du profil actif, ou none
+   * @return void
+   */
+  private static function updateProfileCmds($eqlogicId, $profile)
+  {
+    $infoCmd = self::createCmd($eqlogicId, "Profil actif", "string", "", "info_profile", "", 0);
+    $infoCmd->event((string)$profile);
+
+    $cmd = self::createCmd($eqlogicId, "Changer de profil", "message", "", "action_set_profile", "", 0, null, 0, "action");
+    if ($cmd->getDisplay('title_disable') != 1) {
+      $cmd->setValue($infoCmd->getId());
+      $cmd->setDisplay('title_disable', 1);
+      $cmd->setDisplay('message_placeholder', __("Profil, ou none pour aucun", __FILE__));
+      $cmd->save();
     }
   }
 
@@ -4837,11 +4924,12 @@ class frigateCmd extends cmd
   /**
    * Lit les paramètres de création d'un évènement dans les options de la commande.
    *
-   * Le titre donne le label ; le message peut porter video, duration et score, sous la forme
-   * video=1|duration=20|score=30. Les valeurs absentes viennent de la configuration générale.
+   * Le titre donne le label ; le message peut porter video, duration, score et pre_capture, sous la forme
+   * video=1|duration=20|score=30|pre_capture=5. Les valeurs absentes viennent de la configuration générale, sauf
+   * pre_capture : sans lui, Frigate applique le pré-enregistrement de la caméra.
    *
    * @param array<string, mixed> $_options Options de la commande
-   * @return array{label: string, video: int, duration: int, score: int}
+   * @return array{label: string, video: int, duration: int, score: int, pre_capture: int|null}
    */
   private function parseEventParameters($_options)
   {
@@ -4851,7 +4939,8 @@ class frigateCmd extends cmd
       'label' => config::byKey('defaultLabel', 'frigate'),
       'video' => (int)config::byKey('defaultVideo', 'frigate'),
       'duration' => (int)config::byKey('defaultDuration', 'frigate'),
-      'score' => (int)config::byKey('defaultScore', 'frigate')
+      'score' => (int)config::byKey('defaultScore', 'frigate'),
+      'pre_capture' => null
     ];
 
     // Vérification de l'existence de la clé 'title'
@@ -4885,6 +4974,10 @@ class frigateCmd extends cmd
           if ($key === 'score' && is_numeric($value) && $value >= 0 && $value <= 100) {
             $defaults['score'] = (int)$value;
           }
+
+          if ($key === 'pre_capture' && is_numeric($value) && $value >= 0) {
+            $defaults['pre_capture'] = (int)$value;
+          }
         }
       }
     }
@@ -4897,7 +4990,8 @@ class frigateCmd extends cmd
    * Exécute la commande d'action.
    *
    * Bascules MQTT (marche, arrêt, inversion), activation de la caméra par l'API, mouvements PTZ (arrêtés après
-   * la pause pausePTZ), presets, création d'évènement et de capture, crons, redémarrage de Frigate et actions HTTP.
+   * la pause pausePTZ), presets, création d'évènement et de capture, crons, redémarrage de Frigate, changement de
+   * profil et actions HTTP.
    *
    * @param array<string, mixed> $_options Options de la commande
    * @return void
@@ -4928,6 +5022,9 @@ class frigateCmd extends cmd
         break;
       case 'action_restart':
         frigate::restartFrigate();
+        break;
+      case 'action_set_profile':
+        frigate::setProfile($_options['message'] ?? '');
         break;
       case 'action_start_audio':
       case 'action_stop_audio':
@@ -5112,9 +5209,9 @@ class frigateCmd extends cmd
         $this->publishCameraMessage($camera, 'ptz', 'preset_' . $cmdName);
         break;
       case 'action_make_api_event':
-        //score=12|video=1|duration=20
+        //score=12|video=1|duration=20|pre_capture=5
         $eventParams = self::parseEventParameters($_options);
-        $result = frigate::createEvent($camera, $eventParams['label'], $eventParams['video'], $eventParams['duration'], $eventParams['score']);
+        $result = frigate::createEvent($camera, $eventParams['label'], $eventParams['video'], $eventParams['duration'], $eventParams['score'], '', $eventParams['pre_capture']);
         $deamon_info = frigate::deamon_info();
         if ($deamon_info['launchable'] === 'nok') {
           log::add('frigate', 'debug', "║ action_make_api_event result = " . json_encode($result));
