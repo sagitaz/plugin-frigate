@@ -24,7 +24,7 @@ class frigate extends eqLogic
   /*     * *************************Constantes***************************** */
 
   // Modes de saveURL(), passés dans son paramètre $mode
-  /** Snapshot ou clip d'évènement. */
+  /** Snapshot, clip ou preview d'évènement, selon le type demandé. */
   public const SAVE_MODE_DEFAULT = 0;
   /** Miniature d'évènement, sans redimensionnement. */
   public const SAVE_MODE_THUMBNAIL = 1;
@@ -32,8 +32,6 @@ class frigate extends eqLogic
   public const SAVE_MODE_LATEST = 2;
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
-  /** Extraction d'un clip depuis un flux RTSP. */
-  public const SAVE_MODE_CLIP = 4;
 
   /**
    * Bascules MQTT d'une caméra : clé Frigate => suffixe du type générique JeeMate.
@@ -1399,7 +1397,8 @@ class frigate extends eqLogic
       $newImage = imagecreatetruecolor($newWidth, $height);
       imagecopyresampled($newImage, $source, 0, 0, 0, 0, $newWidth, $height, $width, $origHeight);
       log::add(__CLASS__, 'debug', "║ Redimensionnement appliqué → {$newWidth}x{$height}");
-      imagedestroy($source);
+      // Libère l'image source avant l'enregistrement : sur un gros snapshot, la garder double la mémoire utilisée
+      unset($source);
     }
 
     // --- Enregistrer en JPG ---
@@ -1423,7 +1422,6 @@ class frigate extends eqLogic
       }
     }
 
-    imagedestroy($newImage);
     return $finalPath;
   }
 
@@ -3115,15 +3113,6 @@ class frigate extends eqLogic
     } elseif ($mode == self::SAVE_MODE_SNAPSHOT) {
       $lien = urldecode($file);
       $path = "/data/snapshots/{$eventId}_snapshot.jpg";
-    } elseif ($mode == self::SAVE_MODE_CLIP) {
-      $path = "/data/{$camera}/{$eventId}_clip.mp4";
-      $newPath = dirname(__FILE__, 3) . $path;
-      $cmd = 'ffmpeg -rtsp_transport tcp -loglevel fatal -i "' . $file . '" -c:v copy -bsf:a aac_adtstoasc -y -t 10 -movflags faststart ' . escapeshellarg($newPath);
-      exec($cmd, $output, $return_var);
-      $result = "/plugins/frigate" . $path;
-      log::add(__CLASS__, 'debug', "║ Commande exécutée : " . $cmd);
-      log::add(__CLASS__, 'debug', "║ Code de retour : " . $return_var);
-      return $result;
     }
 
     $fullPath = dirname(__FILE__, 3) . $path;

@@ -15,9 +15,6 @@
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use log;
-use DB;
-
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
 // Fonction exécutée automatiquement après l'installation du plugin
