@@ -17,7 +17,14 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-// Fonction exécutée automatiquement après l'installation du plugin
+/**
+ * Appelée par Jeedom après l'installation du plugin, et à chaque réactivation.
+ *
+ * Crée la table des évènements, complète la configuration par défaut du plugin, des crons et des
+ * équipements, puis publie les messages d'installation.
+ *
+ * @return void
+ */
 function frigate_install()
 {
     $pluginVersion = frigate::getPluginVersion();
@@ -33,7 +40,14 @@ function frigate_install()
     Log::add("frigate", 'info', 'Finish Install');
 }
 
-// Fonction exécutée automatiquement après la mise à jour du plugin
+/**
+ * Appelée par Jeedom après chaque mise à jour du plugin.
+ *
+ * Met la table des évènements à jour (colonnes ajoutées par les versions successives, data en MEDIUMTEXT),
+ * complète la configuration, publie les messages d'installation et supprime les fichiers latest.jpg.
+ *
+ * @return void
+ */
 function frigate_update()
 {
     $pluginVersion = frigate::getPluginVersion();
@@ -97,7 +111,14 @@ function frigate_update()
     Log::add("frigate", 'info', 'Finish Update');
 }
 
-// Fonction exécutée automatiquement après la suppression du plugin
+/**
+ * Appelée par Jeedom à la suppression du plugin, et aussi à chaque désactivation.
+ *
+ * Supprime la table des évènements et désabonne le plugin de son topic MQTT.
+ *
+ * @return void
+ * @todo Jeedom appelle cette fonction à chaque désactivation (plugin::setIsEnable(0)) : la table des évènements, favoris compris, est alors détruite.
+ */
 function frigate_remove()
 {
     Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");

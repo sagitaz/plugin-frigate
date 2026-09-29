@@ -121,6 +121,12 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Donne aux équipements sans fréquence de rafraîchissement celle de la configuration générale (refresh_snapshot).
+   *
+   * @return void
+   * @todo La comparaison à null ne détecte aucune configuration absente : getConfiguration() renvoie alors une chaîne vide.
+   */
   public static function setConfigEqlogic()
   {
     $eqLogics = self::byType('frigate');
@@ -137,6 +143,18 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Traitement commun à toutes les fréquences de cron.
+   *
+   * Purge le dossier data et les évènements anciens ; hors crons 1, 5, 10 et 15 minutes, supprime aussi les
+   * évènements restés en type new ou update. Récupère ensuite les évènements et les statistiques de Frigate si
+   * la fréquence est activée dans la configuration et que les commandes info_Cron et info_enabled de
+   * l'équipement Events, quand elles existent, sont à 1. Avec MQTT Manager opérationnel, les crons 1, 5, 10 et
+   * 15 minutes ne font rien. Un cron qui trouve le drapeau cron::run levé ne s'exécute pas et le rabaisse.
+   *
+   * @param string $frequence Clé de configuration de la fréquence, par exemple functionality::cron5::enable
+   * @return void
+   */
   private static function execCron($frequence)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CRON:/fg: ════════════════════════");
@@ -201,6 +219,11 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Indique si le serveur Frigate répond sur /api/version, avec un délai de 5 s.
+   *
+   * @return bool false aussi quand l'URL ou le port n'est pas configuré
+   */
   private static function isFrigateServerAvailable()
   {
     $urlFrigate = self::getUrlFrigate();
@@ -218,7 +241,13 @@ class frigate extends eqLogic
     return $httpCode >= 200 && $httpCode < 300 && !empty($result);
   }
 
-  // Fonction exécutée automatiquement toutes les minutes par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les minutes.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cron()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -228,7 +257,13 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cron::enable');
   }
-  // Fonction exécutée automatiquement toutes les 5 minutes par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les 5 minutes.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cron5()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -238,7 +273,13 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cron5::enable');
   }
-  // Fonction exécutée automatiquement toutes les 10 minutes par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les 10 minutes.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cron10()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -248,7 +289,13 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cron10::enable');
   }
-  // Fonction exécutée automatiquement toutes les 15 minutes par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les 15 minutes.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cron15()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -258,7 +305,13 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cron15::enable');
   }
-  // Fonction exécutée automatiquement toutes les 30 minutes par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les 30 minutes.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cron30()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -268,7 +321,13 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cron30::enable');
   }
-  // Fonction exécutée automatiquement toutes les heures par Jeedom
+  /**
+   * Cron exécuté par Jeedom toutes les heures.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur » puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cronHourly()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -278,7 +337,14 @@ class frigate extends eqLogic
     self::checkFrigateStatus();
     self::execCron('functionality::cronHourly::enable');
   }
-  // Fonction exécutée automatiquement tous les jours par Jeedom
+  /**
+   * Cron exécuté par Jeedom chaque jour.
+   *
+   * Si le serveur Frigate répond, met à jour la commande « status serveur », signale une nouvelle version de
+   * Frigate puis exécute le traitement de cette fréquence.
+   *
+   * @return void
+   */
   public static function cronDaily()
   {
     if (!self::isFrigateServerAvailable()) {
@@ -315,20 +381,44 @@ class frigate extends eqLogic
 
   /*     * *********************Méthodes d'instance************************* */
 
-  // Fonction exécutée automatiquement avant la création de l'équipement
+  /**
+   * Appelée par Jeedom avant la création de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function preInsert() {}
 
-  // Fonction exécutée automatiquement après la création de l'équipement
+  /**
+   * Appelée par Jeedom après la création de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function postInsert() {}
 
-  // Fonction exécutée automatiquement avant la mise à jour de l'équipement
+  /**
+   * Appelée par Jeedom avant la mise à jour de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function preUpdate() {}
 
-  // Fonction exécutée automatiquement après la mise à jour de l'équipement
+  /**
+   * Appelée par Jeedom après la mise à jour de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function postUpdate() {
     }
 
-  // Fonction exécutée automatiquement avant la sauvegarde (création ou mise à jour) de l'équipement
+  /**
+   * Appelée par Jeedom avant chaque sauvegarde de l'équipement.
+   *
+   * Retire le schéma http(s):// de l'URL Frigate de la configuration générale. Pour une caméra : valeurs par
+   * défaut du PTZ et du nombre de presets (10 au plus), URL de la dernière image avec ses options d'affichage,
+   * puis mise à jour des commandes « SNAPSHOT LIVE » et « RTSP » quand leur valeur a changé.
+   *
+   * @return void
+   */
   public function preSave()
   {
     $url = config::byKey('URL', 'frigate');
@@ -398,13 +488,27 @@ class frigate extends eqLogic
     }
   }
 
-  // Fonction exécutée automatiquement après la sauvegarde (création ou mise à jour) de l'équipement
+  /**
+   * Appelée par Jeedom après chaque sauvegarde de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function postSave() {}
 
-  // Fonction exécutée automatiquement avant la suppression de l'équipement
+  /**
+   * Appelée par Jeedom avant la suppression de l'équipement, sans traitement.
+   *
+   * @return void
+   */
   public function preRemove() {}
 
-  // Fonction exécutée automatiquement après la suppression de l'équipement
+  /**
+   * Appelée par Jeedom après la suppression de l'équipement.
+   *
+   * Supprime les évènements de la caméra, favoris compris, avec leurs fichiers.
+   *
+   * @return void
+   */
   public function postRemove()
   {
     $name = $this->getConfiguration('name');
@@ -433,7 +537,15 @@ class frigate extends eqLogic
   */
 
 
-  // Permet de modifier l'affichage du widget (également utilisable par les commandes)
+  /**
+   * Construit le widget de l'équipement.
+   *
+   * Les caméras utilisent le template du plugin, les autres équipements le widget standard de Jeedom. La
+   * version « panel » s'affiche avec le template dashboard.
+   *
+   * @param string $_version Version d'affichage : dashboard, mobile ou panel
+   * @return string HTML du widget
+   */
   public function toHtml($_version = 'dashboard')
   {
     $type = $this->detectType();
@@ -472,11 +584,22 @@ class frigate extends eqLogic
     return $this->renderTemplate($replace, $_version, $panel);
   }
 
+  /**
+   * Retourne « camera » pour un équipement caméra, une chaîne vide sinon.
+   *
+   * @return string
+   */
   private function detectType(): string
   {
     return strpos($this->getLogicalId(), "eqFrigateCamera_") !== false ? "camera" : "";
   }
 
+  /**
+   * Indique si l'affichage demandé est la version « panel », et la remplace alors par « dashboard ».
+   *
+   * @param string $_version Version d'affichage, modifiée par référence
+   * @return bool
+   */
   private function isPanelVersion(string &$_version): bool
   {
     if ($_version === 'panel') {
@@ -486,7 +609,15 @@ class frigate extends eqLogic
     return false;
   }
 
-  // Construit un bouton icône générique
+  /**
+   * Construit un bouton icône qui exécute une commande au clic.
+   *
+   * @param string $icon     Classes de l'icône Font Awesome
+   * @param string $title    Infobulle
+   * @param int    $cmdId    Identifiant de la commande à exécuter
+   * @param string $cssClass Classe CSS, suffixée par l'identifiant de l'équipement
+   * @return string HTML du bouton
+   */
   private function buildBtnIcon(string $icon, string $title, int $cmdId, string $cssClass): string
   {
     return '<div class="btn-icon">'
@@ -494,7 +625,22 @@ class frigate extends eqLogic
       . '</div>';
   }
 
-  // Construit un toggle start/stop selon l'état d'une info cmd
+  /**
+   * Construit le bouton d'une bascule marche/arrêt, selon l'état de sa commande info.
+   *
+   * Le bouton exécute la commande qui inverse l'état. Rien n'est affiché si l'une des deux commandes d'action
+   * manque ou est masquée.
+   *
+   * @param string $startLogical logicalId de la commande de mise en marche
+   * @param string $stopLogical  logicalId de la commande d'arrêt
+   * @param string $infoLogical  logicalId de la commande info d'état
+   * @param string $iconOn       Icône affichée quand l'état est à 0
+   * @param string $iconOff      Icône affichée quand l'état est à 1
+   * @param string $titleOn      Infobulle quand l'état est à 0
+   * @param string $titleOff     Infobulle quand l'état est à 1
+   * @return string HTML du bouton, vide s'il n'est pas affichable
+   * @todo La commande info d'état n'est pas vérifiée, contrairement à buildIaToggleRow() : son absence provoque une erreur fatale.
+   */
   private function buildToggleAction(string $startLogical, string $stopLogical, string $infoLogical, string $iconOn, string $iconOff, string $titleOn, string $titleOff): string
   {
     $on   = $this->getCmd('action', $startLogical);
@@ -511,6 +657,13 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Construit les boutons d'action du widget.
+   *
+   * Bascules enregistrement, snapshots, détection, audio et mouvement, puis création d'évènement et de capture.
+   *
+   * @return string HTML des boutons
+   */
   private function buildActions(): string
   {
     $html  = $this->buildToggleAction('action_start_recordings', 'action_stop_recordings', 'info_recordings', 'fas fa-video', 'fas fa-video', 'recording ON', 'recording OFF');
@@ -534,6 +687,16 @@ class frigate extends eqLogic
     return $html;
   }
 
+  /**
+   * Construit une ligne interrupteur du panneau des options IA, selon l'état de sa commande info.
+   *
+   * @param string $startLogical logicalId de la commande de mise en marche
+   * @param string $stopLogical  logicalId de la commande d'arrêt
+   * @param string $infoLogical  logicalId de la commande info d'état
+   * @param string $label        Libellé affiché
+   * @param string $title        Infobulle du libellé
+   * @return string HTML de la ligne, vide si l'une des commandes manque ou est masquée
+   */
   private function buildIaToggleRow(string $startLogical, string $stopLogical, string $infoLogical, string $label, string $title = ''): string
   {
     $on   = $this->getCmd('action', $startLogical);
@@ -552,6 +715,12 @@ class frigate extends eqLogic
       . '</div>';
   }
 
+  /**
+   * Construit le panneau des options IA : activation de la caméra, alertes et détections des activités,
+   * descriptions par IA générative.
+   *
+   * @return string HTML des lignes
+   */
   private function buildIaActions(): string
   {
     return
@@ -561,6 +730,12 @@ class frigate extends eqLogic
       . $this->buildIaToggleRow('action_start_review_descriptions', 'action_stop_review_descriptions', 'info_review_descriptions', '{{Descriptions des activités}}', '{{Activez ou désactivez temporairement les descriptions d\'activités par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les activités sur cette caméra.}}')
       . $this->buildIaToggleRow('action_start_object_descriptions', 'action_stop_object_descriptions', 'info_object_descriptions', '{{Descriptions d\'objets}}', '{{Activez ou désactivez temporairement les descriptions par IA générative jusqu\'au redémarrage. Si désactivé, l\'IA ne sera plus sollicitée pour décrire les objets suivis sur cette caméra.}}');
   }
+  /**
+   * Construit les icônes des objets détectés en ce moment : une par commande info_detect_* visible et à 1,
+   * hors info_detect_all.
+   *
+   * @return string HTML des icônes
+   */
   private function buildDetectNow(): string
   {
     $html = '';
@@ -576,6 +751,11 @@ class frigate extends eqLogic
     return $html;
   }
 
+  /**
+   * Construit la liste déroulante des presets PTZ et des commandes HTTP visibles.
+   *
+   * @return string HTML de la liste, vide s'il n'y a rien à proposer
+   */
   private function buildPresetsSelect(): string
   {
     $options   = '';
@@ -606,7 +786,11 @@ class frigate extends eqLogic
       . '</div>';
   }
 
-  // PTZ : définition des boutons [logical, iconWidget, cssWidget, titleWidget, iconModal]
+  /**
+   * Définition des boutons PTZ : logicalId, icône et classe CSS du widget, classe du bouton, infobulle, icône de la modale.
+   *
+   * @return array<int, array<int, string>>
+   */
   private function ptzButtonsConfig(): array
   {
     return [
@@ -618,6 +802,11 @@ class frigate extends eqLogic
     ];
   }
 
+  /**
+   * Construit les boutons PTZ du widget, précédés du cercle de fond quand au moins un est visible.
+   *
+   * @return string HTML des boutons
+   */
   private function buildPtzWidget(): string
   {
     $hasPtz = false;
@@ -641,6 +830,11 @@ class frigate extends eqLogic
     return $html;
   }
 
+  /**
+   * Construit les boutons PTZ de la modale, zoom compris.
+   *
+   * @return string HTML des boutons
+   */
   private function buildPtzModal(): string
   {
     $html = '';
@@ -657,6 +851,11 @@ class frigate extends eqLogic
     return $html;
   }
 
+  /**
+   * Construit les boutons de zoom PTZ du widget.
+   *
+   * @return string HTML des boutons
+   */
   private function buildPtzZoom(): string
   {
     $html = '';
@@ -676,6 +875,16 @@ class frigate extends eqLogic
 
 
 
+  /**
+   * Applique le template de la caméra et met le widget en cache.
+   *
+   * En mode « image seule » (option de l'équipement pour le dashboard ou le panel), les boutons sont retirés.
+   *
+   * @param array<string, string> $replace  Valeurs des balises du template
+   * @param string                $_version Version d'affichage demandée
+   * @param bool                  $panel    Affichage dans le panel
+   * @return string HTML du widget
+   */
   private function renderTemplate(array $replace, string $_version, bool $panel): string
   {
     $version  = "dashboard";
@@ -701,11 +910,21 @@ class frigate extends eqLogic
 
 
   /*     * **********************Getteur Setteur*************************** */
+  /**
+   * Retourne le topic MQTT racine de Frigate, tel que configuré.
+   *
+   * @return string
+   */
   private static function getTopic()
   {
     return config::byKey('topic', 'frigate');
   }
 
+  /**
+   * Retourne l'adresse du serveur Frigate sous la forme hôte:port, sans schéma.
+   *
+   * @return string|false false si l'URL ou le port n'est pas configuré
+   */
   public static function getUrlFrigate()
   {
     $url = config::byKey('URL', 'frigate');
@@ -722,30 +941,63 @@ class frigate extends eqLogic
     return $urlFrigate;
   }
 
+  /**
+   * Publie les messages d'installation : remerciement, puis avertissement si Debian ou Jeedom sont plus anciens
+   * que les versions recommandées.
+   *
+   * @return void
+   */
   public static function addMessages()
   {
     message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__));
     $system = system::getOsVersion();
     if (version_compare($system, "11", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version " . $system . " de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__));
+      message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__)));
     }
     $jeedom = jeedom::version();
     if (version_compare($jeedom, "4.4", "<")) {
-      message::add('frigate', __("Attention, vous utilisez la version " . $jeedom . " de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__));
+      message::add('frigate', str_replace('#version#', $jeedom, __("Attention, vous utilisez la version #version# de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__)));
     }
   }
 
+  /**
+   * Publie un message MQTT sur un sous-topic d'une caméra.
+   *
+   * @param string $camera   Nom de la caméra dans Frigate
+   * @param string $subTopic Sous-topic, par exemple detect/set
+   * @param string $payload  Charge utile
+   * @return void
+   */
   public static function publish_camera_message(string $camera, string $subTopic, string $payload)
   {
     self::publish_message("{$camera}/{$subTopic}", $payload);
   }
 
+  /**
+   * Publie un message MQTT sous le topic racine de Frigate, par MQTT Manager.
+   *
+   * @param string $subTopic Sous-topic
+   * @param string $payload  Charge utile
+   * @return void
+   */
   public static function publish_message(string $subTopic, string $payload)
   {
     log::add(__CLASS__, 'debug', "║ publish_message : " . self::getTopic() . "/{$subTopic} avec payload : {$payload}");
     mqtt2::publish(self::getTopic() . "/{$subTopic}", $payload);
   }
 
+  /**
+   * Envoie une requête HTTP au serveur Frigate et retourne sa réponse.
+   *
+   * Les paramètres partent en JSON pour POST et PUT. La commande curl équivalente est écrite au log en debug.
+   *
+   * @param string $function   Nom de l'appelant, repris dans le log
+   * @param string $url        URL de la requête
+   * @param mixed  $params     Paramètres envoyés en JSON (POST et PUT)
+   * @param bool   $decodeJson Décoder la réponse JSON
+   * @param string $method     Méthode HTTP : GET, POST, PUT ou DELETE
+   * @return mixed Réponse, décodée ou brute ; null en cas d'erreur, de réponse vide ou de code HTTP autre que 200
+   */
   private static function getcURL($function, $url, $params = null, $decodeJson = true, $method = 'GET')
   {
     $ch = curl_init();
@@ -802,11 +1054,29 @@ class frigate extends eqLogic
     return $response;
   }
 
+  /**
+   * Envoie une requête HTTP POST au serveur Frigate (voir getcURL()).
+   *
+   * @param string $function   Nom de l'appelant, repris dans le log
+   * @param string $url        URL de la requête
+   * @param mixed  $params     Paramètres envoyés en JSON
+   * @param bool   $decodeJson Décoder la réponse JSON
+   * @return mixed Réponse, null en cas d'échec
+   */
   private static function postcURL($function, $url, $params = null, $decodeJson = true)
   {
     return self::getcURL($function, $url, $params, $decodeJson, 'POST');
   }
 
+  /**
+   * Envoie une requête HTTP PUT au serveur Frigate, avec un objet JSON vide à défaut de paramètres (voir getcURL()).
+   *
+   * @param string $function   Nom de l'appelant, repris dans le log
+   * @param string $url        URL de la requête
+   * @param mixed  $params     Paramètres envoyés en JSON
+   * @param bool   $decodeJson Décoder la réponse JSON
+   * @return mixed Réponse, null en cas d'échec
+   */
   private static function putcURL($function, $url, $params = null, $decodeJson = true)
   {
     if (empty($params)) {
@@ -848,6 +1118,11 @@ class frigate extends eqLogic
     return $response;
   }
 
+  /**
+   * Récupère les statistiques de Frigate et met à jour les commandes correspondantes.
+   *
+   * @return void
+   */
   public static function getStats()
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START STATS:/fg: ═══════════════════");
@@ -863,6 +1138,12 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════ END STATS ═══════════════════");
   }
 
+  /**
+   * Récupère les informations PTZ d'une caméra, dont la liste de ses presets.
+   *
+   * @param string $camera Nom de la caméra dans Frigate
+   * @return array|null Réponse de /api/<caméra>/ptz/info, null en cas d'échec
+   */
   public static function getPresets($camera)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START IMPORT PRESETS:/fg: ═══════════════════");
@@ -878,6 +1159,17 @@ class frigate extends eqLogic
     return $presets;
   }
 
+  /**
+   * Crée un évènement manuel dans Frigate.
+   *
+   * @param string    $camera   Nom de la caméra dans Frigate
+   * @param string    $label    Label de l'évènement
+   * @param int       $video    1 pour inclure l'enregistrement vidéo
+   * @param int|float $duration Durée en secondes
+   * @param int|float $score    Score en %, ramené entre 0 et 100
+   * @param string    $subLabel Sous-label
+   * @return mixed Réponse de Frigate, null en cas d'échec
+   */
   public static function createEvent($camera, $label, $video = 1, $duration = 20, $score = 30, $subLabel = '')
   {
     $urlfrigate = self::getUrlFrigate();
@@ -909,9 +1201,16 @@ class frigate extends eqLogic
     return $response;
   }
 
-  // Méthodes de modification du fichier de configuration par API
-  // Attention : Redémarrage Frigate nécessaire pour prise en compte
-  // TODO : Ajouter des méthodes appelant cette méthode pour une modification de paramètres du fichier de configuration
+  /**
+   * Modifie un paramètre du fichier de configuration de Frigate par l'API.
+   *
+   * La modification n'est prise en compte qu'après un redémarrage de Frigate. Un évènement Jeedom
+   * frigate::config signale la mise à jour à l'interface.
+   *
+   * @param string $config Paramètre sous la forme chemin=valeur, par exemple cameras.jardin.enabled=true
+   * @return mixed Réponse de Frigate, null en cas d'échec
+   * @todo Ajouter des méthodes qui l'appellent pour d'autres paramètres du fichier de configuration.
+   */
   public static function saveConfig($config)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START SAVE CONFIG:/fg: ═══════════════════");
@@ -927,6 +1226,13 @@ class frigate extends eqLogic
     return $response;
   }
 
+  /**
+   * Modifie un paramètre de la configuration d'une caméra dans Frigate (voir saveConfig()).
+   *
+   * @param string $camera Nom de la caméra dans Frigate
+   * @param string $config Paramètre sous la forme chemin=valeur, relatif à la caméra
+   * @return mixed Réponse de Frigate, null en cas d'échec
+   */
   public static function saveCameraConfig($camera, $config)
   {
     $response = self::saveConfig("cameras.{$camera}.{$config}");
@@ -934,9 +1240,14 @@ class frigate extends eqLogic
     return $response;
   }
 
-  // Méthodes de modification du fichier de configuration pour une caméra par API
-  // Attention : Redémarrage Frigate nécessaire pour prise en compte
-  // TODO : Ajouter d'autres méthodes pour différents paramètres supplémentaires pour une caméra
+  /**
+   * Active ou désactive une caméra dans la configuration de Frigate (voir saveConfig()).
+   *
+   * @param string     $camera Nom de la caméra dans Frigate
+   * @param int|string $enable 1 pour activer, toute autre valeur pour désactiver
+   * @return mixed Réponse de Frigate, null en cas d'échec
+   * @todo Ajouter d'autres paramètres de caméra.
+   */
   public static function enableCamera($camera, $enable)
   {
     $enabled = $enable == 1 ? 'true' : 'false';
@@ -945,6 +1256,12 @@ class frigate extends eqLogic
     return $response;
   }
 
+  /**
+   * Récupère les logs d'un service de Frigate.
+   *
+   * @param string $service Nom du service, par exemple frigate, go2rtc ou nginx
+   * @return string|null Logs bruts, null en cas d'échec
+   */
   public static function getLogs($service)
   {
     $urlfrigate = self::getUrlFrigate();
@@ -958,6 +1275,16 @@ class frigate extends eqLogic
     return $logs;
   }
 
+  /**
+   * Enregistre les évènements dans un fichier JSON de suivi et retourne ceux qui n'y figuraient pas encore.
+   *
+   * La comparaison porte sur start_time. À la première utilisation, le fichier est créé et tous les évènements
+   * sont retournés.
+   *
+   * @param string                           $filePath Chemin du fichier de suivi
+   * @param array<int, array<string, mixed>> $events   Évènements reçus de Frigate
+   * @return array<int, array<string, mixed>> Évènements nouveaux
+   */
   private static function saveAndCompareEvents($filePath, $events)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START COMPARE EVENTS:/fg: ═══════════════════");
@@ -983,6 +1310,13 @@ class frigate extends eqLogic
       return $events;
     }
   }
+  /**
+   * Récupère un évènement Frigate par son identifiant et le traite (voir getEvents()).
+   *
+   * @param string|null $id   Identifiant Frigate ; rien n'est fait s'il est vide
+   * @param string      $type Type d'évènement : new, update ou end
+   * @return void
+   */
   public static function getEvent($id = null, $type = 'end')
   {
     if ($id == null) return;
@@ -990,6 +1324,23 @@ class frigate extends eqLogic
     self::getEvents(false, array(), $type, $id);
   }
 
+  /**
+   * Récupère des évènements Frigate et les enregistre en base.
+   *
+   * Trois sources : un évènement précis quand $id est fourni, les évènements reçus par MQTT quand $mqtt est
+   * vrai, sinon l'API, dont seuls les évènements absents du fichier de suivi data/frigate_events.json sont
+   * traités. Seuls les évènements des recovery_days derniers jours sont gardés (7 par défaut). Le dossier data
+   * est d'abord purgé s'il dépasse la taille maximale. Chaque évènement est créé ou mis à jour en base avec
+   * ses médias, puis publié sur les commandes.
+   *
+   * @param bool                             $mqtt         Évènements reçus par MQTT
+   * @param array<int, array<string, mixed>> $events       Évènements reçus par MQTT
+   * @param string                           $type         Type d'évènement : new, update ou end
+   * @param string|null                      $id           Identifiant Frigate d'un évènement précis
+   * @param int|null                         $recoveryDays 1 pour limiter la récupération au dernier jour
+   * @return void
+   * @todo Le rafraîchissement forcé des médias au changement de type ne s'exécute jamais : la condition lit getType() après sa modification.
+   */
   public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null)
   {
     if ($id !== null) {
@@ -1170,6 +1521,13 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Publie un évènement vers l'interface, par un évènement Jeedom frigate::event.
+   *
+   * @param frigate_events $event     Évènement à publier
+   * @param int|string     $eqLogicId Identifiant de l'équipement caméra
+   * @return void
+   */
   private static function eventAdd($event, $eqLogicId)
   {
 
@@ -1216,6 +1574,19 @@ class frigate extends eqLogic
     );
   }
 
+  /**
+   * Télécharge les médias d'un évènement et prépare ses valeurs à enregistrer.
+   *
+   * Attend d'abord le délai configuré (sleep, de 0 à 10 s ; 5 s si la valeur sort de cette plage) pour laisser
+   * à Frigate le temps de produire les médias. Télécharge ensuite la miniature, le snapshot, le clip (évènement
+   * de type end seulement) et l'aperçu GIF.
+   *
+   * @param bool                 $mqtt  Évènement reçu par MQTT (scores à la racine) ou par l'API (scores dans data)
+   * @param array<string, mixed> $event Évènement Frigate
+   * @param bool                 $force Retélécharger les médias déjà présents
+   * @param string               $type  Type d'évènement : new, update ou end
+   * @return array<string, mixed> URL et disponibilité des médias, dates, scores en %, zones et label
+   */
   public static function getEventInfos($mqtt, $event, $force = false, $type = "end")
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
@@ -1265,6 +1636,18 @@ class frigate extends eqLogic
     );
   }
 
+  /**
+   * Retourne la miniature ou le snapshot d'un évènement, téléchargé s'il n'est pas déjà présent.
+   *
+   * Un fichier webp est préféré à un jpg, et un jpg en double est supprimé. Un snapshot n'est téléchargé que
+   * si Frigate en signale un (has_snapshot).
+   *
+   * @param string               $dir         Dossier local de la caméra
+   * @param array<string, mixed> $event       Évènement Frigate
+   * @param bool                 $isThumbnail true pour la miniature, false pour le snapshot
+   * @param bool                 $force       Retélécharger le fichier même s'il est présent
+   * @return array{url: string, has: int} URL du fichier (« null » s'il n'y en a pas) et disponibilité
+   */
   private static function processImage($dir, $event, $isThumbnail = false, $force = false)
   {
     log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Image:/fg: ═══════════════════");
@@ -1311,6 +1694,16 @@ class frigate extends eqLogic
     return ['url' => "/plugins/frigate/data/$camera/{$id}_{$type}.$ext", 'has' => 1];
   }
 
+  /**
+   * Retourne le clip d'un évènement terminé, téléchargé s'il n'est pas déjà présent.
+   *
+   * @param string               $dir   Dossier local de la caméra
+   * @param array<string, mixed> $event Évènement Frigate
+   * @param string               $type  Type d'évènement ; seul end donne lieu à un clip
+   * @param bool                 $force Retélécharger le clip même s'il est présent
+   * @return array{url: string, has: int}|null URL du clip (« null » s'il n'y en a pas) et disponibilité
+   * @todo Retourne null quand le clip est déjà présent : getEventInfos() en déduit qu'il n'y a pas de clip.
+   */
   private static function processClip($dir, $event, $type, $force)
   {
     log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Clip:/fg: ═══════════════════");
@@ -1337,6 +1730,13 @@ class frigate extends eqLogic
       }
     }
   }
+  /**
+   * Télécharge l'aperçu GIF d'un évènement s'il n'est pas déjà présent.
+   *
+   * @param string               $dir   Dossier local de la caméra
+   * @param array<string, mixed> $event Évènement Frigate
+   * @return array|string Résultat du téléchargement, ou URL de l'aperçu déjà présent
+   */
   private static function processPreview($dir, $event)
   {
     log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Preview:/fg: ═══════════════════");
@@ -1349,6 +1749,19 @@ class frigate extends eqLogic
     return "/plugins/frigate/data/" . $event['camera'] . "/" . $event['id'] . '_preview.gif';
   }
 
+  /**
+   * Réencode une image téléchargée en JPEG, avec redimensionnement et conversion WebP éventuels.
+   *
+   * Le redimensionnement à la hauteur demandée, quand l'image est plus haute, ne s'applique pas aux miniatures.
+   * Une qualité de 0 vaut 80.
+   *
+   * @param string   $filePath      Chemin de l'image (jpeg, png ou webp)
+   * @param int|null $height        Hauteur maximale en pixels, null pour garder la taille
+   * @param int      $quality       Qualité JPEG et WebP, de 1 à 100
+   * @param bool     $convertToWebp Convertir en WebP et supprimer le JPEG
+   * @param bool     $isThumbnail   L'image est une miniature
+   * @return string|null Chemin du fichier final, null si l'image est illisible
+   */
   private static function processJpgImage($filePath, $height = null, $quality = 100, $convertToWebp = false, $isThumbnail = false)
   {
     if (!file_exists($filePath)) {
@@ -1426,11 +1839,23 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Retourne le label de l'évènement sans transformation.
+   *
+   * @param string $label Label reçu de Frigate
+   * @return string
+   */
   private static function cleanLabel($label)
   {
     return $label;
   }
 
+  /**
+   * Retourne la durée d'une vidéo, lue par ffmpeg.
+   *
+   * @param string $filePath Chemin de la vidéo
+   * @return int|false Durée en secondes, false si elle est illisible
+   */
   public static function getVideoDuration($filePath)
   {
     $cmd = "ffmpeg -i " . escapeshellarg($filePath) . " 2>&1";
@@ -1503,8 +1928,14 @@ class frigate extends eqLogic
     return $urls;
   }
 
-  // Fonction de nettoyage du dossier data, suppression de tous les fichiers n'ayant pas d'event associé en DB Jeedom
-  // Exécution en cronDaily
+  /**
+   * Nettoie le dossier data, et le recrée s'il manque.
+   *
+   * Supprime les fichiers des caméras dont l'évènement n'existe plus en base, et les captures manuelles
+   * qu'aucun évènement ne référence depuis plus d'une heure. Appelée par chaque cron (voir execCron()).
+   *
+   * @return void
+   */
   public static function cleanFolderData()
   {
     // Nettoyage du dossier des images caméra
@@ -1563,8 +1994,14 @@ class frigate extends eqLogic
   }
 
 
-  // nettoyer la DB de tous les fichiers dont la date de creation est supérieure au nombre de jours configurer
-  // Exécution en cronDaily
+  /**
+   * Supprime les évènements non favoris plus anciens que remove_days jours, avec leurs fichiers.
+   *
+   * remove_days est porté à recovery_days s'il est plus petit, pour ne pas supprimer des évènements aussitôt
+   * récupérés. Appelée par chaque cron (voir execCron()).
+   *
+   * @return void
+   */
   public static function cleanAllOldestFiles()
   {
     $days = config::byKey('remove_days', 'frigate', "7");
@@ -1594,6 +2031,12 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Supprime les évènements d'un type donné, avec leurs fichiers ; les favoris sont conservés.
+   *
+   * @param string $type Type d'évènement, new par défaut
+   * @return void
+   */
   public static function cleanByType($type = "new")
   {
     $events = frigate_events::byType($type);
@@ -1609,6 +2052,11 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Supprime les cinq évènements non favoris les plus anciens, avec leurs fichiers.
+   *
+   * @return float Espace libéré, en Mo
+   */
   public static function cleanOldestFile()
   {
     $totalSizeGain = 0;
@@ -1623,7 +2071,15 @@ class frigate extends eqLogic
     return $totalSizeGain; // Renvoie par exemple 15.45 (Mo)
   }
 
-  // Supprime le plus vieux si dossier plein
+  /**
+   * Supprime les évènements les plus anciens tant que le dossier data dépasse la taille maximale
+   * (datas_weight, 500 Mo par défaut).
+   *
+   * Les suppressions se font par lots de cinq, dans la limite de 100 lots ; la boucle s'arrête dès qu'un lot
+   * ne libère rien.
+   *
+   * @return void
+   */
   public static function cleanFolderDataIfFull()
   {
     $maxSize = (float)config::byKey('datas_weight', 'frigate', 500);
@@ -1648,6 +2104,11 @@ class frigate extends eqLogic
 
 
 
+  /**
+   * Retourne la taille du dossier data, calculée par du ou, à défaut, en PHP.
+   *
+   * @return float Taille en Mo, 0 si le dossier est absent
+   */
   public static function getFolderSize()
   {
     $t0 = microtime(true);
@@ -1688,6 +2149,12 @@ class frigate extends eqLogic
     return round($size / (1024 * 1024), 2);
   }
 
+  /**
+   * Extrait l'identifiant d'évènement Frigate placé en tête d'un nom de fichier.
+   *
+   * @param string $filename Nom du fichier, par exemple 1718992955.613576-zulr2q_snapshot.jpg
+   * @return string|null Identifiant, null si le nom ne commence pas par un identifiant
+   */
   public static function extractID($filename)
   {
     // Utiliser une expression régulière pour extraire l'ID du nom de fichier
@@ -1701,6 +2168,15 @@ class frigate extends eqLogic
     return null;
   }
 
+  /**
+   * Supprime un évènement de la base avec ses fichiers, sauf s'il est en favori.
+   *
+   * Les fichiers sont retrouvés par leur nom dans le dossier de la caméra, et par les URL enregistrées sur
+   * l'évènement pour les captures manuelles.
+   *
+   * @param string $id Identifiant Frigate de l'évènement
+   * @return float|int Espace libéré en Mo, 0 si rien n'a été supprimé
+   */
   public static function cleanDbEvent($id)
   {
     $frigate = frigate_events::byEventId($id);
@@ -1781,6 +2257,12 @@ class frigate extends eqLogic
     return $totalRemovedSize / 1024 / 1024;
   }
 
+  /**
+   * Supprime plusieurs évènements du plugin (voir deleteEvent()).
+   *
+   * @param string[] $ids Identifiants Frigate des évènements
+   * @return bool Toujours true
+   */
   public static function deleteEvents($ids)
   {
     foreach ($ids as $id) {
@@ -1824,6 +2306,13 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════");
     return "OK";
   }
+  /**
+   * Retourne les évènements enregistrés, prêts à afficher, du plus récent au plus ancien.
+   *
+   * @param bool $_onlyEnable Limiter aux évènements actifs
+   * @param bool $_allType    Inclure les évènements sans type
+   * @return array<int, array<string, mixed>>
+   */
   public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
   {
     $result = [];
@@ -1877,6 +2366,13 @@ class frigate extends eqLogic
     return $result;
   }
 
+  /**
+   * Compare deux évènements par date, pour un tri du plus récent au plus ancien.
+   *
+   * @param array<string, mixed> $a
+   * @param array<string, mixed> $b
+   * @return int
+   */
   private static function orderByDate($a, $b)
   {
     $dateA = new DateTime($a['date']);
@@ -1884,6 +2380,11 @@ class frigate extends eqLogic
     return $dateB <=> $dateA;
   }
 
+  /**
+   * Crée ou met à jour les équipements Events, Statistiques et caméras à partir de la configuration de Frigate.
+   *
+   * @return int|string|false Nombre de caméras créées, « aucun » s'il n'y en a pas, false si la configuration est inaccessible
+   */
   public static function generateAllEqs()
   {
 
@@ -1914,6 +2415,18 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-success:FIN CREATION DES EQUIPEMENTS:/fg: ═══════════════════");
     return $n;
   }
+  /**
+   * Crée les équipements des caméras de la configuration Frigate et met à jour leurs commandes.
+   *
+   * Un équipement homonyme dans la pièce par défaut vaut au nouveau le suffixe « by frigate plugin ». Selon la
+   * configuration : commandes MQTT, de détection d'objets et PTZ (ONVIF) si MQTT est configuré, commandes
+   * audio, états de classification. Les statistiques et les évènements du dernier jour sont ensuite récupérés.
+   *
+   * @param array<string, mixed> $configurationArray Configuration de Frigate (/api/config)
+   * @return int Nombre de caméras créées
+   * @todo Les URL d'image d'une caméra créée utilisent $name, nom du dernier équipement parcouru dans la pièce, au lieu de $cameraName ; preSave() ne corrige que img.
+   * @todo Le suffixe « by frigate plugin » n'est pas réinitialisé d'une caméra à l'autre.
+   */
   public static function generateEqCameras($configurationArray)
   {
 
@@ -2053,12 +2566,25 @@ class frigate extends eqLogic
     return $n;
   }
 
+  /**
+   * Demande le redémarrage de Frigate par MQTT (topic restart).
+   *
+   * @return void
+   */
   public static function restartFrigate()
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-warning:RESTART FRIGATE:/fg: ═══════════════════");
     self::publish_message('restart', '');
     log::add(__CLASS__, 'debug', "╚════════════════════════════════════════════════════════════");
   }
+  /**
+   * Crée l'équipement Events s'il n'existe pas, puis ses commandes de cron et de détection.
+   *
+   * Les objets suivis, généraux et par caméra, sont enregistrés dans sa configuration « objects ».
+   *
+   * @param array<string, mixed> $configurationArray Configuration de Frigate (/api/config)
+   * @return void
+   */
   public static function generateEqEvents($configurationArray)
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -2102,6 +2628,11 @@ class frigate extends eqLogic
     $frigate->save();
   }
 
+  /**
+   * Crée l'équipement Statistiques s'il n'existe pas, puis ses commandes.
+   *
+   * @return void
+   */
   public static function generateEqStats()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -2123,6 +2654,12 @@ class frigate extends eqLogic
     self::createEqStatsCmd($eqlogicId);
   }
 
+  /**
+   * Traite un message MQTT tracked_object_update : description IA, reconnaissance faciale, plaque ou classification.
+   *
+   * @param array<string, mixed> $trackedObjects Contenu du message
+   * @return void
+   */
   public static function updateTrackedObjects($trackedObjects)
   {
     $type = $trackedObjects['type'] ?? null;
@@ -2152,6 +2689,14 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╚════════════════════════ END UPDATE TRACKED OBJECTS ═══════════════════");
   }
 
+  /**
+   * Enregistre en base le résultat d'une reconnaissance sur un évènement, créé s'il n'existe pas encore.
+   *
+   * @param frigate_events|null  $frigateEvent   Évènement existant
+   * @param string|null          $type           Type de reconnaissance : description, face, lpr ou classification
+   * @param array<string, mixed> $trackedObjects Contenu du message
+   * @return frigate_events|null Évènement enregistré, null pour un type inconnu
+   */
   private static function updateDatabase($frigateEvent, $type, $trackedObjects)
   {
     $id = $trackedObjects['id'] ?? null;
@@ -2217,6 +2762,14 @@ class frigate extends eqLogic
     $frigateEvent->save();
     return $frigateEvent;
   }
+  /**
+   * Met à jour les commandes « Reconnaissance » d'une caméra.
+   *
+   * @param int|string          $eqlogicId    Identifiant de l'équipement caméra
+   * @param string|null         $type         Type de reconnaissance
+   * @param frigate_events|null $frigateEvent Évènement enregistré
+   * @return void
+   */
   private static function updateCommands($eqlogicId, $type, $frigateEvent)
   {
     log::add(__CLASS__, 'debug', "║ MAJ Commandes pour le type : $type");
@@ -2251,6 +2804,25 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Retourne la commande d'un équipement, créée si elle n'existe pas.
+   *
+   * La recherche se fait par le nom, nettoyé comme Jeedom le fait en base et limité à 127 caractères : une
+   * commande renommée par l'utilisateur est recréée. Une commande d'action liée à une commande info prend le
+   * template toggle.
+   *
+   * @param int|string      $eqLogicId   Identifiant de l'équipement
+   * @param string          $name        Nom de la commande
+   * @param string          $subType     Sous-type Jeedom
+   * @param string          $unite       Unité
+   * @param string          $logicalId   logicalId
+   * @param string          $genericType Type générique
+   * @param int             $isVisible   Visibilité à la création
+   * @param cmd|string|null $infoCmd     Commande info liée, pour une commande d'action
+   * @param int             $historized  Historisation à la création
+   * @param string          $type        info ou action
+   * @return cmd
+   */
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
     // Nettoyer le nom exactement comme Jeedom le fera en base
@@ -2279,6 +2851,13 @@ class frigate extends eqLogic
     }
     return $cmd;
   }
+  /**
+   * Met à jour la commande « URL » d'un équipement, créée si besoin.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement
+   * @param string     $url       Valeur à publier
+   * @return void
+   */
   public static function createAndRefreshURLcmd($eqlogicId, $url)
   {
     $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "");
@@ -2287,6 +2866,13 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  /**
+   * Crée les commandes audio d'une caméra (état, marche, arrêt, bascule) et met l'état à jour.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement caméra
+   * @param mixed      $value     État audio selon la configuration de Frigate
+   * @return void
+   */
   public static function createAudioCmds($eqlogicId, $value = 0)
   {
     $infoCmd = self::createCmd($eqlogicId, "audio Etat", "binary", "", "info_audio", "JEEMATE_CAMERA_AUDIO_STATE", 0);
@@ -2305,6 +2891,15 @@ class frigate extends eqLogic
     $cmd = self::createCmd($eqlogicId, "audio toggle", "other", "", "action_toggle_audio", "JEEMATE_CAMERA_AUDIO_SET_TOGGLE", 0, $infoCmd, 0, "action");
     $cmd->save();
   }
+  /**
+   * Crée les commandes communes à toutes les caméras.
+   *
+   * Création d'évènement, capture d'image, liens RTSP et snapshot live, activation de la caméra. Les liens et
+   * l'état d'activation ne reçoivent une valeur que s'ils sont vides.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement caméra
+   * @return void
+   */
   public static function createCamerasCmds($eqlogicId)
   {
     $eqlogic = eqLogic::byId($eqlogicId);
@@ -2359,6 +2954,13 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  /**
+   * Crée la commande de détection d'un objet et la commande « Détection tout ».
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement
+   * @param string     $object    Objet suivi par Frigate, par exemple person
+   * @return void
+   */
   public static function createObjectDetectorCmd($eqlogicId, $object)
   {
     $infoCmd = self::createCmd($eqlogicId, "Détection " . $object, "binary", "", "info_detect_" . $object, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
@@ -2367,6 +2969,15 @@ class frigate extends eqLogic
     $infoCmd->save();
   }
 
+  /**
+   * Crée les commandes des bascules MQTT d'une caméra (voir MQTT_TOGGLES) et la commande « détection en cours ».
+   *
+   * Chaque bascule a une commande info d'état et trois actions : off, on et toggle.
+   *
+   * @param int|string           $eqlogicId Identifiant de l'équipement caméra
+   * @param array<string, mixed> $value     États connus, par clé de bascule
+   * @return void
+   */
   public static function createMQTTcmds($eqlogicId, $value)
   {
     foreach (self::MQTT_TOGGLES as $key => $prefix) {
@@ -2405,6 +3016,14 @@ class frigate extends eqLogic
     $infoCmd->save();
   }
 
+  /**
+   * Crée une commande d'action HTTP et la commande info « Etat HTTP command » qui reçoit ses réponses.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement
+   * @param string     $name      Nom de la commande
+   * @param string     $link      URL à appeler ; #user# et #password# y sont remplacés à l'exécution
+   * @return bool Toujours true
+   */
   public static function createHTTPcmd($eqlogicId, $name, $link)
   {
     log::add("frigate", 'debug', '║ création de la commande ' . $name . ' pour ' . $eqlogicId . ' liens : ' . $link);
@@ -2421,6 +3040,13 @@ class frigate extends eqLogic
     log::add("frigate", 'debug', '║ commande mise à jour');
     return true;
   }
+  /**
+   * Crée les commandes de l'équipement Statistiques : redémarrage de Frigate, état du serveur, et
+   * disponibilité quand MQTT est opérationnel.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement Statistiques
+   * @return bool Toujours true
+   */
   public static function createEqStatsCmd($eqlogicId)
   {
     $cmd = self::createCmd($eqlogicId, "redémarrer frigate", "other", "", "action_restart", "GENERIC_ACTION", 1, "", 0, "action");
@@ -2438,6 +3064,13 @@ class frigate extends eqLogic
     }
     return true;
   }
+  /**
+   * Modifie l'URL d'une commande HTTP.
+   *
+   * @param int|string $cmdId Identifiant de la commande
+   * @param string     $link  Nouvelle URL
+   * @return bool Toujours true
+   */
   public static function editHTTP($cmdId, $link)
   {
     $cmd = cmd::byid($cmdId);
@@ -2447,6 +3080,14 @@ class frigate extends eqLogic
     return true;
   }
 
+  /**
+   * Crée des commandes PTZ, de presets et audio fictives, pour tester l'affichage sans caméra PTZ.
+   *
+   * Les presets viennent d'une liste d'exemple ; les commandes sont à supprimer après le test.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement caméra
+   * @return void
+   */
   public static function createPTZdebug($eqlogicId)
   {
     log::add("frigate", 'debug', '║ création des commandes PTZ en mode DEBUG pour ' . $eqlogicId);
@@ -2455,6 +3096,12 @@ class frigate extends eqLogic
     self::createAudioCmds($eqlogicId);
     log::add("frigate", 'debug', '║ penser à supprimer les commandes après le debug... ');
   }
+  /**
+   * Crée les commandes de mouvement et de zoom PTZ d'une caméra.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement caméra
+   * @return bool Toujours true
+   */
   private static function createPTZcmds($eqlogicId)
   {
     log::add("frigate", 'debug', '║ création des commandes PTZ move et zoom pour ' . $eqlogicId);
@@ -2476,6 +3123,16 @@ class frigate extends eqLogic
     return true;
   }
 
+  /**
+   * Crée les commandes de presets PTZ d'une caméra, d'après la liste de Frigate.
+   *
+   * Le nombre de presets vient de la configuration de l'équipement (presetMax), à défaut de la configuration
+   * générale, limité à 10.
+   *
+   * @param int|string $eqlogicId Identifiant de l'équipement caméra
+   * @param bool       $debug     Utiliser une liste de presets d'exemple
+   * @return void
+   */
   private static function createPresetPTZcmds($eqlogicId, $debug = false)
   {
     log::add("frigate", 'debug', '║ Création des commandes Preset PTZ pour ' . $eqlogicId);
@@ -2545,6 +3202,11 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Crée les commandes de cron de l'équipement Events : état (à 1 à la création), marche et arrêt.
+   *
+   * @return void
+   */
   public static function setCmdsCron()
   {
     $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
@@ -2600,7 +3262,6 @@ class frigate extends eqLogic
     $eqlogicIds[] = $eqCamera->getId();
 
     // Récupération de la configuration des actions de la caméra
-    // Camera actions configuration retrieval
     $cameraActions = $eqCamera->getConfiguration('actions');
     if (is_array($cameraActions) && isset($cameraActions[0])) {
       $cameraAction = $cameraActions[0];
@@ -2714,6 +3375,17 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Met à jour les commandes de statistiques à partir des stats de Frigate.
+   *
+   * Par caméra : une commande par valeur, et l'état d'activation déduit du pid. Pour l'équipement
+   * Statistiques : détecteurs, GPU, CPU, stockage des enregistrements, version (aussi enregistrée dans la
+   * configuration) et uptime.
+   *
+   * @param array<string, mixed> $stats Stats reçues de /api/stats ou par MQTT
+   * @param bool                 $mqtt  Non utilisé
+   * @return void
+   */
   public static function majStatsCmds($stats, $mqtt = false)
   {
     // Statistiques pour chaque eqLogic caméras
@@ -2848,6 +3520,19 @@ class frigate extends eqLogic
     $cmd->save();
   }
 
+  /**
+   * Exécute les actions configurées sur un équipement pour un évènement.
+   *
+   * La condition principale de l'équipement (conditionIf), quand elle est vraie, bloque les actions, sauf
+   * celles marquées forcées. Une action s'exécute si elle est activée, si sa propre condition est vraie, si le
+   * label, le type et les zones de l'évènement correspondent (entrée puis sortie quand une zone de sortie est
+   * définie), si l'évènement a moins de 3 h, et si le clip ou le snapshot est disponible quand ses options
+   * l'utilisent. Les options reçoivent les tags de l'évènement (#camera#, #label#, #snapshot#, #clip#, #jeemate#…).
+   *
+   * @param int|string     $eqLogicId Identifiant de l'équipement caméra ou Events
+   * @param frigate_events $event     Évènement
+   * @return void
+   */
   private static function executeActionNewEvent($eqLogicId, $event)
   {
     // Récupération des URLs externes et internes
@@ -3077,9 +3762,23 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Télécharge un média de Frigate dans le dossier data et retourne son URL locale.
+   *
+   * Selon le mode : snapshot, clip ou aperçu d'un évènement ($type), miniature, dernière image de la caméra, ou
+   * capture manuelle depuis une URL. Un fichier déjà présent n'est pas retéléchargé, sauf la dernière image ou
+   * avec $force. Les images JPEG passent par processJpgImage(), selon les réglages de la caméra.
+   *
+   * @param string|null $eventId Identifiant de l'évènement
+   * @param string|null $type    snapshot, clip ou preview, en mode par défaut
+   * @param string|null $camera  Nom de la caméra dans Frigate
+   * @param int         $mode    Une des constantes self::SAVE_MODE_*
+   * @param string      $file    URL source, pour la dernière image et la capture manuelle
+   * @param bool        $force   Retélécharger un fichier déjà présent
+   * @return string URL locale du fichier, « error » en cas d'échec
+   */
   public static function saveURL($eventId = null, $type = null, $camera = null, $mode = self::SAVE_MODE_DEFAULT, $file = "", $force = false)
   {
-    // $mode : l'une des constantes self::SAVE_MODE_* ; $force retélécharge un fichier déjà présent
     $result = "";
     $urlJeedom = network::getNetworkAccess('external') ?: network::getNetworkAccess('internal');
     $urlFrigate = self::getUrlFrigate();
@@ -3178,6 +3877,12 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Retire les accents et met en minuscules, pour comparer labels et zones.
+   *
+   * @param string $string
+   * @return string
+   */
   private static function cleanString($string)
   {
     // Supprimer les accents
@@ -3259,6 +3964,12 @@ class frigate extends eqLogic
     return $uniqueId;
   }
 
+  /**
+   * Construit un identifiant unique de capture : le timestamp suivi de six caractères aléatoires.
+   *
+   * @param string $timestamp Timestamp avec microsecondes, par exemple 1727561234.123456
+   * @return string Identifiant, par exemple 1727561234.123456-ab12cd
+   */
   public static function createUniqueId($timestamp)
   {
     // Chaîne aléatoire de 6 caractères
@@ -3269,6 +3980,11 @@ class frigate extends eqLogic
     return $uniqueId;
   }
 
+  /**
+   * Retourne la configuration de Frigate (/api/config).
+   *
+   * @return array|false Configuration décodée, false en cas d'échec
+   */
   public static function getConfig()
   {
     $urlfrigate = self::getUrlFrigate();
@@ -3289,6 +4005,12 @@ class frigate extends eqLogic
     return $config;
   }
 
+  /**
+   * Appelée par Jeedom avant l'enregistrement du topic MQTT : désabonne le plugin de l'ancien topic s'il change.
+   *
+   * @param string $value Nouveau topic
+   * @return string Topic à enregistrer
+   */
   public static function preConfig_topic($value)
   {
     if (self::getTopic() != $value) {
@@ -3297,6 +4019,12 @@ class frigate extends eqLogic
     return $value;
   }
 
+  /**
+   * Appelée par Jeedom après l'enregistrement du topic MQTT : relance l'abonnement si le démon tourne.
+   *
+   * @param string $value Topic enregistré
+   * @return void
+   */
   public static function postConfig_topic($value)
   {
     if (class_exists('mqtt2')) {
@@ -3307,6 +4035,11 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Désabonne le plugin du topic MQTT de Frigate auprès de MQTT Manager.
+   *
+   * @return void
+   */
   public static function removeMQTTTopicRegistration()
   {
     $topic = self::getTopic();
@@ -3316,6 +4049,12 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Démarre le démon : abonne le plugin au topic MQTT de Frigate auprès de MQTT Manager.
+   *
+   * @return bool Toujours true
+   * @throws Exception Si le démon n'est pas lançable (MQTT Manager absent ou arrêté, topic vide)
+   */
   public static function deamon_start()
   {
     log::add(__CLASS__, 'info', 'deamon_start()');
@@ -3332,6 +4071,12 @@ class frigate extends eqLogic
     return true;
   }
 
+  /**
+   * Arrête le démon : désabonne le plugin de son topic MQTT.
+   *
+   * @return void
+   * @todo Lit la clé de configuration « frigate » au lieu de « topic » : le topic retiré est vide.
+   */
   public static function deamon_stop()
   {
     if (class_exists('mqtt2')) {
@@ -3340,6 +4085,13 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Retourne l'état du démon, au format attendu par Jeedom.
+   *
+   * Le démon n'est lançable qu'avec MQTT Manager installé et démarré, et un topic configuré.
+   *
+   * @return array<string, string> Clés log, launchable, state, et launchable_message quand il n'est pas lançable
+   */
   public static function deamon_info()
   {
     $return = [
@@ -3363,11 +4115,25 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Indique si le démon tourne : toujours vrai, l'écoute étant assurée par MQTT Manager.
+   *
+   * @return bool
+   */
   public static function isRunning()
   {
     return true;
   }
 
+  /**
+   * Traite les messages MQTT reçus sur le topic de Frigate.
+   *
+   * events (Frigate antérieur à 0.14 seulement), reviews, stats, available et tracked_object_update ont leur
+   * traitement ; toute autre clé qui désigne une caméra passe par processCameraData().
+   *
+   * @param array<string, mixed> $_message Messages reçus, indexés par topic
+   * @return void
+   */
   public static function handleMqttMessage($_message)
   {
     if (!isset($_message[self::getTopic()])) {
@@ -3518,6 +4284,15 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Met à jour les commandes de mouvement d'une caméra : « motion Etat » pour l'état de la bascule, « détection
+   * en cours » pour le mouvement lui-même.
+   *
+   * @param eqLogic $eqCamera   Équipement caméra
+   * @param string  $key        Nom de la caméra
+   * @param mixed   $innerValue Valeur reçue : tableau avec state, ou ON / OFF
+   * @return void
+   */
   private static function handleMotion($eqCamera, $key, $innerValue)
   {
     if (isset($innerValue['state']) && $innerValue['state']) {
@@ -3539,6 +4314,14 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Met à jour la commande de détection d'un objet sur un équipement.
+   *
+   * @param eqLogic $eqCamera   Équipement caméra ou Events
+   * @param string  $key        Objet, par exemple person
+   * @param mixed   $innerValue Nombre d'objets, ou tableau avec active
+   * @return void
+   */
   private static function handleObject($eqCamera, $key, $innerValue)
   {
     // Traiter le cas où $innerValue est un nombre ou un tableau avec "active"
@@ -3553,6 +4336,15 @@ class frigate extends eqLogic
     $infoCmd->save();
     log::add("frigate_Detect", 'info', '║ Objet : ' . $key . ', Valeur enregistrée : ' . json_encode($value));
   }
+  /**
+   * Met à jour la commande « Détection tout » d'un équipement ; à 0, remet aussi à 0 les détections d'objets
+   * encore actives.
+   *
+   * @param eqLogic $eqCamera   Équipement caméra ou Events
+   * @param string  $key        Clé reçue (all)
+   * @param mixed   $innerValue Nombre d'objets, ou tableau avec active
+   * @return void
+   */
   private static function handleAllObject($eqCamera, $key, $innerValue)
   {
     // Traiter le cas où $innerValue est un nombre ou un tableau avec "active"
@@ -3576,6 +4368,15 @@ class frigate extends eqLogic
       }
     }
   }
+  /**
+   * Met à jour la commande d'état d'une bascule MQTT d'une caméra, quand sa valeur change.
+   *
+   * @param eqLogic     $eqCamera     Équipement caméra
+   * @param string      $type         Clé de la bascule, par exemple detect
+   * @param string|null $state        ON ou OFF
+   * @param string      $jeemateState Type générique de la commande d'état
+   * @return void
+   */
   private static function updateCameraState($eqCamera, $type, $state, $jeemateState)
   {
 
@@ -3595,9 +4396,11 @@ class frigate extends eqLogic
   }
 
   /**
-   * @param string $eventId
-   * @param int|bool $isFav
-   * @return int|null
+   * Change le statut favori d'un évènement ; un favori n'est jamais purgé.
+   *
+   * @param string   $eventId Identifiant Frigate de l'évènement
+   * @param int|bool $isFav   1 ou true pour le mettre en favori
+   * @return int|null Nouveau statut, null si l'évènement est introuvable
    */
   public static function setFavorite($eventId, $isFav)
   {
@@ -3614,6 +4417,11 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Supprime les fichiers latest.jpg du dossier data.
+   *
+   * @return void
+   */
   public static function deleteLatestFile()
   {
     $folder = dirname(__FILE__, 3) . "/data/";
@@ -3632,6 +4440,13 @@ class frigate extends eqLogic
     }
   }
 
+  /**
+   * Appelée par Jeedom lors d'une sauvegarde : retourne les dossiers du plugin à exclure.
+   *
+   * Le dossier data, qui contient les snapshots et les clips, est exclu quand l'option excludeBackup est cochée.
+   *
+   * @return string[]|null
+   */
   public static function backupExclude()
   {
     // retourne le répertoire de sauvegarde des snapshots et des vidéos des events à ne pas enregistrer dans le backup Jeedom
@@ -3641,6 +4456,11 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Retourne la configuration brute de Frigate (/api/config/raw), pour l'éditeur du plugin.
+   *
+   * @return array{status: string, message: mixed} success avec la configuration, ou error avec le message d'erreur
+   */
   public static function getFrigateConfiguration()
   {
     log::add(__CLASS__, 'info', "getFrigateConfiguration");
@@ -3698,6 +4518,13 @@ class frigate extends eqLogic
     return $response;
   }
 
+  /**
+   * Envoie une configuration YAML à Frigate, avec ou sans redémarrage.
+   *
+   * @param string $frigateConfiguration Configuration YAML
+   * @param bool   $restart              Redémarrer Frigate après l'enregistrement
+   * @return array{status: string, message: mixed} success avec la réponse de Frigate, ou error avec le message d'erreur
+   */
   public static function sendFrigateConfiguration($frigateConfiguration, $restart = false)
   {
     $urlfrigate = self::getUrlFrigate();
@@ -3785,6 +4612,11 @@ class frigate extends eqLogic
     return $jsonArray;
   }
 
+  /**
+   * Met à jour la commande « status serveur » de l'équipement Statistiques selon la réponse du serveur Frigate.
+   *
+   * @return int|null 1 si le serveur répond en 200, 0 sinon, null sans équipement Statistiques
+   */
   private static function checkFrigateStatus()
   {
     $frigate = frigate::byLogicalId('eqFrigateStats', 'frigate');
@@ -3815,6 +4647,11 @@ class frigate extends eqLogic
 
     return $etat;
   }
+  /**
+   * Signale par un message une nouvelle version de Frigate, et la note dans la configuration (frigate_maj).
+   *
+   * @return void
+   */
   private static function checkFrigateVersion()
   {
     $urlfrigate = self::getUrlFrigate();
@@ -3873,6 +4710,13 @@ class frigate extends eqLogic
   }
 
 
+  /**
+   * Retourne le temps écoulé depuis une date, en français (« il y a 3 heures »).
+   *
+   * @param string $datetime Date lisible par DateTime
+   * @param bool   $full     Toutes les unités au lieu de la plus grande
+   * @return string
+   */
   public static function timeElapsedString($datetime, $full = false)
   {
     $now = new DateTime();
@@ -3916,6 +4760,12 @@ class frigate extends eqLogic
     return $strings ? 'il y a ' . implode(', ', $strings) : 'à l\'instant';
   }
 
+  /**
+   * Retourne la classe CSS de couleur d'un score, par tranche de 10 %.
+   *
+   * @param int|float|string $score Score en %
+   * @return string
+   */
   public static function getPercentageClass($score)
   {
     $score = (int) $score;
@@ -3934,6 +4784,12 @@ class frigate extends eqLogic
     return 'percentage-0';
   }
 
+  /**
+   * Formate une durée en secondes : « 1h 05mn », « 3mn 07s » ou « 42s ».
+   *
+   * @param int|float $seconds
+   * @return string
+   */
   public static function formatDuration($seconds)
   {
     $hours = floor($seconds / 3600);
@@ -3974,6 +4830,15 @@ class frigateCmd extends cmd
   }
   */
 
+  /**
+   * Lit les paramètres de création d'un évènement dans les options de la commande.
+   *
+   * Le titre donne le label ; le message peut porter video, duration et score, sous la forme
+   * video=1|duration=20|score=30. Les valeurs absentes viennent de la configuration générale.
+   *
+   * @param array<string, mixed> $_options Options de la commande
+   * @return array{label: string, video: int, duration: int, score: int}
+   */
   private function parseEventParameters($_options)
   {
     // Valeurs par défaut
@@ -4024,7 +4889,15 @@ class frigateCmd extends cmd
   }
 
 
-  // Exécution d'une commande
+  /**
+   * Exécute la commande d'action.
+   *
+   * Bascules MQTT (marche, arrêt, inversion), activation de la caméra par l'API, mouvements PTZ (arrêtés après
+   * la pause pausePTZ), presets, création d'évènement et de capture, crons, redémarrage de Frigate et actions HTTP.
+   *
+   * @param array<string, mixed> $_options Options de la commande
+   * @return void
+   */
   public function execute($_options = array())
   {
     $frigate = $this->getEqLogic();
@@ -4288,6 +5161,16 @@ class frigateCmd extends cmd
       $httpCmd->event($response);
     }
   }
+  /**
+   * Appelle une URL avec une authentification Digest et retourne la réponse.
+   *
+   * La réponse et le détail de l'échange sont écrits au log en debug, mot de passe masqué.
+   *
+   * @param string $link     URL à appeler
+   * @param string $username Identifiant
+   * @param string $password Mot de passe
+   * @return string|false Réponse, false en cas d'erreur
+   */
   private function getCurlcmd($link, $username, $password)
   {
 
@@ -4335,17 +5218,42 @@ class frigateCmd extends cmd
     return $secret === '' ? $text : str_replace($secret, '****', $text);
   }
 
+  /**
+   * Active ou désactive le cron de l'équipement Events (commande info_Cron).
+   *
+   * @param eqLogic $frigate Équipement Events
+   * @param int     $status  1 pour activer, 0 pour désactiver
+   * @param string  $message Message écrit au log
+   * @return void
+   */
   private function updateCronStatus($frigate, $status, $message)
   {
     $frigate->getCmd(null, 'info_Cron')->event($status);
     log::add(__CLASS__, 'debug', $message);
   }
 
+  /**
+   * Publie un message MQTT sur un sous-topic d'une caméra.
+   *
+   * @param string $camera  Nom de la caméra dans Frigate
+   * @param string $topic   Sous-topic, par exemple detect/set
+   * @param string $message Charge utile
+   * @return void
+   */
   private function publishCameraMessage($camera, $topic, $message)
   {
     frigate::publish_camera_message($camera, $topic, $message);
   }
 
+  /**
+   * Inverse une bascule MQTT d'une caméra, d'après la valeur de sa commande d'état.
+   *
+   * @param eqLogic $frigate Équipement caméra
+   * @param string  $camera  Nom de la caméra dans Frigate
+   * @param string  $infoCmd logicalId de la commande d'état
+   * @param string  $setCmd  Sous-topic de commande, par exemple detect/set
+   * @return void
+   */
   private function toggleCameraSetting($frigate, $camera, $infoCmd, $setCmd)
   {
     $currentStatus = $frigate->getCmd(null, $infoCmd)->execCmd();
