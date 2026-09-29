@@ -1301,7 +1301,8 @@ class frigate extends eqLogic
       }
 
       log::add(__CLASS__, 'debug', "║ Téléchargement du fichier $type pour ID: $id");
-      $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $isThumbnail);
+      $mode = $isThumbnail ? self::SAVE_MODE_THUMBNAIL : self::SAVE_MODE_DEFAULT;
+      $img = self::saveURL($id, $isThumbnail ? null : "snapshot", $camera, $mode, "", $force);
       return ['url' => $img == "error" ? "null" : $img, 'has' => ($img != "error") ? 1 : 0];
     }
 
@@ -1461,12 +1462,47 @@ class frigate extends eqLogic
    */
   public static function mediaFileExists($url)
   {
-    $pluginWebPath = '/plugins/frigate/';
-    if (!is_string($url) || strpos($url, $pluginWebPath) !== 0) {
-      return false;
+    $path = self::mediaFilePath($url);
+
+    return $path !== null && is_file($path);
+  }
+
+  /**
+   * Retourne le chemin local désigné par l'URL d'un média du plugin.
+   *
+   * Seules les URL du dossier data sont acceptées, sans remontée « .. » : la purge
+   * supprime les fichiers désignés par les URL enregistrées en base.
+   *
+   * @param string|null $url URL web du média, de la forme /plugins/frigate/data/...
+   * @return string|null Chemin local, null si l'URL ne désigne pas un fichier du dossier data
+   */
+  private static function mediaFilePath($url)
+  {
+    $dataWebPath = '/plugins/frigate/data/';
+    if (!is_string($url) || strpos($url, $dataWebPath) !== 0 || strpos($url, '..') !== false) {
+      return null;
     }
 
-    return is_file(dirname(__FILE__, 3) . '/' . substr($url, strlen($pluginWebPath)));
+    return dirname(__FILE__, 3) . '/data/' . substr($url, strlen($dataWebPath));
+  }
+
+  /**
+   * Retourne les URL de médias enregistrées sur les évènements, en clés d'un tableau.
+   *
+   * @return array<string, true>
+   */
+  private static function referencedMediaUrls()
+  {
+    $urls = [];
+    foreach (frigate_events::all(false, true) ?: [] as $event) {
+      foreach ([$event->getSnapshot(), $event->getThumbnail(), $event->getLasted()] as $url) {
+        if (is_string($url) && $url !== '') {
+          $urls[$url] = true;
+        }
+      }
+    }
+
+    return $urls;
   }
 
   // Fonction de nettoyage du dossier data, suppression de tous les fichiers n'ayant pas d'event associé en DB Jeedom
@@ -1477,12 +1513,32 @@ class frigate extends eqLogic
     $folder = dirname(__FILE__, 3) . "/data";
 
     if (file_exists($folder)) {
+      $snapshotsDir = $folder . DIRECTORY_SEPARATOR . 'snapshots' . DIRECTORY_SEPARATOR;
+      $referencedUrls = null;
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
           $path = $file->getPathname();
+          // Capture manuelle : son nom ne porte pas toujours l'event_id, elle se rattache à son
+          // évènement par l'URL enregistrée. L'heure de marge laisse createSnapshot() enregistrer
+          // l'évènement après avoir écrit le fichier.
+          if (strpos($path, $snapshotsDir) === 0) {
+            if ($referencedUrls === null) {
+              $referencedUrls = self::referencedMediaUrls();
+            }
+            $url = '/plugins/frigate/data/snapshots/' . $file->getFilename();
+            if (!isset($referencedUrls[$url]) && $file->getMTime() < time() - 3600) {
+              log::add(__CLASS__, 'debug', "║ Capture " . $path . " rattachée à aucun évènement.");
+              if (unlink($path)) {
+                log::add(__CLASS__, 'debug', "║ Suppresion reussie: " . $path);
+              } else {
+                log::add(__CLASS__, "error", "║ Suppresion echouée: " . $path);
+              }
+            }
+            continue;
+          }
           // Vérifiez que le fichier est dans un sous-dossier de /data
-          if (strpos($path, $folder . DIRECTORY_SEPARATOR) === 0 && $path !== $folder . DIRECTORY_SEPARATOR . basename($path) && strpos($path, $folder . DIRECTORY_SEPARATOR . 'snapshots' . DIRECTORY_SEPARATOR) === false) {
+          if (strpos($path, $folder . DIRECTORY_SEPARATOR) === 0 && $path !== $folder . DIRECTORY_SEPARATOR . basename($path)) {
             $id = self::extractID($file->getFilename());
             // Vérifier si l'id existe dans la base de données
             $frigate = frigate_events::byEventId($id);
@@ -1707,6 +1763,17 @@ class frigate extends eqLogic
       $totalRemovedSize += filesize($files['preview']);
       unlink($files['preview']);
       log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
+    }
+
+    // Les captures manuelles sont rangées dans data/snapshots/, hors du dossier de la caméra :
+    // leurs fichiers se retrouvent par les URL enregistrées sur l'évènement
+    foreach (array_unique([$frigate->getSnapshot(), $frigate->getThumbnail(), $frigate->getLasted()]) as $url) {
+      $path = self::mediaFilePath($url);
+      if ($path !== null && is_file($path)) {
+        $totalRemovedSize += filesize($path);
+        unlink($path);
+        log::add(__CLASS__, 'debug', "║ Fichier " . basename($path) . " supprimé pour l'événement " . $frigate->getEventId());
+      }
     }
 
     $frigate->remove();
@@ -3012,9 +3079,9 @@ class frigate extends eqLogic
     }
   }
 
-  public static function saveURL($eventId = null, $type = null, $camera = null, $mode = self::SAVE_MODE_DEFAULT, $file = "")
+  public static function saveURL($eventId = null, $type = null, $camera = null, $mode = self::SAVE_MODE_DEFAULT, $file = "", $force = false)
   {
-    // $mode : l'une des constantes self::SAVE_MODE_*
+    // $mode : l'une des constantes self::SAVE_MODE_* ; $force retélécharge un fichier déjà présent
     $result = "";
     $urlJeedom = network::getNetworkAccess('external') ?: network::getNetworkAccess('internal');
     $urlFrigate = self::getUrlFrigate();
@@ -3061,8 +3128,8 @@ class frigate extends eqLogic
 
     $fullPath = dirname(__FILE__, 3) . $path;
 
-    // --- Si déjà téléchargé (sauf latest) ---
-    if (file_exists($fullPath) && $mode != self::SAVE_MODE_LATEST) {
+    // --- Si déjà téléchargé (sauf latest et téléchargement forcé) ---
+    if (!$force && file_exists($fullPath) && $mode != self::SAVE_MODE_LATEST) {
       return "/plugins/frigate" . $path;
     }
 
@@ -4193,13 +4260,10 @@ class frigateCmd extends cmd
         break;
       case 'action_http':
         // Gérer les variables user et password
-        $user     = $frigate->getConfiguration('userName') ?? "";
-        $password = $frigate->getConfiguration('password') ?? "";
-        $link     = str_replace(['#user#', '#password#'], [$user, $password], $link);
         $this->runHttpAction($frigate, $link, $user, $password);
         break;
       default:
-        // Gérer les actions HTTP dynamiques
+        // Commandes HTTP au logicalId action_http_<nom>, créées par les premières versions du plugin
         if (strpos($logicalId, 'action_http_') === 0) {
           $this->runHttpAction($frigate, $link, $user, $password);
         }
@@ -4209,19 +4273,24 @@ class frigateCmd extends cmd
   /**
    * Exécute une action HTTP et publie la réponse sur la commande info_http.
    *
+   * Les variables #user# et #password# du lien sont remplacées par les identifiants
+   * de l'équipement. Le mot de passe est masqué dans tout ce qui part au log.
+   *
    * @param eqLogic $_frigate  Équipement porteur de la commande
-   * @param string  $_link     URL à appeler
+   * @param string  $_link     URL à appeler, avec ses éventuelles variables
    * @param string  $_user     Identifiant d'authentification
    * @param string  $_password Mot de passe d'authentification
    * @return void
    */
   private function runHttpAction($_frigate, $_link, $_user, $_password)
   {
-    log::add('frigate', 'info', "║ action_http " . $_link);
+    $link = str_replace(['#user#', '#password#'], [(string) $_user, (string) $_password], (string) $_link);
+    $safeLink = self::maskSecret($link, $_password);
+    log::add('frigate', 'info', "║ action_http " . $safeLink);
 
-    $response = $this->getCurlcmd($_link, $_user, $_password);
+    $response = $this->getCurlcmd($link, $_user, $_password);
     if ($response === false) {
-      log::add('frigate', "error", "Erreur lors de l'appel HTTP: " . $_link);
+      log::add('frigate', "error", "Erreur lors de l'appel HTTP: " . $safeLink);
       return;
     }
 
@@ -4247,19 +4316,34 @@ class frigateCmd extends cmd
     $response = curl_exec($ch);
 
     if (curl_errno($ch)) {
-      log::add('frigate', "error", "Erreur cURL: " . curl_error($ch));
+      log::add('frigate', "error", "Erreur cURL: " . self::maskSecret(curl_error($ch), $password));
     } else {
-      log::add('frigate', 'debug', "║ Resultat de la commande HTTP : " . $response);
+      log::add('frigate', 'debug', "║ Resultat de la commande HTTP : " . self::maskSecret($response, $password));
     }
 
     // Récupérer les informations verbose
     rewind($verbose);
     $verboseLog = stream_get_contents($verbose);
-    log::add('frigate', 'debug', "║ cURL verbose log: " . $verboseLog);
+    log::add('frigate', 'debug', "║ cURL verbose log: " . self::maskSecret($verboseLog, $password));
 
     fclose($verbose);
     curl_close($ch);
     return $response;
+  }
+
+  /**
+   * Remplace un secret par des astérisques dans un texte destiné au log.
+   *
+   * @param string|false|null $_text   Texte à écrire au log
+   * @param string|null       $_secret Secret à masquer ; une valeur vide laisse le texte intact
+   * @return string
+   */
+  private static function maskSecret($_text, $_secret)
+  {
+    $text = (string) $_text;
+    $secret = (string) $_secret;
+
+    return $secret === '' ? $text : str_replace($secret, '****', $text);
   }
 
   private function updateCronStatus($frigate, $status, $message)
