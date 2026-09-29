@@ -379,7 +379,7 @@ class frigate extends eqLogic
         }
       }
 
-      // maj lien et cmd rtsp    
+      // maj lien et cmd rtsp
       $rtspStream = "";
       $cmd = cmd::byEqLogicIdCmdName($this->getId(), "RTSP");
       if (is_object($cmd)) {
@@ -556,7 +556,7 @@ class frigate extends eqLogic
 
   private function buildIaActions(): string
   {
-    return 
+    return
         $this->buildIaToggleRow('action_start_enabled', 'action_stop_enabled', 'info_enabled', '{{Activer la caméra}}', '{{Désactive temporairement la caméra jusqu\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\'enregistrement et le débogage deviennent alors indisponibles.}}')
       . $this->buildIaToggleRow('action_start_review_alerts',       'action_stop_review_alerts',       'info_review_alerts',       '{{Activités : alertes}}', '{{Active ou désactive temporairement les alertes pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
       . $this->buildIaToggleRow('action_start_review_detections',   'action_stop_review_detections',   'info_review_detections',   '{{Activités : détections}}', '{{Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\'est générée.}}')
@@ -936,7 +936,7 @@ class frigate extends eqLogic
     return $response;
   }
 
-  // Méthodes de modification du fichier de configuration pour une caméra par API 
+  // Méthodes de modification du fichier de configuration pour une caméra par API
   // Attention : Redémarrage Frigate nécessaire pour prise en compte
   // TODO : Ajouter d'autres méthodes pour différents paramètres supplémentaires pour une caméra
   public static function enableCamera($camera, $enable)
@@ -1937,7 +1937,7 @@ class frigate extends eqLogic
         $objects = array_merge($objectsGeneral, $objectsCamera);
         // supprimer les entrées identique :
         $objects = array_unique($objects);
-        // créé les commandes 
+        // créé les commandes
         foreach ($objects as $object) {
           self::createObjectDetectorCmd($frigate->getId(), $object);
         }
@@ -2010,7 +2010,7 @@ class frigate extends eqLogic
     }
     // création des commandes d'activation des cron
     frigate::setCmdsCron();
-    // création des commandes détection objects        
+    // création des commandes détection objects
     $objectsGeneral = $configurationArray['objects']['track'];
     $objectsCamera = []; // tableau pour stocker les objets détectés des caméras
 
