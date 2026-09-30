@@ -34,10 +34,10 @@ Comme pour tous les autres plugins, après l'avoir installé, il faut l'activer.
 
 Le plugin sera toujours compatible avec la dernière version stable connue (le temps de s'adapter). Par contre, on ne fera pas plusieurs développements pour rester opérationnel avec les anciennes versions. Donc si quelque chose ne fonctionne pas, commencez par mettre à jour votre serveur Frigate avant de demander de l'aide.
 
-Au 05-04-2026 le plugin fonctionne avec les versions suivantes de Frigate :
-- Frigate 0.17.1 Stable
+Au 30-09-2026 le plugin fonctionne avec les versions suivantes de Frigate :
+- Frigate 0.18.0 Stable
 
-Les versions inférieures à 0.17.1 peuvent avoir des fonctions manquantes, voire ne plus fonctionner avec le plugin. Je ne garantis pas un suivi des anciennes versions du serveur Frigate.
+Frigate 0.16.0 est la version minimale. Certaines fonctions ne sont disponibles qu'à partir de Frigate 0.18 : statut des flux des caméras, profils et paramètre pre_capture des évènements créés manuellement. Je ne garantis pas un suivi des anciennes versions du serveur Frigate.
 
 # Mode de connexion au serveur Frigate
 ### API
@@ -57,8 +57,8 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19,
 ![niveau de logs](../images/frigate_Doc_Logs.png)
 # <u>Configuration</u>
 - **Pièce par défaut** : Les caméras créées seront automatiquement placées dans cette pièce.
-- **Exclure du backup** : Si coché, les données de la caméra ne seront pas sauvegardées dans le fichier de configuration de Jeedom.
-- **Version du plugin** : Si vous avez des problèmes avec la mise à jour, vous pouvez indiquer la version du plugin.
+- **Exclure du backup** : Si coché, le dossier data du plugin (snapshots, clips, miniatures et captures) est exclu des sauvegardes Jeedom, qui sont alors plus légères. Après la restauration d'une telle sauvegarde, les évènements n'ont plus leurs fichiers : une image par défaut s'affiche à leur place.
+- **Version du plugin** : la version installée, en lecture seule. À indiquer dans vos demandes d'aide.
 
 #### Paramétrage Frigate
 - **URL** : l'url de votre serveur Frigate (ex: 192.168.1.20)
@@ -69,13 +69,16 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19,
 - **Pause action** : Pause à effectuer sur les actions PTZ. Par exemple, après avoir appuyé sur move up, un stop est automatiquement effectué : vous pouvez définir le temps avant cette action stop de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
 
 #### Gestion des évènements
-- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités. Si le nombre de jours est 0, alors le processus est arrêté et aucun appel à l'API Frigate n'est effectué.
-- **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués seront supprimés de la database Jeedom (pas du serveur Frigate).
+- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités (7 par défaut). Si le nombre de jours est 0, alors le processus est arrêté et aucun appel à l'API Frigate n'est effectué.
+- **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués (7 par défaut) seront supprimés de la database Jeedom avec leurs fichiers, mais pas du serveur Frigate.
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
-- **Taille des dossiers** : Taille maximum du dossier data.
-- **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut)
+- **Taille des dossiers** : Taille maximum du dossier data, en Mo (500 Mo par défaut). Au-delà, les évènements les plus anciens sont supprimés jusqu'à repasser sous la limite.
+
+Les évènements mis en favori ne sont jamais supprimés, ni par l'ancienneté ni par la taille. Les captures manuelles suivent les mêmes règles que les évènements : mettez-les en favori pour les garder.
+
+- **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut). Chaque caméra peut avoir sa propre durée, voir l'équipement caméra.
 - **Vidéos en vignette** : Au passage de la souris sur une vignette de la page évènement, la vidéo sera jouée.
 - **Confirmation avant suppression** : Affiche une alerte avant la suppression d'un évènement.
 - **Pause création fichiers (en secondes)** : Délai d'attente avant de créer le fichier (clip / snapshot) (5 s par défaut). Suivant les serveurs, cela peut être nécessaire pour laisser le temps à Frigate de créer le fichier.
@@ -128,11 +131,18 @@ Après installation du plugin et la configuration de l'URL et du port de votre s
 
 ### Equipement
 
-- user : seulement utile si vous créez des commandes HTTP
-- mot de passe : seulement utile si vous créez des commandes HTTP
-- Panel : cocher pour que la caméra soit visible sur le Panel
-- Flux vidéo : Renseigner un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
-- preset : si vous souhaitez un nombre différent du réglage global
+- **Identifiant** et **Mot de passe** : seulement utiles pour les commandes HTTP (voir plus bas).
+- **Rafraîchissement** : durée de rafraîchissement de l'image de la caméra, en secondes : la première pour le dashboard et le panel, la seconde pour JeeMate. Sans valeur, la durée de la configuration générale est reprise.
+- **Afficher sur le panel** : cocher pour que la caméra soit visible sur le Panel.
+- **Position sur le panel** : ordre d'affichage de la caméra sur le panel (1, 2, 3…). Les caméras sans position s'affichent après les autres. À la création de la caméra, la position reprend l'ordre défini dans Frigate (**``ui -> order``**).
+- **Flux vidéo** : Renseigner un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
+- **Nombre de preset** : nombre de presets PTZ à importer, si vous souhaitez un nombre différent du réglage global (10 au maximum).
+- **Qualité des snapshots** : qualité de compression des images téléchargées, de 1 à 100 (70 par défaut). Plus la valeur est basse, plus les fichiers sont légers. S'applique aux snapshots, aux miniatures et aux captures.
+- **Hauteur des snapshots** : hauteur maximale des images, en pixels. Une image plus haute est réduite en gardant ses proportions. Sans valeur, la taille d'origine est conservée. Ne s'applique pas aux miniatures.
+- **Convertir en WEBP** : les images sont enregistrées au format WebP, plus léger que le JPEG.
+- **Template dashboard** et **Template panel** : n'afficher que l'image de la caméra, sur le dashboard ou sur le panel. Les boutons, les commandes PTZ et les icônes de détection sont masqués ; un clic sur l'image ouvre toujours la fenêtre agrandie avec les actions.
+
+La qualité, la hauteur et le format ne s'appliquent qu'aux images téléchargées après leur modification.
 
 A droite, les quelques paramètres disponibles pour la visualisation.
 Refresh de l'image suivant votre configuration.
@@ -146,9 +156,12 @@ Refresh de l'image suivant votre configuration.
 
 ### Commandes infos
 ##### Toutes les caméras
-Les informations sur le dernier évènement de la caméra et sur ses statistiques.
+Les informations sur le dernier évènement de la caméra : caméra, label, score, top score, zones, id, type, timestamp, durée, clip disponible, snapshot disponible, URL snapshot, URL clip et URL thumbnail. Et les statistiques de la caméra.
 
 L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
+
+- **RTSP** : le lien du flux vidéo de la caméra (voir la section Flux vidéo).
+- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra.
 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...) 
@@ -156,21 +169,46 @@ L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, 
 - **Détection all** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande all est à 0, alors les autres commandes de détection seront forcées à 0.
 - **Statut flux détection / enregistrement / audio** (Frigate 0.18 ou plus, masquées par défaut) : online, offline ou disabled pour chaque flux de la caméra. Frigate relance un flux hors ligne, la valeur peut donc alterner entre offline et online : attendre qu'elle reste stable avant d'agir, par exemple avec une condition de durée dans le scénario.
 
+##### Reconnaissance
+Si la reconnaissance faciale, la lecture de plaques, des modèles de classification ou l'IA générative sont activés dans Frigate, la caméra reçoit par MQTT le résultat de la dernière reconnaissance. Les commandes sont créées au premier résultat.
+- **Reconnaissance - Type** : face (visage), lpr (plaque), classification ou description
+- **Reconnaissance - Nom** et **Reconnaissance - Score** : la personne ou la plaque reconnue, ou le modèle de classification, avec le score en %
+- **Reconnaissance - Plaque d'immatriculation** : la plaque lue
+- **Reconnaissance - Label** et **Reconnaissance - Attributs** : le résultat d'un modèle de classification d'objets
+- **Reconnaissance - Description** : la description générée par l'IA
+- **Reconnaissance - Etat xxx** : l'état courant d'un modèle de classification d'état configuré pour la caméra
+
 ### Commandes actions
-- **Capture** :état, capture
-- **Camera** : état, activer, désactiver, toggle (Un redémarrage du serveur est nécessaire pour la prise en compte car le fichier configuration est modifié).
+- **Créer un évènement** : voir la page Events.
+- **Capture** : état, capture (voir Création d'une capture instantanée).
+- **(Config) Camera** : état, activer, désactiver, toggle. Ces commandes modifient le fichier de configuration de Frigate : un redémarrage du serveur est nécessaire pour la prise en compte.
 
-Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT.
+Pour avoir les commandes actions suivantes, il est obligatoire d'utiliser MQTT. Sans cela, les commandes ne seront pas créées. Je vous invite à lire la documentation de Frigate pour la configuration de votre serveur MQTT. Chacune a un état et des commandes on, off et toggle.
 
-- **Detect** : état, on, off, toggle
-- **Snapshot** : état, on, off, toggle
-- **Recording** : état, on, off, toggle
-- **Motion** : état, on, off, toggle (le OFF n'est possible que si detect est sur OFF aussi)
+- **Detect** : détection d'objets
+- **Snapshot** : snapshots des évènements
+- **Recording** : enregistrement
+- **Motion** : détection de mouvement (le OFF n'est possible que si detect est sur OFF aussi)
+- **enabled** : active ou désactive la caméra tout de suite, sans modifier le fichier de configuration. À partir de Frigate 0.18, l'état est conservé au redémarrage de Frigate ; avant, la caméra revient à sa configuration.
+- **review_alerts** et **review_detections** : alertes et détections des activités de la caméra, jusqu'au redémarrage de Frigate. Le plugin reçoit les nouveaux évènements en temps réel par les activités : sans alertes ni détections, il n'en reçoit plus.
+- **review_descriptions** et **object_descriptions** : descriptions par IA générative des activités et des objets suivis, jusqu'au redémarrage de Frigate
+- **notifications** : notifications de Frigate pour la caméra (pas celles de Jeedom)
+- **improve_contrast** : amélioration du contraste pour la détection de mouvement
 
 Les commandes PTZ, preset et audio ne sont créées que si la configuration de votre serveur Frigate possède les informations.
 - **PTZ** : left, right, up, down, stop, zoom in, zoom out
 - **Audio** : état, on, off, toggle
 - **Preset** : l'action permettant de placer votre caméra sur un point précis.
+
+### Commandes HTTP
+Dans l'onglet **PTZ & HTTP** d'une caméra, le bouton **Ajouter une commande HTTP** crée une commande action qui appelle l'URL indiquée, par exemple pour piloter une fonction de la caméra que Frigate ne propose pas.
+
+Dans l'URL, **``#user#``** et **``#password#``** sont remplacés par l'identifiant et le mot de passe de l'équipement, par exemple :
+**``http://192.168.1.50/cgi-bin/api.cgi?cmd=Snap&user=#user#&password=#password#``**
+
+L'appel utilise aussi l'authentification Digest avec cet identifiant et ce mot de passe. La réponse de la caméra est enregistrée dans la commande info **Etat HTTP command**. Le mot de passe est masqué dans les logs.
+
+Les commandes HTTP sont créées masquées. Une fois rendues visibles, elles apparaissent dans la liste déroulante des actions du widget, avec les presets. Le bouton crayon de la commande permet de modifier son URL.
 
 ### Action(s) sur évènement
 Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipement **caméras**.
@@ -227,6 +265,10 @@ Les actions ne seront exécutées que si le mode est configuré comme absent.
 
 Si aucune condition n'est spécifiée, l'action sera réalisée.
 
+<u>BON À SAVOIR</u> :
+- Une action qui utilise **#clip#** ou **#clip_path#** n'est exécutée que si le clip est disponible. De même, une action qui utilise **#snapshot#** ou **#snapshot_path#** n'est exécutée que si le snapshot est disponible.
+- Un évènement qui a commencé il y a plus de 3 heures ne déclenche aucune action, par exemple lors de la récupération d'anciens évènements.
+
 <u>Variables disponibles pour les conditions:</u>
 - **#camera#** : le nom de la caméra
 - **#score#** : le score en pourcentage -> 82 %
@@ -235,14 +277,18 @@ Si aucune condition n'est spécifiée, l'action sera réalisée.
 <u>Variables disponibles pour les actions:</u>
 Une liste de variables est disponible afin de personnaliser les actions, ces variables sont remplacées par leur valeur lors de l'exécution de l'action.
 - **#time#** : l'heure actuelle au format 12:00
+- **#event_id#** : l'identifiant Frigate de l'évènement
+- **#type#** : le type de l'évènement : new, update ou end
 - **#camera#** : le nom de la caméra
 - **#cameraId#** : l'id de la caméra (pour par exemple un deeplink vers la page de la caméra dans l'application JeeMate)
 - **#score#** : le score en pourcentage -> 82 %
 - **#has_clip#** : texte 0 ou 1
 - **#has_snapshot#** : texte 0 ou 1
 - **#top_score#** : le score maximum en pourcentage -> 92 %
-- **#zones#** : tableau
+- **#zones#** : texte, les zones séparées par des virgules
 - **#description#** : la description de l'événement générée par genAI (il faut bien entendu l'avoir activé dans le serveur Frigate)
+- **#sublabel#** : le label attribué par un modèle de classification d'objets de Frigate
+- **#attributes#** : les attributs attribués par un modèle de classification d'objets de Frigate
 - **#snapshot#** : lien vers fichier image
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#snapshot_path#** : path vers fichier image
@@ -340,10 +386,12 @@ Afficher seulement les événements d'une ou plusieurs caméras, seulement d'un 
 Vous ne souhaitez pas créer un évènement manuellement, mais vous souhaitez avoir une capture instantanée de la caméra ? Vous pouvez créer une action sur la caméra qui va capturer l'image de la caméra.
 
 Dans les actions des caméras se trouvent deux commandes :
-- Capturer image (action)
+- Capturer une image (action)
 - URL image (info)
 
-L'URL est de la forme **``/plugins/frigate/data/caméra/id_snapshot.jpg``** afin de s'adapter au maximum de plugins de communication.
+Chaque capture est aussi enregistrée comme un évènement avec le label **capture**, visible sur la page Events. Les captures sont supprimées selon les mêmes règles que les évènements (ancienneté et taille du dossier data) : mettez en favori celles que vous voulez garder.
+
+L'URL est de la forme **``/plugins/frigate/data/snapshots/id_snapshot.jpg``** afin de s'adapter au maximum de plugins de communication.
 
 Par exemple si vous souhaitez une URL complète, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
 **``str_replace('"','',"https://monjeedom.eu.jeedom.link"#value#)``**
@@ -375,7 +423,15 @@ Avec MQTT : cronDaily
 ***Dans tous les cas, si un cron est en cours d'exécution, le suivant ne sera pas lancé et en MQTT, les cron (1, 5, 10 et 15 sont désactivès).***
 
 # <u>Widget</u>
-Vous y trouverez la visualisation de la caméra et les boutons cochés visibles.
+Vous y trouverez la visualisation de la caméra et les boutons cochés visibles :
+- un clic sur l'image ouvre une fenêtre agrandie avec les actions, les commandes PTZ et les presets ;
+- les boutons enregistrement, snapshots, détection, audio et mouvement, création d'évènement et capture ;
+- la liste déroulante des actions regroupe les presets PTZ et les commandes HTTP visibles ;
+- l'icône clé à molette ouvre le panneau IA : activation de la caméra, alertes et détections des activités, descriptions par IA générative ;
+- une icône affiche les évènements de la caméra sur la page Events ;
+- les icônes des objets détectés en ce moment, pour les commandes **Détection xxx** visibles.
+
+Un bouton n'apparaît que si ses commandes sont visibles.
 
 # <u>Flux vidéo</u>
 ### configuration

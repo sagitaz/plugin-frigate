@@ -1767,7 +1767,7 @@ class frigate extends eqLogic
    * Réencode une image téléchargée en JPEG, avec redimensionnement et conversion WebP éventuels.
    *
    * Le redimensionnement à la hauteur demandée, quand l'image est plus haute, ne s'applique pas aux miniatures.
-   * Une qualité de 0 vaut 80.
+   * Une qualité hors de 1 à 100 vaut 70.
    *
    * @param string   $filePath      Chemin de l'image (jpeg, png ou webp)
    * @param int|null $height        Hauteur maximale en pixels, null pour garder la taille
@@ -1776,7 +1776,7 @@ class frigate extends eqLogic
    * @param bool     $isThumbnail   L'image est une miniature
    * @return string|null Chemin du fichier final, null si l'image est illisible
    */
-  private static function processJpgImage($filePath, $height = null, $quality = 100, $convertToWebp = false, $isThumbnail = false)
+  private static function processJpgImage($filePath, $height = null, $quality = 70, $convertToWebp = false, $isThumbnail = false)
   {
     if (!file_exists($filePath)) {
       log::add(__CLASS__, 'debug', "║ processJpgImage : fichier introuvable → $filePath");
@@ -1830,8 +1830,8 @@ class frigate extends eqLogic
 
     // --- Enregistrer en JPG ---
     $jpgPath = preg_replace('/\.(png|webp)$/i', '.jpg', $filePath);
-    if ($quality === 0) {
-      $quality = 80;
+    if ($quality < 1 || $quality > 100) {
+      $quality = 70;
     }
     imagejpeg($newImage, $jpgPath, $quality);
     log::add(__CLASS__, 'debug', "║ JPEG sauvegardé avec qualité = $quality");
@@ -3874,7 +3874,7 @@ class frigate extends eqLogic
     }
 
     // --- Récupération paramètres user ---
-    $snapshotQuality = (int)($eqLogic->getConfiguration('snapshotQuality') ?? 100);
+    $snapshotQuality = (int)$eqLogic->getConfiguration('snapshotQuality', 70);
     $snapshotHeight  = $eqLogic->getConfiguration('snapshotHeight');
     $snapshotHeight  = is_numeric($snapshotHeight) ? (int)$snapshotHeight : null;
     $snapshotWebp    = ($eqLogic->getConfiguration('snapshotWebp') ?? "0") == "1";
