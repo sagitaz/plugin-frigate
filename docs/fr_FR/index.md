@@ -178,7 +178,7 @@ L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, 
 - **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra.
 
 ##### MQTT
-- **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...) 
+- **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
 - **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Si un objet est considéré statique, alors la détection repasse à 0.
 - **Détection tout** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande Détection tout est à 0, alors les autres commandes de détection seront forcées à 0.
 - **Statut flux détection / enregistrement / audio** (Frigate 0.18 ou plus, masquées par défaut) : online, offline ou disabled pour chaque flux de la caméra. Frigate relance un flux hors ligne, la valeur peut donc alterner entre offline et online : attendre qu'elle reste stable avant d'agir, par exemple avec une condition de durée dans le scénario.
@@ -236,24 +236,24 @@ Si vous souhaitez regrouper sur l'équipement Events des actions communes et ens
 #### Conditions générales
 Indiquer ici dans quel cas les actions **NE DOIVENT PAS** être exécutées.
 
-Par exemple, vous configurez la condition comme ceci : 
-**#[Maison][Mode maison][Mode]# == "présent"** 
+Par exemple, vous configurez la condition comme ceci :
+**#[Maison][Mode maison][Mode]# == "présent"**
 Les actions ne seront exécutées que si le mode est tout autre que présent.
 
 
 #### Actions
 Vous pouvez indiquer ici les actions à effectuer à chaque nouvel évènement.
 
-Une checkbox vous permet de désactiver la vérification de la condition générale. 
+Une checkbox vous permet de désactiver la vérification de la condition générale.
 
-<u>LABEL</u> : 
+<u>LABEL</u> :
 **Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
 Dans la case **label**, il vous suffit d'indiquer le(s) label(s) pour lesquels vous souhaitez que l'action soit exécutée.
 Si ce champ est **vide** ou que vous mettez **all**, alors l'action sera exécutée pour tous les nouveaux évènements.
 Vous pouvez indiquer plusieurs labels en les séparant par des virgules.
 Les majuscules et les accents sont ignorés, donc si vous indiquez "Vélo" ou "velo", les deux seront considérées comme identiques.
 
-<u>TYPE</u> : 
+<u>TYPE</u> :
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
@@ -273,7 +273,7 @@ Les majuscules et les accents sont ignorés, donc si vous indiquez "Allée" ou "
 <u>CONDITION DE L'ACTION</u> :
 Indiquer ici dans quel cas les actions **DOIVENT** être exécutées.
 
-Par exemple, vous configurez la condition comme ceci : 
+Par exemple, vous configurez la condition comme ceci :
 **#[Maison][Mode maison][Mode]# == "absent"**
 Les actions ne seront exécutées que si le mode est configuré comme absent.
 
@@ -334,7 +334,7 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **thumbnail** : dans le champ titre : **``title=votre titre;;bigPicture=#thumbnail#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
 
-Pour une notification automatique, ajouter frigate=#jeemate# (JeeMate v3 et plus)
+Pour une notification automatique, ajouter frigate=#jeemate# (JeeMate v3)
 
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#;;frigate=#jeemate#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#;;frigate=#jeemate#``**
@@ -493,7 +493,7 @@ Configuration Frigate avec plusieurs flux, indiquer l'url du flux voulu sur la p
         - path: rtsp://127.0.0.1:8554/frigate1_low   # Flux secondaire basse résolution
           input_args: preset-rtsp-restream
           roles:
-            - detect  
+            - detect
 ```
 
 ***Attention, en aucun cas il ne vous est demandé de modifier la configuration sur Frigate***
@@ -511,7 +511,7 @@ N'oubliez pas d'activer la page panel dans la configuration générale, puis pou
 ### Le plugin est bien configuré en MQTT mais aucune action n'est effectuée
 Le topic frigate/reviews correspond aux review items (périodes d’activité détectée) qui sont générés après la détection et l’enregistrement des objets. Ce système de revue s'appuie fortement sur la fonction d’enregistrement (recording) pour fonctionner :
 
-Frigate organise les review items comme des plages temporelles regroupant plusieurs détections 
+Frigate organise les review items comme des plages temporelles regroupant plusieurs détections
 
 Si l’enregistrement est désactivé (record.enabled: false), aucun segment vidéo n’est stocké, et donc la plateforme ne construit pas de review items → rien n’est publié dans frigate/reviews.
 
@@ -529,15 +529,15 @@ record:
 
  J'ai mis des commentaires afin de vous aider.
 
- Ce fichier a été écrit pour Frigate 0.16. Depuis Frigate 0.18, la section **``genai``** a un nouveau format (plusieurs fournisseurs possibles) : Frigate convertit automatiquement l'ancien format, mais reportez-vous à la documentation officielle de Frigate pour une nouvelle configuration.
+ Ce fichier correspond à Frigate 0.18. Il est raccourci : une seule caméra, prompts abrégés.
 
- ```yaml
- # Rappel, le plugin mqtt-manager nécessite un broker mqtt sécurisé.
- mqtt:
+```yaml
+# Rappel, le plugin mqtt-manager nécessite un broker mqtt sécurisé.
+mqtt:
   host: 192.168.2.22        # Adresse IP de votre serveur MQTT
-  port: 1883                # Port du broker MQTT (1883 = standard non sécurisé)
-  user: ***                 # Nom d'utilisateur (masqué ici)
-  password: ***             # Mot de passe (masqué ici)
+  port: 1883                # Port du broker MQTT
+  user: '***'               # Nom d'utilisateur (masqué ici)
+  password: '***'           # Mot de passe (masqué ici)
   stats_interval: 300       # Fréquence (en secondes) des messages de statistiques MQTT
 
 detectors:
@@ -545,11 +545,8 @@ detectors:
     type: edgetpu           # Utilise un accélérateur Coral (Edge TPU) pour la détection
     device: usb             # Type de connexion : USB
 
-ffmpeg:
-  hwaccel_args: preset-intel-qsv-h264  # Accélération matérielle Intel Quick Sync pour le décodage vidéo
-
 timestamp_style:
-  position: tr              # Position du timestamp sur l’image (tr = top-right = coin supérieur droit)
+  position: tr              # Position du timestamp sur l'image (tr = coin supérieur droit)
   format: '%d/%m/%Y %H:%M:%S'  # Format du timestamp affiché (jour/mois/année heure:min:sec)
 
 birdseye:
@@ -570,72 +567,94 @@ model:
     20: animale
 
 detect:
-  enabled: true             # Active globalement la détection d'objets pour toutes les caméras (ajouté automatiquement par frigate 0.16)
+  enabled: true             # Active la détection d'objets pour toutes les caméras
 
 snapshots:
-  enabled: true             # Active les captures d’image (snapshots) lors des événements
-  clean_copy: true          # Génère une version sans annotation (utile pour archivage ou IA)
+  enabled: true             # Active les captures d'image (snapshots) des évènements
   timestamp: false          # Ne superpose pas la date/heure sur les images
-  bounding_box: false       # Ne dessine pas de boîte de détection sur les images
-  crop: false               # Ne recadre pas automatiquement l’objet détecté
-  retain:                   # Durée de conservation des images
-    default: 3              # Par défaut, conserve les snapshots 3 jours
+  bounding_box: false       # Ne dessine pas de cadre autour des objets détectés
+  crop: false               # Ne recadre pas sur l'objet détecté
+  retain:                   # Durée de conservation des snapshots
+    default: 3              # Par défaut, 3 jours
     objects:
-      personne: 7           # Conserve ceux contenant une "personne" pendant 7 jours
-      vehicule: 3           # Conserve ceux contenant un "vehicule" pendant 3 jours
+      personne: 7           # 7 jours pour une "personne"
+      vehicule: 3           # 3 jours pour un "vehicule"
 
 record:
-  enabled: true             # Active l’enregistrement vidéo, obligatoire pour que le plugin reçoive les événements.
-  retain:
-    days: 1                 # Conserve les enregistrements pendant 1 jour
-    mode: all               # Enregistre tout, même sans détection
+  enabled: true             # Active l'enregistrement vidéo, obligatoire pour que le plugin reçoive les évènements
   alerts:
     retain:
-      days: 7               # Conserve les clips d’alerte pendant 7 jours
+      days: 7               # Conserve les clips d'alerte pendant 7 jours
       mode: active_objects  # Seulement si un objet actif a été détecté
-    pre_capture: 5          # Enregistre 5 secondes avant le début de l’événement
-    post_capture: 5         # Enregistre 5 secondes après la fin de l’événement
+    pre_capture: 5          # Enregistre 5 secondes avant le début de l'évènement
+    post_capture: 5         # Enregistre 5 secondes après la fin de l'évènement
   detections:
     retain:
-      days: 7               # Conserve les clips avec détection pendant 7 jours
+      days: 7               # Conserve les clips de détection pendant 7 jours
       mode: active_objects
     pre_capture: 3
     post_capture: 5
 
 semantic_search:
-  enabled: true             # Active l’analyse sémantique des événements (IA)
-  reindex: false            # Ne re-analyse pas les anciens événements au démarrage
+  enabled: true             # Active la recherche sémantique des évènements
+
+face_recognition:
+  enabled: true             # Reconnaissance faciale (commandes Reconnaissance du plugin)
+
+lpr:
+  enabled: true             # Lecture des plaques d'immatriculation
+
+classification:
+  custom:
+    Porte entrée:           # Modèle d'état : commande "Reconnaissance - Etat Porte entrée"
+      enabled: true
+      name: Porte entrée
+      threshold: 0.8
+      state_config:
+        cameras:
+          Porte:
+            crop: [0.0, 0.39, 0.34, 0.99]   # Partie de l'image analysée
+        motion: true
+    Parking:                # Modèle d'objet : variable #sublabel# des actions
+      enabled: true
+      name: Parking
+      threshold: 0.8
+      object_config:
+        objects:
+          - vehicule
+        classification_type: sub_label
 
 genai:
-  enabled: true             # Active l’intégration IA (Google Gemini ici)
-  provider: gemini          # Fournisseur de l’IA
-  api_key: ***              # Clé API Gemini (masquée ici)
-  model: gemini-1.5-flash   # Modèle utilisé pour l’analyse comportementale
-  object_prompts:          # Prompts personnalisés pour chaque type d’objet, à vous de l'adapter si besoin.
-    personne: >
-      Commence IMMÉDIATEMENT et DIRECTEMENT la description de l'action...
-    vehicule: >
-      Décris IMMÉDIATEMENT et DIRECTEMENT le comportement du véhicule...
-    animale: >
-      Analyse IMMÉDIATEMENT et DIRECTEMENT le comportement de l'animal...
+  default:                  # Fournisseur d'IA générative (plusieurs possibles depuis Frigate 0.18)
+    provider: gemini
+    api_key: '***'          # Clé API (masquée ici)
+    model: gemini-2.5-flash
+    roles:                  # Tâches confiées à ce fournisseur
+      - descriptions
+      - chat
+
+review:
+  genai:                    # Descriptions des activités par l'IA
+    enabled: true
+    alerts: true
+    detections: true
 
 cameras:
-  frigate1:                 # Nom de la caméra
+  Porte:                    # Nom de la caméra
     detect:
-      fps: 5                # Taux d’analyse des images pour la détection
-      enabled: true         # Active la détection pour cette caméra
-      width: 640            # Largeur du flux vidéo analysé
-      height: 360           # Hauteur du flux vidéo analysé
+      fps: 2                # Images analysées par seconde
+      width: 1280           # Résolution du flux analysé
+      height: 720
       stationary:
-        interval: 50        # Vérifie les objets immobiles toutes les 50 frames
-        threshold: 30       # Seuil de mouvement à partir duquel un objet est considéré comme "mobile"
+        interval: 50        # Vérifie les objets immobiles toutes les 50 images
+        threshold: 30       # Nombre d'images sans déplacement pour qu'un objet soit considéré immobile
     ffmpeg:
       inputs:
-        - path: rtsp://127.0.0.1:8554/frigate1_high  # Flux principal haute résolution
+        - path: rtsp://127.0.0.1:8554/Porte_1  # Flux principal haute résolution
           input_args: preset-rtsp-restream
           roles:
-            - record        # Utilisé pour l’enregistrement
-        - path: rtsp://127.0.0.1:8554/frigate1_low   # Flux secondaire basse résolution
+            - record        # Utilisé pour l'enregistrement
+        - path: rtsp://127.0.0.1:8554/Porte_2  # Flux secondaire basse résolution
           input_args: preset-rtsp-restream
           roles:
             - detect        # Utilisé pour la détection
@@ -644,23 +663,30 @@ cameras:
         - personne
         - vehicule
         - animale
-      filters:              # Filtres pour chaque type d’objet
+      filters:
         personne:
-          min_score: 0.65   # Score minimum pour commencer à suivre
-          threshold: 0.7    # Score minimum pour déclencher un événement
-        vehicule:
-          min_score: 0.7
-          threshold: 0.8
-        animale:
-          min_score: 0.7
-          threshold: 0.8
+          min_score: 0.73   # Score minimum pour commencer à suivre
+          threshold: 0.8    # Score minimum pour déclencher un évènement
+      genai:                # Descriptions des objets par l'IA
+        enabled: true
+        use_snapshot: true
+        prompt: Analyse le {label} dans ces images provenant de la caméra de sécurité {camera}...
+        object_prompts:     # Prompts personnalisés pour chaque type d'objet, à vous de les adapter
+          personne: Commence IMMÉDIATEMENT et DIRECTEMENT la description de l'action...
+          vehicule: Décris IMMÉDIATEMENT et DIRECTEMENT le comportement du véhicule...
+    zones:
+      entree:               # Zone utilisable dans les actions du plugin
+        coordinates: 0.379,0.307,0.985,0.533,0.99,0.986,0.003,0.994
+        objects:
+          - personne
+          - vehicule
 
 go2rtc:
-  streams:                  # Flux vidéo déclarés pour usage interne (re-streaming)
-    frigate1_low: rtsp://***:***@192.168.2.36:554/2   # Flux basse qualité
-    frigate1_high: rtsp://***:***@192.168.2.36:554/1  # Flux haute qualité
+  streams:                  # Flux des caméras, relayés par Frigate
+    Porte_1: rtsp://***:***@192.168.2.36:554/1  # Flux haute qualité
+    Porte_2: rtsp://***:***@192.168.2.36:554/2  # Flux basse qualité
 
-version: 0.16-0             # Version utilisée de Frigate
+version: 0.18-0             # Version du format de configuration de Frigate
 ```
 
 
