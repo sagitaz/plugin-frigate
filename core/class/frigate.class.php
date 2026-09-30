@@ -2434,7 +2434,8 @@ class frigate extends eqLogic
    *
    * Un équipement homonyme dans la pièce par défaut vaut au nouveau le suffixe « by frigate plugin ». Selon la
    * configuration : commandes MQTT, de détection d'objets et PTZ (ONVIF) si MQTT est configuré, commandes
-   * audio, états de classification. Les statistiques et les évènements du dernier jour sont ensuite récupérés.
+   * audio, états de classification. La position sur le panel reprend l'ordre défini dans Frigate seulement si
+   * elle n'est pas renseignée. Les statistiques et les évènements du dernier jour sont ensuite récupérés.
    *
    * @param array<string, mixed> $configurationArray Configuration de Frigate (/api/config)
    * @return int Nombre de caméras créées
@@ -2471,9 +2472,6 @@ class frigate extends eqLogic
       }
       // Recherche équipement caméra
       $frigate = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
-      // position de la caméra sur l'ui / panel
-      $panelOrder = isset($cameraConfig['ui']['order']) ? $cameraConfig['ui']['order'] : ($n);
-
       if (!is_object($frigate)) {
         $n++;
         $urlLatest = "http://" . $urlfrigate . "/api/" . $cameraName . "/latest.jpg?timestamp=0&bbox=0&zones=0&mask=0&motion=0&regions=0";
@@ -2504,7 +2502,10 @@ class frigate extends eqLogic
       } else {
         log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }
-      $frigate->setConfiguration('panelOrder', $panelOrder);
+      // Position sur le panel : l'ordre défini dans Frigate, seulement si aucune position n'est renseignée
+      if ((int)$frigate->getConfiguration('panelOrder', 0) <= 0) {
+        $frigate->setConfiguration('panelOrder', (int)($cameraConfig['ui']['order'] ?? 0));
+      }
       $frigate->setLogicalId("eqFrigateCamera_" . $cameraName);
       $frigate->save();
       // commandes identique pour toutes les caméras

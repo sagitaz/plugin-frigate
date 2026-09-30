@@ -134,7 +134,7 @@ Après installation du plugin et la configuration de l'URL et du port de votre s
 - **Identifiant** et **Mot de passe** : seulement utiles pour les commandes HTTP (voir plus bas).
 - **Rafraîchissement** : durée de rafraîchissement de l'image de la caméra, en secondes : la première pour le dashboard et le panel, la seconde pour JeeMate. Sans valeur, la durée de la configuration générale est reprise.
 - **Afficher sur le panel** : cocher pour que la caméra soit visible sur le Panel.
-- **Position sur le panel** : ordre d'affichage de la caméra sur le panel (1, 2, 3…). Les caméras sans position s'affichent après les autres. À la création de la caméra, la position reprend l'ordre défini dans Frigate (**``ui -> order``**).
+- **Position sur le panel** : ordre d'affichage de la caméra sur le panel (1, 2, 3…). Les caméras sans position s'affichent après les autres, par ordre alphabétique. Tant qu'elle n'est pas renseignée, la position reprend l'ordre défini dans Frigate (**``ui -> order``**) à chaque « Rechercher / MAJ » ; une position saisie n'est jamais modifiée.
 - **Flux vidéo** : Renseigner un flux différent que celui par défaut si ce dernier ne convient pas (rtsp://URL_Frigate:8554/Nom_de_la_caméra)
 - **Nombre de preset** : nombre de presets PTZ à importer, si vous souhaitez un nombre différent du réglage global (10 au maximum).
 - **Qualité des snapshots** : qualité de compression des images téléchargées, de 1 à 100 (70 par défaut). Plus la valeur est basse, plus les fichiers sont légers. S'applique aux snapshots, aux miniatures et aux captures.
