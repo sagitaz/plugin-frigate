@@ -1,6 +1,6 @@
 Plugin créé par **Sagitaz** et **Noodom**
 
-# <u>Remerciemment</u>
+# <u>Remerciements</u>
 Le plugin et le support sont gratuits, vous souhaitez néanmoins m'offrir un café ou des couches pour bébé, je vous remercie par avance.
 
 [![ko-fi](https://ko-fi.com/img/githubbutton_sm.svg)](https://ko-fi.com/C1C61AKVV7)
@@ -13,9 +13,9 @@ Pour toute demande d'aide sur Community ou Discord, merci de fournir le maximum 
 
 Sur la page configuration, le bouton assistance permet déjà d'en remplir automatiquement certaines.
 
-Assurer vous d'avoir le matériel compatible pour Frigate et que ce dernier fonctionne correctement avant de demander de l'aide sur le plugin. (voir la documentation officielle de Frigate pour les configurations matérielle recommandées).
+Assurez-vous d'avoir un matériel compatible avec Frigate et que ce dernier fonctionne correctement avant de demander de l'aide sur le plugin. (voir la documentation officielle de Frigate pour les configurations matérielles recommandées).
 
-Donner aussi des logs en mode debug. (ceux du plugin et du serveur Frigate).
+Donnez aussi des logs en mode debug. (ceux du plugin et du serveur Frigate).
 
 Aucun support ne sera apporté sur d'autres moyens de communication que ceux-ci.
 
@@ -52,7 +52,7 @@ Un broker sécurisé (user:mdp) est obligatoire pour que le plugin mqtt-manager 
 
 
 # <u>Log</u>
-Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
+Le plugin comporte des sous-logs, pour qu'ils soient visibles sur Jeedom 4.4.19, il est nécessaire de passer les logs globaux en niveau info minimum.
 
 ![niveau de logs](../images/frigate_Doc_Logs.png)
 # <u>Configuration</u>
@@ -69,7 +69,7 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur jeedom 4.4.19,
 - **Pause action** : Pause à effectuer sur les actions PTZ. Par exemple, après avoir appuyé sur move up, un stop est automatiquement effectué : vous pouvez définir le temps avant cette action stop de 0 à 10, correspondant à une pause de 0 à 1 seconde (0, 0.1, 0.2, etc...).
 
 #### Gestion des évènements
-- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités (7 par défaut). Si le nombre de jours est 0, alors le processus est arrêté et aucun appel à l'API Frigate n'est effectué.
+- **Récupération des évènements** : Vous pouvez avoir 30 jours d'évènements sur votre serveur Frigate mais ne vouloir en importer que 7 sur Jeedom. Indiquez ici le nombre de jours souhaités (7 par défaut). Si le nombre de jours est 0, alors le processus est arrêté et aucun appel à l'API Frigate n'est effectué.
 - **Suppression des évènements** : Les évènements plus anciens que le nombre de jours indiqués (7 par défaut) seront supprimés de la database Jeedom avec leurs fichiers, mais pas du serveur Frigate.
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
@@ -92,25 +92,39 @@ Les évènements mis en favori ne sont jamais supprimés, ni par l'ancienneté n
 - **Cron** : sélectionner le cron voulu.
 
 
-# <u>Demon</u>
+# <u>Démon</u>
 Le démon démarre automatiquement après avoir sauvegardé la partie configuration et y avoir configuré le topic Frigate.
 Pour pouvoir utiliser MQTT, il faut que vous ayez correctement configuré votre serveur Frigate et que vous ayez le plugin mqtt-manager (mqtt2) installé et correctement configuré.
 Votre broker MQTT doit être sécurisé pour que le plugin mqtt-manager fonctionne.
 Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
-**Deamon NOK :**
+**Démon NOK :**
 Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
 
 # <u>Utilisation</u>
 
 **Les commandes infos de tous les équipements sont créées automatiquement à la prochaine réception d'événements ou de statistiques. Si vous ne les voyez pas à la première installation du plugin, c'est que vos événements récents ont plus de 3 heures, il faut donc attendre le prochain événement pour voir les commandes.**
 
-**Les commandes actions sont créées seulement quand vous utiliser le bouton "Rechercher / MAJ".**
+**Les commandes actions sont créées seulement quand vous utilisez le bouton "Rechercher / MAJ".**
+
+## <u>Page du plugin</u>
+Les boutons de gestion :
+- **Rechercher / MAJ** : crée les nouvelles caméras de Frigate et met à jour les commandes de toutes les caméras.
+- **Events** : ouvre la page des évènements.
+- **Configuration** : ouvre la configuration générale du plugin.
+- **Redémarrer Frigate** : redémarre le serveur Frigate.
+- **Serveur Frigate** : ouvre l'interface de Frigate. Depuis votre réseau local (adresse en 192.168.x.x), c'est l'URL du serveur qui est utilisée ; ailleurs, c'est l'adresse externe de la configuration. Sans adresse externe, le bouton n'est affiché que sur le réseau local.
+- **aide Discord** : ouvre le salon d'aide du plugin sur Discord.
+- **Configuration Frigate** : éditeur du fichier de configuration du serveur Frigate (voir plus bas).
+- **Logs Frigate** : logs du serveur Frigate (voir plus bas).
+- **Json** : télécharge la liste de tous les évènements, utile pour le développeur en cas de demande d'aide.
+
+Sous les boutons, la version de votre serveur Frigate s'affiche en orange quand une mise à jour est disponible.
 
 ## <u>Equipement Events</u>
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
-Il comporte aussi 2 commandes actions : cron start et cron stop, ceci afin de mettre en pause la recherche de nouveaux évènements.
+Il comporte aussi 2 commandes actions : Cron on et Cron off, ceci afin de mettre en pause la recherche de nouveaux évènements.
 
 Il est possible de créer des actions communes à toutes les caméras (voir la section dédiée)
 Cocher "autoriser les actions" si vous souhaitez sur une détection exécuter les actions présentes dans l'équipement events et dans les équipements caméras.
@@ -166,7 +180,7 @@ L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...) 
 - **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Si un objet est considéré statique, alors la détection repasse à 0.
-- **Détection all** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande all est à 0, alors les autres commandes de détection seront forcées à 0.
+- **Détection tout** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande Détection tout est à 0, alors les autres commandes de détection seront forcées à 0.
 - **Statut flux détection / enregistrement / audio** (Frigate 0.18 ou plus, masquées par défaut) : online, offline ou disabled pour chaque flux de la caméra. Frigate relance un flux hors ligne, la valeur peut donc alterner entre offline et online : attendre qu'elle reste stable avant d'agir, par exemple avec une condition de durée dans le scénario.
 
 ##### Reconnaissance
@@ -211,7 +225,7 @@ L'appel utilise aussi l'authentification Digest avec cet identifiant et ce mot d
 Les commandes HTTP sont créées masquées. Une fois rendues visibles, elles apparaissent dans la liste déroulante des actions du widget, avec les presets. Le bouton crayon de la commande permet de modifier son URL.
 
 ### Action(s) sur évènement
-Les actions sur évènements sont disponible pour l'équipement **Events** et pour chaque équipement **caméras**.
+Les actions sur évènements sont disponibles pour l'équipement **Events** et pour chaque équipement **caméras**.
 Les actions configurées sur l'équipement **Events** seront exécutées par les évènements provenant de toutes les caméras **sauf si elles possèdent des actions configurées et activées.**
 Si vous souhaitez regrouper sur l'équipement Events des actions communes et ensuite ajouter des actions pour chaque caméra, pensez à cocher sur l'équipement Events la case "autoriser les actions".
 
@@ -230,7 +244,7 @@ Les actions ne seront exécutées que si le mode est tout autre que présent.
 #### Actions
 Vous pouvez indiquer ici les actions à effectuer à chaque nouvel évènement.
 
-Une checkbox vous permet de désactiver la vérification de la condition génèrale. 
+Une checkbox vous permet de désactiver la vérification de la condition générale. 
 
 <u>LABEL</u> : 
 **Pour rappel, le label est ce qui déclenche la détection (person, vehicle, animal, etc...)**
@@ -243,7 +257,7 @@ Les majuscules et les accents sont ignorés, donc si vous indiquez "Vélo" ou "v
 **Avec** MQTT, ils peuvent être de type **new**, **update** et **end**.
 **Sans** MQTT, il sera toujours de type **end**.
 Dans la case **type**, il vous suffit d'indiquer le type pour lequel vous souhaitez que l'action soit exécutée.
-Vous pourvez en mettre plusieurs en les séparant par des virgules.
+Vous pouvez en mettre plusieurs en les séparant par des virgules.
 Si aucun type n'est spécifié, l'action sera exécutée seulement pour les évènements de type **end**.
 les majuscules et les accents sont ignorés, donc si vous indiquez "update" ou "UPDATE", les deux seront considérées comme identiques.
 
@@ -301,7 +315,7 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#thumbnail_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
-- **#preview#** : lien vers fichier le fichier preview
+- **#preview#** : lien vers le fichier preview
 `https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#preview_path#** : path vers fichier preview
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
@@ -320,7 +334,7 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **thumbnail** : dans le champ titre : **``title=votre titre;;bigPicture=#thumbnail#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#``**
 
-Pour une notification automatique, ajouter frigate=#jeemate#, disponible avec la future v3 de JeeMate
+Pour une notification automatique, ajouter frigate=#jeemate# (JeeMate v3 et plus)
 
 - **snapshot** : dans le champ titre : **``title=votre titre;;bigPicture=#snapshot#;;frigate=#jeemate#``**
 - **clip** : dans le champ titre : **``title=votre titre;;bigPicture=#clip#;;frigate=#jeemate#``**
@@ -350,10 +364,10 @@ Testez les 2 commandes snapshot. Selon les configurations, il se peut qu'une des
 ![cadre évènement](../images/frigate_Doc_Evenement.png)
 1. - Mettre l'évènement en favori
 2. - lien vers la caméra
-3. - Visualiser le snapshot (simple clic sur l'icone)
-   - Télécharger le snapshot (double clic sur l'icone)
-4. - Visualiser le clip (simple clic sur l'icone)
-   - Télécharger le clip (double clic sur l'icone)
+3. - Visualiser le snapshot (simple clic sur l'icône)
+   - Télécharger le snapshot (double clic sur l'icône)
+4. - Visualiser le clip (simple clic sur l'icône)
+   - Télécharger le clip (double clic sur l'icône)
 5. - Supprimer l'évènement
 6. - Description de l'évènement (si genAI activé)
 
@@ -375,8 +389,8 @@ Cette commande est de type message. Si vous laissez vide alors les paramètres p
 title : **``Indiquer le label``**
 message : **``score=80 | video=1 | duration=20 | pre_capture=5``**
 **pre_capture** (Frigate 0.18 ou plus) : nombre de secondes enregistrées avant la création de l'évènement. Sans ce paramètre, Frigate applique le pré-enregistrement de la caméra.
-Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5 sec. par defaut, donc en paramétrant à 20 sec. vous obtiendrez une vidéo de 30 sec.
-Attention sur les évènements créés manuellement, si dans votre configuration Frigate pour **``record -> retain -> mode``** vous avez **``motion``** alors les clips ne seront disponibles que s'il y a du mouvement de detecté, mettre à **``all``** si vous voulez tout avoir.
+Pour la durée des clips, il faut penser aussi au fait que Frigate ajoute du temps avant et après la vidéo, 5 sec. par défaut, donc en paramétrant à 20 sec. vous obtiendrez une vidéo de 30 sec.
+Attention sur les évènements créés manuellement, si dans votre configuration Frigate pour **``record -> retain -> mode``** vous avez **``motion``** alors les clips ne seront disponibles que s'il y a du mouvement détecté, mettre à **``all``** si vous voulez tout avoir.
 
 3. - **Filtrer les évènements**
 Afficher seulement les événements d'une ou plusieurs caméras, seulement d'un label ou d'un type d'événement, seulement les événements de la semaine ou de l'année en cours, etc...
@@ -404,8 +418,14 @@ Ou bien pour ceux ayant besoin du path :
 
 **ATTENTION** : La modification de la configuration du serveur Frigate est à vos risques et périls ! Aucun support ne sera donné !
 
+L'éditeur affiche le fichier de configuration du serveur Frigate et vérifie la syntaxe YAML pendant la saisie.
+- **Récupérer la configuration** : recharge le fichier depuis le serveur Frigate, en abandonnant vos modifications.
+- **Télécharger la configuration** : enregistre le fichier sur votre ordinateur. Pensez à le faire avant toute modification.
+- **Envoyer la configuration** : remplace le fichier sur le serveur Frigate. Certaines modifications ne sont prises en compte qu'après un redémarrage de Frigate.
+- **Envoyer la configuration et redémarrer Frigate** : remplace le fichier puis redémarre Frigate.
+
 # <u>Logs Frigate</u>
-Visualiser tous les logs de votre serveur Frigate
+Visualiser les logs de votre serveur Frigate : Frigate, go2rtc et nginx. Le bouton de téléchargement enregistre les logs affichés.
 
 # <u>Cron</u>
 **Si vous n'utilisez pas MQTT** : un cron régulier vous permet de récupérer les derniers events et donc d'exécuter les actions associées.
@@ -420,7 +440,7 @@ Le cronDaily est le seul à vérifier la version de votre serveur frigate : si u
 Sans MQTT : cron ou cron5 (suivant puissance machine) + cronDaily
 Avec MQTT : cronDaily
 
-***Dans tous les cas, si un cron est en cours d'exécution, le suivant ne sera pas lancé et en MQTT, les cron (1, 5, 10 et 15 sont désactivès).***
+***Dans tous les cas, si un cron est en cours d'exécution, le suivant ne sera pas lancé et en MQTT, les crons 1, 5, 10 et 15 sont désactivés.***
 
 # <u>Widget</u>
 Vous y trouverez la visualisation de la caméra et les boutons cochés visibles :
@@ -450,7 +470,7 @@ L'URL du flux vidéo enregistré dans le plugin est celle de votre serveur Friga
 En résumé, si vous avez plusieurs caméras et que vous souhaitez une gestion centralisée, le flux RTSP de Frigate pourrait être plus avantageux. Si vous préférez une solution plus simple et directe, utiliser le flux RTSP de la caméra pourrait être suffisant.
 
 ### Avec JeeMate
-Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre équipement celui que vous souhaitez utiliser, la même chose si vous préférez utiliser le fux d'origine de la caméra.
+Si votre configuration Frigate comporte plusieurs flux par caméra, il vous faudra indiquer dans le champ flux vidéo de votre équipement celui que vous souhaitez utiliser, la même chose si vous préférez utiliser le flux d'origine de la caméra.
 
 Configuration Frigate avec un seul flux, ici je n'ai pas besoin d'indiquer le flux, celui par défaut conviendra.
 
@@ -461,7 +481,7 @@ frigate1:
       - path: rtsp://127.0.0.1:8554/frigate1
 ```
 
-Configuration Frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement , celui par defaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur Frigate.
+Configuration Frigate avec plusieurs flux, indiquer l'url du flux voulu sur la page de votre équipement, celui par défaut ne conviendra pas, remplacer 127.0.0.1 par l'ip du serveur Frigate.
 
 ```yaml
     ffmpeg:
@@ -505,12 +525,14 @@ record:
 ### Exemple de fichier de configuration
  Veuillez noter que c'est mon fichier, mes réglages et qu'il fonctionne pour ma situation, à vous de l'adapter ou de comparer avec le vôtre si jamais toutes les fonctions du plugin n'étaient pas fonctionnelles chez vous.
 
- Je ne pourrais être tenu responsable de tout dysfonctionnement causé par cette configuration, vous devez donc adapter la configuration à votre propre serveur et à vos besoins.
+ Je ne pourrai être tenu responsable de tout dysfonctionnement causé par cette configuration, vous devez donc adapter la configuration à votre propre serveur et à vos besoins.
 
  J'ai mis des commentaires afin de vous aider.
 
+ Ce fichier a été écrit pour Frigate 0.16. Depuis Frigate 0.18, la section **``genai``** a un nouveau format (plusieurs fournisseurs possibles) : Frigate convertit automatiquement l'ancien format, mais reportez-vous à la documentation officielle de Frigate pour une nouvelle configuration.
+
  ```yaml
- # Rappel, le plugin mqtt-manager nécéssite un broker mqtt sécurisé.
+ # Rappel, le plugin mqtt-manager nécessite un broker mqtt sécurisé.
  mqtt:
   host: 192.168.2.22        # Adresse IP de votre serveur MQTT
   port: 1883                # Port du broker MQTT (1883 = standard non sécurisé)
@@ -589,7 +611,7 @@ genai:
   provider: gemini          # Fournisseur de l’IA
   api_key: ***              # Clé API Gemini (masquée ici)
   model: gemini-1.5-flash   # Modèle utilisé pour l’analyse comportementale
-  object_prompts:          # Prompts personnalisés pour chaque type d’objet, a vous de l'adapter si besoin.
+  object_prompts:          # Prompts personnalisés pour chaque type d’objet, à vous de l'adapter si besoin.
     personne: >
       Commence IMMÉDIATEMENT et DIRECTEMENT la description de l'action...
     vehicule: >

@@ -4,6 +4,33 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 30/09/2026 Beta 1.5.6
+- Compatibilité avec Frigate 0.18, Frigate 0.16 minimum
+- Nouvelles commandes de statut des flux vidéo de chaque caméra (Frigate 0.18)
+- Nouvelles commandes pour suivre et changer le profil de Frigate (Frigate 0.18)
+- Création d'évènement : nouveau paramètre pour choisir la durée enregistrée avant l'évènement (Frigate 0.18)
+- Les évènements et les favoris ne sont plus perdus à la désactivation du plugin
+- Les captures manuelles sont supprimées selon les mêmes règles que les évènements, les favoris sont conservés
+- La position des caméras sur le panel n'est plus remplacée par « Rechercher / MAJ », les caméras sans position sont triées par nom
+- Qualité par défaut des snapshots à 70 %, comme indiqué dans l'équipement
+- Téléchargement des snapshots et clips autorisé pour les applications comme JeeMate
+- Le snapshot final d'un évènement est bien récupéré
+- Un clip déjà téléchargé ne disparaît plus de la page Events
+- Correction des erreurs répétées dans le log http.error quand les fichiers d'un évènement sont absents
+- Le bouton de description d'un évènement sans vidéo ouvre la capture
+- Le mot de passe des commandes HTTP n'apparaît plus dans les logs
+- L'identifiant et le mot de passe fonctionnent aussi pour les anciennes commandes HTTP
+- Aucun évènement n'est créé quand une capture échoue
+- Correction de plantages quand Frigate ne répond pas ou qu'un évènement est introuvable
+- Correction de l'installation quand la base de données de Jeedom ne porte pas le nom par défaut
+- Correction de la création des caméras (image et nombre de presets)
+- Correction de la fréquence de rafraîchissement par défaut des caméras
+- Correction du rafraîchissement de l'image en passant d'une caméra à l'autre dans la page des équipements
+- Correction de l'arrêt du démon
+- Correction d'une erreur d'affichage du widget quand une commande a été supprimée
+- Messages du plugin traduits dans toutes les langues
+- Documentation complétée
+
 # 11/05/2026 Beta & Stable 1.5.5
 - Correction de logs ERROR
 
