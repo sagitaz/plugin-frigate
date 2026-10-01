@@ -77,8 +77,11 @@ function frigate_update()
         $sql2 = "ALTER TABLE `frigate_events` ADD COLUMN `isFavorite` tinyint(1) DEFAULT 0;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
-    // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0UPDATE `frigate_events`
-    $sqlUpdate = "UPDATE `frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` != 1 AND `isFavorite` != 0;";
+    // 'isFavorite' à 0 quand il n'est ni 0 ni 1 : les purges ne sélectionnent que isFavorite != 1, faux pour NULL
+    $sqlUpdate = "UPDATE `frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` IS NULL OR `isFavorite` NOT IN (0, 1);";
+    DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
+    // 'startTime' manquant tiré de l'event_id, qui commence par le timestamp de début : la purge par ancienneté s'en sert
+    $sqlUpdate = "UPDATE `frigate_events` SET `startTime` = CEIL(SUBSTRING_INDEX(`event_id`, '-', 1)) WHERE `startTime` IS NULL AND `event_id` REGEXP '^[0-9]+([.][0-9]+)?-';";
     DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
 
     // Vérifier si les colonnes recognition_* existent déjà dans la table 'frigate_events'

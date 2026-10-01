@@ -189,13 +189,12 @@ class frigate extends eqLogic
     self::cleanFolderData();
     self::cleanAllOldestFiles();
 
-    // Si la fréquence n'est pas parmi les crons désactivés, exécuter cleanByType
+    // Évènements incomplets et verrous, aux crons de 30 minutes et plus
     if (!($frequence === "functionality::cron::enable" ||
       $frequence === "functionality::cron5::enable" ||
       $frequence === "functionality::cron10::enable" ||
       $frequence === "functionality::cron15::enable")) {
-      self::cleanByType();
-      self::cleanByType("update");
+      self::reconcileEvents();
       self::cleanEventLocks();
     }
 
@@ -1326,13 +1325,14 @@ class frigate extends eqLogic
    *
    * @param string|null $id   Identifiant Frigate ; rien n'est fait s'il est vide
    * @param string      $type Type d'évènement : new, update ou end
+   * @param bool        $wait Attendre le délai configuré avant de télécharger les médias (voir getEventInfos())
    * @return void
    */
-  public static function getEvent($id = null, $type = 'end')
+  public static function getEvent($id = null, $type = 'end', $wait = true)
   {
     if ($id == null) return;
 
-    self::getEvents(false, array(), $type, $id);
+    self::getEvents(false, array(), $type, $id, null, $wait);
   }
 
   /**
@@ -1351,9 +1351,10 @@ class frigate extends eqLogic
    * @param string                           $type         Type d'évènement : new, update ou end
    * @param string|null                      $id           Identifiant Frigate d'un évènement précis
    * @param int|null                         $recoveryDays 1 pour limiter la récupération au dernier jour
+   * @param bool                             $wait         Attendre le délai configuré avant de télécharger les médias
    * @return void
    */
-  public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null)
+  public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null, $wait = true)
   {
     if ($id !== null) {
       $urlFrigate = self::getUrlFrigate();
@@ -1437,7 +1438,7 @@ class frigate extends eqLogic
         // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
         // au fil de l'évènement, celui du premier message n'est pas le définitif.
         $force = is_object($frigate) && $previousType != $eventType;
-        $infos = self::getEventinfos($mqtt, $event, $force, $eventType);
+        $infos = self::getEventinfos($mqtt, $event, $force, $eventType, $wait);
 
         if (!$frigate) {
           log::add(__CLASS__, 'debug', "║ Events (type=" . $eventType . ") => " . json_encode($event));
@@ -1694,16 +1695,17 @@ class frigate extends eqLogic
    * Télécharge les médias d'un évènement et prépare ses valeurs à enregistrer.
    *
    * Attend d'abord le délai configuré (sleep, de 0 à 10 s ; 5 s si la valeur sort de cette plage) pour laisser
-   * à Frigate le temps de produire les médias. Télécharge ensuite la miniature, le snapshot, le clip (évènement
-   * de type end seulement) et l'aperçu GIF.
+   * à Frigate le temps de produire les médias, sauf avec $wait à faux. Télécharge ensuite la miniature, le
+   * snapshot, le clip (évènement de type end seulement) et l'aperçu GIF.
    *
    * @param bool                 $mqtt  Évènement reçu par MQTT (scores à la racine) ou par l'API (scores dans data)
    * @param array<string, mixed> $event Évènement Frigate
    * @param bool                 $force Retélécharger les médias déjà présents
    * @param string               $type  Type d'évènement : new, update ou end
+   * @param bool                 $wait  Attendre le délai configuré
    * @return array<string, mixed> URL et disponibilité des médias, dates, scores en %, zones et label
    */
-  public static function getEventInfos($mqtt, $event, $force = false, $type = "end")
+  public static function getEventInfos($mqtt, $event, $force = false, $type = "end", $wait = true)
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
     $sleep = config::byKey('sleep', 'frigate');
@@ -1713,7 +1715,9 @@ class frigate extends eqLogic
       $sleep = intval($sleep);
     }
     // Fonction de vérification et téléchargement
-    sleep($sleep);
+    if ($wait) {
+      sleep($sleep);
+    }
     $img = self::processImage($dir, $event, true, $force);
     log::add(__CLASS__, "debug", "║ Thumbnail: " . json_encode($img));
 
@@ -2156,24 +2160,78 @@ class frigate extends eqLogic
   }
 
   /**
-   * Supprime les évènements d'un type donné, avec leurs fichiers ; les favoris sont conservés.
+   * Fait le point avec Frigate sur les évènements restés incomplets en base : new, update ou sans type.
    *
-   * @param string $type Type d'évènement, new par défaut
+   * Un évènement reste incomplet quand sa fin n'est jamais reçue, par exemple pendant une coupure MQTT. Seuls
+   * les évènements non favoris commencés depuis plus de 3 heures sont examinés : un évènement plus récent peut
+   * être en cours, et passé 3 heures aucune action n'est exécutée (voir executeActionNewEvent()). Sans réponse de
+   * Frigate, rien n'est fait. Un évènement terminé dans Frigate est complété comme end, avec son clip et sans
+   * le délai d'attente ; un évènement inconnu de Frigate est supprimé avec ses fichiers ; un évènement encore
+   * en cours est conservé jusqu'au passage suivant. Un évènement plus ancien que recovery_days, que getEvents()
+   * ne traiterait pas, est laissé à la purge par ancienneté.
+   *
    * @return void
    */
-  public static function cleanByType($type = "new")
+  public static function reconcileEvents()
   {
-    $events = frigate_events::byType($type);
+    $events = frigate_events::incompleteBefore(time() - 10800);
+    if (empty($events)) {
+      return;
+    }
+    if (!self::isFrigateServerAvailable()) {
+      log::add(__CLASS__, 'info', "║ Frigate ne répond pas : " . count($events) . " évènement(s) incomplet(s) conservé(s) jusqu'au prochain passage.");
+      return;
+    }
+    // Même limite que getEvents()
+    $recoveryDays = config::byKey('recovery_days', 'frigate');
+    if (empty($recoveryDays)) {
+      $recoveryDays = 7;
+    }
 
-    if (!empty($events)) {
-      foreach ($events as $event) {
-        $eventId = $event->getEventId();
-
-        log::add(__CLASS__, 'info', "║ Nettoyage de l'événement ID: " . $eventId . " il est de type: " . $type);
-
+    foreach ($events as $event) {
+      $eventId = $event->getEventId();
+      if ($event->getStartTime() !== null && $event->getStartTime() < time() - $recoveryDays * 86400) {
+        continue;
+      }
+      $frigateEvent = self::fetchFrigateEvent($eventId);
+      if ($frigateEvent === false) {
+        log::add(__CLASS__, 'info', "║ Évènement " . $eventId . " incomplet et inconnu de Frigate : supprimé.");
         self::cleanDbEvent($eventId, $event);
+      } elseif ($frigateEvent === null) {
+        log::add(__CLASS__, 'info', "║ Évènement " . $eventId . " incomplet, réponse de Frigate illisible : conservé.");
+      } elseif (!empty($frigateEvent['end_time'])) {
+        log::add(__CLASS__, 'info', "║ Évènement " . $eventId . " incomplet, terminé dans Frigate : complété.");
+        self::getEvent($eventId, 'end', false);
+      } else {
+        log::add(__CLASS__, 'info', "║ Évènement " . $eventId . " incomplet, encore en cours dans Frigate : conservé.");
       }
     }
+  }
+
+  /**
+   * Interroge Frigate sur un évènement, sans tenir un évènement inconnu pour une erreur.
+   *
+   * @param string $eventId Identifiant Frigate
+   * @return array<string, mixed>|false|null Évènement, false s'il est inconnu (404), null sans réponse lisible
+   */
+  private static function fetchFrigateEvent($eventId)
+  {
+    $urlFrigate = self::getUrlFrigate();
+    if ($urlFrigate === false) {
+      return null;
+    }
+    $ch = curl_init("http://" . $urlFrigate . "/api/events/" . rawurlencode($eventId));
+    curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
+    $result = curl_exec($ch);
+    $httpCode = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+
+    if ($httpCode === 404) {
+      return false;
+    }
+    $event = ($httpCode === 200 && is_string($result)) ? json_decode($result, true) : null;
+    return is_array($event) ? $event : null;
   }
 
   /**
@@ -2860,6 +2918,11 @@ class frigate extends eqLogic
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
+      // L'identifiant Frigate commence par le timestamp de début : la purge par ancienneté s'en sert
+      $start = explode('-', (string) $id)[0];
+      if (is_numeric($start)) {
+        $frigateEvent->setStartTime((int) ceil((float) $start));
+      }
       // on commence par vidér les champs de reconnaissance pour éviter d'avoir des données obsolètes
       $frigateEvent->setRecognition_type('');
       $frigateEvent->setRecognition_name('');

@@ -68,8 +68,8 @@ class frigate_events
 	private $zones;
 	/** @var string|null Type d'évènement (new, update, end) */
 	private $type;
-	/** @var int|null 1 si l'évènement est un favori */
-	private $isFavorite;
+	/** @var int|null 1 si l'évènement est un favori ; 0 pour un nouvel évènement, que les purges peuvent alors sélectionner */
+	private $isFavorite = 0;
 	/** @var string|null Type de reconnaissance */
 	private $recognition_type;
 	/** @var string|null Description générée par IA */
@@ -155,6 +155,23 @@ class frigate_events
 	public static function byEventId($_event_id)
 	{
 		return self::query('WHERE event_id = :event_id', array('event_id' => $_event_id), DB::FETCH_TYPE_ROW);
+	}
+
+	/**
+	 * Retourne les évènements non favoris restés incomplets (new, update ou sans type) commencés avant une date.
+	 *
+	 * Un évènement sans date de début est retourné aussi.
+	 *
+	 * @param int $_before Timestamp limite
+	 * @return frigate_events[]
+	 * @throws Exception
+	 */
+	public static function incompleteBefore($_before)
+	{
+		return self::query(
+			"WHERE (type IS NULL OR type IN ('new', 'update')) AND (isFavorite IS NULL OR isFavorite != 1) AND (startTime IS NULL OR startTime < :before)",
+			array('before' => $_before)
+		);
 	}
 
 	/**
