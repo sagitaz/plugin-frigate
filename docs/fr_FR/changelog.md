@@ -16,6 +16,8 @@
 - Un évènement en double ne perd plus ses fichiers au nettoyage de la nuit
 - Un évènement resté incomplet n'est plus supprimé la nuit : il est complété auprès de Frigate
 - Les évènements créés par une description de l'IA sont bien supprimés après le nombre de jours configuré
+- Les détections de l'équipement Events restent actives tant qu'une caméra détecte
+- Les détections restées bloquées sont remises à 0 à la mise à jour
 
 # 30/09/2026 Beta 1.5.6
 - Compatibilité avec Frigate 0.18, Frigate 0.16 minimum

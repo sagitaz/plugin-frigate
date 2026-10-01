@@ -4485,7 +4485,7 @@ class frigate extends eqLogic
         log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . $count);
         self::handleObject($eqCamera, $innerKey, $value);
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-        self::handleObject($eqEvent, $innerKey, $value);
+        self::handleObject($eqEvent, $innerKey, self::anyCameraDetects('info_detect_' . $innerKey));
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
@@ -4526,7 +4526,7 @@ class frigate extends eqLogic
         log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . $count);
         self::handleAllObject($eqCamera, $innerKey, $value);
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-        self::handleAllObject($eqEvent, $innerKey, $value);
+        self::handleAllObject($eqEvent, $innerKey, self::anyCameraDetects('info_detect_all'));
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
@@ -4594,6 +4594,50 @@ class frigate extends eqLogic
       $innerValue = $innerValue['active'] ?? null;
     }
     return is_numeric($innerValue) ? (int) $innerValue : null;
+  }
+
+  /**
+   * Indique si au moins une caméra active a une commande de détection à 1.
+   *
+   * L'équipement Events reprend ainsi l'état de toutes les caméras : le 0 d'une caméra ne le remet pas à 0 tant
+   * qu'une autre détecte encore. Une caméra désactivée est ignorée, le core ne mettant plus ses commandes à jour
+   * (cmd::event()).
+   *
+   * @param string $logicalId Commande de détection, par exemple info_detect_person ou info_detect_all
+   * @return int 1 ou 0
+   */
+  private static function anyCameraDetects($logicalId)
+  {
+    foreach (self::byType(__CLASS__, true) as $eqLogic) {
+      if (strpos($eqLogic->getLogicalId(), 'eqFrigateCamera_') !== 0) {
+        continue;
+      }
+      $cmd = $eqLogic->getCmd('info', $logicalId);
+      if (is_object($cmd) && $cmd->execCmd() == 1) {
+        return 1;
+      }
+    }
+    return 0;
+  }
+
+  /**
+   * Remet à 0 les commandes de détection d'objets restées à 1, sur les caméras et l'équipement Events.
+   *
+   * Appelée à la mise à jour du plugin : une détection restée à 1 sans message de fin bloquerait l'équipement
+   * Events, qui reste à 1 tant qu'une caméra détecte (voir anyCameraDetects()). Frigate publie le nombre
+   * d'objets au changement suivant.
+   *
+   * @return void
+   */
+  public static function resetDetections()
+  {
+    foreach (self::byType(__CLASS__) as $eqLogic) {
+      foreach ($eqLogic->getCmd('info') as $cmd) {
+        if (strpos($cmd->getLogicalId(), 'info_detect_') === 0 && $cmd->execCmd() == 1) {
+          $cmd->event(0);
+        }
+      }
+    }
   }
 
   /**

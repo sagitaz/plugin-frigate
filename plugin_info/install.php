@@ -115,6 +115,7 @@ function frigate_update()
 
     frigate::setConfig();
     frigate::setConfigEqlogic();
+    frigate::resetDetections();
     frigate::addMessages();
     frigate::deleteLatestFile();
     Log::add("frigate", 'info', 'Finish Update');

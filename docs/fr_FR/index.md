@@ -128,6 +128,7 @@ Sous les boutons, la version de votre serveur Frigate s'affiche en orange quand 
 L'équipement est créé de manière automatique en même temps que les caméras.
 Celui-ci comporte des commandes infos avec la valeur du dernier évènement reçu.
 Il comporte aussi 2 commandes actions : Cron on et Cron off, ceci afin de mettre en pause la recherche de nouveaux évènements.
+Avec MQTT, ses commandes **Détection xxx** et **Détection tout** valent 1 tant qu'au moins une caméra active détecte l'objet, et repassent à 0 quand plus aucune ne le détecte.
 
 Il est possible de créer des actions communes à toutes les caméras (voir la section dédiée)
 Cocher "autoriser les actions" si vous souhaitez sur une détection exécuter les actions présentes dans l'équipement events et dans les équipements caméras.
