@@ -12,6 +12,8 @@
 - Un évènement terminé ne repasse plus en cours et garde son clip
 - Un clip encore indisponible à la fin d'un évènement est récupéré au message suivant de Frigate
 - Pas d'action en double quand Frigate renvoie un évènement déjà terminé
+- Les évènements ne sont plus enregistrés en double, les doublons existants sont fusionnés à la mise à jour
+- Un évènement en double ne perd plus ses fichiers au nettoyage de la nuit
 
 # 30/09/2026 Beta 1.5.6
 - Compatibilité avec Frigate 0.18, Frigate 0.16 minimum

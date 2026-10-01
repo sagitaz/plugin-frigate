@@ -96,6 +96,12 @@ function frigate_update()
             DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
         }
     }
+    // Fusionner les évènements enregistrés plusieurs fois sous le même event_id
+    $merged = frigate_events::mergeDuplicates();
+    if ($merged > 0) {
+        Log::add("frigate", 'info', 'Évènements en double fusionnés : ' . $merged . ' ligne(s) supprimée(s)');
+    }
+
     // Vérifier le type de la colonne data, si c'est text le passer en mediumtext
     $sqlCheck = "SHOW COLUMNS FROM `frigate_events` LIKE 'data';";
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);

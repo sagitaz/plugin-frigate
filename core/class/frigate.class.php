@@ -196,6 +196,7 @@ class frigate extends eqLogic
       $frequence === "functionality::cron15::enable")) {
       self::cleanByType();
       self::cleanByType("update");
+      self::cleanEventLocks();
     }
 
     // Exécution des actions si Frigate est disponible
@@ -523,7 +524,7 @@ class frigate extends eqLogic
         $event->setIsFavorite(0);
         $event->save();
         $eventId = $event->getEventId();
-        self::cleanDbEvent($eventId);
+        self::cleanDbEvent($eventId, $event);
       }
     }
     log::add(__CLASS__, 'debug', "╚════════════════════════ END REMOVE EQLOGIC ═══════════════════");
@@ -1422,120 +1423,125 @@ class frigate extends eqLogic
     $filteredRecoveryEvents = array_values($filteredRecoveryEvents);
 
     foreach ($filteredRecoveryEvents as $event) {
-      $frigate = frigate_events::byEventId($event['id']);
-      $previousType = is_object($frigate) ? $frigate->getType() : null;
-      $eventType = self::advanceType($previousType, $type);
+      $lock = self::lockEvent($event['id']);
+      try {
+        $frigate = frigate_events::byEventId($event['id']);
+        $previousType = is_object($frigate) ? $frigate->getType() : null;
+        $eventType = self::advanceType($previousType, $type);
 
-      log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START EVENT:/fg: ═══════════════════");
-      if ($eventType !== $type) {
-        log::add(__CLASS__, 'debug', "║ Type reçu « " . $type . " » ignoré, l'évènement est déjà « " . $eventType . " ».");
-      }
+        log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START EVENT:/fg: ═══════════════════");
+        if ($eventType !== $type) {
+          log::add(__CLASS__, 'debug', "║ Type reçu « " . $type . " » ignoré, l'évènement est déjà « " . $eventType . " ».");
+        }
 
-      // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
-      // au fil de l'évènement, celui du premier message n'est pas le définitif.
-      $force = is_object($frigate) && $previousType != $eventType;
-      $infos = self::getEventinfos($mqtt, $event, $force, $eventType);
+        // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
+        // au fil de l'évènement, celui du premier message n'est pas le définitif.
+        $force = is_object($frigate) && $previousType != $eventType;
+        $infos = self::getEventinfos($mqtt, $event, $force, $eventType);
 
-      if (!$frigate) {
-        log::add(__CLASS__, 'debug', "║ Events (type=" . $eventType . ") => " . json_encode($event));
-        $box = $event['data']['box'] ?? "null";
+        if (!$frigate) {
+          log::add(__CLASS__, 'debug', "║ Events (type=" . $eventType . ") => " . json_encode($event));
+          $box = $event['data']['box'] ?? "null";
 
-        $frigate = new frigate_events();
-        $frigate->setBox($box);
-        $frigate->setCamera($event['camera']);
-        $frigate->setData($event['data']);
-        $frigate->setLasted($infos["image"]);
-        $frigate->setHasClip($infos["hasClip"]);
-        $frigate->setClip($infos["clip"]);
-        $frigate->setHasSnapshot($infos["hasSnapshot"]);
-        $frigate->setSnapshot($infos["snapshot"]);
-        $frigate->setStartTime($infos['startTime']);
-        $frigate->setEndTime($infos["endTime"]);
-        // $frigate->setFalsePositive($event['false_positive']);
-        $frigate->setEventId($event['id']);
-        $frigate->setLabel($infos['label']);
-        $frigate->setPlusId($event['plus_id']);
-        $frigate->setRetain($event['retain_indefinitely']);
-        $frigate->setSubLabel($event['sub_label']);
-        $frigate->setThumbnail($infos["thumbnail"]);
-        $frigate->setTopScore($infos["topScore"]);
-        $frigate->setScore($infos["score"]);
-        $frigate->setZones($infos['zones']);
-        $frigate->setType($eventType);
-        $frigate->setIsFavorite(0);
-        $frigate->save();
-        self::majEventsCmds($frigate);
-        log::add(__CLASS__, 'debug', "║ Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
-      } else {
-        $updated = false;
+          $frigate = new frigate_events();
+          $frigate->setBox($box);
+          $frigate->setCamera($event['camera']);
+          $frigate->setData($event['data']);
+          $frigate->setLasted($infos["image"]);
+          $frigate->setHasClip($infos["hasClip"]);
+          $frigate->setClip($infos["clip"]);
+          $frigate->setHasSnapshot($infos["hasSnapshot"]);
+          $frigate->setSnapshot($infos["snapshot"]);
+          $frigate->setStartTime($infos['startTime']);
+          $frigate->setEndTime($infos["endTime"]);
+          // $frigate->setFalsePositive($event['false_positive']);
+          $frigate->setEventId($event['id']);
+          $frigate->setLabel($infos['label']);
+          $frigate->setPlusId($event['plus_id']);
+          $frigate->setRetain($event['retain_indefinitely']);
+          $frigate->setSubLabel($event['sub_label']);
+          $frigate->setThumbnail($infos["thumbnail"]);
+          $frigate->setTopScore($infos["topScore"]);
+          $frigate->setScore($infos["score"]);
+          $frigate->setZones($infos['zones']);
+          $frigate->setType($eventType);
+          $frigate->setIsFavorite(0);
+          $frigate->save();
+          self::majEventsCmds($frigate);
+          log::add(__CLASS__, 'debug', "║ Evénement Frigate créé et sauvegardé, event ID: " . $event['id']);
+        } else {
+          $updated = false;
 
-        $fieldsToUpdate = [
-          'StartTime' => $infos["startTime"] ?? $infos['endTime'],
-          'EndTime' => $infos["endTime"],
-          'HasClip' => $infos["hasClip"],
-          'Clip' => $infos["clip"],
-          'HasSnapshot' => $infos["hasSnapshot"],
-          'Snapshot' => $infos["snapshot"],
-          'Box' => $event['data']['box'] ?? null,
-          'Camera' => $event['camera'],
-          // 'FalsePositive' => $event['false_positive'],
-          'Label' => $infos['label'],
-          'PlusId' => $event['plus_id'],
-          'SubLabel' => $event['sub_label'],
-          'Thumbnail' => $infos["thumbnail"],
-          'Lasted' => $infos["image"],
-          'Type' => $eventType,
-          'TopScore' => $infos["topScore"],
-          'Score' => $infos["score"],
-          'Zones' => $infos['zones']
-        ];
+          $fieldsToUpdate = [
+            'StartTime' => $infos["startTime"] ?? $infos['endTime'],
+            'EndTime' => $infos["endTime"],
+            'HasClip' => $infos["hasClip"],
+            'Clip' => $infos["clip"],
+            'HasSnapshot' => $infos["hasSnapshot"],
+            'Snapshot' => $infos["snapshot"],
+            'Box' => $event['data']['box'] ?? null,
+            'Camera' => $event['camera'],
+            // 'FalsePositive' => $event['false_positive'],
+            'Label' => $infos['label'],
+            'PlusId' => $event['plus_id'],
+            'SubLabel' => $event['sub_label'],
+            'Thumbnail' => $infos["thumbnail"],
+            'Lasted' => $infos["image"],
+            'Type' => $eventType,
+            'TopScore' => $infos["topScore"],
+            'Score' => $infos["score"],
+            'Zones' => $infos['zones']
+          ];
 
-        foreach ($fieldsToUpdate as $field => $value) {
-          $getMethod = 'get' . $field;
-          $setMethod = 'set' . $field;
-          //$currentValue = is_string($frigate->$getMethod()) ? json_decode($frigate->$getMethod(), true) : $frigate->$getMethod();
-          $currentValue = $frigate->$getMethod();
-          //$newValue = is_string($value) ? json_decode($value, true) : $value;
-          $newValue = $value;
+          foreach ($fieldsToUpdate as $field => $value) {
+            $getMethod = 'get' . $field;
+            $setMethod = 'set' . $field;
+            //$currentValue = is_string($frigate->$getMethod()) ? json_decode($frigate->$getMethod(), true) : $frigate->$getMethod();
+            $currentValue = $frigate->$getMethod();
+            //$newValue = is_string($value) ? json_decode($value, true) : $value;
+            $newValue = $value;
 
-          // soucis sur maj Box, "[]" != []
-          if ($field == 'Box') {
-            if ($value !== null) {
-              $newValue = json_encode($value);
+            // soucis sur maj Box, "[]" != []
+            if ($field == 'Box') {
+              if ($value !== null) {
+                $newValue = json_encode($value);
+              }
+              // log::add(__CLASS__, 'debug', "║ BOX, ancienne valeur: " . $currentValue . ", nouvelle valeur: " . $newValue);
             }
-            // log::add(__CLASS__, 'debug', "║ BOX, ancienne valeur: " . $currentValue . ", nouvelle valeur: " . $newValue);
+
+            if ((is_null($currentValue) || $currentValue === '' || $currentValue != $newValue) && !is_null($newValue) && $newValue !== '') {
+              log::add(__CLASS__, 'debug', "║ Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
+              $frigate->$setMethod($newValue);
+              $updated = true;
+            }
           }
 
-          if ((is_null($currentValue) || $currentValue === '' || $currentValue != $newValue) && !is_null($newValue) && $newValue !== '') {
-            log::add(__CLASS__, 'debug', "║ Mise à jour du champ '$field' pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($currentValue) . ", nouvelle valeur: " . json_encode($newValue));
-            $frigate->$setMethod($newValue);
+          // La description de l'IA peut arriver seule, par la revue genai d'un évènement terminé
+          if (isset($event['data']['description']) && $event['data']['description'] !== $frigate->getRecognition_description()) {
             $updated = true;
           }
-        }
 
-        // La description de l'IA peut arriver seule, par la revue genai d'un évènement terminé
-        if (isset($event['data']['description']) && $event['data']['description'] !== $frigate->getRecognition_description()) {
-          $updated = true;
-        }
+          if ($updated) {
+            $frigate->setData($event['data']);
+            log::add(__CLASS__, 'debug', "║ Mise à jour du champ data pour event ID: " . $event['id']);
 
-        if ($updated) {
-          $frigate->setData($event['data']);
-          log::add(__CLASS__, 'debug', "║ Mise à jour du champ data pour event ID: " . $event['id']);
-
-          // si data description existe, le mettre à jour aussi
-          if (isset($event['data']['description'])) {
-            log::add(__CLASS__, 'debug', "║ Mise à jour du champ recognition_description pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($frigate->getRecognition_description()) . ", nouvelle valeur: " . json_encode($event['data']['description']));
-            $frigate->setRecognition_description($event['data']['description']);
+            // si data description existe, le mettre à jour aussi
+            if (isset($event['data']['description'])) {
+              log::add(__CLASS__, 'debug', "║ Mise à jour du champ recognition_description pour event ID: " . $event['id'] . ". ancienne valeur: " . json_encode($frigate->getRecognition_description()) . ", nouvelle valeur: " . json_encode($event['data']['description']));
+              $frigate->setRecognition_description($event['data']['description']);
+            }
+            $frigate->save();
+            // Les actions d'un évènement déjà terminé ont été exécutées à sa fin
+            self::majEventsCmds($frigate, $previousType !== 'end');
+            log::add(__CLASS__, 'debug', "║ Evénement Frigate mis à jour et sauvegardé, event ID: " . $event['id']);
+          } else {
+            log::add(__CLASS__, 'debug', "║ Pas de mise à jour pour event ID: " . $event['id']);
           }
-          $frigate->save();
-          // Les actions d'un évènement déjà terminé ont été exécutées à sa fin
-          self::majEventsCmds($frigate, $previousType !== 'end');
-          log::add(__CLASS__, 'debug', "║ Evénement Frigate mis à jour et sauvegardé, event ID: " . $event['id']);
-        } else {
-          log::add(__CLASS__, 'debug', "║ Pas de mise à jour pour event ID: " . $event['id']);
         }
+        log::add(__CLASS__, 'debug', "╚════════════════════════ END EVENT ═══════════════════");
+      } finally {
+        self::unlockEvent($lock);
       }
-      log::add(__CLASS__, 'debug', "╚════════════════════════ END EVENT ═══════════════════");
     }
   }
 
@@ -1557,6 +1563,78 @@ class frigate extends eqLogic
       return $current;
     }
     return $received;
+  }
+
+  /**
+   * Prend le verrou d'un évènement, pour que deux messages du même évènement ne soient pas traités en même temps.
+   *
+   * Deux messages reçus à une seconde d'écart sont traités par deux processus PHP : sans verrou, aucun ne trouve
+   * l'évènement en base et chacun le crée. Le verrou est un flock sur un fichier du dossier temporaire du plugin,
+   * que PHP rend à la fin de la requête, même après une erreur fatale ; un verrou SQL (GET_LOCK) survivrait au
+   * processus, les connexions PDO du core étant persistantes. Le second message attend la fin du premier, au plus
+   * $timeout secondes, puis est traité sans verrou.
+   *
+   * @param string|null $eventId Identifiant Frigate de l'évènement
+   * @param int         $timeout Attente maximale, en secondes
+   * @return resource|null Verrou à rendre avec unlockEvent(), null s'il n'a pas pu être pris ou sans identifiant
+   */
+  private static function lockEvent($eventId, $timeout = 60)
+  {
+    if ($eventId === null || $eventId === '') {
+      return null;
+    }
+    $dir = jeedom::getTmpFolder(__CLASS__) . '/locks';
+    if (!is_dir($dir) && !@mkdir($dir, 0775, true) && !is_dir($dir)) {
+      log::add(__CLASS__, 'warning', "║ Dossier des verrous impossible à créer : " . $dir);
+      return null;
+    }
+    $path = $dir . '/' . preg_replace('/[^A-Za-z0-9._-]/', '_', $eventId) . '.lock';
+    $handle = @fopen($path, 'c');
+    if ($handle === false) {
+      log::add(__CLASS__, 'warning', "║ Verrou de l'évènement " . $eventId . " impossible à ouvrir, traitement sans verrou.");
+      return null;
+    }
+    $start = microtime(true);
+    while (!flock($handle, LOCK_EX | LOCK_NB)) {
+      if (microtime(true) - $start >= $timeout) {
+        log::add(__CLASS__, 'warning', "║ Verrou de l'évènement " . $eventId . " non obtenu après " . $timeout . " s, traitement sans verrou.");
+        fclose($handle);
+        return null;
+      }
+      usleep(200000);
+    }
+    // Date d'utilisation, lue par cleanEventLocks()
+    @touch($path);
+    return $handle;
+  }
+
+  /**
+   * Rend le verrou d'un évènement pris par lockEvent().
+   *
+   * @param resource|null $handle Verrou, null s'il n'a pas été pris
+   * @return void
+   */
+  private static function unlockEvent($handle)
+  {
+    if (is_resource($handle)) {
+      flock($handle, LOCK_UN);
+      fclose($handle);
+    }
+  }
+
+  /**
+   * Supprime les fichiers de verrou des évènements inutilisés depuis plus d'un jour.
+   *
+   * @return void
+   */
+  private static function cleanEventLocks()
+  {
+    $files = glob(jeedom::getTmpFolder(__CLASS__) . '/locks/*.lock');
+    foreach ($files ?: [] as $file) {
+      if (filemtime($file) < time() - 86400) {
+        @unlink($file);
+      }
+    }
   }
 
   /**
@@ -2070,7 +2148,7 @@ class frigate extends eqLogic
 
         log::add(__CLASS__, 'info', "║ Nettoyage de l'événement ID: " . $eventId);
 
-        self::cleanDbEvent($eventId);
+        self::cleanDbEvent($eventId, $event);
       }
     } else {
       log::add(__CLASS__, 'info', "║ Aucun événement trouvé datant de plus de " . $days . " jours.");
@@ -2093,7 +2171,7 @@ class frigate extends eqLogic
 
         log::add(__CLASS__, 'info', "║ Nettoyage de l'événement ID: " . $eventId . " il est de type: " . $type);
 
-        self::cleanDbEvent($eventId);
+        self::cleanDbEvent($eventId, $event);
       }
     }
   }
@@ -2111,7 +2189,7 @@ class frigate extends eqLogic
 
     if (!empty($events)) {
       foreach ($events as $event) {
-        $totalSizeGain += self::cleanDbEvent($event->getEventId());
+        $totalSizeGain += self::cleanDbEvent($event->getEventId(), $event);
       }
     }
     return $totalSizeGain; // Renvoie par exemple 15.45 (Mo)
@@ -2218,14 +2296,18 @@ class frigate extends eqLogic
    * Supprime un évènement de la base avec ses fichiers, sauf s'il est en favori.
    *
    * Les fichiers sont retrouvés par leur nom dans le dossier de la caméra, et par les URL enregistrées sur
-   * l'évènement pour les captures manuelles.
+   * l'évènement pour les captures manuelles. Quand une autre ligne porte le même identifiant Frigate (doublon),
+   * seule la ligne est supprimée : les fichiers lui sont communs.
    *
-   * @param string $id Identifiant Frigate de l'évènement
+   * @param string              $id      Identifiant Frigate de l'évènement
+   * @param frigate_events|null $frigate Ligne à supprimer, quand l'appelant l'a déjà ; sinon lue par identifiant
    * @return float|int Espace libéré en Mo, 0 si rien n'a été supprimé
    */
-  public static function cleanDbEvent($id)
+  public static function cleanDbEvent($id, $frigate = null)
   {
-    $frigate = frigate_events::byEventId($id);
+    if (!is_object($frigate)) {
+      $frigate = frigate_events::byEventId($id);
+    }
 
     // Sécurité : vérifier si l'objet existe
     if (!is_object($frigate)) {
@@ -2237,6 +2319,12 @@ class frigate extends eqLogic
     $isFavorite = $frigate->getIsFavorite() ?? 0;
     if ($isFavorite == 1) {
       log::add(__CLASS__, 'debug', "║ Événement " . $frigate->getEventId() . " est un favori, il ne doit pas être supprimé de la base de données.");
+      return 0;
+    }
+
+    if (count(frigate_events::allByEventId($frigate->getEventId())) > 1) {
+      $frigate->remove();
+      log::add(__CLASS__, 'debug', "║ Doublon de l'événement " . $frigate->getEventId() . " supprimé de la base de données, fichiers conservés pour l'autre ligne.");
       return 0;
     }
 
@@ -2739,11 +2827,16 @@ class frigate extends eqLogic
     }
 
     $eqlogicId = $frigate->getId();
-    $frigateEvent = frigate_events::byEventId($id);
     log::add(__CLASS__, 'debug', "║ Données reçues : " . json_encode($trackedObjects));
 
-    // Création / Mise à jour de la base de données
-    $frigateEvent = self::updateDatabase($frigateEvent, $type, $trackedObjects);
+    // Création / Mise à jour de la base de données, sous le verrou de l'évènement partagé avec getEvents()
+    $lock = self::lockEvent($id);
+    try {
+      $frigateEvent = frigate_events::byEventId($id);
+      $frigateEvent = self::updateDatabase($frigateEvent, $type, $trackedObjects);
+    } finally {
+      self::unlockEvent($lock);
+    }
 
     // Création / mise à jour des commandes Jeedom
     self::updateCommands($eqlogicId, $type, $frigateEvent);

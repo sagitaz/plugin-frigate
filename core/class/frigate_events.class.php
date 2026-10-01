@@ -158,6 +158,71 @@ class frigate_events
 	}
 
 	/**
+	 * Retourne toutes les lignes enregistrées sous un identifiant Frigate, de la plus ancienne à la plus récente.
+	 *
+	 * @param string $_event_id Identifiant Frigate
+	 * @return frigate_events[]
+	 * @throws Exception
+	 */
+	public static function allByEventId($_event_id)
+	{
+		return self::query('WHERE event_id = :event_id ORDER BY id', array('event_id' => $_event_id));
+	}
+
+	/**
+	 * Fusionne les évènements enregistrés plusieurs fois sous le même identifiant Frigate.
+	 *
+	 * Pour chaque identifiant en double, la ligne au type le plus avancé est gardée (end, puis update, puis new,
+	 * puis sans type ; la plus ancienne à égalité). Elle reprend le favori, et les champs de reconnaissance
+	 * qu'elle n'a pas, depuis les autres lignes, qui sont supprimées de la base. Les fichiers, communs à toutes
+	 * les lignes, ne sont pas touchés.
+	 *
+	 * @return int Nombre de lignes supprimées
+	 * @throws Exception
+	 */
+	public static function mergeDuplicates()
+	{
+		$order = array('end' => 3, 'update' => 2, 'new' => 1);
+		$fields = array('Recognition_type', 'Recognition_name', 'Recognition_subname', 'Recognition_description', 'Recognition_plate', 'Recognition_attributes', 'Recognition_score');
+		$removed = 0;
+
+		$duplicates = DB::Prepare('SELECT event_id FROM frigate_events GROUP BY event_id HAVING COUNT(*) > 1', array(), DB::FETCH_TYPE_ALL);
+		foreach ($duplicates as $duplicate) {
+			$rows = self::allByEventId($duplicate['event_id']);
+			$rank = function ($row) use ($order) {
+				return $order[$row->getType()] ?? 0;
+			};
+			// Lignes triées par id : à rang égal, la plus ancienne est gardée
+			$keeper = $rows[0];
+			foreach ($rows as $row) {
+				if ($rank($row) > $rank($keeper)) {
+					$keeper = $row;
+				}
+			}
+
+			foreach ($rows as $row) {
+				if ($row === $keeper) {
+					continue;
+				}
+				if ($row->getIsFavorite() == 1) {
+					$keeper->setIsFavorite(1);
+				}
+				foreach ($fields as $field) {
+					$value = $row->{'get' . $field}();
+					if (($keeper->{'get' . $field}() === null || $keeper->{'get' . $field}() === '') && $value !== null && $value !== '') {
+						$keeper->{'set' . $field}($value);
+					}
+				}
+				$row->remove();
+				$removed++;
+			}
+			$keeper->save();
+		}
+
+		return $removed;
+	}
+
+	/**
 	 * Retourne tous les évènements d'un type donné.
 	 *
 	 * @param string $_type Type recherché (new, update, end)
