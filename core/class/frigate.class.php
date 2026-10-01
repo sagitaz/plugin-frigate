@@ -4238,6 +4238,8 @@ class frigate extends eqLogic
   /**
    * Traite les données MQTT d'une caméra et met à jour les commandes associées.
    *
+   * Un message d'objet qui ne porte pas de nombre d'objets, comme le snapshot, est ignoré (voir detectionCount()).
+   *
    * @param eqLogic              $eqCamera Équipement caméra
    * @param string               $key      Nom de la caméra
    * @param array<string, mixed> $data     Données reçues
@@ -4269,12 +4271,17 @@ class frigate extends eqLogic
 
       // objet détecté (person, car, etc.)
       if (in_array($innerKey, $objects)) {
+        $count = self::detectionCount($innerValue);
+        if ($count === null) {
+          continue;
+        }
+        $value = $count > 0 ? 1 : 0;
         log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-success:START OBJET DETECT :/fg: ════════════════════════════════╗");
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-        log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . json_encode($innerValue));
-        self::handleObject($eqCamera, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', "║ Objet : " . $innerKey . ', Etat : ' . $count);
+        self::handleObject($eqCamera, $innerKey, $value);
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-        self::handleObject($eqEvent, $innerKey, $innerValue);
+        self::handleObject($eqEvent, $innerKey, $value);
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
@@ -4287,12 +4294,15 @@ class frigate extends eqLogic
 
       // classification en cours
       if ($innerKey === 'classification') {
-        foreach ($innerValue as $key => $value) {
+        if (!is_array($innerValue)) {
+          continue;
+        }
+        foreach ($innerValue as $model => $state) {
           log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-info:START CLASSIFICATION:/fg: ═══════════════════════════════════╗");
           log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-          log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
-          $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $key, "string", "", "info_classification_state", "", 0);
-          $infoCmd->event($value);
+          log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode([$model => $state]));
+          $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $model, "string", "", "info_classification_state", "", 0);
+          $infoCmd->event($state);
           $infoCmd->save();
           $eqCamera->refreshWidget();
           log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
@@ -4302,12 +4312,17 @@ class frigate extends eqLogic
 
       // tous les objets (all)
       if ($innerKey === 'all') {
+        $count = self::detectionCount($innerValue);
+        if ($count === null) {
+          continue;
+        }
+        $value = $count > 0 ? 1 : 0;
         log::add("frigate_Detect", 'info', "╔═════════════════════════════ :fg-danger:START ALL DETECT:/fg: ═══════════════════════════════════╗");
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
-        log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode($innerValue));
-        self::handleAllObject($eqCamera, $innerKey, $innerValue);
+        log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . $count);
+        self::handleAllObject($eqCamera, $innerKey, $value);
         log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqEvent->getHumanName() . ":/b:");
-        self::handleAllObject($eqEvent, $innerKey, $innerValue);
+        self::handleAllObject($eqEvent, $innerKey, $value);
         log::add("frigate_Detect", 'info', "╚══════════════════════════════════════════════════════════════════════════════════╝");
         continue;
       }
@@ -4360,22 +4375,33 @@ class frigate extends eqLogic
   }
 
   /**
+   * Retourne le nombre d'objets porté par un message MQTT de détection.
+   *
+   * Frigate publie ce nombre sur <caméra>/<objet> et sur <caméra>/<objet>/active ; le second arrive sous la
+   * forme d'un tableau à clé active. Le message <caméra>/<objet>/snapshot, un tableau à clé snapshot, ne porte
+   * pas de nombre : Frigate le republie aussi quand l'objet n'est plus détecté.
+   *
+   * @param mixed $innerValue Valeur reçue pour l'objet
+   * @return int|null Nombre d'objets, null si le message n'en porte pas
+   */
+  private static function detectionCount($innerValue)
+  {
+    if (is_array($innerValue)) {
+      $innerValue = $innerValue['active'] ?? null;
+    }
+    return is_numeric($innerValue) ? (int) $innerValue : null;
+  }
+
+  /**
    * Met à jour la commande de détection d'un objet sur un équipement.
    *
-   * @param eqLogic $eqCamera   Équipement caméra ou Events
-   * @param string  $key        Objet, par exemple person
-   * @param mixed   $innerValue Nombre d'objets, ou tableau avec active
+   * @param eqLogic $eqCamera Équipement caméra ou Events
+   * @param string  $key      Objet, par exemple person
+   * @param int     $value    1 si au moins un objet est détecté, 0 sinon
    * @return void
    */
-  private static function handleObject($eqCamera, $key, $innerValue)
+  private static function handleObject($eqCamera, $key, $value)
   {
-    // Traiter le cas où $innerValue est un nombre ou un tableau avec "active"
-    $value = 0;
-    if (is_array($innerValue) && isset($innerValue["active"])) {
-      $value = ($innerValue["active"] !== 0) ? 1 : 0;
-    } else {
-      $value = ($innerValue !== 0) ? 1 : 0;
-    }
     $infoCmd = self::createCmd($eqCamera->getId(), "Détection " . $key, "binary", "", "info_detect_" . $key, "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
     $infoCmd->event($value);
     $infoCmd->save();
@@ -4385,19 +4411,13 @@ class frigate extends eqLogic
    * Met à jour la commande « Détection tout » d'un équipement ; à 0, remet aussi à 0 les détections d'objets
    * encore actives.
    *
-   * @param eqLogic $eqCamera   Équipement caméra ou Events
-   * @param string  $key        Clé reçue (all)
-   * @param mixed   $innerValue Nombre d'objets, ou tableau avec active
+   * @param eqLogic $eqCamera Équipement caméra ou Events
+   * @param string  $key      Clé reçue (all)
+   * @param int     $value    1 si au moins un objet est détecté, 0 sinon
    * @return void
    */
-  private static function handleAllObject($eqCamera, $key, $innerValue)
+  private static function handleAllObject($eqCamera, $key, $value)
   {
-    // Traiter le cas où $innerValue est un nombre ou un tableau avec "active"
-    if (is_array($innerValue)) {
-      $value = ($innerValue["active"] !== 0) ? 1 : 0;
-    } else {
-      $value = ($innerValue !== 0) ? 1 : 0;
-    }
     $infoCmd = self::createCmd($eqCamera->getId(), "Détection tout", "binary", "", "info_detect_all", "JEEMATE_CAMERA_DETECT_EVENT_STATE", 0);
     $infoCmd->event($value);
     $infoCmd->save();
