@@ -4050,7 +4050,8 @@ class frigate extends eqLogic
   }
 
   /**
-   * Appelée par Jeedom après l'enregistrement du topic MQTT : relance l'abonnement si le démon tourne.
+   * Appelée par Jeedom après l'enregistrement du topic MQTT : abonne le plugin au topic enregistré, quand MQTT
+   * Manager est démarré.
    *
    * @param string $value Topic enregistré
    * @return void
@@ -4059,7 +4060,7 @@ class frigate extends eqLogic
   {
     if (class_exists('mqtt2')) {
       $deamon_info = self::deamon_info();
-      if ($deamon_info['state'] === 'ok') {
+      if ($deamon_info['launchable'] === 'ok') {
         self::deamon_start();
       }
     }
@@ -4145,13 +4146,24 @@ class frigate extends eqLogic
 
 
   /**
-   * Indique si le démon tourne : toujours vrai, l'écoute étant assurée par MQTT Manager.
+   * Indique si le démon tourne, c'est-à-dire si MQTT Manager transmet le topic de Frigate au plugin.
+   *
+   * Un état faux après une mise à jour, qui désabonne le topic, permet au core de relancer le démon (cron
+   * plugin::checkDeamon, toutes les 5 minutes, gestion automatique active). Sans getPluginForTopic() dans
+   * MQTT Manager, l'abonnement ne peut pas être vérifié et le démon est réputé tourner.
    *
    * @return bool
    */
   public static function isRunning()
   {
-    return true;
+    if (!class_exists('mqtt2')) {
+      return false;
+    }
+    if (!method_exists('mqtt2', 'getPluginForTopic')) {
+      return true;
+    }
+    $topic = self::getTopic();
+    return $topic != '' && mqtt2::getPluginForTopic($topic) === __CLASS__;
   }
 
   /**

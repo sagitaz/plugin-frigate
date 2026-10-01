@@ -7,6 +7,8 @@
 # 01/10/2026 Beta 1.5.7
 - Les détections ne restent plus actives après le départ de l'objet
 - Log de détection allégé
+- La réception MQTT reprend d'elle-même après une mise à jour du plugin, et le statut du démon indique si le plugin reçoit bien les messages
+- Plus d'erreur à l'enregistrement de la configuration quand MQTT Manager est arrêté
 
 # 30/09/2026 Beta 1.5.6
 - Compatibilité avec Frigate 0.18, Frigate 0.16 minimum

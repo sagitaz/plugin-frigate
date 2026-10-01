@@ -100,6 +100,7 @@ Si vous utilisez MQTT, vous pouvez mettre le cron à Hourly ou Daily.
 
 **Démon NOK :**
 Si vous n'avez pas mqtt-manager, il est normal que le démon reste sur NOK. Aucun problème, le plugin fonctionne quand même, cependant certaines fonctions seront indisponibles ou limitées.
+Avec mqtt-manager, NOK signifie que le plugin ne reçoit plus les messages de Frigate, par exemple juste après une mise à jour du plugin. Jeedom relance le démon dans les 5 minutes si la gestion automatique est activée ; sinon, cliquez sur **(Re)Démarrer**.
 
 # <u>Utilisation</u>
 
