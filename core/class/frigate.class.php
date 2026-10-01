@@ -1341,8 +1341,9 @@ class frigate extends eqLogic
    * vrai, sinon l'API, dont seuls les évènements absents du fichier de suivi data/frigate_events.json sont
    * traités. Seuls les évènements des recovery_days derniers jours sont gardés (7 par défaut). Le dossier data
    * est d'abord purgé s'il dépasse la taille maximale. Chaque évènement est créé ou mis à jour en base avec
-   * ses médias, puis publié sur les commandes. Quand le type d'un évènement change, sa miniature et son
-   * snapshot sont retéléchargés.
+   * ses médias, puis publié sur les commandes. Le type reçu ne fait qu'avancer le type en base (voir
+   * advanceType()). Quand le type d'un évènement change, sa miniature et son snapshot sont retéléchargés. Un
+   * évènement déjà terminé en base ne déclenche pas d'action.
    *
    * @param bool                             $mqtt         Évènements reçus par MQTT
    * @param array<int, array<string, mixed>> $events       Évènements reçus par MQTT
@@ -1422,16 +1423,21 @@ class frigate extends eqLogic
 
     foreach ($filteredRecoveryEvents as $event) {
       $frigate = frigate_events::byEventId($event['id']);
+      $previousType = is_object($frigate) ? $frigate->getType() : null;
+      $eventType = self::advanceType($previousType, $type);
 
       log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START EVENT:/fg: ═══════════════════");
+      if ($eventType !== $type) {
+        log::add(__CLASS__, 'debug', "║ Type reçu « " . $type . " » ignoré, l'évènement est déjà « " . $eventType . " ».");
+      }
 
       // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
       // au fil de l'évènement, celui du premier message n'est pas le définitif.
-      $force = is_object($frigate) && $frigate->getType() != $type;
-      $infos = self::getEventinfos($mqtt, $event, $force, $type);
+      $force = is_object($frigate) && $previousType != $eventType;
+      $infos = self::getEventinfos($mqtt, $event, $force, $eventType);
 
       if (!$frigate) {
-        log::add(__CLASS__, 'debug', "║ Events (type=" . $type . ") => " . json_encode($event));
+        log::add(__CLASS__, 'debug', "║ Events (type=" . $eventType . ") => " . json_encode($event));
         $box = $event['data']['box'] ?? "null";
 
         $frigate = new frigate_events();
@@ -1455,7 +1461,7 @@ class frigate extends eqLogic
         $frigate->setTopScore($infos["topScore"]);
         $frigate->setScore($infos["score"]);
         $frigate->setZones($infos['zones']);
-        $frigate->setType($type);
+        $frigate->setType($eventType);
         $frigate->setIsFavorite(0);
         $frigate->save();
         self::majEventsCmds($frigate);
@@ -1478,7 +1484,7 @@ class frigate extends eqLogic
           'SubLabel' => $event['sub_label'],
           'Thumbnail' => $infos["thumbnail"],
           'Lasted' => $infos["image"],
-          'Type' => $type,
+          'Type' => $eventType,
           'TopScore' => $infos["topScore"],
           'Score' => $infos["score"],
           'Zones' => $infos['zones']
@@ -1507,6 +1513,11 @@ class frigate extends eqLogic
           }
         }
 
+        // La description de l'IA peut arriver seule, par la revue genai d'un évènement terminé
+        if (isset($event['data']['description']) && $event['data']['description'] !== $frigate->getRecognition_description()) {
+          $updated = true;
+        }
+
         if ($updated) {
           $frigate->setData($event['data']);
           log::add(__CLASS__, 'debug', "║ Mise à jour du champ data pour event ID: " . $event['id']);
@@ -1517,7 +1528,8 @@ class frigate extends eqLogic
             $frigate->setRecognition_description($event['data']['description']);
           }
           $frigate->save();
-          self::majEventsCmds($frigate);
+          // Les actions d'un évènement déjà terminé ont été exécutées à sa fin
+          self::majEventsCmds($frigate, $previousType !== 'end');
           log::add(__CLASS__, 'debug', "║ Evénement Frigate mis à jour et sauvegardé, event ID: " . $event['id']);
         } else {
           log::add(__CLASS__, 'debug', "║ Pas de mise à jour pour event ID: " . $event['id']);
@@ -1525,6 +1537,26 @@ class frigate extends eqLogic
       }
       log::add(__CLASS__, 'debug', "╚════════════════════════ END EVENT ═══════════════════");
     }
+  }
+
+  /**
+   * Retourne le type à enregistrer pour un évènement : le type reçu, sauf s'il ferait reculer le type en base.
+   *
+   * Les types avancent dans l'ordre new, update, end. Un message tardif, comme une revue new ou update d'un
+   * objet encore suivi, laisse donc un évènement terminé en end, avec son clip. Un type reçu inconnu ne
+   * remplace pas un type connu.
+   *
+   * @param string|null $current  Type en base, null pour un évènement absent ou sans type
+   * @param string|null $received Type reçu
+   * @return string|null
+   */
+  private static function advanceType($current, $received)
+  {
+    $order = ['new' => 1, 'update' => 2, 'end' => 3];
+    if (isset($order[$current]) && (!isset($order[$received]) || $order[$current] > $order[$received])) {
+      return $current;
+    }
+    return $received;
   }
 
   /**
@@ -3260,12 +3292,13 @@ class frigate extends eqLogic
   }
 
   /**
-   * Met à jour les commandes Jeedom à partir d'un évènement Frigate.
+   * Met à jour les commandes Jeedom à partir d'un évènement Frigate, et exécute les actions configurées.
    *
-   * @param frigate_events $event Évènement à publier
+   * @param frigate_events $event      Évènement à publier
+   * @param bool           $runActions false pour publier sans exécuter les actions
    * @return void
    */
-  public static function majEventsCmds($event)
+  public static function majEventsCmds($event, $runActions = true)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-warning:MAJ EVENTS:/fg: ═══════════════════");
 
@@ -3362,11 +3395,13 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "║ ACTION: Les actions sont désactivées pour l'équipement Events (ID: " . $eventsId . ").");
     }
 
-    if ($cameraActionsExist) {
+    if (!$runActions) {
+      log::add(__CLASS__, 'debug', "║ ACTION: Évènement déjà terminé, ses actions ont été exécutées à sa fin.");
+    } elseif ($cameraActionsExist) {
       log::add(__CLASS__, 'debug', "║ ACTION: Exécution des actions pour la caméra (ID: " . $eqCamera->getId() . ").");
       self::executeActionNewEvent($eqCamera->getId(), $event);
     }
-    if ($eventsId !== null && ($autorizeAction === 1 || !$cameraActionsExist)) {
+    if ($runActions && $eventsId !== null && ($autorizeAction === 1 || !$cameraActionsExist)) {
       log::add(__CLASS__, 'debug', "║ ACTION: Exécution des actions pour l'équipement Events (ID: " . $eventsId . ").");
       self::executeActionNewEvent($eventsId, $event);
     }
@@ -4208,7 +4243,8 @@ class frigate extends eqLogic
 
         case 'reviews':
           $eventId = $value['after']['data']['detections'][0];
-          $eventType = $value['type'];
+          // genai : résumé de la revue par l'IA, que Frigate envoie après la fin de la revue
+          $eventType = $value['type'] === 'genai' ? 'end' : $value['type'];
 
           self::getEvent($eventId, $eventType);
           event::add('frigate::events', array('message' => 'mqtt_update_manual', 'type' => 'event'));

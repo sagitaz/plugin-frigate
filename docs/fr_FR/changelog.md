@@ -9,6 +9,9 @@
 - Log de détection allégé
 - La réception MQTT reprend d'elle-même après une mise à jour du plugin, et le statut du démon indique si le plugin reçoit bien les messages
 - Plus d'erreur à l'enregistrement de la configuration quand MQTT Manager est arrêté
+- Un évènement terminé ne repasse plus en cours et garde son clip
+- Un clip encore indisponible à la fin d'un évènement est récupéré au message suivant de Frigate
+- Pas d'action en double quand Frigate renvoie un évènement déjà terminé
 
 # 30/09/2026 Beta 1.5.6
 - Compatibilité avec Frigate 0.18, Frigate 0.16 minimum
