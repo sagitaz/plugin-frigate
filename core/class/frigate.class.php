@@ -1834,7 +1834,7 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "║════════════════════════ :fg-success:Process Clip:/fg: ═══════════════════");
 
     if ($type != "end") {
-      log::add(__CLASS__, 'debug', "║ Pas de clip, le type n'est pas 'end' " . json_encode($event));
+      log::add(__CLASS__, 'debug', "║ Pas de clip pour l'évènement " . $event['id'] . " : le type n'est pas end.");
       return ['url' => "null", 'has' => 0];
     }
 
@@ -2914,7 +2914,7 @@ class frigate extends eqLogic
   {
     $id = $trackedObjects['id'] ?? null;
     if (!is_object($frigateEvent)) {
-      log::add(__CLASS__, "debug", "║ Événement introuvable (id: $id), il sera est créé dans la DB.");
+      log::add(__CLASS__, "debug", "║ Événement introuvable (id: $id), il est créé dans la base.");
       $frigateEvent = new frigate_events();
       $frigateEvent->setCamera($trackedObjects['camera']);
       $frigateEvent->setEventId($id);
@@ -3828,23 +3828,24 @@ class frigate extends eqLogic
     }
     if (is_array($actions)) {
       log::add("frigate_Actions", 'info', "╔═════════════════════════════ :b:START " . $type . ":/b: ═══════════════════════════════════╗");
-      log::add("frigate_Actions", 'info',  "║ Caméra : " . $eqLogic->getHumanName());
+      log::add("frigate_Actions", 'info',  "║ Équipement : " . $eqLogic->getHumanName());
+      log::add("frigate_Actions", 'info',  "║ Évènement : " . $eventId . ", caméra : " . $camera);
       log::add("frigate_Actions", 'info',  "║ HasSnapshot : " . $hasSnapshot);
       log::add("frigate_Actions", 'info',  "║ HasClip : " . $hasClip);
       log::add("frigate_Actions", 'info',  "║ Label : " . $label);
       foreach ($actions as $action) {
         log::add("frigate_Actions", 'info', "╠════════════════════════════════════");
 
-        // Vérifier la condition d'éxècution
+        // Vérifier la condition d'exécution
         $options = $action['options'];
         $actionForced = $action['options']['actionForced'] ?? false;
 
         if (!$conditionIsActived) {
-          log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution.");
+          log::add("frigate_Actions", 'info', "║ Commande en cours d'exécution.");
         } elseif ($actionForced) {
-          log::add("frigate_Actions", 'info', "║ Commande en cour d'éxècution car la condition principale est ignorée");
+          log::add("frigate_Actions", 'info', "║ Commande en cours d'exécution, la condition principale est ignorée.");
         } else {
-          log::add("frigate_Actions", 'info', "║ Action non exécutées car la condition principale " . $conditionIf .  " est vrai.");
+          log::add("frigate_Actions", 'info', "║ Action non exécutée : la condition principale " . $conditionIf . " est vraie.");
           continue;
         }
 
@@ -3866,7 +3867,7 @@ class frigate extends eqLogic
         if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
           $actionConditionIsActived = false;
         }
-        log::add("frigate_Actions", 'info', "║ Condition de l'action  : " . $actionCondition . ", etat : " . json_encode($actionConditionIsActived));
+        log::add("frigate_Actions", 'info', "║ Condition de l'action : " . ($actionCondition === '' ? 'aucune' : $actionCondition) . ", état : " . json_encode($actionConditionIsActived));
 
         if (!$actionConditionIsActived) {
           log::add("frigate_Actions", 'info', "║ Condition de l'action non remplie : " . $actionCondition . ", l'action sera ignorée.");
@@ -3884,19 +3885,10 @@ class frigate extends eqLogic
         $cmdLabels = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdLabelName));
         $cmdZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneName));
         $cmdZonesEnd = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdZoneEndName));
-        $eventZones = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $zones));
+        // Un évènement sans zone n'en a aucune, plutôt qu'une zone vide
+        $eventZones = ($zones === null || $zones === '') ? [] : array_map(fn($s) => self::cleanString(trim($s)), explode(',', $zones));
         $cmdTypes = array_map(fn($s) => self::cleanString(trim($s)), explode(',', $cmdTypeName));
 
-        // Ajouter aux tableaux si nécessaire une valeur par défaut
-        if ($cmdLabelName == '') {
-          $cmdLabels = ["all"];
-        }
-        if ($cmdZoneName == '') {
-          $cmdZones = ["all"];
-        }
-        if ($cmdTypes == '') {
-          $cmdTypes = ["end"];
-        }
         log::add("frigate_Actions", 'info', "║ Labels configurés : " . json_encode($cmdLabels) . ", labels de l'évènement : " . json_encode($label));
 
         log::add("frigate_Actions", 'info', "║ Zones configurées : " . json_encode($cmdZones) . ", zones de l'évènement : " . json_encode($eventZones));
@@ -3927,10 +3919,10 @@ class frigate extends eqLogic
             $zoneMatch = false;
           }
           log::add("frigate_Actions", 'info', "║ Zones de l'évènement : " . json_encode($eventZones));
-          log::add("frigate_Actions", 'info', "║ Zone d'entrée' : " . json_encode($enterZone));
+          log::add("frigate_Actions", 'info', "║ Zone d'entrée : " . json_encode($enterZone));
           log::add("frigate_Actions", 'info', "║ Zone de sortie : " . json_encode($quitZone));
           if ($zoneMatch) {
-            log::add("frigate_Actions", 'info', "║ Correspondance trouvé, déclenchement de l'action.");
+            log::add("frigate_Actions", 'info', "║ Correspondance trouvée, déclenchement de l'action.");
           } else {
             log::add("frigate_Actions", 'info', "║ Les zones ne correspondent pas !");
           }
