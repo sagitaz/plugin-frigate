@@ -1791,8 +1791,13 @@ class frigate extends eqLogic
     }
 
     // --- Vérifie si un fichier (jpg ou webp) existe sinon téléchargement ---
-    if (!file_exists($jpgPath) && !file_exists($webpPath) || $force) {
-      log::add(__CLASS__, 'debug', "║ Aucun fichier local trouvé pour $type ID: $id");
+    $hasLocalFile = file_exists($jpgPath) || file_exists($webpPath);
+    if (!$hasLocalFile || $force) {
+      if ($hasLocalFile) {
+        log::add(__CLASS__, 'debug', "║ Fichier local présent, retéléchargement forcé pour $type ID: $id");
+      } else {
+        log::add(__CLASS__, 'debug', "║ Aucun fichier local trouvé pour $type ID: $id");
+      }
 
       // Pour les snapshots seulement, on vérifie has_snapshot avant de télécharger
       if (!$isThumbnail && $event['has_snapshot'] != "true") {
@@ -4266,6 +4271,8 @@ class frigate extends eqLogic
   /**
    * Démarre le démon : abonne le plugin au topic MQTT de Frigate auprès de MQTT Manager.
    *
+   * Les informations de connexion de MQTT Manager sont écrites au log, mot de passe masqué.
+   *
    * @return bool Toujours true
    * @throws Exception Si le démon n'est pas lançable (MQTT Manager absent ou arrêté, topic vide)
    */
@@ -4280,6 +4287,9 @@ class frigate extends eqLogic
     // Enregistrement topic frigate
     mqtt2::addPluginTopic(__CLASS__, config::byKey('topic', 'frigate'));
     $mqttInfos = mqtt2::getFormatedInfos();
+    if (!empty($mqttInfos['password'])) {
+      $mqttInfos['password'] = '****';
+    }
     log::add(__CLASS__, 'info', '[' . __FUNCTION__ . '] ' . __('Informations reçues de MQTT Manager', __FILE__) . ' : ' . json_encode($mqttInfos));
 
     return true;
