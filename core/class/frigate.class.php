@@ -4363,7 +4363,8 @@ class frigate extends eqLogic
    * Traite les messages MQTT reçus sur le topic de Frigate.
    *
    * events (Frigate antérieur à 0.14 seulement), reviews, stats, available, profile et tracked_object_update ont
-   * leur traitement ; toute autre clé qui désigne une caméra passe par processCameraData().
+   * leur traitement ; toute autre clé qui désigne une caméra passe par processCameraData(). Chaque message est
+   * écrit au log MQTT, images remplacées par leur taille (voir mqttLogValue()).
    *
    * @param array<string, mixed> $_message Messages reçus, indexés par topic
    * @return void
@@ -4386,7 +4387,7 @@ class frigate extends eqLogic
     }
 
     foreach ($_message[self::getTopic()] as $key => $value) {
-      log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode($value));
+      log::add("frigate_MQTT", 'info', 'handle Mqtt Message pour : :b:' . $key . ':/b: = ' . json_encode(self::mqttLogValue($value)));
 
       switch ($key) {
         case 'events':
@@ -4439,6 +4440,28 @@ class frigate extends eqLogic
           break;
       }
     }
+  }
+
+  /**
+   * Retourne un message MQTT tel qu'il est écrit au log : chaque image (clé snapshot) est remplacée par sa taille.
+   *
+   * Le snapshot JPEG de <caméra>/<objet>/snapshot pèse plusieurs dizaines de Ko, et le core tronque les logs à
+   * leur taille maximale : écrit tel quel, il chasserait rapidement le reste du log. Le message traité n'est pas
+   * modifié.
+   *
+   * @param mixed $value Valeur reçue
+   * @return mixed
+   */
+  private static function mqttLogValue($value)
+  {
+    if (is_array($value)) {
+      array_walk_recursive($value, function (&$item, $key) {
+        if ($key === 'snapshot' && is_string($item)) {
+          $item = '[image de ' . strlen($item) . ' octets]';
+        }
+      });
+    }
+    return $value;
   }
 
   /**

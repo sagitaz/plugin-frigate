@@ -6,7 +6,7 @@
 
 # 01/10/2026 Beta 1.5.7
 - Les détections ne restent plus actives après le départ de l'objet
-- Log de détection allégé
+- Logs de détection et MQTT allégés
 - La réception MQTT reprend d'elle-même après une mise à jour du plugin, et le statut du démon indique si le plugin reçoit bien les messages
 - Plus d'erreur à l'enregistrement de la configuration quand MQTT Manager est arrêté
 - Un évènement terminé ne repasse plus en cours et garde son clip
