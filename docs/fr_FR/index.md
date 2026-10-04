@@ -78,6 +78,8 @@ Le nombre de jours de suppression ne peut pas être plus petit que le nombre de 
 
 Les évènements mis en favori ne sont jamais supprimés, ni par l'ancienneté ni par la taille. Les captures manuelles suivent les mêmes règles que les évènements : mettez-les en favori pour les garder.
 
+Une activité de Frigate (review) peut regrouper plusieurs objets suivis, par exemple une personne puis une voiture. Le plugin suit l'objet par lequel l'activité a commencé : lui seul met à jour les commandes et déclenche les actions, une seule fois pour toute l'activité. À la fin de l'activité, les autres objets sont enregistrés avec leurs médias et apparaissent sur la page des évènements, sans mettre à jour les commandes ni exécuter d'action.
+
 Un évènement dont la fin n'a jamais été reçue (coupure MQTT, redémarrage de Frigate) reste incomplet. Trois heures après son début, le cron suivant (30 minutes, horaire ou journalier) demande à Frigate où il en est : terminé, il est complété avec son clip, sans exécuter d'action ; inconnu de Frigate, il est supprimé ; encore en cours, il est gardé jusqu'au cron suivant.
 
 - **Durée de rafraîchissement** : En secondes, durée de rafraîchissement des snapshots de vos caméras. (5 secondes par défaut). Chaque caméra peut avoir sa propre durée, voir l'équipement caméra.
