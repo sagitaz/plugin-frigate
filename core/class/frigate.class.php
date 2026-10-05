@@ -4983,7 +4983,7 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-yaml'));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $frigateConfiguration);
 
-    log::add(__CLASS__, 'debug', '║ sendFrigateConfiguration :: Data : ' . $frigateConfiguration);
+    log::add(__CLASS__, 'debug', '║ sendFrigateConfiguration :: envoi de ' . strlen((string) $frigateConfiguration) . ' octets');
     $curlResponse = curl_exec($ch);
 
     if ($curlResponse === false) {
