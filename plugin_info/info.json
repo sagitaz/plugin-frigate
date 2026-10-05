@@ -1,15 +1,15 @@
 {
 	"id": "frigate",
 	"name": "Frigate",
-	"pluginVersion": "1.5.5",
+	"pluginVersion": "1.5.7",
 	"installation": "Il est nécessaire d'avoir le plugin mqtt-manager installé avec un broker MQTT sécurisé (user / mdp) pour profiter de toutes les fonctionnalités. Dans le cas contraire, le plugin Frigate sera limité. Voir la documentation pour plus d'informations.",
 	"description": {
-		"fr_FR": "Plugin Frigate pour Jeedom. Ne fonctionne qu'avec les versions de Frigate > 0.13.0. Le plugin n'installe pas le serveur Frigate mais permet de le controler.",
-		"en_US": "Frigate plugin for Jeedom. Works only with Frigate versions > 0.13.0",
-		"es_ES": "Plugin Frigate para Jeedom. Sólo funciona con versiones de Frigate > 0.13.0",
-		"de_DE": "Frigate-Plugin für Jeedom. Funktioniert nur mit Frigate-Versionen > 0.13.0",
-		"it_IT": "Plugin Frigate per Jeedom. Funziona solo con le versioni di Frigate > 0.13.0",
-		"pt_PT": "Plugin do Frigate para o Jeedom. Só funciona com as versões do Frigate > 0.13.0"
+		"fr_FR": "Plugin Frigate pour Jeedom. Nécessite Frigate 0.16 ou plus récent. Le plugin n'installe pas le serveur Frigate mais permet de le contrôler.",
+		"en_US": "Frigate plugin for Jeedom. Requires Frigate 0.16 or later.",
+		"es_ES": "Plugin Frigate para Jeedom. Requiere Frigate 0.16 o posterior.",
+		"de_DE": "Frigate-Plugin für Jeedom. Erfordert Frigate 0.16 oder neuer.",
+		"it_IT": "Plugin Frigate per Jeedom. Richiede Frigate 0.16 o successivo.",
+		"pt_PT": "Plugin do Frigate para o Jeedom. Requer o Frigate 0.16 ou posterior."
 	},
 	"licence": "AGPL",
 	"author": "Sagitaz et Noodom",
@@ -23,9 +23,9 @@
 	"hasDependency": false,
 	"hasOwnDeamon": true,
 	"maxDependancyInstallTime": 0,
- "whiteListFolders": [
-        "data"
-    ],
+	"whiteListFolders": [
+		"data"
+	],
 	"changelog_beta": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
 	"changelog": "https://sagitaz.github.io/plugin-frigate/#language#/changelog",
 	"documentation_beta": "https://sagitaz.github.io/plugin-frigate/#language#",

@@ -4,6 +4,52 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 01/10/2026 Beta 1.5.7
+- Les détections ne restent plus actives après le départ de l'objet
+- Logs de détection et MQTT allégés
+- La réception MQTT reprend d'elle-même après une mise à jour du plugin, et le statut du démon indique si le plugin reçoit bien les messages
+- Plus d'erreur à l'enregistrement de la configuration quand MQTT Manager est arrêté
+- Un évènement terminé ne repasse plus en cours et garde son clip
+- Un clip encore indisponible à la fin d'un évènement est récupéré au message suivant de Frigate
+- Pas d'action en double quand Frigate renvoie un évènement déjà terminé
+- Les évènements ne sont plus enregistrés en double, les doublons existants sont fusionnés à la mise à jour
+- Un évènement en double ne perd plus ses fichiers au nettoyage de la nuit
+- Un évènement resté incomplet n'est plus supprimé la nuit : il est complété auprès de Frigate
+- Une activité à plusieurs objets ne laisse plus d'évènement en cours jusqu'à la nuit : chaque objet est enregistré avec ses médias, avec toujours une seule notification
+- Les évènements créés par une description de l'IA sont bien supprimés après le nombre de jours configuré
+- Les détections de l'équipement Events restent actives tant qu'une caméra détecte
+- Les détections restées bloquées sont remises à 0 à la mise à jour
+- Une action limitée à une zone ne se déclenche plus à tort pour un évènement sans zone
+- Log des actions plus lisible : évènement et caméra indiqués, fautes corrigées
+- Le mot de passe MQTT n'apparaît plus dans le log au démarrage du démon
+
+# 30/09/2026 Beta 1.5.6
+- Compatibilité avec Frigate 0.18, Frigate 0.16 minimum
+- Nouvelles commandes de statut des flux vidéo de chaque caméra (Frigate 0.18)
+- Nouvelles commandes pour suivre et changer le profil de Frigate (Frigate 0.18)
+- Création d'évènement : nouveau paramètre pour choisir la durée enregistrée avant l'évènement (Frigate 0.18)
+- Les évènements et les favoris ne sont plus perdus à la désactivation du plugin
+- Les captures manuelles sont supprimées selon les mêmes règles que les évènements, les favoris sont conservés
+- La position des caméras sur le panel n'est plus remplacée par « Rechercher / MAJ », les caméras sans position sont triées par nom
+- Qualité par défaut des snapshots à 70 %, comme indiqué dans l'équipement
+- Téléchargement des snapshots et clips autorisé pour les applications comme JeeMate
+- Le snapshot final d'un évènement est bien récupéré
+- Un clip déjà téléchargé ne disparaît plus de la page Events
+- Correction des erreurs répétées dans le log http.error quand les fichiers d'un évènement sont absents
+- Le bouton de description d'un évènement sans vidéo ouvre la capture
+- Le mot de passe des commandes HTTP n'apparaît plus dans les logs
+- L'identifiant et le mot de passe fonctionnent aussi pour les anciennes commandes HTTP
+- Aucun évènement n'est créé quand une capture échoue
+- Correction de plantages quand Frigate ne répond pas ou qu'un évènement est introuvable
+- Correction de l'installation quand la base de données de Jeedom ne porte pas le nom par défaut
+- Correction de la création des caméras (image et nombre de presets)
+- Correction de la fréquence de rafraîchissement par défaut des caméras
+- Correction du rafraîchissement de l'image en passant d'une caméra à l'autre dans la page des équipements
+- Correction de l'arrêt du démon
+- Correction d'une erreur d'affichage du widget quand une commande a été supprimée
+- Messages du plugin traduits dans toutes les langues
+- Documentation complétée
+
 # 11/05/2026 Beta & Stable 1.5.5
 - Correction de logs ERROR
 

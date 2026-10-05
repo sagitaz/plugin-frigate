@@ -39,17 +39,27 @@
   }
 </style>
 
+<?php
+// Seuls les médias dont le fichier est présent sont proposés : une URL vers un fichier absent
+// lance une requête vouée à l'échec, que Jeedom écrit dans le log http.error si le dossier manque.
+$thumbnailSrc = ($hasSnapshot == 1 && frigate::mediaFileExists($img)) ? $img : '/plugins/frigate/core/img/no-image.png';
+$snapshotAvailable = $hasSnapshot == 1 && frigate::mediaFileExists($snapshot);
+$clipAvailable = $hasClip == 1 && frigate::mediaFileExists($clip);
+// Le bouton de description ouvre la vidéo, à défaut la capture ; sans média, il se limite à son infobulle.
+$descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'snapshot-btn' : '');
+?>
+
 <div data-date="<?= $date ?>" data-camera="<?= $camera ?>" data-label="<?= $label ?>" data-id="<?= $id ?>"
   class="frigateEventContainer">
   <div class="frigateEvent">
 
     <!-- div img -->
     <div class="img-container" onmouseenter="if (typeof handleHover === 'function') handleHover(this)">
-      <img class="imgSnap" src="<?= $hasSnapshot == 1 ? $img : '/plugins/frigate/data/no-image.png' ?>" />
+      <img class="imgSnap" src="<?= $thumbnailSrc ?>" />
       <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
 
       <?php
-      if ($showClip) {
+      if ($showClip && $clipAvailable) {
         echo '<div class="video-overlay">';
         echo '<video data-src="' . $clip . '" autoplay="" muted="" loop=""></video>';
         echo '</div>';
@@ -99,8 +109,8 @@
     <div class="eventBtns" 
       data-eventid="<?= $id ?>"
       data-confirmdelete="<?= $confirmDelete ? 1 : 0 ?>"
-      <?= $hasSnapshot == 1 ? 'data-snapshot="' . $snapshot . '"' : '' ?>
-      <?= $hasClip == 1 ? 'data-video="' . $clip . '"' : '' ?>
+      <?= $snapshotAvailable ? 'data-snapshot="' . $snapshot . '"' : '' ?>
+      <?= $clipAvailable ? 'data-video="' . $clip . '"' : '' ?>
       data-title="
       	<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?>
         <div class='percentage <?= frigate::getPercentageClass($topScore) ?>'><?= $topScore ?> %</div>
@@ -108,12 +118,12 @@
         <br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
 	    data-description="<?= $description ?>">
 
-      <?php if ($hasSnapshot == 1): ?>
+      <?php if ($snapshotAvailable): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
           <i class="fas fa-camera"></i>
         </button>
       <?php endif; ?>
-      <?php if ($hasClip == 1): ?>
+      <?php if ($clipAvailable): ?>
         <button class="hover-button video-btn" title="{{Voir la vidéo}}">
           <i class="fas fa-film"></i>
         </button>
@@ -123,7 +133,7 @@
         <i class="fas fa-trash"></i>
       </button>
       <?php if ($description != ''): ?>
-        <button class="hover-button video-btn" title="<?= $description ?>">
+        <button class="hover-button <?= $descriptionBtnClass ?>" title="<?= $description ?>">
           <i class="fas fas fa-comment"></i>
         </button>
       <?php endif; ?>

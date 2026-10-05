@@ -95,7 +95,7 @@ if (!isConnect('admin')) {
     $hasClip = $event['hasClip'];
     $clip = $event['clip'];
     $preview = str_replace("snapshot.jpg", "preview.gif", $event["snapshot"]);
-    $hasPreview = file_exists("/var/www/html" . $preview);
+    $hasPreview = frigate::mediaFileExists($preview);
     $zones = $event['zones'];
     $showClip = 0;
     if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1) {

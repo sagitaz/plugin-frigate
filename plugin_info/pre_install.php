@@ -18,7 +18,11 @@
 
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-// Fonction exécutée automatiquement avant la mise à jour du plugin
+/**
+ * Appelée par Jeedom avant la mise à jour du plugin, sans traitement.
+ *
+ * @return void
+ */
 function frigate_pre_update()
 {
 }
