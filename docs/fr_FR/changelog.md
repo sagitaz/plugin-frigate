@@ -21,7 +21,7 @@
 - Les détections restées bloquées sont remises à 0 à la mise à jour
 - Une action limitée à une zone ne se déclenche plus à tort pour un évènement sans zone
 - Log des actions plus lisible : évènement et caméra indiqués, fautes corrigées
-- Le mot de passe MQTT n'apparaît plus dans le log au démarrage du démon
+- Les mots de passe n'apparaissent plus dans les logs, ni au démarrage du démon, ni à l'enregistrement de la configuration de Frigate
 
 # 30/09/2026 Beta 1.5.6
 - Compatibilité avec Frigate 0.18, Frigate 0.16 minimum
