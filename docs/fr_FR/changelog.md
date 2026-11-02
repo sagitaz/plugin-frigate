@@ -19,6 +19,7 @@
 - Les évènements créés par une description de l'IA sont bien supprimés après le nombre de jours configuré
 - La taille maximale du dossier des médias est de nouveau respectée quand les évènements les plus anciens n'ont pas de fichier
 - La récupération des évènements par le cron n'occupe plus toujours plus d'espace et de mémoire, et ne se bloque plus sur un fichier endommagé
+- Un média impossible à supprimer est signalé dans le log et ne fausse plus le respect de la taille maximale
 - Les détections de l'équipement Events restent actives tant qu'une caméra détecte
 - Les détections restées bloquées sont remises à 0 à la mise à jour
 - Une action limitée à une zone ne se déclenche plus à tort pour un évènement sans zone

@@ -2417,7 +2417,8 @@ class frigate extends eqLogic
    *
    * Les fichiers sont retrouvés par leur nom dans le dossier de la caméra, et par les URL enregistrées sur
    * l'évènement pour les captures manuelles. Quand une autre ligne porte le même identifiant Frigate (doublon),
-   * seule la ligne est supprimée : les fichiers lui sont communs.
+   * seule la ligne est supprimée : les fichiers lui sont communs. Un fichier impossible à supprimer est signalé
+   * et ne compte pas dans l'espace libéré ; la ligne est supprimée quand même.
    *
    * @param string              $id      Identifiant Frigate de l'évènement
    * @param frigate_events|null $frigate Ligne à supprimer, quand l'appelant l'a déjà ; sinon lue par identifiant
@@ -2453,54 +2454,34 @@ class frigate extends eqLogic
 
     // On définit les fichiers à vérifier
     $files = [
-      'clip' => $basePath . "_clip.mp4",
-      'snapshot' => $basePath . "_snapshot.jpg",
-      'snapshotWebp' => $basePath . "_snapshot.webp",
-      'thumbnail' => $basePath . "_thumbnail.jpg",
-      'thumbnailWebp' => $basePath . "_thumbnail.webp",
-      'preview' => $basePath . "_preview.gif"
+      $basePath . "_clip.mp4" => "Clip MP4 supprimé",
+      $basePath . "_snapshot.jpg" => "Snapshot JPG supprimé",
+      $basePath . "_snapshot.webp" => "Snapshot WEBP supprimé",
+      $basePath . "_thumbnail.jpg" => "Miniature JPG supprimée",
+      $basePath . "_thumbnail.webp" => "Miniature WEBP supprimée",
+      $basePath . "_preview.gif" => "GIF supprimé"
     ];
-
-    // Traitement des fichiers avec récupération de la taille avant suppression
-    if (file_exists($files['clip'])) {
-      $totalRemovedSize += filesize($files['clip']);
-      unlink($files['clip']);
-      log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['snapshot'])) {
-      $totalRemovedSize += filesize($files['snapshot']);
-      unlink($files['snapshot']);
-      log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['snapshotWebp'])) {
-      $totalRemovedSize += filesize($files['snapshotWebp']);
-      unlink($files['snapshotWebp']);
-      log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['thumbnail'])) {
-      $totalRemovedSize += filesize($files['thumbnail']);
-      unlink($files['thumbnail']);
-      log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['thumbnailWebp'])) {
-      $totalRemovedSize += filesize($files['thumbnailWebp']);
-      unlink($files['thumbnailWebp']);
-      log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['preview'])) {
-      $totalRemovedSize += filesize($files['preview']);
-      unlink($files['preview']);
-      log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
-    }
 
     // Les captures manuelles sont rangées dans data/snapshots/, hors du dossier de la caméra :
     // leurs fichiers se retrouvent par les URL enregistrées sur l'évènement
     foreach (array_unique([$frigate->getSnapshot(), $frigate->getThumbnail(), $frigate->getLasted()]) as $url) {
       $path = self::mediaFilePath($url);
-      if ($path !== null && is_file($path)) {
-        $totalRemovedSize += filesize($path);
-        unlink($path);
-        log::add(__CLASS__, 'debug', "║ Fichier " . basename($path) . " supprimé pour l'événement " . $frigate->getEventId());
+      if ($path !== null && !isset($files[$path])) {
+        $files[$path] = "Fichier " . basename($path) . " supprimé";
+      }
+    }
+
+    // Traitement des fichiers avec récupération de la taille avant suppression
+    foreach ($files as $path => $message) {
+      if (!is_file($path)) {
+        continue;
+      }
+      $size = filesize($path);
+      if (@unlink($path)) {
+        $totalRemovedSize += $size;
+        log::add(__CLASS__, 'debug', "║ " . $message . " pour l'événement " . $frigate->getEventId());
+      } else {
+        log::add(__CLASS__, 'warning', "║ Suppression échouée pour l'événement " . $frigate->getEventId() . " : " . $path);
       }
     }
 
