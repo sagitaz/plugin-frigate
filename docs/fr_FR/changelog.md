@@ -5,6 +5,8 @@
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
 # 02/11/2026 Stable 1.6.0
+- Les nouvelles caméras prennent le nom d'affichage défini dans Frigate (Frigate 0.17 et plus)
+- « Rechercher / MAJ » ne s'arrête plus en erreur quand un équipement de la pièce par défaut porte le nom d'une caméra à un accent ou une majuscule près
 - La taille maximale du dossier des médias est de nouveau respectée quand les évènements les plus anciens n'ont pas de fichier
 - La récupération des évènements par le cron n'occupe plus toujours plus d'espace et de mémoire, et ne se bloque plus sur un fichier endommagé
 - Un média impossible à supprimer est signalé dans le log et ne fausse plus le respect de la taille maximale

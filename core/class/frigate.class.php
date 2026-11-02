@@ -2661,7 +2661,10 @@ class frigate extends eqLogic
   /**
    * Crée les équipements des caméras de la configuration Frigate et met à jour leurs commandes.
    *
-   * Un équipement homonyme dans la pièce par défaut vaut au nouveau le suffixe « by frigate plugin ». Selon la
+   * Un équipement créé prend le nom d'affichage de la caméra dans Frigate (friendly_name, depuis Frigate 0.17),
+   * à défaut son nom dans Frigate ; le nom d'un équipement existant n'est pas modifié. Un équipement homonyme
+   * dans la pièce par défaut, casse et accents ignorés comme dans l'index unique de la base, vaut au nouveau le
+   * suffixe « by frigate plugin ». Selon la
    * configuration : commandes MQTT, de détection d'objets et PTZ (ONVIF) si MQTT est configuré, commandes
    * audio, états de classification. La position sur le panel reprend l'ordre défini dans Frigate seulement si
    * elle n'est pas renseignée. Les statistiques et les évènements du dernier jour sont ensuite récupérés.
@@ -2686,17 +2689,21 @@ class frigate extends eqLogic
     foreach ($configurationArray['cameras'] as $cameraName => $cameraConfig) {
       $exist = 0;
       $addToName = "";
+      $eqName = is_string($cameraConfig['friendly_name'] ?? null) ? trim(cleanComponanteName($cameraConfig['friendly_name'])) : '';
+      if ($eqName === '') {
+        $eqName = $cameraName;
+      }
       $eqlogics = eqLogic::byObjectId($defaultRoom, false);
       foreach ($eqlogics as $eqlogic) {
         $name = $eqlogic->getName();
-        // Utilisation de strcasecmp pour une comparaison insensible à la casse
-        if (strcasecmp($name, $cameraName) === 0) {
+        // Comparaison insensible à la casse et aux accents, comme l'index unique (nom, pièce) de la table eqLogic
+        if (strcasecmp(sanitizeAccent($name), sanitizeAccent($eqName)) === 0) {
           $exist = 1;
           break;
         }
       }
       if ($exist) {
-        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
+        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($eqName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
         $addToName = " by frigate plugin";
       }
       // Recherche équipement caméra
@@ -2707,7 +2714,7 @@ class frigate extends eqLogic
         $img = urlencode($urlLatest);
 
         $frigate = new frigate();
-        $frigate->setName($cameraName . $addToName);
+        $frigate->setName($eqName . $addToName);
         $frigate->setEqType_name("frigate");
         $frigate->setConfiguration("name", $cameraName);
         $frigate->setConfiguration('panel', 0);
@@ -2727,7 +2734,7 @@ class frigate extends eqLogic
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
-        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName . $addToName) . " est créé.");
+        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($eqName . $addToName) . " est créé pour la caméra " . json_encode($cameraName) . ".");
       } else {
         log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }

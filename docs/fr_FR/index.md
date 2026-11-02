@@ -114,7 +114,7 @@ Avec mqtt-manager, NOK signifie que le plugin ne reçoit plus les messages de Fr
 
 ## <u>Page du plugin</u>
 Les boutons de gestion :
-- **Rechercher / MAJ** : crée les nouvelles caméras de Frigate et met à jour les commandes de toutes les caméras.
+- **Rechercher / MAJ** : crée les nouvelles caméras de Frigate et met à jour les commandes de toutes les caméras. Une caméra créée prend le nom d'affichage défini dans Frigate (**``friendly_name``**, Frigate 0.17 et plus), à défaut son nom dans Frigate ; si un équipement de la pièce par défaut porte déjà ce nom, « by frigate plugin » y est ajouté. Le nom d'un équipement existant n'est jamais modifié.
 - **Events** : ouvre la page des évènements.
 - **Configuration** : ouvre la configuration générale du plugin.
 - **Redémarrer Frigate** : redémarre le serveur Frigate.
