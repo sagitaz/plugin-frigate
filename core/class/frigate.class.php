@@ -150,7 +150,8 @@ class frigate extends eqLogic
   /**
    * Traitement commun à toutes les fréquences de cron.
    *
-   * Purge le dossier data et les évènements anciens ; hors crons 1, 5, 10 et 15 minutes, supprime aussi les
+   * Purge le dossier data et les évènements anciens, puis les plus anciens tant que le dossier dépasse la taille
+   * maximale ; hors crons 1, 5, 10 et 15 minutes, supprime aussi les
    * évènements restés en type new ou update. Récupère ensuite les évènements et les statistiques de Frigate si
    * la fréquence est activée dans la configuration et que les commandes info_Cron et info_enabled de
    * l'équipement Events, quand elles existent, sont à 1. Avec MQTT Manager opérationnel, les crons 1, 5, 10 et
@@ -188,6 +189,7 @@ class frigate extends eqLogic
     // Exécution des autres fréquences et nettoyage
     self::cleanFolderData();
     self::cleanAllOldestFiles();
+    self::cleanFolderDataIfFull();
 
     // Évènements incomplets et verrous, aux crons de 30 minutes et plus
     if (!($frequence === "functionality::cron::enable" ||
@@ -1288,24 +1290,36 @@ class frigate extends eqLogic
   /**
    * Enregistre les évènements dans un fichier JSON de suivi et retourne ceux qui n'y figuraient pas encore.
    *
-   * La comparaison porte sur start_time. À la première utilisation, le fichier est créé et tous les évènements
-   * sont retournés.
+   * La comparaison porte sur start_time. Le fichier ne garde que l'identifiant et le début de chaque évènement
+   * (voir trackedEvents()). À la première utilisation, le fichier est créé et tous les évènements sont retournés ;
+   * de même pour un fichier illisible, ou de plus de 2 Mo, que relire demanderait trop de mémoire : le suivi
+   * d'un évènement occupe moins de 100 octets.
    *
-   * @param string                           $filePath Chemin du fichier de suivi
-   * @param array<int, array<string, mixed>> $events   Évènements reçus de Frigate
+   * @param string                           $filePath     Chemin du fichier de suivi
+   * @param array<int, array<string, mixed>> $events       Évènements reçus de Frigate
+   * @param int|string                       $recoveryDays Nombre de jours de récupération (recovery_days)
    * @return array<int, array<string, mixed>> Évènements nouveaux
    */
-  private static function saveAndCompareEvents($filePath, $events)
+  private static function saveAndCompareEvents($filePath, $events, $recoveryDays)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START COMPARE EVENTS:/fg: ═══════════════════");
     log::add(__CLASS__, 'debug', "║ Sauvegarde et comparaison des événements dans le fichier : " . $filePath);
+    $since = time() - $recoveryDays * 86400;
+    $oldEvents = null;
     if (file_exists($filePath)) {
-      $oldEvents = json_decode(file_get_contents($filePath), true);
+      if (filesize($filePath) <= 2097152) {
+        $oldEvents = json_decode(file_get_contents($filePath), true);
+      }
+      if (!is_array($oldEvents)) {
+        log::add(__CLASS__, 'info', "║ Fichier de suivi des évènements illisible ou trop volumineux, il est recréé : " . $filePath);
+      }
+    }
+    if (is_array($oldEvents)) {
       $newEvents = array_udiff($events, $oldEvents, function ($a, $b) {
         return strcmp($a['start_time'], $b['start_time']);
       });
       if (!empty($newEvents)) {
-        file_put_contents($filePath, json_encode(array_merge($oldEvents, $newEvents)));
+        file_put_contents($filePath, json_encode(self::trackedEvents($events, $oldEvents, $since)));
         log::add(__CLASS__, 'debug', "║ Detection d'événements nouveaux : " . json_encode($newEvents));
       } else {
         log::add(__CLASS__, 'debug', "║ Aucun nouveau événement détecté.");
@@ -1313,13 +1327,46 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
       return $newEvents;
     } else {
-      file_put_contents($filePath, json_encode($events));
+      file_put_contents($filePath, json_encode(self::trackedEvents($events, [], $since)));
       log::add(__CLASS__, 'debug', "║ Fichier de sauvegarde créé : " . $filePath);
       log::add(__CLASS__, 'debug', "║ Sauvegarde des événements : " . json_encode($events));
       log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
       return $events;
     }
   }
+
+  /**
+   * Retourne le contenu du fichier de suivi : l'identifiant et le début des évènements de la dernière réponse
+   * de l'API, et des évènements déjà suivis commencés depuis $since.
+   *
+   * Un évènement commencé avant $since n'est pas traité par getEvents() : le retirer du suivi ne change rien au
+   * traitement et borne la taille du fichier.
+   *
+   * @param array<int, array<string, mixed>> $events    Évènements de la dernière réponse de l'API
+   * @param array<int, array<string, mixed>> $oldEvents Évènements déjà suivis
+   * @param int                              $since     Début de la période de récupération (timestamp)
+   * @return array<int, array{id: string|null, start_time: float|null}>
+   */
+  private static function trackedEvents($events, $oldEvents, $since)
+  {
+    $tracked = [];
+    foreach ($events as $event) {
+      if (is_array($event)) {
+        $key = (string) ($event['id'] ?? $event['start_time'] ?? '');
+        $tracked[$key] = ['id' => $event['id'] ?? null, 'start_time' => $event['start_time'] ?? null];
+      }
+    }
+    foreach ($oldEvents as $event) {
+      if (is_array($event) && isset($event['start_time']) && $event['start_time'] >= $since) {
+        $key = (string) ($event['id'] ?? $event['start_time']);
+        if (!isset($tracked[$key])) {
+          $tracked[$key] = ['id' => $event['id'] ?? null, 'start_time' => $event['start_time']];
+        }
+      }
+    }
+    return array_values($tracked);
+  }
+
   /**
    * Récupère un évènement Frigate par son identifiant et le traite (voir getEvents()).
    *
@@ -1388,7 +1435,7 @@ class frigate extends eqLogic
       if (!file_exists(dirname($filePath))) {
         mkdir(dirname($filePath), 0777, true);
       }
-      $newEvents = self::saveAndCompareEvents($filePath, $events);
+      $newEvents = self::saveAndCompareEvents($filePath, $events, $recoveryDays ?: 7);
       if (empty($newEvents)) {
         return;
       }
@@ -2252,7 +2299,8 @@ class frigate extends eqLogic
   /**
    * Supprime les cinq évènements non favoris les plus anciens, avec leurs fichiers.
    *
-   * @return float Espace libéré, en Mo
+   * @return float|null Espace libéré en Mo, 0 pour des évènements sans fichier ; null s'il ne reste aucun
+   *                    évènement non favori
    */
   public static function cleanOldestFile()
   {
@@ -2260,10 +2308,11 @@ class frigate extends eqLogic
     // On ne récupère que les 5 ou 10 plus vieux pour ne pas saturer la RAM
     $events = frigate_events::getOldestNotFavorite(5);
 
-    if (!empty($events)) {
-      foreach ($events as $event) {
-        $totalSizeGain += self::cleanDbEvent($event->getEventId(), $event);
-      }
+    if (empty($events)) {
+      return null;
+    }
+    foreach ($events as $event) {
+      $totalSizeGain += self::cleanDbEvent($event->getEventId(), $event);
     }
     return $totalSizeGain; // Renvoie par exemple 15.45 (Mo)
   }
@@ -2272,8 +2321,10 @@ class frigate extends eqLogic
    * Supprime les évènements les plus anciens tant que le dossier data dépasse la taille maximale
    * (datas_weight, 500 Mo par défaut).
    *
-   * Les suppressions se font par lots de cinq, dans la limite de 100 lots ; la boucle s'arrête dès qu'un lot
-   * ne libère rien.
+   * Les suppressions se font par lots de cinq, dans la limite de 100 lots. Un lot d'évènements sans fichier ne
+   * libère rien mais compte dans la limite ; la boucle s'arrête quand il ne reste plus d'évènement non favori.
+   * Si la taille maximale est alors toujours dépassée, un warning le signale, au plus une fois par jour.
+   * Appelée par chaque cron (voir execCron()) et par getEvents(), avant le téléchargement des médias.
    *
    * @return void
    */
@@ -2288,8 +2339,12 @@ class frigate extends eqLogic
     while ($currentSize > $maxSize && $limit < 100) {
       $removedSize = self::cleanOldestFile();
 
-      if ($removedSize <= 0) {
-        log::add(__CLASS__, 'debug', "║ [Fin] Plus rien à supprimer ou erreur.");
+      if ($removedSize === null) {
+        log::add(__CLASS__, 'debug', "║ [Fin] Plus aucun évènement non favori à supprimer.");
+        if (!cache::byKey('frigate::dataFullWarning')->getValue(0)) {
+          cache::set('frigate::dataFullWarning', 1, 86400);
+          log::add(__CLASS__, 'warning', "║ Le dossier data dépasse la taille maximale (" . round($currentSize, 2) . " Mo pour " . $maxSize . " Mo) sans aucun évènement non favori à supprimer : les favoris, ou des fichiers impossibles à supprimer, occupent la place, et chaque nouvel évènement sera supprimé au nettoyage suivant. Augmenter la taille maximale ou retirer des favoris.");
+        }
         break;
       }
 
@@ -2370,7 +2425,8 @@ class frigate extends eqLogic
    *
    * Les fichiers sont retrouvés par leur nom dans le dossier de la caméra, et par les URL enregistrées sur
    * l'évènement pour les captures manuelles. Quand une autre ligne porte le même identifiant Frigate (doublon),
-   * seule la ligne est supprimée : les fichiers lui sont communs.
+   * seule la ligne est supprimée : les fichiers lui sont communs. Un fichier impossible à supprimer est signalé
+   * et ne compte pas dans l'espace libéré ; la ligne est supprimée quand même.
    *
    * @param string              $id      Identifiant Frigate de l'évènement
    * @param frigate_events|null $frigate Ligne à supprimer, quand l'appelant l'a déjà ; sinon lue par identifiant
@@ -2406,54 +2462,34 @@ class frigate extends eqLogic
 
     // On définit les fichiers à vérifier
     $files = [
-      'clip' => $basePath . "_clip.mp4",
-      'snapshot' => $basePath . "_snapshot.jpg",
-      'snapshotWebp' => $basePath . "_snapshot.webp",
-      'thumbnail' => $basePath . "_thumbnail.jpg",
-      'thumbnailWebp' => $basePath . "_thumbnail.webp",
-      'preview' => $basePath . "_preview.gif"
+      $basePath . "_clip.mp4" => "Clip MP4 supprimé",
+      $basePath . "_snapshot.jpg" => "Snapshot JPG supprimé",
+      $basePath . "_snapshot.webp" => "Snapshot WEBP supprimé",
+      $basePath . "_thumbnail.jpg" => "Miniature JPG supprimée",
+      $basePath . "_thumbnail.webp" => "Miniature WEBP supprimée",
+      $basePath . "_preview.gif" => "GIF supprimé"
     ];
-
-    // Traitement des fichiers avec récupération de la taille avant suppression
-    if (file_exists($files['clip'])) {
-      $totalRemovedSize += filesize($files['clip']);
-      unlink($files['clip']);
-      log::add(__CLASS__, 'debug', "║ Clip MP4 supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['snapshot'])) {
-      $totalRemovedSize += filesize($files['snapshot']);
-      unlink($files['snapshot']);
-      log::add(__CLASS__, 'debug', "║ Snapshot JPG supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['snapshotWebp'])) {
-      $totalRemovedSize += filesize($files['snapshotWebp']);
-      unlink($files['snapshotWebp']);
-      log::add(__CLASS__, 'debug', "║ Snapshot WEBP supprimé pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['thumbnail'])) {
-      $totalRemovedSize += filesize($files['thumbnail']);
-      unlink($files['thumbnail']);
-      log::add(__CLASS__, 'debug', "║ Miniature JPG supprimée pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['thumbnailWebp'])) {
-      $totalRemovedSize += filesize($files['thumbnailWebp']);
-      unlink($files['thumbnailWebp']);
-      log::add(__CLASS__, 'debug', "║ Miniature WEBP supprimée pour l'événement " . $frigate->getEventId());
-    }
-    if (file_exists($files['preview'])) {
-      $totalRemovedSize += filesize($files['preview']);
-      unlink($files['preview']);
-      log::add(__CLASS__, 'debug', "║ GIF supprimé pour l'événement " . $frigate->getEventId());
-    }
 
     // Les captures manuelles sont rangées dans data/snapshots/, hors du dossier de la caméra :
     // leurs fichiers se retrouvent par les URL enregistrées sur l'évènement
     foreach (array_unique([$frigate->getSnapshot(), $frigate->getThumbnail(), $frigate->getLasted()]) as $url) {
       $path = self::mediaFilePath($url);
-      if ($path !== null && is_file($path)) {
-        $totalRemovedSize += filesize($path);
-        unlink($path);
-        log::add(__CLASS__, 'debug', "║ Fichier " . basename($path) . " supprimé pour l'événement " . $frigate->getEventId());
+      if ($path !== null && !isset($files[$path])) {
+        $files[$path] = "Fichier " . basename($path) . " supprimé";
+      }
+    }
+
+    // Traitement des fichiers avec récupération de la taille avant suppression
+    foreach ($files as $path => $message) {
+      if (!is_file($path)) {
+        continue;
+      }
+      $size = filesize($path);
+      if (@unlink($path)) {
+        $totalRemovedSize += $size;
+        log::add(__CLASS__, 'debug', "║ " . $message . " pour l'événement " . $frigate->getEventId());
+      } else {
+        log::add(__CLASS__, 'warning', "║ Suppression échouée pour l'événement " . $frigate->getEventId() . " : " . $path);
       }
     }
 
@@ -2625,7 +2661,10 @@ class frigate extends eqLogic
   /**
    * Crée les équipements des caméras de la configuration Frigate et met à jour leurs commandes.
    *
-   * Un équipement homonyme dans la pièce par défaut vaut au nouveau le suffixe « by frigate plugin ». Selon la
+   * Un équipement créé prend le nom d'affichage de la caméra dans Frigate (friendly_name, depuis Frigate 0.17),
+   * à défaut son nom dans Frigate ; le nom d'un équipement existant n'est pas modifié. Un équipement homonyme
+   * dans la pièce par défaut, casse et accents ignorés comme dans l'index unique de la base, vaut au nouveau le
+   * suffixe « by frigate plugin ». Selon la
    * configuration : commandes MQTT, de détection d'objets et PTZ (ONVIF) si MQTT est configuré, commandes
    * audio, états de classification. La position sur le panel reprend l'ordre défini dans Frigate seulement si
    * elle n'est pas renseignée. Les statistiques et les évènements du dernier jour sont ensuite récupérés.
@@ -2650,17 +2689,21 @@ class frigate extends eqLogic
     foreach ($configurationArray['cameras'] as $cameraName => $cameraConfig) {
       $exist = 0;
       $addToName = "";
+      $eqName = is_string($cameraConfig['friendly_name'] ?? null) ? trim(cleanComponanteName($cameraConfig['friendly_name'])) : '';
+      if ($eqName === '') {
+        $eqName = $cameraName;
+      }
       $eqlogics = eqLogic::byObjectId($defaultRoom, false);
       foreach ($eqlogics as $eqlogic) {
         $name = $eqlogic->getName();
-        // Utilisation de strcasecmp pour une comparaison insensible à la casse
-        if (strcasecmp($name, $cameraName) === 0) {
+        // Comparaison insensible à la casse et aux accents, comme l'index unique (nom, pièce) de la table eqLogic
+        if (strcasecmp(sanitizeAccent($name), sanitizeAccent($eqName)) === 0) {
           $exist = 1;
           break;
         }
       }
       if ($exist) {
-        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
+        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($eqName) . " existe dans la pièce : " . jeeObject::byId($defaultRoom)->getName());
         $addToName = " by frigate plugin";
       }
       // Recherche équipement caméra
@@ -2671,7 +2714,7 @@ class frigate extends eqLogic
         $img = urlencode($urlLatest);
 
         $frigate = new frigate();
-        $frigate->setName($cameraName . $addToName);
+        $frigate->setName($eqName . $addToName);
         $frigate->setEqType_name("frigate");
         $frigate->setConfiguration("name", $cameraName);
         $frigate->setConfiguration('panel', 0);
@@ -2691,7 +2734,7 @@ class frigate extends eqLogic
         if ($defaultRoom) $frigate->setObject_id($defaultRoom);
         $frigate->setIsEnable(1);
         $frigate->setIsVisible(1);
-        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName . $addToName) . " est créé.");
+        log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($eqName . $addToName) . " est créé pour la caméra " . json_encode($cameraName) . ".");
       } else {
         log::add(__CLASS__, 'debug', "║ L'équipement : " . json_encode($cameraName) . " n'est pas créé.");
       }

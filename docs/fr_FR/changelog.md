@@ -4,6 +4,14 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 02/11/2026 Stable 1.5.8
+- Les nouvelles caméras prennent le nom d'affichage défini dans Frigate (Frigate 0.17 et plus)
+- « Rechercher / MAJ » ne s'arrête plus en erreur quand un équipement de la pièce par défaut porte le nom d'une caméra à un accent ou une majuscule près
+- La taille maximale du dossier des médias est de nouveau respectée quand les évènements les plus anciens n'ont pas de fichier
+- La récupération des évènements par le cron n'occupe plus toujours plus d'espace et de mémoire, et ne se bloque plus sur un fichier endommagé
+- Un média impossible à supprimer est signalé dans le log et ne fausse plus le respect de la taille maximale
+- La taille maximale des médias est vérifiée à chaque cron, et le log avertit quand les favoris la dépassent à eux seuls
+
 # 01/10/2026 Beta 1.5.7
 - Les détections ne restent plus actives après le départ de l'objet
 - Logs de détection et MQTT allégés
@@ -78,7 +86,7 @@
 
 # 16/03/2026 Beta 1.4.95
 - Nettoyage du nom des commandes de la même façon que Jeedom
-- Correction classification sub_label, j'avais mis un s (sub_labels) 
+- Correction classification sub_label, j'avais mis un s (sub_labels)
 
 # 15/03/2026 Beta 1.4.94
 - Ajout pour trier les commandes (click sur le nom ou l'id)
@@ -136,8 +144,8 @@
 - Ajout des variables #camera#, #score# et #top_score# dans les conditions
 
 # 27/05/2025 Stable 1.3.1
-- Correction sur nouvelle installation (bug de la 1.3.0)   
-- Cacher sur le dashboard ne cache pas sur le panel. 
+- Correction sur nouvelle installation (bug de la 1.3.0)
+- Cacher sur le dashboard ne cache pas sur le panel.
 
 # 23/05/2025 Stable 1.3.0
 - Verion Jeedom minimum 4.4
