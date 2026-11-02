@@ -1,10 +1,17 @@
 <?php
-# Vérifie le paramètre url et empêche le transfert de fichier
-if (isset($_GET['url']) and preg_match('#^https?://#', $_GET['url']) === 1) {
-    $url = $_GET['url'];
-    $url = $decoded_url = urldecode($_GET['url']);
-    // error_log('URL : ' . $url); // Débogage
-} else {
+require_once __DIR__ . '/../../../../core/php/core.inc.php';
+include_file('core', 'authentification', 'php');
+
+# Accès : session Jeedom, ou clé du proxy (lien « SNAPSHOT LIVE » appelé par les applications)
+$proxyKey = config::byKey('proxyKey', 'frigate');
+if (!isConnect() && ($proxyKey == '' || !hash_equals($proxyKey, (string) init('key')))) {
+    header('HTTP/1.1 403 Forbidden');
+    exit;
+}
+
+# Seule cible admise : l'API du serveur Frigate configuré
+$url = frigate::proxyTarget(urldecode((string) ($_GET['url'] ?? '')));
+if ($url === null) {
     error_log('URL non valide ou non fournie');
     header('HTTP/1.1 404 Not Found');
     exit;
@@ -20,7 +27,7 @@ $ch = curl_init();
 curl_setopt($ch, CURLOPT_URL, $url);
 curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HEADER, true);
-curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
 curl_setopt($ch, CURLOPT_BUFFERSIZE, 12800);
 curl_setopt($ch, CURLOPT_NOPROGRESS, false);
@@ -67,12 +74,13 @@ foreach ($header_array as $header_value) {
 
 if (array_key_exists('content-type', $headers)) {
     $ct = $headers['content-type'];
-    if (preg_match('#image/png|image/.*icon|image/jpe?g|image/gif|image/webp#', strtolower($ct)) !== 1) {
+    if (preg_match('#^image/(png|jpe?g|gif|webp|x-icon|vnd\.microsoft\.icon)\s*(;|$)#', strtolower($ct)) !== 1) {
         error_log('Type de contenu non autorisé: ' . $ct);
         header('HTTP/1.1 404 Not Found');
         exit;
     }
     header('Content-Type: ' . $ct);
+    header('X-Content-Type-Options: nosniff');
 } else {
     error_log('Type de contenu non trouvé');
     header('HTTP/1.1 404 Not Found');
