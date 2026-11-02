@@ -28,8 +28,6 @@ class frigate extends eqLogic
   public const SAVE_MODE_DEFAULT = 0;
   /** Miniature d'évènement, sans redimensionnement. */
   public const SAVE_MODE_THUMBNAIL = 1;
-  /** Dernière image de la caméra. */
-  public const SAVE_MODE_LATEST = 2;
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
 
@@ -1465,7 +1463,8 @@ class frigate extends eqLogic
    *
    * Trois sources : un évènement précis quand $id est fourni, les évènements reçus par MQTT quand $mqtt est
    * vrai, sinon l'API, dont seuls les évènements absents du fichier de suivi data/frigate_events.json sont
-   * traités. Seuls les évènements des recovery_days derniers jours sont gardés (7 par défaut). Le dossier data
+   * traités. Seuls les évènements des recovery_days derniers jours sont gardés (7 par défaut), et seulement
+   * avec une caméra et un identifiant valides (voir isSafeCameraName() et isSafeEventId()). Le dossier data
    * est d'abord purgé s'il dépasse la taille maximale. Chaque évènement est créé ou mis à jour en base avec
    * ses médias, puis publié sur les commandes, sauf avec $publish à faux. Le type reçu ne fait qu'avancer le
    * type en base (voir advanceType()). Quand le type d'un évènement change, sa miniature et son snapshot sont
@@ -1484,6 +1483,10 @@ class frigate extends eqLogic
   public static function getEvents($mqtt = false, $events = array(), $type = 'end', $id = null, $recoveryDays = null, $wait = true, $publish = true)
   {
     if ($id !== null) {
+      if (!self::isSafeEventId($id)) {
+        log::add(__CLASS__, 'warning', "║ Identifiant d'évènement invalide, ignoré : " . json_encode($id));
+        return;
+      }
       $urlFrigate = self::getUrlFrigate();
       $resultURL = "{$urlFrigate}/api/events/{$id}";
       $event = self::getcURL("ManualEvent", $resultURL);
@@ -1533,6 +1536,11 @@ class frigate extends eqLogic
       if (!is_array($event)) {
         log::add(__CLASS__, 'error', "║ Erreur: Événement invalide, ce n'est pas un tableau.");
         log::add(__CLASS__, 'debug', "║ Événement concerné : " . json_encode($event));
+        return false;
+      }
+
+      if (!self::isSafeCameraName($event['camera'] ?? null) || !self::isSafeEventId($event['id'] ?? null)) {
+        log::add(__CLASS__, 'warning', "║ Évènement ignoré, caméra ou identifiant invalide : " . json_encode([$event['camera'] ?? null, $event['id'] ?? null]));
         return false;
       }
 
@@ -2141,6 +2149,36 @@ class frigate extends eqLogic
   }
 
   /**
+   * Échappe une valeur pour l'écrire dans une page HTML, en texte ou dans un attribut.
+   *
+   * Le texte d'un évènement peut être écrit par quiconque joint l'API de Frigate ou le broker MQTT (sous-label,
+   * description). secureXSS() du core ne convient pas : il rétablit les « & », ce qui annule l'échappement
+   * dans un attribut relu par innerHTML.
+   *
+   * @param mixed $value Valeur à afficher
+   * @return string
+   */
+  public static function escapeHtml($value)
+  {
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+  }
+
+  /**
+   * Retire les chevrons d'un texte reçu de Frigate, avant de l'écrire dans une commande info.
+   *
+   * Le core affiche la valeur d'une commande texte par innerHTML, sans échappement : sans chevron, aucune
+   * balise ne peut s'y former. Les autres caractères, apostrophes comprises, restent intacts pour les
+   * scénarios et les notifications. Une valeur qui n'est pas une chaîne est retournée telle quelle.
+   *
+   * @param mixed $value Valeur à écrire
+   * @return mixed
+   */
+  public static function plainText($value)
+  {
+    return is_string($value) ? str_replace(['<', '>'], '', $value) : $value;
+  }
+
+  /**
    * Indique si l'URL d'un média du plugin désigne un fichier présent sur le disque.
    *
    * Un évènement garde en base l'URL de ses médias même quand le fichier a disparu,
@@ -2498,12 +2536,37 @@ class frigate extends eqLogic
   }
 
   /**
+   * Indique si un nom de caméra reçu de Frigate peut servir de dossier dans data/ : lettres, chiffres, « _ » et
+   * « - », la règle de Frigate pour les noms de caméra (REGEX_CAMERA_NAME).
+   *
+   * @param mixed $camera Nom de la caméra
+   * @return bool
+   */
+  public static function isSafeCameraName($camera)
+  {
+    return is_string($camera) && preg_match('/^[a-zA-Z0-9_-]+$/', $camera) === 1;
+  }
+
+  /**
+   * Indique si un identifiant d'évènement reçu de Frigate peut entrer dans un nom de fichier ou une URL de
+   * l'API : lettres, chiffres, « _ », « - » et « . », comme 1718992955.613576-zulr2q, sans séparateur de dossier.
+   *
+   * @param mixed $eventId Identifiant de l'évènement
+   * @return bool
+   */
+  public static function isSafeEventId($eventId)
+  {
+    return is_string($eventId) && preg_match('/^[a-zA-Z0-9._-]+$/', $eventId) === 1;
+  }
+
+  /**
    * Supprime un évènement de la base avec ses fichiers, sauf s'il est en favori.
    *
    * Les fichiers sont retrouvés par leur nom dans le dossier de la caméra, et par les URL enregistrées sur
    * l'évènement pour les captures manuelles. Quand une autre ligne porte le même identifiant Frigate (doublon),
    * seule la ligne est supprimée : les fichiers lui sont communs. Un fichier impossible à supprimer est signalé
-   * et ne compte pas dans l'espace libéré ; la ligne est supprimée quand même.
+   * et ne compte pas dans l'espace libéré ; la ligne est supprimée quand même. Avec une caméra ou un
+   * identifiant invalide (voir isSafeCameraName() et isSafeEventId()), le dossier de la caméra n'est pas visité.
    *
    * @param string              $id      Identifiant Frigate de l'évènement
    * @param frigate_events|null $frigate Ligne à supprimer, quand l'appelant l'a déjà ; sinon lue par identifiant
@@ -2546,6 +2609,10 @@ class frigate extends eqLogic
       $basePath . "_thumbnail.webp" => "Miniature WEBP supprimée",
       $basePath . "_preview.gif" => "GIF supprimé"
     ];
+    if (!self::isSafeCameraName($frigate->getCamera()) || !self::isSafeEventId($frigate->getEventId())) {
+      log::add(__CLASS__, 'warning', "║ Caméra ou identifiant invalide pour l'événement " . json_encode($frigate->getEventId()) . " : seuls les fichiers désignés par ses URL sont supprimés.");
+      $files = [];
+    }
 
     // Les captures manuelles sont rangées dans data/snapshots/, hors du dossier de la caméra :
     // leurs fichiers se retrouvent par les URL enregistrées sur l'évènement
@@ -2722,7 +2789,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
       return false;
     }
-    log::add(__CLASS__, 'debug', "║ Fichier de configuration : " . json_encode($configurationArray));
+    log::add(__CLASS__, 'debug', "║ Fichier de configuration reçu : " . strlen(json_encode($configurationArray)) . " octets");
 
     frigate::generateEqEvents($configurationArray);
     frigate::generateEqStats();
@@ -3012,6 +3079,11 @@ class frigate extends eqLogic
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:UPDATE TRACKED OBJECTS:/fg: ═══════════════════");
     log::add(__CLASS__, 'debug', "║ Type d'objet : $type | Événement ID : $id | Caméra : $camera");
 
+    if (!self::isSafeEventId($id)) {
+      log::add(__CLASS__, 'warning', "║ Identifiant d'évènement invalide, message ignoré : " . json_encode($id));
+      return;
+    }
+
     // Vérification équipement Frigate
     $frigate = frigate::byLogicalId("eqFrigateCamera_" . $camera, 'frigate');
     if (!is_object($frigate)) {
@@ -3130,7 +3202,7 @@ class frigate extends eqLogic
     $update = function ($label, $subtype, $unit, $logicalId, $genericType, $value) use ($eqlogicId) {
       $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $genericType, 0, null, 0);
       $cmd->save();
-      $cmd->event($value ?? '');
+      $cmd->event(self::plainText($value ?? ''));
       $cmd->save();
     };
 
@@ -3203,20 +3275,6 @@ class frigate extends eqLogic
       $cmd->save();
     }
     return $cmd;
-  }
-  /**
-   * Met à jour la commande « URL » d'un équipement, créée si besoin.
-   *
-   * @param int|string $eqlogicId Identifiant de l'équipement
-   * @param string     $url       Valeur à publier
-   * @return void
-   */
-  public static function createAndRefreshURLcmd($eqlogicId, $url)
-  {
-    $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "");
-    $cmd->save();
-    $cmd->event($url);
-    $cmd->save();
   }
 
   /**
@@ -3716,7 +3774,7 @@ class frigate extends eqLogic
 
       foreach ($cmds as [$label, $subtype, $unit, $logicalId, $const, $value]) {
         $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $const, 0, null, 0);
-        $cmd->event($value);
+        $cmd->event(self::plainText($value));
         $cmd->save();
       }
     }
@@ -4104,20 +4162,24 @@ class frigate extends eqLogic
   /**
    * Télécharge un média de Frigate dans le dossier data et retourne son URL locale.
    *
-   * Selon le mode : snapshot, clip ou aperçu d'un évènement ($type), miniature, dernière image de la caméra, ou
-   * capture manuelle depuis une URL. Un fichier déjà présent n'est pas retéléchargé, sauf la dernière image ou
-   * avec $force. Les images JPEG passent par processJpgImage(), selon les réglages de la caméra.
+   * Selon le mode : snapshot, clip ou aperçu d'un évènement ($type), miniature, ou capture manuelle depuis une
+   * URL. Un fichier déjà présent n'est pas retéléchargé, sauf avec $force. Les images JPEG passent par
+   * processJpgImage(), selon les réglages de la caméra.
    *
    * @param string|null $eventId Identifiant de l'évènement
    * @param string|null $type    snapshot, clip ou preview, en mode par défaut
    * @param string|null $camera  Nom de la caméra dans Frigate
    * @param int         $mode    Une des constantes self::SAVE_MODE_*
-   * @param string      $file    URL source, pour la dernière image et la capture manuelle
+   * @param string      $file    URL source, pour la capture manuelle
    * @param bool        $force   Retélécharger un fichier déjà présent
    * @return string URL locale du fichier, « error » en cas d'échec
    */
   public static function saveURL($eventId = null, $type = null, $camera = null, $mode = self::SAVE_MODE_DEFAULT, $file = "", $force = false)
   {
+    if (!self::isSafeCameraName($camera) || !self::isSafeEventId($eventId)) {
+      log::add(__CLASS__, 'warning', "║ Caméra ou identifiant invalide, média non téléchargé : " . json_encode([$camera, $eventId]));
+      return "error";
+    }
     $result = "";
     $urlJeedom = network::getNetworkAccess('external') ?: network::getNetworkAccess('internal');
     $urlFrigate = self::getUrlFrigate();
@@ -4145,9 +4207,6 @@ class frigate extends eqLogic
     if ($mode == self::SAVE_MODE_THUMBNAIL) {
       $lien = "http://{$urlFrigate}/api/events/{$eventId}/thumbnail.jpg";
       $path = "/data/{$camera}/{$eventId}_thumbnail.jpg";
-    } elseif ($mode == self::SAVE_MODE_LATEST) {
-      $lien = $file;
-      $path = "/data/{$camera}/latest.jpg";
     } elseif ($mode == self::SAVE_MODE_SNAPSHOT) {
       $lien = urldecode($file);
       $path = "/data/snapshots/{$eventId}_snapshot.jpg";
@@ -4155,8 +4214,8 @@ class frigate extends eqLogic
 
     $fullPath = dirname(__FILE__, 3) . $path;
 
-    // --- Si déjà téléchargé (sauf latest et téléchargement forcé) ---
-    if (!$force && file_exists($fullPath) && $mode != self::SAVE_MODE_LATEST) {
+    // --- Si déjà téléchargé (sauf téléchargement forcé) ---
+    if (!$force && file_exists($fullPath)) {
       return "/plugins/frigate" . $path;
     }
 
@@ -4339,7 +4398,7 @@ class frigate extends eqLogic
       return false;
     } else {
       log::add(__CLASS__, 'debug', "║ Configuration de Frigate récupérée avec succès.");
-      log::add(__CLASS__, 'debug', "║ Configuration : " . json_encode($config));
+      log::add(__CLASS__, 'debug', "║ Configuration : " . strlen(json_encode($config)) . " octets");
     }
     return $config;
   }
