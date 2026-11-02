@@ -15,12 +15,16 @@
 * along with Jeedom. If not, see <http://www.gnu.org/licenses/>.
 */
 
-use log;
-use DB;
-
 require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
 
-// Fonction exécutée automatiquement après l'installation du plugin
+/**
+ * Appelée par Jeedom après l'installation du plugin, et à chaque réactivation.
+ *
+ * Crée la table des évènements, complète la configuration par défaut du plugin, des crons et des
+ * équipements, puis publie les messages d'installation.
+ *
+ * @return void
+ */
 function frigate_install()
 {
     $pluginVersion = frigate::getPluginVersion();
@@ -36,7 +40,14 @@ function frigate_install()
     Log::add("frigate", 'info', 'Finish Install');
 }
 
-// Fonction exécutée automatiquement après la mise à jour du plugin
+/**
+ * Appelée par Jeedom après chaque mise à jour du plugin.
+ *
+ * Met la table des évènements à jour (colonnes ajoutées par les versions successives, data en MEDIUMTEXT),
+ * complète la configuration, publie les messages d'installation et supprime les fichiers latest.jpg.
+ *
+ * @return void
+ */
 function frigate_update()
 {
     $pluginVersion = frigate::getPluginVersion();
@@ -51,63 +62,76 @@ function frigate_update()
 
 
     // Vérifier si la colonne 'type' existe déjà dans la table 'frigate_events'
-    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'type';";
+    $sqlCheck = "SHOW COLUMNS FROM `frigate_events` LIKE 'type';";
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
     if (empty($resultCheck)) {
         // Création de la nouvelle colonne 'type' si elle n'existe pas
-        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `type` text DEFAULT NULL;";
+        $sql2 = "ALTER TABLE `frigate_events` ADD COLUMN `type` text DEFAULT NULL;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
     // Vérifier si la colonne 'isFavorite' existe déjà dans la table 'frigate_events'
-    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'isFavorite';";
+    $sqlCheck = "SHOW COLUMNS FROM `frigate_events` LIKE 'isFavorite';";
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
     if (empty($resultCheck)) {
         // Création de la nouvelle colonne 'isFavorite' si elle n'existe pas
-        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `isFavorite` tinyint(1) DEFAULT 0;";
+        $sql2 = "ALTER TABLE `frigate_events` ADD COLUMN `isFavorite` tinyint(1) DEFAULT 0;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
-    // Mettre à jour les enregistrements où 'isFavorite' est NULL pour les définir à 0UPDATE `frigate_events`
-    $sqlUpdate = "UPDATE `jeedom`.`frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` != 1 AND `isFavorite` != 0;";
+    // 'isFavorite' à 0 quand il n'est ni 0 ni 1 : les purges ne sélectionnent que isFavorite != 1, faux pour NULL
+    $sqlUpdate = "UPDATE `frigate_events` SET `isFavorite` = 0 WHERE `isFavorite` IS NULL OR `isFavorite` NOT IN (0, 1);";
+    DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
+    // 'startTime' manquant tiré de l'event_id, qui commence par le timestamp de début : la purge par ancienneté s'en sert
+    $sqlUpdate = "UPDATE `frigate_events` SET `startTime` = CEIL(SUBSTRING_INDEX(`event_id`, '-', 1)) WHERE `startTime` IS NULL AND `event_id` REGEXP '^[0-9]+([.][0-9]+)?-';";
     DB::Prepare($sqlUpdate, array(), DB::FETCH_TYPE_ROW);
 
     // Vérifier si les colonnes recognition_* existent déjà dans la table 'frigate_events'
     $columns = ['recognition_type', 'recognition_description', 'recognition_name', 'recognition_subname', 'recognition_attributes', 'recognition_plate', 'recognition_score'];
     foreach ($columns as $column) {
-        $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE '" . $column . "';";
+        $sqlCheck = "SHOW COLUMNS FROM `frigate_events` LIKE '" . $column . "';";
         $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
         if (empty($resultCheck)) {
             // Création de la nouvelle colonne si elle n'existe pas
             if ($column == 'recognition_score') {
-                $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `" . $column . "` int(11) DEFAULT NULL;";
+                $sql2 = "ALTER TABLE `frigate_events` ADD COLUMN `" . $column . "` int(11) DEFAULT NULL;";
             } else {
-                $sql2 = "ALTER TABLE `jeedom`.`frigate_events` ADD COLUMN `" . $column . "` text DEFAULT NULL;";
+                $sql2 = "ALTER TABLE `frigate_events` ADD COLUMN `" . $column . "` text DEFAULT NULL;";
             }
             DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
         }
     }
+    // Fusionner les évènements enregistrés plusieurs fois sous le même event_id
+    $merged = frigate_events::mergeDuplicates();
+    if ($merged > 0) {
+        Log::add("frigate", 'info', 'Évènements en double fusionnés : ' . $merged . ' ligne(s) supprimée(s)');
+    }
+
     // Vérifier le type de la colonne data, si c'est text le passer en mediumtext
-    $sqlCheck = "SHOW COLUMNS FROM `jeedom`.`frigate_events` LIKE 'data';";
+    $sqlCheck = "SHOW COLUMNS FROM `frigate_events` LIKE 'data';";
     $resultCheck = DB::Prepare($sqlCheck, array(), DB::FETCH_TYPE_ROW);
     if (!empty($resultCheck) && isset($resultCheck['Type']) && $resultCheck['Type'] == 'text') {
-        $sql2 = "ALTER TABLE `jeedom`.`frigate_events` MODIFY COLUMN `data` MEDIUMTEXT;";
+        $sql2 = "ALTER TABLE `frigate_events` MODIFY COLUMN `data` MEDIUMTEXT;";
         DB::Prepare($sql2, array(), DB::FETCH_TYPE_ROW);
     }
 
     frigate::setConfig();
     frigate::setConfigEqlogic();
+    frigate::resetDetections();
     frigate::addMessages();
     frigate::deleteLatestFile();
     Log::add("frigate", 'info', 'Finish Update');
 }
 
-// Fonction exécutée automatiquement après la suppression du plugin
+/**
+ * Appelée par Jeedom à la suppression du plugin, et aussi à chaque désactivation.
+ *
+ * Désabonne le plugin de son topic MQTT. La table des évènements est conservée : Jeedom appelle cette
+ * fonction à chaque désactivation (plugin::setIsEnable(0)), et la supprimer ferait perdre tous les
+ * évènements, favoris compris, puis leurs fichiers au cron suivant.
+ *
+ * @return void
+ */
 function frigate_remove()
 {
-    Log::add("frigate", "info", "==> Début de la suppression de la database Frigate");
-    $sql = "DROP TABLE IF EXISTS `frigate_events`;";
-    DB::Prepare($sql, array(), DB::FETCH_TYPE_ROW);
-    Log::add("frigate", "info", "==> Fin de la suppression de la database Frigate");
-
     Log::add("frigate", "info", "==> Désenregistrement du topic Frigate de MQTT2");
     frigate::removeMQTTTopicRegistration();
 }

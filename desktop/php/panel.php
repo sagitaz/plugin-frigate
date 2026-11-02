@@ -10,7 +10,7 @@ if (init('object_id') == '') {
   foreach ($allObject as $object) {
     foreach ($object->getEqLogic(true, false, 'frigate') as $frigate) {
       if ($frigate->getLogicalId() != 'eqFrigateStats' && $frigate->getLogicalId() != 'eqFrigateEvents' && $frigate->getConfiguration("panel") == true) {
-        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'), 'order' => $frigate->getConfiguration('panelOrder') ?? 0);
+        $frigate_widgets[] = array('widget' => $frigate->toHtml('panel'), 'order' => (int)$frigate->getConfiguration('panelOrder', 0), 'name' => $frigate->getName());
       }
     }
   }
@@ -42,15 +42,17 @@ if (init('object_id') == '') {
 <div class="tab-content" id="div_configuration" style="height:calc(100% - 50px);overflow:auto;overflow-x: hidden;">
   <div role="tabpanel" class="tab-pane active" id="Cameras">
     <?php
+    // Caméras positionnées d'abord, par position ; les autres ensuite ; à égalité, par nom
     usort($frigate_widgets, function ($a, $b) {
-
-      if ($a['order'] > 0 && $b['order'] > 0) {
+      $aPlaced = $a['order'] > 0;
+      $bPlaced = $b['order'] > 0;
+      if ($aPlaced !== $bPlaced) {
+        return $aPlaced ? -1 : 1;
+      }
+      if ($aPlaced && $a['order'] !== $b['order']) {
         return $a['order'] <=> $b['order'];
       }
-      if ($a['order'] > 0 && $b['order'] == 0) return -1;
-      if ($a['order'] == 0 && $b['order'] > 0) return 1;
-
-      return strcasecmp($a['name'] ?? '', $b['name'] ?? '');
+      return strcasecmp($a['name'], $b['name']);
     });
 
     echo '<div class="col-lg-12" style="width: 100%;">';
@@ -140,7 +142,7 @@ if (init('object_id') == '') {
         $hasClip = $event['hasClip'];
         $clip = $event['clip'];
         $preview = str_replace("snapshot.jpg", "preview.gif", $event["snapshot"]);
-        $hasPreview = file_exists("/var/www/html" . $preview);
+        $hasPreview = frigate::mediaFileExists($preview);
         $zones = $event['zones'];
         $showClip = 0;
         if (config::byKey('event::displayVideo', 'frigate', true) == true && $hasClip == 1) {
