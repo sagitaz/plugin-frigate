@@ -75,19 +75,6 @@ try {
         ajax::success($result);
     }
 
-    if (init('action') == 'refreshCameras') {
-        // Rafraichit la visualisation
-        $name = init('name');
-        $img = init('img');
-        $eqlogicId = init('eqlogicId');
-        $who = init('who');
-        $result = frigate::saveURL(null, null, $name, frigate::SAVE_MODE_LATEST, $img);
-        if ($who != "dashboard") {
-            frigate::createAndRefreshURLcmd($eqlogicId, $result);
-        }
-        ajax::success($result);
-    }
-
     if (init('action') == 'setFavorite') {
         // Changement de favori
         $result = frigate::setFavorite(init('eventId'), init('isFav'));

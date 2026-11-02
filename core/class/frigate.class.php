@@ -28,8 +28,6 @@ class frigate extends eqLogic
   public const SAVE_MODE_DEFAULT = 0;
   /** Miniature d'évènement, sans redimensionnement. */
   public const SAVE_MODE_THUMBNAIL = 1;
-  /** Dernière image de la caméra. */
-  public const SAVE_MODE_LATEST = 2;
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
 
@@ -3234,20 +3232,6 @@ class frigate extends eqLogic
     }
     return $cmd;
   }
-  /**
-   * Met à jour la commande « URL » d'un équipement, créée si besoin.
-   *
-   * @param int|string $eqlogicId Identifiant de l'équipement
-   * @param string     $url       Valeur à publier
-   * @return void
-   */
-  public static function createAndRefreshURLcmd($eqlogicId, $url)
-  {
-    $cmd = self::createCmd($eqlogicId, "URL", "string", "", "info_url", "");
-    $cmd->save();
-    $cmd->event($url);
-    $cmd->save();
-  }
 
   /**
    * Crée les commandes audio d'une caméra (état, marche, arrêt, bascule) et met l'état à jour.
@@ -4134,15 +4118,15 @@ class frigate extends eqLogic
   /**
    * Télécharge un média de Frigate dans le dossier data et retourne son URL locale.
    *
-   * Selon le mode : snapshot, clip ou aperçu d'un évènement ($type), miniature, dernière image de la caméra, ou
-   * capture manuelle depuis une URL. Un fichier déjà présent n'est pas retéléchargé, sauf la dernière image ou
-   * avec $force. Les images JPEG passent par processJpgImage(), selon les réglages de la caméra.
+   * Selon le mode : snapshot, clip ou aperçu d'un évènement ($type), miniature, ou capture manuelle depuis une
+   * URL. Un fichier déjà présent n'est pas retéléchargé, sauf avec $force. Les images JPEG passent par
+   * processJpgImage(), selon les réglages de la caméra.
    *
    * @param string|null $eventId Identifiant de l'évènement
    * @param string|null $type    snapshot, clip ou preview, en mode par défaut
    * @param string|null $camera  Nom de la caméra dans Frigate
    * @param int         $mode    Une des constantes self::SAVE_MODE_*
-   * @param string      $file    URL source, pour la dernière image et la capture manuelle
+   * @param string      $file    URL source, pour la capture manuelle
    * @param bool        $force   Retélécharger un fichier déjà présent
    * @return string URL locale du fichier, « error » en cas d'échec
    */
@@ -4175,9 +4159,6 @@ class frigate extends eqLogic
     if ($mode == self::SAVE_MODE_THUMBNAIL) {
       $lien = "http://{$urlFrigate}/api/events/{$eventId}/thumbnail.jpg";
       $path = "/data/{$camera}/{$eventId}_thumbnail.jpg";
-    } elseif ($mode == self::SAVE_MODE_LATEST) {
-      $lien = $file;
-      $path = "/data/{$camera}/latest.jpg";
     } elseif ($mode == self::SAVE_MODE_SNAPSHOT) {
       $lien = urldecode($file);
       $path = "/data/snapshots/{$eventId}_snapshot.jpg";
@@ -4185,8 +4166,8 @@ class frigate extends eqLogic
 
     $fullPath = dirname(__FILE__, 3) . $path;
 
-    // --- Si déjà téléchargé (sauf latest et téléchargement forcé) ---
-    if (!$force && file_exists($fullPath) && $mode != self::SAVE_MODE_LATEST) {
+    // --- Si déjà téléchargé (sauf téléchargement forcé) ---
+    if (!$force && file_exists($fullPath)) {
       return "/plugins/frigate" . $path;
     }
 
