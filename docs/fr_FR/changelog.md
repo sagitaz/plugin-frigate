@@ -17,6 +17,7 @@
 - Un évènement resté incomplet n'est plus supprimé la nuit : il est complété auprès de Frigate
 - Une activité à plusieurs objets ne laisse plus d'évènement en cours jusqu'à la nuit : chaque objet est enregistré avec ses médias, avec toujours une seule notification
 - Les évènements créés par une description de l'IA sont bien supprimés après le nombre de jours configuré
+- La taille maximale du dossier des médias est de nouveau respectée quand les évènements les plus anciens n'ont pas de fichier
 - Les détections de l'équipement Events restent actives tant qu'une caméra détecte
 - Les détections restées bloquées sont remises à 0 à la mise à jour
 - Une action limitée à une zone ne se déclenche plus à tort pour un évènement sans zone

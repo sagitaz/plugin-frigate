@@ -2252,7 +2252,8 @@ class frigate extends eqLogic
   /**
    * Supprime les cinq évènements non favoris les plus anciens, avec leurs fichiers.
    *
-   * @return float Espace libéré, en Mo
+   * @return float|null Espace libéré en Mo, 0 pour des évènements sans fichier ; null s'il ne reste aucun
+   *                    évènement non favori
    */
   public static function cleanOldestFile()
   {
@@ -2260,10 +2261,11 @@ class frigate extends eqLogic
     // On ne récupère que les 5 ou 10 plus vieux pour ne pas saturer la RAM
     $events = frigate_events::getOldestNotFavorite(5);
 
-    if (!empty($events)) {
-      foreach ($events as $event) {
-        $totalSizeGain += self::cleanDbEvent($event->getEventId(), $event);
-      }
+    if (empty($events)) {
+      return null;
+    }
+    foreach ($events as $event) {
+      $totalSizeGain += self::cleanDbEvent($event->getEventId(), $event);
     }
     return $totalSizeGain; // Renvoie par exemple 15.45 (Mo)
   }
@@ -2272,8 +2274,8 @@ class frigate extends eqLogic
    * Supprime les évènements les plus anciens tant que le dossier data dépasse la taille maximale
    * (datas_weight, 500 Mo par défaut).
    *
-   * Les suppressions se font par lots de cinq, dans la limite de 100 lots ; la boucle s'arrête dès qu'un lot
-   * ne libère rien.
+   * Les suppressions se font par lots de cinq, dans la limite de 100 lots. Un lot d'évènements sans fichier ne
+   * libère rien mais compte dans la limite ; la boucle s'arrête quand il ne reste plus d'évènement non favori.
    *
    * @return void
    */
@@ -2288,8 +2290,8 @@ class frigate extends eqLogic
     while ($currentSize > $maxSize && $limit < 100) {
       $removedSize = self::cleanOldestFile();
 
-      if ($removedSize <= 0) {
-        log::add(__CLASS__, 'debug', "║ [Fin] Plus rien à supprimer ou erreur.");
+      if ($removedSize === null) {
+        log::add(__CLASS__, 'debug', "║ [Fin] Plus aucun évènement non favori à supprimer.");
         break;
       }
 
