@@ -7,6 +7,7 @@
 # 02/11/2026 Stable 1.5.8
 - Correctif de sécurité sur l'affichage des images des caméras : le lien « SNAPSHOT LIVE » change, à recopier là où il avait été copié à la main
 - Correctif de sécurité sur l'affichage des évènements et des commandes de reconnaissance
+- La configuration de Frigate n'est plus écrite dans le log : elle pouvait contenir des clés d'API et des mots de passe
 - Les nouvelles caméras prennent le nom d'affichage défini dans Frigate (Frigate 0.17 et plus)
 - « Rechercher / MAJ » ne s'arrête plus en erreur quand un équipement de la pièce par défaut porte le nom d'une caméra à un accent ou une majuscule près
 - La taille maximale du dossier des médias est de nouveau respectée quand les évènements les plus anciens n'ont pas de fichier

@@ -2752,7 +2752,7 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS DANS LA CONFIGURATION:/fg: ═══════════════════");
       return false;
     }
-    log::add(__CLASS__, 'debug', "║ Fichier de configuration : " . json_encode($configurationArray));
+    log::add(__CLASS__, 'debug', "║ Fichier de configuration reçu : " . strlen(json_encode($configurationArray)) . " octets");
 
     frigate::generateEqEvents($configurationArray);
     frigate::generateEqStats();
@@ -4369,7 +4369,7 @@ class frigate extends eqLogic
       return false;
     } else {
       log::add(__CLASS__, 'debug', "║ Configuration de Frigate récupérée avec succès.");
-      log::add(__CLASS__, 'debug', "║ Configuration : " . json_encode($config));
+      log::add(__CLASS__, 'debug', "║ Configuration : " . strlen(json_encode($config)) . " octets");
     }
     return $config;
   }
