@@ -150,7 +150,8 @@ class frigate extends eqLogic
   /**
    * Traitement commun à toutes les fréquences de cron.
    *
-   * Purge le dossier data et les évènements anciens ; hors crons 1, 5, 10 et 15 minutes, supprime aussi les
+   * Purge le dossier data et les évènements anciens, puis les plus anciens tant que le dossier dépasse la taille
+   * maximale ; hors crons 1, 5, 10 et 15 minutes, supprime aussi les
    * évènements restés en type new ou update. Récupère ensuite les évènements et les statistiques de Frigate si
    * la fréquence est activée dans la configuration et que les commandes info_Cron et info_enabled de
    * l'équipement Events, quand elles existent, sont à 1. Avec MQTT Manager opérationnel, les crons 1, 5, 10 et
@@ -188,6 +189,7 @@ class frigate extends eqLogic
     // Exécution des autres fréquences et nettoyage
     self::cleanFolderData();
     self::cleanAllOldestFiles();
+    self::cleanFolderDataIfFull();
 
     // Évènements incomplets et verrous, aux crons de 30 minutes et plus
     if (!($frequence === "functionality::cron::enable" ||
@@ -2321,6 +2323,8 @@ class frigate extends eqLogic
    *
    * Les suppressions se font par lots de cinq, dans la limite de 100 lots. Un lot d'évènements sans fichier ne
    * libère rien mais compte dans la limite ; la boucle s'arrête quand il ne reste plus d'évènement non favori.
+   * Si la taille maximale est alors toujours dépassée, un warning le signale, au plus une fois par jour.
+   * Appelée par chaque cron (voir execCron()) et par getEvents(), avant le téléchargement des médias.
    *
    * @return void
    */
@@ -2337,6 +2341,10 @@ class frigate extends eqLogic
 
       if ($removedSize === null) {
         log::add(__CLASS__, 'debug', "║ [Fin] Plus aucun évènement non favori à supprimer.");
+        if (!cache::byKey('frigate::dataFullWarning')->getValue(0)) {
+          cache::set('frigate::dataFullWarning', 1, 86400);
+          log::add(__CLASS__, 'warning', "║ Le dossier data dépasse la taille maximale (" . round($currentSize, 2) . " Mo pour " . $maxSize . " Mo) sans aucun évènement non favori à supprimer : les favoris, ou des fichiers impossibles à supprimer, occupent la place, et chaque nouvel évènement sera supprimé au nettoyage suivant. Augmenter la taille maximale ou retirer des favoris.");
+        }
         break;
       }
 
