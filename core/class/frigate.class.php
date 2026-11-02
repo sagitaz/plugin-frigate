@@ -462,13 +462,9 @@ class frigate extends eqLogic
         $urlStream = $cmd->execCmd();
 
         if ($this->getConfiguration('urlStream') == '' || $this->getConfiguration('urlStream') != $urlStream) {
-          $urlJeedom = network::getNetworkAccess('external');
-          if ($urlJeedom == "") {
-            $urlJeedom = network::getNetworkAccess('internal');
-          }
           $urlStream = "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $img;
           $this->setConfiguration('urlStream', $urlStream);
-          $cmd->event($urlJeedom . $urlStream);
+          $cmd->event($this->snapshotLiveUrl());
           $cmd->save();
         }
       }
@@ -492,6 +488,22 @@ class frigate extends eqLogic
         }
       }
     }
+  }
+
+  /**
+   * Retourne le lien « SNAPSHOT LIVE » de la caméra : le proxy d'images sur l'URL de la dernière image, avec la
+   * clé du proxy, pour les applications qui l'appellent sans session Jeedom. Adresse externe de Jeedom, à
+   * défaut l'interne.
+   *
+   * @return string
+   */
+  public function snapshotLiveUrl()
+  {
+    $urlJeedom = network::getNetworkAccess('external');
+    if ($urlJeedom == "") {
+      $urlJeedom = network::getNetworkAccess('internal');
+    }
+    return $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $this->getConfiguration('img') . "&key=" . self::getProxyKey();
   }
 
   /**
@@ -944,6 +956,71 @@ class frigate extends eqLogic
     }
     $urlFrigate = $url . ":" . $port;
     return $urlFrigate;
+  }
+
+  /**
+   * Retourne la clé qui ouvre le proxy d'images sans session Jeedom, et la crée au premier appel.
+   *
+   * Elle figure dans le lien « SNAPSHOT LIVE », que les applications appellent sans session ; elle ne donne
+   * accès qu'au proxy, donc qu'aux images de l'API du serveur Frigate configuré.
+   *
+   * @return string
+   */
+  public static function getProxyKey()
+  {
+    $key = config::byKey('proxyKey', 'frigate');
+    if ($key == '') {
+      $key = config::genKey(32);
+      config::save('proxyKey', $key, 'frigate');
+    }
+    return $key;
+  }
+
+  /**
+   * Retourne l'URL que le proxy d'images doit interroger, ou null si l'URL demandée ne vise pas l'API du serveur
+   * Frigate configuré.
+   *
+   * L'URL retournée est reconstruite sur l'hôte et le port de la configuration, avec le chemin et les paramètres
+   * demandés : le proxy ne peut joindre aucun autre serveur, quelle que soit la façon dont l'URL est écrite.
+   *
+   * @param string $url URL demandée au proxy
+   * @return string|null
+   */
+  public static function proxyTarget($url)
+  {
+    $parts = parse_url((string) $url);
+    $host = preg_replace('#^https?://#', '', (string) config::byKey('URL', 'frigate'));
+    $port = (string) config::byKey('port', 'frigate');
+    if (!is_array($parts) || isset($parts['user']) || isset($parts['pass']) || $host === '' || $port === '') {
+      return null;
+    }
+    $scheme = strtolower($parts['scheme'] ?? '');
+    $path = $parts['path'] ?? '';
+    if (!in_array($scheme, ['http', 'https'], true) || strcasecmp($parts['host'] ?? '', $host) !== 0
+      || (string) ($parts['port'] ?? '') !== $port || strpos($path, '/api/') !== 0) {
+      return null;
+    }
+    return $scheme . '://' . $host . ':' . $port . $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
+  }
+
+  /**
+   * Réécrit la commande « SNAPSHOT LIVE » de chaque caméra avec son lien courant (voir snapshotLiveUrl()).
+   *
+   * Appelée à la mise à jour du plugin, pour que les liens déjà enregistrés reçoivent la clé du proxy.
+   *
+   * @return void
+   */
+  public static function refreshSnapshotLinks()
+  {
+    foreach (eqLogic::byType('frigate') as $eqLogic) {
+      if (strpos($eqLogic->getLogicalId(), 'eqFrigateCamera_') !== 0) {
+        continue;
+      }
+      $cmd = $eqLogic->getCmd('info', 'link_snapshot');
+      if (is_object($cmd)) {
+        $cmd->event($eqLogic->snapshotLiveUrl());
+      }
+    }
   }
 
   /**
@@ -3179,14 +3256,6 @@ class frigate extends eqLogic
   public static function createCamerasCmds($eqlogicId)
   {
     $eqlogic = eqLogic::byId($eqlogicId);
-    // Récupération des URLs externes et internes
-    $urlJeedom = network::getNetworkAccess('external');
-    if ($urlJeedom == "") {
-      $urlJeedom = network::getNetworkAccess('internal');
-    }
-    $url = config::byKey('URL', 'frigate');
-    $port = config::byKey('port', 'frigate');
-    $name = $eqlogic->getConfiguration('name');
 
     $cmd = self::createCmd($eqlogicId, "Créer un évènement", "message", "", "action_make_api_event", "CAMERA_TAKE", 1, null, 0, "action");
     $cmd->save();
@@ -3209,8 +3278,7 @@ class frigate extends eqLogic
     $infoCmd->save();
     $value = $infoCmd->execCmd();
     if (!isset($value) || $value == null || $value == '') {
-      $link = $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=http://" . $url . ":" . $port . "/api/" . $name . "/latest.jpg";
-      $infoCmd->event($link);
+      $infoCmd->event($eqlogic->snapshotLiveUrl());
       $infoCmd->save();
     }
 
