@@ -44,7 +44,8 @@ function frigate_install()
  * Appelée par Jeedom après chaque mise à jour du plugin.
  *
  * Met la table des évènements à jour (colonnes ajoutées par les versions successives, data en MEDIUMTEXT),
- * complète la configuration, publie les messages d'installation et supprime les fichiers latest.jpg.
+ * complète la configuration, publie les messages d'installation, supprime les fichiers latest.jpg et réécrit
+ * les liens « SNAPSHOT LIVE » des caméras avec la clé du proxy d'images.
  *
  * @return void
  */
@@ -118,6 +119,7 @@ function frigate_update()
     frigate::resetDetections();
     frigate::addMessages();
     frigate::deleteLatestFile();
+    frigate::refreshSnapshotLinks();
     Log::add("frigate", 'info', 'Finish Update');
 }
 

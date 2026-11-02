@@ -181,7 +181,7 @@ Les informations sur le dernier évènement de la caméra : caméra, label, scor
 L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 - **RTSP** : le lien du flux vidéo de la caméra (voir la section Flux vidéo).
-- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra.
+- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra. Il contient une clé qui permet d'afficher l'image sans être connecté à Jeedom : ne le partagez pas.
 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
