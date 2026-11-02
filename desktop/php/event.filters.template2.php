@@ -19,8 +19,8 @@ sendVarToJS('labelFilter', $labelFilter);
     <div class="select-dropdown configKey" id="cameraSelectDropdown" data-l1key="cameraFilter">
       <?php foreach ($cameras as $camera): ?>
         <label class="thin-label">
-          <input type="checkbox" value="<?= $camera ?>" class="cameraFilter" checked <?= in_array($camera, $selectedCameras) ? 'checked' : '' ?>>
-          <?= ucfirst($camera) ?>
+          <input type="checkbox" value="<?= frigate::escapeHtml($camera) ?>" class="cameraFilter" checked <?= in_array($camera, $selectedCameras) ? 'checked' : '' ?>>
+          <?= frigate::escapeHtml(ucfirst($camera)) ?>
         </label>
       <?php endforeach; ?>
     </div>
@@ -32,8 +32,8 @@ sendVarToJS('labelFilter', $labelFilter);
     <div class="select-dropdown configKey" id="labelSelectDropdown" data-l1key="labelFilter">
       <?php foreach ($labels as $label): ?>
         <label class="thin-label">
-          <input type="checkbox" value="<?= $label ?>" class="labelFilter" checked <?= in_array($label, $selectedLabels) ? 'checked' : '' ?>>
-          <?= ucfirst($label) ?>
+          <input type="checkbox" value="<?= frigate::escapeHtml($label) ?>" class="labelFilter" checked <?= in_array($label, $selectedLabels) ? 'checked' : '' ?>>
+          <?= frigate::escapeHtml(ucfirst($label)) ?>
         </label>
       <?php endforeach; ?>
     </div>

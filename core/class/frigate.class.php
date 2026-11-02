@@ -2141,6 +2141,36 @@ class frigate extends eqLogic
   }
 
   /**
+   * Échappe une valeur pour l'écrire dans une page HTML, en texte ou dans un attribut.
+   *
+   * Le texte d'un évènement peut être écrit par quiconque joint l'API de Frigate ou le broker MQTT (sous-label,
+   * description). secureXSS() du core ne convient pas : il rétablit les « & », ce qui annule l'échappement
+   * dans un attribut relu par innerHTML.
+   *
+   * @param mixed $value Valeur à afficher
+   * @return string
+   */
+  public static function escapeHtml($value)
+  {
+    return htmlspecialchars((string) $value, ENT_QUOTES, 'UTF-8');
+  }
+
+  /**
+   * Retire les chevrons d'un texte reçu de Frigate, avant de l'écrire dans une commande info.
+   *
+   * Le core affiche la valeur d'une commande texte par innerHTML, sans échappement : sans chevron, aucune
+   * balise ne peut s'y former. Les autres caractères, apostrophes comprises, restent intacts pour les
+   * scénarios et les notifications. Une valeur qui n'est pas une chaîne est retournée telle quelle.
+   *
+   * @param mixed $value Valeur à écrire
+   * @return mixed
+   */
+  public static function plainText($value)
+  {
+    return is_string($value) ? str_replace(['<', '>'], '', $value) : $value;
+  }
+
+  /**
    * Indique si l'URL d'un média du plugin désigne un fichier présent sur le disque.
    *
    * Un évènement garde en base l'URL de ses médias même quand le fichier a disparu,
@@ -3130,7 +3160,7 @@ class frigate extends eqLogic
     $update = function ($label, $subtype, $unit, $logicalId, $genericType, $value) use ($eqlogicId) {
       $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $genericType, 0, null, 0);
       $cmd->save();
-      $cmd->event($value ?? '');
+      $cmd->event(self::plainText($value ?? ''));
       $cmd->save();
     };
 
@@ -3716,7 +3746,7 @@ class frigate extends eqLogic
 
       foreach ($cmds as [$label, $subtype, $unit, $logicalId, $const, $value]) {
         $cmd = self::createCmd($eqlogicId, $label, $subtype, $unit, $logicalId, $const, 0, null, 0);
-        $cmd->event($value);
+        $cmd->event(self::plainText($value));
         $cmd->save();
       }
     }
