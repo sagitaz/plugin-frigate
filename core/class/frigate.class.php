@@ -1288,24 +1288,36 @@ class frigate extends eqLogic
   /**
    * Enregistre les évènements dans un fichier JSON de suivi et retourne ceux qui n'y figuraient pas encore.
    *
-   * La comparaison porte sur start_time. À la première utilisation, le fichier est créé et tous les évènements
-   * sont retournés.
+   * La comparaison porte sur start_time. Le fichier ne garde que l'identifiant et le début de chaque évènement
+   * (voir trackedEvents()). À la première utilisation, le fichier est créé et tous les évènements sont retournés ;
+   * de même pour un fichier illisible, ou de plus de 2 Mo, que relire demanderait trop de mémoire : le suivi
+   * d'un évènement occupe moins de 100 octets.
    *
-   * @param string                           $filePath Chemin du fichier de suivi
-   * @param array<int, array<string, mixed>> $events   Évènements reçus de Frigate
+   * @param string                           $filePath     Chemin du fichier de suivi
+   * @param array<int, array<string, mixed>> $events       Évènements reçus de Frigate
+   * @param int|string                       $recoveryDays Nombre de jours de récupération (recovery_days)
    * @return array<int, array<string, mixed>> Évènements nouveaux
    */
-  private static function saveAndCompareEvents($filePath, $events)
+  private static function saveAndCompareEvents($filePath, $events, $recoveryDays)
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START COMPARE EVENTS:/fg: ═══════════════════");
     log::add(__CLASS__, 'debug', "║ Sauvegarde et comparaison des événements dans le fichier : " . $filePath);
+    $since = time() - $recoveryDays * 86400;
+    $oldEvents = null;
     if (file_exists($filePath)) {
-      $oldEvents = json_decode(file_get_contents($filePath), true);
+      if (filesize($filePath) <= 2097152) {
+        $oldEvents = json_decode(file_get_contents($filePath), true);
+      }
+      if (!is_array($oldEvents)) {
+        log::add(__CLASS__, 'info', "║ Fichier de suivi des évènements illisible ou trop volumineux, il est recréé : " . $filePath);
+      }
+    }
+    if (is_array($oldEvents)) {
       $newEvents = array_udiff($events, $oldEvents, function ($a, $b) {
         return strcmp($a['start_time'], $b['start_time']);
       });
       if (!empty($newEvents)) {
-        file_put_contents($filePath, json_encode(array_merge($oldEvents, $newEvents)));
+        file_put_contents($filePath, json_encode(self::trackedEvents($events, $oldEvents, $since)));
         log::add(__CLASS__, 'debug', "║ Detection d'événements nouveaux : " . json_encode($newEvents));
       } else {
         log::add(__CLASS__, 'debug', "║ Aucun nouveau événement détecté.");
@@ -1313,13 +1325,46 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
       return $newEvents;
     } else {
-      file_put_contents($filePath, json_encode($events));
+      file_put_contents($filePath, json_encode(self::trackedEvents($events, [], $since)));
       log::add(__CLASS__, 'debug', "║ Fichier de sauvegarde créé : " . $filePath);
       log::add(__CLASS__, 'debug', "║ Sauvegarde des événements : " . json_encode($events));
       log::add(__CLASS__, 'debug', "╚════════════════════════ END COMPARE EVENTS ═══════════════════");
       return $events;
     }
   }
+
+  /**
+   * Retourne le contenu du fichier de suivi : l'identifiant et le début des évènements de la dernière réponse
+   * de l'API, et des évènements déjà suivis commencés depuis $since.
+   *
+   * Un évènement commencé avant $since n'est pas traité par getEvents() : le retirer du suivi ne change rien au
+   * traitement et borne la taille du fichier.
+   *
+   * @param array<int, array<string, mixed>> $events    Évènements de la dernière réponse de l'API
+   * @param array<int, array<string, mixed>> $oldEvents Évènements déjà suivis
+   * @param int                              $since     Début de la période de récupération (timestamp)
+   * @return array<int, array{id: string|null, start_time: float|null}>
+   */
+  private static function trackedEvents($events, $oldEvents, $since)
+  {
+    $tracked = [];
+    foreach ($events as $event) {
+      if (is_array($event)) {
+        $key = (string) ($event['id'] ?? $event['start_time'] ?? '');
+        $tracked[$key] = ['id' => $event['id'] ?? null, 'start_time' => $event['start_time'] ?? null];
+      }
+    }
+    foreach ($oldEvents as $event) {
+      if (is_array($event) && isset($event['start_time']) && $event['start_time'] >= $since) {
+        $key = (string) ($event['id'] ?? $event['start_time']);
+        if (!isset($tracked[$key])) {
+          $tracked[$key] = ['id' => $event['id'] ?? null, 'start_time' => $event['start_time']];
+        }
+      }
+    }
+    return array_values($tracked);
+  }
+
   /**
    * Récupère un évènement Frigate par son identifiant et le traite (voir getEvents()).
    *
@@ -1388,7 +1433,7 @@ class frigate extends eqLogic
       if (!file_exists(dirname($filePath))) {
         mkdir(dirname($filePath), 0777, true);
       }
-      $newEvents = self::saveAndCompareEvents($filePath, $events);
+      $newEvents = self::saveAndCompareEvents($filePath, $events, $recoveryDays ?: 7);
       if (empty($newEvents)) {
         return;
       }
