@@ -47,26 +47,32 @@ $snapshotAvailable = $hasSnapshot == 1 && frigate::mediaFileExists($snapshot);
 $clipAvailable = $hasClip == 1 && frigate::mediaFileExists($clip);
 // Le bouton de description ouvre la vidéo, à défaut la capture ; sans média, il se limite à son infobulle.
 $descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'snapshot-btn' : '');
+// Titre de la fenêtre du média : du HTML rangé dans un attribut, puis relu par innerHTML (events.js).
+// Les valeurs y sont échappées une fois pour le HTML, le tout une seconde fois pour l'attribut.
+$titleHtml = "<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;" . frigate::escapeHtml($label)
+  . "<div class='percentage " . frigate::getPercentageClass($topScore) . "'>" . frigate::escapeHtml($topScore) . " %</div>"
+  . "<br><i class='fas fa-video'>&nbsp;</i>&nbsp;" . frigate::escapeHtml($camera)
+  . "<br><i class='fas fa-clock'>&nbsp;</i>&nbsp;" . frigate::escapeHtml($date) . " " . ($hasClip == 1 ? $formattedDuration : '');
 ?>
 
-<div data-date="<?= $date ?>" data-camera="<?= $camera ?>" data-label="<?= $label ?>" data-id="<?= $id ?>"
+<div data-date="<?= frigate::escapeHtml($date) ?>" data-camera="<?= frigate::escapeHtml($camera) ?>" data-label="<?= frigate::escapeHtml($label) ?>" data-id="<?= frigate::escapeHtml($id) ?>"
   class="frigateEventContainer">
   <div class="frigateEvent">
 
     <!-- div img -->
     <div class="img-container" onmouseenter="if (typeof handleHover === 'function') handleHover(this)">
-      <img class="imgSnap" src="<?= $thumbnailSrc ?>" />
+      <img class="imgSnap" src="<?= frigate::escapeHtml($thumbnailSrc) ?>" />
       <!-- Hidden video container idéal afficher les preview si hasclip est 0 ou que le param est 0 -->
 
       <?php
       if ($showClip && $clipAvailable) {
         echo '<div class="video-overlay">';
-        echo '<video data-src="' . $clip . '" autoplay="" muted="" loop=""></video>';
+        echo '<video data-src="' . frigate::escapeHtml($clip) . '" autoplay="" muted="" loop=""></video>';
         echo '</div>';
       } else {
         if ($hasPreview) {
           echo '<div>';
-          echo '<img class="video-overlay" src="' . $preview . '" />';
+          echo '<img class="video-overlay" src="' . frigate::escapeHtml($preview) . '" />';
           echo '</div>';
         }
       }
@@ -74,7 +80,7 @@ $descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'sna
 
       ?>
 
-      <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= $id ?>">
+      <button class="favorite-btn" onclick="toggleFavorite(this)" data-id="<?= frigate::escapeHtml($id) ?>">
         <i class="<?= $favoriteClass ?>"></i>
       </button>
       <?php if (!empty($filterText)): ?>
@@ -84,39 +90,35 @@ $descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'sna
 
     <!-- div text -->
     <div class="eventText">
-      <span class="inline-title"><?= $label ?></span>
+      <span class="inline-title"><?= frigate::escapeHtml($label) ?></span>
       <span class="inline-subtitle duration"> <?= $timeElapsed ?></span><br /><br />
       <i class="fas fa-minus-square"></i>
-      <span> <?= $label ?>
-        <div class="percentage <?= frigate::getPercentageClass($topScore) ?>"><?= $topScore ?>%</div>
+      <span> <?= frigate::escapeHtml($label) ?>
+        <div class="percentage <?= frigate::getPercentageClass($topScore) ?>"><?= frigate::escapeHtml($topScore) ?>%</div>
       </span><br>
       <?php if ($cameraFound): ?>
         <div style='display: flex;align-items: center;gap: 10px;'>
           <a class="container-text" onclick="gotoCamera('<?= $cameraId ?>')" title="{{Afficher la page de la caméra}}">
           <?php endif; ?>
-          <i class="fas fa-video"></i><span> <?= $camera ?></span>
+          <i class="fas fa-video"></i><span> <?= frigate::escapeHtml($camera) ?></span>
           <?php if ($cameraFound): ?>
           </a>
           <?php $zonesFormatted = htmlspecialchars(str_replace('_', ' ', $zones)) ?>
           <?= $zones !== '' ? '<div class="zones"" title="' . $zonesFormatted . '">' . $zonesFormatted . '</div>' : '' ?>
         </div>
       <?php endif; ?>
-      <i class="fas fa-clock"></i><span> <?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?></span>
+      <i class="fas fa-clock"></i><span> <?= frigate::escapeHtml($date) ?> <?= $hasClip == 1 ? $formattedDuration : '' ?></span>
     </div>
 
     <!-- div buttons -->
     <?php $confirmDelete = config::byKey('event::confirmDelete', 'frigate', 1) == 1; ?>
     <div class="eventBtns" 
-      data-eventid="<?= $id ?>"
+      data-eventid="<?= frigate::escapeHtml($id) ?>"
       data-confirmdelete="<?= $confirmDelete ? 1 : 0 ?>"
-      <?= $snapshotAvailable ? 'data-snapshot="' . $snapshot . '"' : '' ?>
-      <?= $clipAvailable ? 'data-video="' . $clip . '"' : '' ?>
-      data-title="
-      	<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;<?= $label ?>
-        <div class='percentage <?= frigate::getPercentageClass($topScore) ?>'><?= $topScore ?> %</div>
-        <br><i class='fas fa-video'>&nbsp;</i>&nbsp;<?= $camera ?>
-        <br><i class='fas fa-clock'>&nbsp;</i>&nbsp;<?= $date ?> <?= $hasClip == 1 ? $formattedDuration : '' ?>"
-	    data-description="<?= $description ?>">
+      <?= $snapshotAvailable ? 'data-snapshot="' . frigate::escapeHtml($snapshot) . '"' : '' ?>
+      <?= $clipAvailable ? 'data-video="' . frigate::escapeHtml($clip) . '"' : '' ?>
+      data-title="<?= frigate::escapeHtml($titleHtml) ?>"
+	    data-description="<?= frigate::escapeHtml($description) ?>">
 
       <?php if ($snapshotAvailable): ?>
         <button class="hover-button snapshot-btn" title="{{Voir la capture}}">
@@ -128,12 +130,12 @@ $descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'sna
           <i class="fas fa-film"></i>
         </button>
       <?php endif; ?>
-      <button class="hover-button" onclick="deleteEvent('<?= $id ?>')"
+      <button class="hover-button" onclick="deleteEvent(<?= frigate::escapeHtml(json_encode((string) $id)) ?>)"
         title="{{Supprimer l'évènement sur votre serveur Frigate}}">
         <i class="fas fa-trash"></i>
       </button>
       <?php if ($description != ''): ?>
-        <button class="hover-button <?= $descriptionBtnClass ?>" title="<?= $description ?>">
+        <button class="hover-button <?= $descriptionBtnClass ?>" title="<?= frigate::escapeHtml($description) ?>">
           <i class="fas fas fa-comment"></i>
         </button>
       <?php endif; ?>
