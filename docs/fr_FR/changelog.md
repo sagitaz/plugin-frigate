@@ -4,6 +4,9 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 03/11/2026 Beta 1.6.0
+- Debian 12 et Jeedom 4.6 minimum
+
 # 02/11/2026 Stable 1.5.8
 - Correctif de sécurité sur l'affichage des images des caméras : le lien « SNAPSHOT LIVE » change, à recopier là où il avait été copié à la main
 - Correctif de sécurité sur l'affichage des évènements et des commandes de reconnaissance
