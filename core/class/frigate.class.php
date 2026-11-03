@@ -1030,8 +1030,8 @@ class frigate extends eqLogic
   public static function addMessages()
   {
     message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__));
-    $system = system::getOsVersion();
-    if (version_compare($system, "12", "<")) {
+    $system = (string) system::getOsVersion();
+    if ((float) $system > 0 && (float) $system < 12) {
       message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 12 de Debian est recommandée.", __FILE__)));
     }
     $jeedom = jeedom::version();
