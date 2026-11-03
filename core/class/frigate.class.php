@@ -1031,12 +1031,12 @@ class frigate extends eqLogic
   {
     message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__));
     $system = system::getOsVersion();
-    if (version_compare($system, "11", "<")) {
-      message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__)));
+    if (version_compare($system, "12", "<")) {
+      message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 12 de Debian est recommandée.", __FILE__)));
     }
     $jeedom = jeedom::version();
-    if (version_compare($jeedom, "4.4", "<")) {
-      message::add('frigate', str_replace('#version#', $jeedom, __("Attention, vous utilisez la version #version# de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__)));
+    if (version_compare($jeedom, "4.6", "<")) {
+      message::add('frigate', str_replace('#version#', $jeedom, __("Attention, vous utilisez la version #version# de Jeedom. La version 4.6.x de Jeedom est recommandée.", __FILE__)));
     }
   }
 
