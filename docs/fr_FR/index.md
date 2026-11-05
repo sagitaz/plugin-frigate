@@ -23,8 +23,13 @@ Merci
 
 
 # <u>Pré-requis</u>
+### Stable
 - Jeedom 4.4.0 minimum
 - Debian 11 (Bullseye) minimum
+- Frigate 0.16.0 minimum
+### Beta
+- Jeedom 4.6.0 minimum
+- Debian 12 (Bookworm) minimum
 - Frigate 0.16.0 minimum
 
 Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut donc l'installer et le configurer vous-même. Voir la documentation officielle de Frigate pour plus d'informations.
