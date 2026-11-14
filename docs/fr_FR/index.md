@@ -187,7 +187,21 @@ L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, 
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
 - **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Si un objet est considéré statique, alors la détection repasse à 0.
 - **Détection tout** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande Détection tout est à 0, alors les autres commandes de détection seront forcées à 0.
+
 - **Statut flux détection / enregistrement / audio** (Frigate 0.18 ou plus, masquées par défaut) : online, offline ou disabled pour chaque flux de la caméra. Frigate relance un flux hors ligne, la valeur peut donc alterner entre offline et online : attendre qu'elle reste stable avant d'agir, par exemple avec une condition de durée dans le scénario.
+
+Ces deux types de commandes utilisent uniquement les compteurs MQTT `frigate/<camera>/<objet>/active`
+et `frigate/<camera>/all/active` (adapter `frigate` si un autre préfixe est configuré). Les topics sans
+`/active` comptent aussi les objets immobiles et ne mettent pas ces commandes à jour. Par exemple,
+`car/active = 0` suivi de `car = 1` laisse **Détection car** à 0 : une voiture peut rester présente
+sans être considérée active par Frigate. Les snapshots ne modifient pas non plus cet état.
+
+Les noms, identifiants et sous-types binaires des commandes restent inchangés : aucune nouvelle commande
+n'est nécessaire dans les scénarios. Après une mise à jour, leur état est réinitialisé puis alimenté
+par les prochains messages `/active` ; l'absence d'un nouveau message n'est pas une preuve d'absence
+d'objet. Un redémarrage ou une perte de suivi dans Frigate peut rendre un objet stationné temporairement
+actif ; ces commandes reflètent la classification de Frigate, pas une mesure physique certaine du mouvement.
+
 
 ##### Reconnaissance
 Si la reconnaissance faciale, la lecture de plaques, des modèles de classification ou l'IA générative sont activés dans Frigate, la caméra reçoit par MQTT le résultat de la dernière reconnaissance. Les commandes sont créées au premier résultat.
