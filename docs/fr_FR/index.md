@@ -183,6 +183,8 @@ Refresh de l'image suivant votre configuration.
 ##### Toutes les caméras
 Les informations sur le dernier évènement de la caméra : caméra, label, score, top score, zones, id, type, timestamp, durée, clip disponible, snapshot disponible, URL snapshot, URL clip et URL thumbnail. Et les statistiques de la caméra.
 
+Les commandes **URL snapshot**, **URL clip** et **URL thumbnail** contiennent le chemin du fichier, de la forme **``/plugins/frigate/data/...``**. Le dossier data est fermé : ce chemin ne s'ouvre pas dans un navigateur. Il sert à retrouver le fichier sur le disque, en ajoutant **``/var/www/html``** devant. Pour un lien à envoyer, utilisez les tags des actions (**#snapshot#**, **#clip#**…).
+
 L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 - **RTSP** : le lien du flux vidéo de la caméra (voir la section Flux vidéo).
@@ -315,19 +317,19 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **#sublabel#** : le label attribué par un modèle de classification d'objets de Frigate
 - **#attributes#** : les attributs attribués par un modèle de classification d'objets de Frigate
 - **#snapshot#** : lien vers fichier image
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#snapshot_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#clip#** : lien vers fichier mp4
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_clip.mp4`
 - **#clip_path#** : path vers fichier mp4
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
 - **#thumbnail#** : lien vers fichier image
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#thumbnail_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#preview#** : lien vers le fichier preview
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#preview_path#** : path vers fichier preview
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#label#** : texte
@@ -335,6 +337,8 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **#end#** : heure de fin
 - **#duree#** : durée de l'évènement
 - **#jeemate#** : voir explications plus bas
+
+Les liens **#snapshot#**, **#clip#**, **#thumbnail#** et **#preview#** s'ouvrent sans connexion à Jeedom : chacun porte une signature qui n'ouvre que son fichier. Les tags **_path** donnent le chemin du fichier sur le disque, pour les plugins qui l'envoient en pièce jointe. Pour révoquer tous les liens déjà envoyés, supprimez la clé **mediaKey** de la configuration du plugin : une nouvelle clé est créée au lien suivant.
 
 
 
@@ -416,12 +420,9 @@ Dans les actions des caméras se trouvent deux commandes :
 
 Chaque capture est aussi enregistrée comme un évènement avec le label **capture**, visible sur la page Events. Les captures sont supprimées selon les mêmes règles que les évènements (ancienneté et taille du dossier data) : mettez en favori celles que vous voulez garder.
 
-L'URL est de la forme **``/plugins/frigate/data/snapshots/id_snapshot.jpg``** afin de s'adapter au maximum de plugins de communication.
+L'URL est de la forme **``/plugins/frigate/data/snapshots/id_snapshot.jpg``**. Le dossier data est fermé : cette URL ne s'ouvre pas dans un navigateur, même avec l'adresse de Jeedom devant. Elle sert à retrouver le fichier sur le disque.
 
-Par exemple si vous souhaitez une URL complète, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
-**``str_replace('"','',"https://monjeedom.eu.jeedom.link"#value#)``**
-
-Ou bien pour ceux ayant besoin du path :
+Pour ceux ayant besoin du path, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
 
 **``str_replace('"','',"/var/www/html"#value#)``**
 

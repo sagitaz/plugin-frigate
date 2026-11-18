@@ -31,6 +31,11 @@ class frigate extends eqLogic
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
 
+  /** Fichier témoin du dossier data, interrogé par checkDataFolderProtection(). */
+  private const DATA_WITNESS_FILE = 'controle.txt';
+  /** Texte du fichier témoin, qui distingue le fichier servi d'une page renvoyée pour toute URL. */
+  private const DATA_WITNESS_MARK = 'frigate-data-witness';
+
   /**
    * Bascules MQTT d'une caméra : clé Frigate => suffixe du type générique JeeMate.
    *
@@ -344,13 +349,15 @@ class frigate extends eqLogic
   /**
    * Cron exécuté par Jeedom chaque jour.
    *
-   * Si le serveur Frigate répond, met à jour la commande « status serveur », signale une nouvelle version de
+   * Vérifie que le dossier data est fermé à Apache (voir checkDataFolderProtection()). Si le serveur Frigate répond, met à jour la commande « status serveur », signale une nouvelle version de
    * Frigate puis exécute le traitement de cette fréquence.
    *
    * @return void
    */
   public static function cronDaily()
   {
+    // Indépendant du serveur Frigate : les médias déjà téléchargés restent à protéger
+    self::checkDataFolderProtection();
     if (!self::isFrigateServerAvailable()) {
       log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. CronDaily non exécuté.");
       return;
@@ -1805,9 +1812,9 @@ class frigate extends eqLogic
       "duree" => $duree,
       "startTime" => $event->getStartTime(),
       "endTime" => $event->getEndTime(),
-      "snapshot" => $event->getSnapshot(),
-      "clip" => $event->getClip(),
-      "thumbnail" => $event->getThumbnail(),
+      "snapshot" => self::mediaUrl($event->getSnapshot(), true),
+      "clip" => self::mediaUrl($event->getClip(), true),
+      "thumbnail" => self::mediaUrl($event->getThumbnail(), true),
       "hasSnapshot" => $event->getHasSnapshot(),
       "hasClip" => $event->getHasClip(),
       "eventId" => $event->getEventId(),
@@ -2215,6 +2222,142 @@ class frigate extends eqLogic
   }
 
   /**
+   * Retourne la clé qui signe les liens des médias, et la crée au premier appel.
+   *
+   * Distincte de la clé du proxy et de la clé API du plugin : elle ne sert qu'à signer les liens de
+   * frigate.media.php. La supprimer de la configuration révoque tous les liens signés.
+   *
+   * @return string
+   */
+  public static function getMediaKey()
+  {
+    $key = config::byKey('mediaKey', 'frigate');
+    if ($key == '') {
+      $key = config::genKey(32);
+      config::save('mediaKey', $key, 'frigate');
+    }
+    return $key;
+  }
+
+  /**
+   * Retourne la signature d'un fichier du dossier data, qui ouvre ce seul fichier sans session Jeedom.
+   *
+   * @param string $file Fichier relatif au dossier data, par exemple camera/1718992955.613576-zulr2q_clip.mp4
+   * @return string
+   */
+  public static function mediaSignature($file)
+  {
+    return substr(hash_hmac('sha256', (string) $file, self::getMediaKey()), 0, 32);
+  }
+
+  /**
+   * Convertit l'URL enregistrée d'un média (/plugins/frigate/data/...) en URL de frigate.media.php.
+   *
+   * Le dossier data étant fermé à Apache, c'est la seule URL qui sert le fichier. Toute autre valeur (« null »,
+   * image par défaut, tableau…) est retournée telle quelle. Le fichier est placé en dernier paramètre, pour que
+   * l'URL se termine par son extension ; la date de modification du fichier permet au navigateur de le garder
+   * en cache.
+   *
+   * @param mixed $url    URL enregistrée en base
+   * @param bool  $signed Ajouter la signature, pour un lien ouvert sans session Jeedom (notifications, JeeMate)
+   * @return mixed URL relative du script, ou la valeur reçue
+   */
+  public static function mediaUrl($url, $signed = false)
+  {
+    $path = self::mediaFilePath($url);
+    if ($path === null) {
+      return $url;
+    }
+    $file = substr($url, strlen('/plugins/frigate/data/'));
+    $params = [];
+    if ($signed) {
+      $params[] = 't=' . self::mediaSignature($file);
+    }
+    $mtime = @filemtime($path);
+    if ($mtime !== false) {
+      $params[] = 'v=' . $mtime;
+    }
+    $params[] = 'f=' . str_replace('%2F', '/', rawurlencode($file));
+
+    return '/plugins/frigate/core/ajax/frigate.media.php?' . implode('&', $params);
+  }
+
+  /**
+   * Ferme le dossier data à Apache : crée le dossier s'il manque, et y écrit le .htaccess et le fichier témoin.
+   *
+   * Les médias ne sont alors servis que par frigate.media.php, qui vérifie l'accès. Le fichier témoin, non
+   * caché, sert au contrôle de checkDataFolderProtection(). Appelée à l'installation, à la mise à jour et par
+   * cleanFolderData(), donc à chaque cron : le dossier peut disparaître à la restauration d'une sauvegarde.
+   *
+   * @return void
+   */
+  public static function protectDataFolder()
+  {
+    $folder = dirname(__FILE__, 3) . '/data';
+    if (!is_dir($folder) && !mkdir($folder, 0755, true)) {
+      log::add(__CLASS__, 'error', "║ Dossier inexistant, création impossible : " . $folder);
+      return;
+    }
+    $htaccess = "<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Order allow,deny\n    Deny from all\n</IfModule>\n";
+    $htaccessPath = $folder . '/.htaccess';
+    $current = is_file($htaccessPath) ? (string) file_get_contents($htaccessPath) : '';
+    if (strpos($current, 'Require all denied') === false || strpos($current, 'Deny from all') === false) {
+      if (file_put_contents($htaccessPath, $htaccess) === false) {
+        log::add(__CLASS__, 'error', "║ Écriture impossible : " . $htaccessPath . ". Les médias restent accessibles sans connexion.");
+      } else {
+        log::add(__CLASS__, 'info', "║ Dossier data fermé : " . $htaccessPath . " écrit.");
+      }
+    }
+    $witnessPath = $folder . '/' . self::DATA_WITNESS_FILE;
+    if (!is_file($witnessPath)) {
+      file_put_contents($witnessPath, self::DATA_WITNESS_MARK . "\nSi ce fichier s'affiche sans connexion à Jeedom, le dossier data du plugin Frigate n'est pas protégé.\n");
+    }
+  }
+
+  /**
+   * Vérifie qu'Apache refuse l'accès au dossier data, et prévient l'utilisateur sinon.
+   *
+   * Interroge en interne le fichier témoin : un .htaccess ignoré (AllowOverride None, nginx…) le laisse servir.
+   * Le .htaccess lui-même ne peut pas servir de témoin : la configuration Apache de Debian refuse tous les
+   * fichiers .ht*. Le message Jeedom est retiré quand le dossier est de nouveau fermé.
+   *
+   * @return void
+   */
+  public static function checkDataFolderProtection()
+  {
+    self::protectDataFolder();
+    $base = network::getNetworkAccess('internal');
+    if ($base == '') {
+      log::add(__CLASS__, 'debug', "║ Contrôle du dossier data impossible : pas d'accès interne configuré.");
+      return;
+    }
+    $url = rtrim($base, '/') . '/plugins/frigate/data/' . self::DATA_WITNESS_FILE;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_FOLLOWLOCATION => false,
+      CURLOPT_CONNECTTIMEOUT => 3,
+      CURLOPT_TIMEOUT        => 5,
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => 0,
+    ]);
+    $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($body === false || $code === 0) {
+      log::add(__CLASS__, 'debug', "║ Contrôle du dossier data impossible : " . $url . " ne répond pas.");
+      return;
+    }
+    if ($code === 200 && strpos((string) $body, self::DATA_WITNESS_MARK) !== false) {
+      log::add(__CLASS__, 'warning', "║ Le dossier data est accessible sans connexion : " . $url);
+      message::add('frigate', __("Les snapshots et les clips du plugin Frigate sont accessibles sans connexion à Jeedom : le serveur web ignore le fichier plugins/frigate/data/.htaccess (AllowOverride None, nginx…). Autorisez les fichiers .htaccess ou interdisez l'accès à ce dossier dans la configuration du serveur web.", __FILE__), '', 'dataFolderExposed');
+    } else {
+      log::add(__CLASS__, 'debug', "║ Dossier data fermé (HTTP " . $code . ").");
+      message::removeAll('frigate', 'dataFolderExposed');
+    }
+  }
+
+  /**
    * Retourne les URL de médias enregistrées sur les évènements, en clés d'un tableau.
    *
    * @return array<string, true>
@@ -2296,6 +2439,8 @@ class frigate extends eqLogic
         log::add(__CLASS__, "error", "║ Dossier inexistant, création impossible : " . $folder);
       }
     }
+    // Le .htaccess manque aussi après une telle restauration : sans lui, les médias sont servis sans connexion
+    self::protectDataFolder();
   }
 
 
@@ -3951,15 +4096,17 @@ class frigate extends eqLogic
     $hasClip = $event->getHasClip();
     $hasSnapshot = $event->getHasSnapshot();
     $topScore = $event->getTopScore();
-    $clip = $urlJeedom . $event->getClip();
-    $snapshot = $urlJeedom . $event->getSnapshot();
     if (is_array($event->getThumbnail())) {
       $valueThumbnail = json_encode($event->getThumbnail());
     } else {
       $valueThumbnail = $event->getThumbnail();
     }
-    $thumbnail = $urlJeedom . $valueThumbnail;
-    $preview = $urlJeedom . $getPreview;
+    // Liens signés : ils s'ouvrent sans session Jeedom (notifications, JeeMate), et le dossier data est fermé.
+    // L'aperçu est signé après le remplacement de texte qui le tire du snapshot, pour signer le bon fichier.
+    $clip = $urlJeedom . self::mediaUrl($event->getClip(), true);
+    $snapshot = $urlJeedom . self::mediaUrl($event->getSnapshot(), true);
+    $thumbnail = $urlJeedom . self::mediaUrl($valueThumbnail, true);
+    $preview = $urlJeedom . self::mediaUrl($getPreview, true);
     $clipPath = "/var/www/html" . $event->getClip();
     $snapshotPath = "/var/www/html" . $event->getSnapshot();
     $thumbnailPath = "/var/www/html" . $valueThumbnail;
