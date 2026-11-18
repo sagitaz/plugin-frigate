@@ -1,10 +1,10 @@
 {
     "plugins\/frigate\/core\/ajax\/frigate.ajax.php": {
         "401 - Accès non autorisé": "401 - Acesso não autorizado",
-        "Aucune méthode correspondante à": "Nenhum método correspondente a",
-        "Impossible de trouver la camera : ": "É impossível encontrar a câmara:"
+        "Aucune méthode correspondante à": "Nenhum método correspondente a"
     },
     "plugins\/frigate\/core\/class\/frigate.class.php": {
+        "Active ou désactive la caméra. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\\'enregistrement et le débogage deviennent alors indisponibles. À partir de Frigate 0.18, l\\'état est conservé au redémarrage de Frigate ; avant, la caméra revient à sa configuration.": "Ativa ou desativa a câmara. A desativação interrompe completamente o processamento dos fluxos da câmara pelo Frigate. A deteção, o registo e a depuração ficam então indisponíveis. A partir do Frigate 0.18, o estado é mantido ao reiniciar o Frigate; anteriormente, a câmara voltava à sua configuração inicial.",
         "Active ou désactive temporairement les alertes et les détections pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Ativa ou desativa temporariamente os alertas e as deteções para esta câmara até ao reinício do Frigate. Quando esta opção está desativada, não é gerada nenhuma atividade nova.",
         "Active ou désactive temporairement les alertes pour cette caméra jusqu\\'au redémarrage de Frigate. Lorsque cette option est désactivée, aucune activité nouvelle n\\'est générée.": "Ativa ou desativa temporariamente os alertas para esta câmara até ao reinício do Frigate. Quando esta opção está desativada, não é gerada nenhuma atividade nova.",
         "Activer la caméra": "Ativar a câmara",
@@ -13,18 +13,23 @@
         "Activités : alertes": "Atividades: alertas",
         "Activités : détections": "Atividades: sistemas de deteção",
         "Arrêt du démon Frigate": "Parar o daemon Frigate",
+        "Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.": "Atenção: está a utilizar a versão #version# do Debian; não está disponível qualquer suporte. Recomenda-se a versão 11 do Debian.",
+        "Attention, vous utilisez la version #version# de Jeedom. La version 4.4.x de Jeedom est recommandée.": "Atenção, está a utilizar a versão #version# do Jeedom. Recomenda-se a versão 4.4.x do Jeedom.",
         "Créer un évènement": "Criar um evento",
         "Créer une capture": "Criar uma captura",
         "Descriptions d\\'objets": "Descrições de objetos",
         "Descriptions des activités": "Descrições das atividades",
-        "Désactive temporairement la caméra jusqu\\'au redémarrage de Frigate. La désactivation interrompt complètement le traitement des flux de la caméra par Frigate. La détection, l\\'enregistrement et le débogage deviennent alors indisponibles.": "Desativa temporariamente a câmara até ao reinício do Frigate. A desativação interrompe completamente o processamento dos fluxos da câmara pelo Frigate. A deteção, o registo e a depuração ficam, assim, indisponíveis.",
+        "Frigate : #count# caméras créées, les commandes, évènements et statistiques sont mises à jour. Veuillez patienter...": "Frigate: #count# câmaras criadas, os comandos, eventos e estatísticas estão a ser atualizados. Por favor, aguarde...",
         "Informations reçues de MQTT Manager": "Informações recebidas do MQTT Manager",
         "L'évènement est un favori, il ne peut pas être supprimé de la DB.": "O evento é um favorito e não pode ser eliminado da BD.",
         "Le démon MQTT Manager n\\'est pas démarré": "O daemon do MQTT Manager não foi iniciado",
         "Le plugin MQTT Manager n\\'est pas installé": "O plugin MQTT Manager não está instalado",
         "Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.": "Obrigado por instalar o plugin. Se precisar de ajuda, contacte o suporte no Discord ou na Comunidade.",
         "Mise à jour des commandes, évènements et statistiques terminée.": "Atualização de encomendas, eventos e estatísticas concluída.",
+        "Profil, ou none pour aucun": "Perfil, ou «none» para nenhum",
         "Topic mqtt pour Frigate non défini.": "Tópico mqtt para Frigate não definido.",
+        "Une nouvelle version de Frigate (#version#) est disponible.": "Está disponível uma nova versão do Frigate (#versão#).",
+        "Version de Frigate détectée : #version#, certaines fonctionnalités du plugin peuvent ne pas fonctionner correctement. Veuillez mettre à jour votre serveur Frigate pour une expérience optimale.": "Versão do Frigate detetada: #version#. Algumas funcionalidades do plugin podem não funcionar corretamente. Atualize o seu servidor Frigate para uma experiência ideal.",
         "Veuillez vérifier la configuration": "Verificar a configuração",
         "action": "ação"
     },
