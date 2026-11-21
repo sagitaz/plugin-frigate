@@ -3423,8 +3423,9 @@ class frigate extends eqLogic
    */
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
-    // Nettoyer le nom exactement comme Jeedom le fera en base
-    $cleanName = substr(cleanComponanteName($name), 0, 127);
+    // Nettoyer le nom exactement comme Jeedom le fera en base. Certains noms viennent de MQTT (clés des stats,
+    // modèles de classification) : sans chevron, aucune balise ne peut s'y former (voir plainText()).
+    $cleanName = substr(cleanComponanteName(self::plainText((string) $name)), 0, 127);
     $cleanName = trim($cleanName);
 
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $cleanName);
@@ -4072,14 +4073,24 @@ class frigate extends eqLogic
     }
 
     // Créer ou récupérer la commande version Frigate
-    $version = strstr($stats['service']['version'], '-', true);
+    $rawVersion = (string) ($stats['service']['version'] ?? '');
+    $version = strstr($rawVersion, '-', true);
+    if ($version === false) {
+      $version = $rawVersion;
+    }
 
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-    // Enregistrer la valeur de l'événement
-    $cmd->event($version);
-    $cmd->save();
-    if ($version != config::byKey('frigate_version', 'frigate')) {
-      config::save('frigate_version', $version, 'frigate');
+    // Les stats arrivent aussi par MQTT : seule une version de forme 0.16.0 est enregistrée, elle s'affiche
+    // dans les pages du plugin et dans les messages Jeedom
+    if (preg_match('/^\d+(\.\d+)*$/', $version) === 1) {
+      $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
+      // Enregistrer la valeur de l'événement
+      $cmd->event($version);
+      $cmd->save();
+      if ($version != config::byKey('frigate_version', 'frigate')) {
+        config::save('frigate_version', $version, 'frigate');
+      }
+    } else {
+      log::add(__CLASS__, 'debug', "║ Version de Frigate non reconnue, ignorée : " . json_encode(self::plainText($rawVersion)));
     }
 
     // Créer ou récupérer la valeur de uptime en secondes
@@ -4735,7 +4746,8 @@ class frigate extends eqLogic
     } else {
       $eqlogicId = $frigate->getId();
       $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-      $version = $cmd->execCmd();
+      // Une valeur enregistrée avant la validation de majStatsCmds() peut contenir du HTML
+      $version = self::plainText((string) $cmd->execCmd());
       if ($version != config::byKey('frigate_version', 'frigate')) {
         config::save('frigate_version', $version, 'frigate');
       }
@@ -4783,7 +4795,7 @@ class frigate extends eqLogic
 
         case 'available':
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
-          $cmd->event($value);
+          $cmd->event(self::plainText($value));
           $cmd->save();
           break;
 
@@ -4938,7 +4950,7 @@ class frigate extends eqLogic
           log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
           log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode([$model => $state]));
           $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $model, "string", "", "info_classification_state", "", 0);
-          $infoCmd->event($state);
+          $infoCmd->event(self::plainText($state));
           $infoCmd->save();
           $eqCamera->refreshWidget();
           log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
@@ -5158,6 +5170,7 @@ class frigate extends eqLogic
     }
 
     $infoCmd = self::createCmd($eqCamera->getId(), "Statut flux " . $names[$role], "string", "", "info_stream_status_" . $role, "", 0);
+    $status = self::plainText($status);
     if ($infoCmd->execCmd() !== $status) {
       $infoCmd->event($status);
       log::add("frigate_MQTT", 'info', $eqCamera->getHumanName() . ' => statut du flux ' . $role . ' : ' . $status);
@@ -5176,7 +5189,7 @@ class frigate extends eqLogic
   private static function updateProfileCmds($eqlogicId, $profile)
   {
     $infoCmd = self::createCmd($eqlogicId, "Profil actif", "string", "", "info_profile", "", 0);
-    $infoCmd->event((string)$profile);
+    $infoCmd->event(self::plainText((string)$profile));
 
     $cmd = self::createCmd($eqlogicId, "Changer de profil", "message", "", "action_set_profile", "", 0, null, 0, "action");
     if ($cmd->getDisplay('title_disable') != 1) {

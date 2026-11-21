@@ -4,12 +4,16 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 21/11/2026 Beta 1.6.2
+- Correctif de sécurité : la clé des liens « SNAPSHOT LIVE » n'ouvre plus que l'image en direct des caméras, et non les captures des évènements ou des enregistrements
+- Correctif de sécurité : les noms de caméras, les labels et la version de Frigate sont échappés dans les pages du plugin
+- Correctif de sécurité : les logs de Frigate (Frigate, go2rtc, nginx) sont échappés à l'affichage
+- Correctif de sécurité : les valeurs et les noms de commandes reçus par MQTT (disponibilité, profil, statut des flux, classification, statistiques) ne peuvent plus contenir de HTML, et seule une version de Frigate valide est enregistrée
+- JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
+
 # 18/11/2026 Beta 1.6.1
 - Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
 - Les tags #snapshot#, #clip#, #thumbnail# et #preview# des actions donnent un lien signé, qui n'ouvre que son fichier
-- JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
-- Correctif de sécurité : la clé des liens « SNAPSHOT LIVE » n'ouvre plus que l'image en direct des caméras, et non les captures des évènements ou des enregistrements
-- Correctif de sécurité : les noms de caméras, les labels et la version de Frigate sont échappés dans les pages du plugin
 - Les commandes URL snapshot, URL clip, URL thumbnail et URL image gardent le chemin du fichier, qui ne s'ouvre plus dans un navigateur
 - Les clips se lisent dans Safari et l'app iOS, et les miniatures de la page Évènements restent en cache
 - Un message Jeedom prévient si le serveur web ignore la protection du dossier des médias
