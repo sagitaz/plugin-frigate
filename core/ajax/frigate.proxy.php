@@ -4,7 +4,8 @@ include_file('core', 'authentification', 'php');
 
 # Accès : session Jeedom, ou clé du proxy (lien « SNAPSHOT LIVE » appelé par les applications)
 $proxyKey = config::byKey('proxyKey', 'frigate');
-if (!isConnect() && ($proxyKey == '' || !hash_equals($proxyKey, (string) init('key')))) {
+$connected = isConnect();
+if (!$connected && ($proxyKey == '' || !hash_equals($proxyKey, (string) init('key')))) {
     header('HTTP/1.1 403 Forbidden');
     exit;
 }
@@ -14,6 +15,12 @@ $url = frigate::proxyTarget(urldecode((string) ($_GET['url'] ?? '')));
 if ($url === null) {
     error_log('URL non valide ou non fournie');
     header('HTTP/1.1 404 Not Found');
+    exit;
+}
+
+# Sans session, la clé n'ouvre que l'image en direct d'une caméra du plugin (voir frigate::isProxyKeyTarget())
+if (!$connected && !frigate::isProxyKeyTarget($url)) {
+    header('HTTP/1.1 403 Forbidden');
     exit;
 }
 

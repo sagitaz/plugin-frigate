@@ -76,7 +76,8 @@ sendVarToJS('refresh', $refresh);
 
         <?php
         if (count($eqLogics) != 0) {
-            $version = config::byKey('frigate_version', 'frigate') ?? "version non trouvée";
+            // Version reçue par MQTT (info_version) : échappée comme toute donnée externe
+            $version = frigate::escapeHtml(config::byKey('frigate_version', 'frigate') ?? "version non trouvée");
             $maj = config::byKey('frigate_maj', 'frigate') ?? 0;
             echo '<legend>';
             if (!$maj) {

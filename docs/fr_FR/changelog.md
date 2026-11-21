@@ -8,6 +8,8 @@
 - Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
 - Les tags #snapshot#, #clip#, #thumbnail# et #preview# des actions donnent un lien signé, qui n'ouvre que son fichier
 - JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
+- Correctif de sécurité : la clé des liens « SNAPSHOT LIVE » n'ouvre plus que l'image en direct des caméras, et non les captures des évènements ou des enregistrements
+- Correctif de sécurité : les noms de caméras, les labels et la version de Frigate sont échappés dans les pages du plugin
 - Les commandes URL snapshot, URL clip, URL thumbnail et URL image gardent le chemin du fichier, qui ne s'ouvre plus dans un navigateur
 - Les clips se lisent dans Safari et l'app iOS, et les miniatures de la page Évènements restent en cache
 - Un message Jeedom prévient si le serveur web ignore la protection du dossier des médias

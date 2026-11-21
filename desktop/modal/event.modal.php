@@ -56,7 +56,7 @@ if (!isConnect('admin')) {
         $cameraOption = $eqLogic->getName();
         $cameraValue = $eqLogic->getConfiguration('name');
         if ($cameraOption !== 'Events' && $cameraOption !== 'Statistiques') {
-          echo '<option value="' . $cameraValue . '">' . $cameraOption . '</option>';
+          echo '<option value="' . frigate::escapeHtml($cameraValue) . '">' . frigate::escapeHtml($cameraOption) . '</option>';
         }
       }
       echo '</select>';

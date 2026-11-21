@@ -1009,6 +1009,25 @@ class frigate extends eqLogic
   }
 
   /**
+   * Indique si une URL de proxy peut être ouverte avec la clé du proxy, sans session Jeedom.
+   *
+   * La clé figure dans les liens « SNAPSHOT LIVE », visibles des applications et des utilisateurs non admin.
+   * Elle n'ouvre que l'image en direct d'une caméra du plugin (/api/<caméra>/latest.jpg ou .webp) : ni les
+   * captures des évènements, ni les images des enregistrements, que l'API Frigate sert aussi.
+   *
+   * @param string $url URL retournée par proxyTarget()
+   * @return bool
+   */
+  public static function isProxyKeyTarget($url)
+  {
+    $path = (string) parse_url((string) $url, PHP_URL_PATH);
+    if (preg_match('#^/api/([A-Za-z0-9_-]+)/latest\.(jpg|webp)$#', $path, $matches) !== 1) {
+      return false;
+    }
+    return is_object(eqLogic::byLogicalId('eqFrigateCamera_' . $matches[1], 'frigate'));
+  }
+
+  /**
    * Réécrit la commande « SNAPSHOT LIVE » de chaque caméra avec son lien courant (voir snapshotLiveUrl()).
    *
    * Appelée à la mise à jour du plugin, pour que les liens déjà enregistrés reçoivent la clé du proxy.
