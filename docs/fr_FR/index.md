@@ -197,9 +197,11 @@ L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, 
 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
-- **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Si un objet est considéré statique, alors la détection repasse à 0.
+- **Détection xxx** : pour chaque caméra sera ajouté un état qui indique si une détection active est en cours ou non pour chaque objet configuré. Par exemple, si vous avez une caméra avec un personnage, un véhicule, une vache, etc., vous aurez 3 états : personne, vache, véhicule. Si vous cochez "visible", l'icône sera présente sur le widget lorsqu'il y aura une détection. L'icône est à personnaliser dans les paramètres de la commande. Seuls les objets en mouvement comptent : un objet immobile, par exemple une voiture garée, laisse la commande à 0, même si Frigate le voit toujours.
 - **Détection tout** : Si un objet en déplacement est détecté, alors la commande passe à 1. Lorsque Frigate ne détecte plus de mouvement ou que l'objet est immobile, la commande repasse à 0. Si la commande Détection tout est à 0, alors les autres commandes de détection seront forcées à 0.
 - **Statut flux détection / enregistrement / audio** (Frigate 0.18 ou plus, masquées par défaut) : online, offline ou disabled pour chaque flux de la caméra. Frigate relance un flux hors ligne, la valeur peut donc alterner entre offline et online : attendre qu'elle reste stable avant d'agir, par exemple avec une condition de durée dans le scénario.
+
+Les commandes **Détection xxx** et **Détection tout** suivent la classification de Frigate : après un redémarrage de Frigate ou une perte de suivi, un objet immobile peut être brièvement considéré comme en mouvement.
 
 ##### Reconnaissance
 Si la reconnaissance faciale, la lecture de plaques, des modèles de classification ou l'IA générative sont activés dans Frigate, la caméra reçoit par MQTT le résultat de la dernière reconnaissance. Les commandes sont créées au premier résultat.
