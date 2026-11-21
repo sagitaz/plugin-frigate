@@ -43,12 +43,24 @@ var app_config = {
       app_config.updateContent(logs);
     };
 
+    // Échappe une ligne de log avant de l'insérer en HTML : les logs de Frigate reprennent des données
+    // externes, comme les URL demandées à son nginx, que n'importe quel client du réseau peut choisir.
+    this.escapeHtml = function (text) {
+      return String(text)
+        .replace(/&/g, "&amp;")
+        .replace(/</g, "&lt;")
+        .replace(/>/g, "&gt;")
+        .replace(/"/g, "&quot;")
+        .replace(/'/g, "&#39;");
+    };
+
     // Gestion de la coloration des logs
     this.processLogs = function (logs) {
       const lines = JSON.parse(logs).lines;
 
       let result = "";
-      lines.forEach((line) => {
+      lines.forEach((rawLine) => {
+        const line = String(rawLine);
         let className;
         if (line.includes("ERROR") || line.includes("ERR")) {
           className = "danger";
@@ -58,7 +70,7 @@ var app_config = {
           className = "warning";
         }
 
-        result += `<p class="${className}">${line}</p>\n`;
+        result += `<p class="${className}">${this.escapeHtml(line)}</p>\n`;
       });
 
       return result;

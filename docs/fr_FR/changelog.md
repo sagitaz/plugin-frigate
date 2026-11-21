@@ -4,6 +4,22 @@
 >
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
+# 21/11/2026 Beta 1.6.2
+- Correctifs de sécurité
+- Les liens « SNAPSHOT LIVE » changent à la mise à jour : si vous les avez copiés dans un autre plugin ou une autre application, reprenez-les dans la commande
+- Les liens des médias envoyés dans les notifications expirent après la durée de suppression des évènements (réglage « Validité des liens des médias »)
+- Configuration : boutons pour régénérer la clé des liens « SNAPSHOT LIVE » et pour révoquer les liens des médias déjà envoyés
+- Les appels à Frigate et les commandes HTTP ont un délai maximum : un serveur ou une caméra qui ne répond pas ne bloque plus Jeedom
+- JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau
+- Les clips volumineux (caméras 2K/4K, longues détections) sont téléchargés sans saturer la mémoire de PHP : le média est enregistré et les actions s'exécutent
+
+# 18/11/2026 Beta 1.6.1
+- Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
+- Les tags #snapshot#, #clip#, #thumbnail# et #preview# des actions donnent un lien signé, qui n'ouvre que son fichier
+- Les commandes URL snapshot, URL clip, URL thumbnail et URL image gardent le chemin du fichier, qui ne s'ouvre plus dans un navigateur
+- Les clips se lisent dans Safari et l'app iOS, et les miniatures de la page Évènements restent en cache
+- Un message Jeedom prévient si le serveur web ignore la protection du dossier des médias
+
 # 03/11/2026 Beta 1.6.0
 - Debian 12 et Jeedom 4.6 minimum
 

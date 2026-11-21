@@ -21,7 +21,7 @@ require_once dirname(__FILE__) . '/../../../core/php/core.inc.php';
  * Appelée par Jeedom après l'installation du plugin, et à chaque réactivation.
  *
  * Crée la table des évènements, complète la configuration par défaut du plugin, des crons et des
- * équipements, puis publie les messages d'installation.
+ * équipements, publie les messages d'installation, puis ferme le dossier data à Apache.
  *
  * @return void
  */
@@ -37,6 +37,7 @@ function frigate_install()
     frigate::setConfigCron();
     frigate::setConfigEqlogic();
     frigate::addMessages();
+    frigate::protectDataFolder();
     Log::add("frigate", 'info', 'Finish Install');
 }
 
@@ -45,7 +46,7 @@ function frigate_install()
  *
  * Met la table des évènements à jour (colonnes ajoutées par les versions successives, data en MEDIUMTEXT),
  * complète la configuration, publie les messages d'installation, supprime les fichiers latest.jpg et réécrit
- * les liens « SNAPSHOT LIVE » des caméras avec la clé du proxy d'images.
+ * les liens « SNAPSHOT LIVE » des caméras avec la clé du proxy d'images, puis ferme le dossier data à Apache.
  *
  * @return void
  */
@@ -120,6 +121,7 @@ function frigate_update()
     frigate::addMessages();
     frigate::deleteLatestFile();
     frigate::refreshSnapshotLinks();
+    frigate::protectDataFolder();
     Log::add("frigate", 'info', 'Finish Update');
 }
 

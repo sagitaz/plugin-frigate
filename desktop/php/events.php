@@ -30,7 +30,8 @@ if (!isConnect('admin')) {
 
   <?php
 
-  $events = frigate::showEvents();
+  // URL enregistrées : event.template.php vérifie la présence des fichiers, puis les convertit
+  $events = frigate::showEvents(false, false, true);
 
   // cameras variables
   $selectedCameras = isset($_GET['cameras']) ? explode(',', $_GET['cameras']) : [];

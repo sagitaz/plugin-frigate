@@ -8,8 +8,8 @@
     <?php foreach ($cameras as $camera): ?>
       <?php $isChecked = empty($selectedCameras) || in_array($camera, $selectedCameras); ?>
       <label>
-        <input type="checkbox" class="eqLogicAttr cameraFilter" value="<?= $camera ?>" <?= $isChecked ? 'checked' : '' ?>>
-        <span class="custom-checkbox"></span> <?= ucfirst($camera) ?>
+        <input type="checkbox" class="eqLogicAttr cameraFilter" value="<?= frigate::escapeHtml($camera) ?>" <?= $isChecked ? 'checked' : '' ?>>
+        <span class="custom-checkbox"></span> <?= frigate::escapeHtml(ucfirst($camera)) ?>
       </label>
     <?php endforeach; ?>
   </div>
@@ -24,8 +24,8 @@
     <?php foreach ($labels as $label): ?>
       <?php $isChecked = empty($selectedLabels) || in_array($label, $selectedLabels); ?>
       <label>
-        <input type="checkbox" class="eqLogicAttr labelFilter" value="<?= $label ?>" <?= $isChecked ? 'checked' : '' ?>>
-        <span class="custom-checkbox"></span> <?= ucfirst($label) ?>
+        <input type="checkbox" class="eqLogicAttr labelFilter" value="<?= frigate::escapeHtml($label) ?>" <?= $isChecked ? 'checked' : '' ?>>
+        <span class="custom-checkbox"></span> <?= frigate::escapeHtml(ucfirst($label)) ?>
       </label>
     <?php endforeach; ?>
   </div>
