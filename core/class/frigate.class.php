@@ -2578,6 +2578,14 @@ class frigate extends eqLogic
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
           $path = $file->getPathname();
+          // Téléchargement en cours (downloadToFile()) : laissé une heure, le temps d'un long clip, puis
+          // supprimé s'il a été abandonné (processus arrêté en cours de route)
+          if (substr($path, -5) === '.part') {
+            if ($file->getMTime() < time() - 3600 && @unlink($path)) {
+              log::add(__CLASS__, 'debug', "║ Téléchargement abandonné supprimé : " . $path);
+            }
+            continue;
+          }
           // Capture manuelle : son nom ne porte pas toujours l'event_id, elle se rattache à son
           // évènement par l'URL enregistrée. L'heure de marge laisse createSnapshot() enregistrer
           // l'évènement après avoir écrit le fichier.
@@ -4663,19 +4671,8 @@ class frigate extends eqLogic
       return "error";
     }
 
-    // --- Téléchargement ---
-    $headers = @get_headers($lien);
-    $content = ($headers && strpos($headers[0], '200') !== false) ? file_get_contents($lien) : false;
-
-    if ($content === false) {
-      log::add(__CLASS__, 'debug', "║ Le fichier n'existe pas ou une erreur s'est produite : " . $lien);
-      return "error";
-    }
-
-    // --- Sauvegarde initiale ---
-    $fileSaved = file_put_contents($fullPath, $content);
-    if ($fileSaved === false) {
-      log::add(__CLASS__, 'debug', "║ Échec de l'enregistrement du fichier : " . $lien);
+    // --- Téléchargement, en flux direct vers le fichier ---
+    if (!self::downloadToFile($lien, $fullPath)) {
       return "error";
     }
 
@@ -4711,6 +4708,59 @@ class frigate extends eqLogic
     return $result;
   }
 
+
+  /**
+   * Télécharge une URL dans un fichier, en flux direct, sans charger le média en mémoire.
+   *
+   * Un clip en haute définition dépasse plusieurs centaines de Mo : chargé en mémoire, il épuisait memory_limit
+   * et le processus PHP s'arrêtait, sans média ni actions. Le flux est écrit dans un fichier temporaire, renommé
+   * à la fin : un téléchargement interrompu ne laisse pas de fichier partiel, que saveURL() prendrait ensuite pour
+   * un fichier complet. Une réponse HTTP d'erreur (404…) fait échouer l'ouverture du flux.
+   *
+   * @param string $url  URL du média
+   * @param string $path Chemin du fichier de destination
+   * @return bool
+   */
+  private static function downloadToFile($url, $path)
+  {
+    // timeout : durée maximum sans recevoir de données, pas la durée totale du téléchargement
+    $context = stream_context_create(['http' => ['timeout' => self::FRIGATE_TIMEOUT]]);
+    $in = @fopen($url, 'rb', false, $context);
+    if ($in === false) {
+      log::add(__CLASS__, 'debug', "║ Le fichier n'existe pas ou une erreur s'est produite : " . $url);
+      return false;
+    }
+
+    $tmpPath = $path . '.part';
+    $out = @fopen($tmpPath, 'wb');
+    if ($out === false) {
+      fclose($in);
+      log::add(__CLASS__, 'debug', "║ Échec de l'enregistrement du fichier : " . $url);
+      return false;
+    }
+
+    $bytes = stream_copy_to_stream($in, $out);
+    $meta = stream_get_meta_data($in);
+    fclose($in);
+    $closed = fclose($out);
+
+    // Connexion coupée en route : moins d'octets que n'en annonce le serveur. Le dernier Content-Length est
+    // celui de la réponse finale, après une éventuelle redirection.
+    $expected = null;
+    foreach ((array) ($meta['wrapper_data'] ?? []) as $header) {
+      if (preg_match('/^Content-Length:\s*(\d+)/i', (string) $header, $matches) === 1) {
+        $expected = (int) $matches[1];
+      }
+    }
+    $truncated = $expected !== null && $bytes !== $expected;
+
+    if ($bytes === false || $bytes === 0 || $truncated || !empty($meta['timed_out']) || !$closed || !rename($tmpPath, $path)) {
+      @unlink($tmpPath);
+      log::add(__CLASS__, 'debug', "║ Échec du téléchargement du fichier : " . $url);
+      return false;
+    }
+    return true;
+  }
 
   /**
    * Retire les accents et met en minuscules, pour comparer labels et zones.

@@ -11,6 +11,7 @@
 - Configuration : boutons pour régénérer la clé des liens « SNAPSHOT LIVE » et pour révoquer les liens des médias déjà envoyés
 - Les appels à Frigate et les commandes HTTP ont un délai maximum : un serveur ou une caméra qui ne répond pas ne bloque plus Jeedom
 - JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau
+- Les clips volumineux (caméras 2K/4K, longues détections) sont téléchargés sans saturer la mémoire de PHP : le média est enregistré et les actions s'exécutent
 
 # 18/11/2026 Beta 1.6.1
 - Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
