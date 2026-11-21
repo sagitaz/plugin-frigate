@@ -345,6 +345,8 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 
 Les liens **#snapshot#**, **#clip#**, **#thumbnail#** et **#preview#** s'ouvrent sans connexion à Jeedom : chacun porte une signature qui n'ouvre que son fichier, et expire après la durée **Validité des liens des médias** de la configuration du plugin. Les tags **_path** donnent le chemin du fichier sur le disque, pour les plugins qui l'envoient en pièce jointe. Pour révoquer tous les liens déjà envoyés avant leur expiration, utilisez le bouton **Révoquer les liens** de la configuration du plugin (Sécurité des liens).
 
+Par sécurité, les valeurs des tags sont nettoyées avant d'être écrites dans l'action : les **#** sont retirés et une parenthèse ouvrante est séparée du mot qui la précède par un espace (« personne(adulte) » devient « personne (adulte) »). Le label ou la description d'un évènement peuvent en effet être écrits par quiconque joint votre serveur Frigate, et Jeedom exécute les fonctions écrites dans les options d'une action. Vos propres fonctions restent utilisables, par exemple **round(#score#)**.
+
 
 
 ### Exemple de notifications :

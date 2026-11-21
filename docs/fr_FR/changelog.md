@@ -5,6 +5,10 @@
 >S'il n'y a pas d'information sur la mise à jour, c'est que celle-ci concerne uniquement de la mise à jour de documentation, de traduction ou de texte.
 
 # 21/11/2026 Beta 1.6.2
+- Correctif de sécurité critique : le label, le sous-label, la description ou les zones d'un évènement ne peuvent plus exécuter de code sur Jeedom à travers les tags des actions (#label#, #description#, #jeemate#…)
+- Correctif de sécurité : un utilisateur au profil restreint ne voit plus que les images et les médias des caméras sur lesquelles il a des droits
+- Correctif de sécurité : le proxy d'images refuse les chemins qui sortent de l'API de Frigate, et les logs ne sont demandés que pour Frigate, go2rtc et nginx
+- Les appels à Frigate et les commandes HTTP ont un délai maximum : un serveur ou une caméra qui ne répond pas ne bloque plus Jeedom
 - Correctif de sécurité : la clé des liens « SNAPSHOT LIVE » n'ouvre plus que l'image en direct des caméras, et non les captures des évènements ou des enregistrements
 - Correctif de sécurité : les noms de caméras, les labels et la version de Frigate sont échappés dans les pages du plugin
 - Correctif de sécurité : les logs de Frigate (Frigate, go2rtc, nginx) sont échappés à l'affichage

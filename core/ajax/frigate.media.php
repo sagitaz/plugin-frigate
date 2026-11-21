@@ -87,6 +87,9 @@ if (!isConnect()) {
   } else {
     frigateMediaFail(403);
   }
+} elseif (!frigate::sessionSeesAllCameras() && !frigate::sessionCanSeeCamera(frigate::mediaCamera($file))) {
+  // Profil restreint : seulement les médias des caméras sur lesquelles l'utilisateur a des droits
+  frigateMediaFail(403);
 }
 @session_write_close();
 

@@ -31,6 +31,11 @@ class frigate extends eqLogic
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
 
+  /** Délai de connexion au serveur Frigate, en secondes. */
+  private const FRIGATE_CONNECT_TIMEOUT = 5;
+  /** Durée maximum d'une requête à l'API de Frigate, en secondes : large, pour un serveur lent ou chargé. */
+  private const FRIGATE_TIMEOUT = 60;
+
   /** Fichier témoin du dossier data, interrogé par checkDataFolderProtection(). */
   private const DATA_WITNESS_FILE = 'controle.txt';
   /** Texte du fichier témoin, qui distingue le fichier servi d'une page renvoyée pour toute URL. */
@@ -1005,6 +1010,11 @@ class frigate extends eqLogic
       || (string) ($parts['port'] ?? '') !== $port || strpos($path, '/api/') !== 0) {
       return null;
     }
+    // Sans remontée : curl et le nginx de Frigate ramènent /api/../ (même encodé en %2e ou avec « \ ») à la
+    // racine du serveur, hors de l'API
+    if (preg_match('#\.\.|%2e|%2f|%5c|\\\\#i', $path) === 1) {
+      return null;
+    }
     return $scheme . '://' . $host . ':' . $port . $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
   }
 
@@ -1031,6 +1041,58 @@ class frigate extends eqLogic
       return null;
     }
     return $matches[1];
+  }
+
+  /**
+   * Indique si l'utilisateur connecté voit toutes les caméras : profils admin et utilisateur.
+   *
+   * Un utilisateur au profil restreint ne voit que les caméras sur lesquelles il a des droits (voir
+   * sessionCanSeeCamera()).
+   *
+   * @return bool
+   */
+  public static function sessionSeesAllCameras()
+  {
+    return isConnect('admin') || isConnect('user');
+  }
+
+  /**
+   * Indique si l'utilisateur connecté peut voir une caméra : tous les droits pour les profils admin et
+   * utilisateur, le droit de lecture sur l'équipement pour un profil restreint (eqLogic::hasRight()).
+   *
+   * @param string|null $camera Nom de la caméra dans Frigate
+   * @return bool
+   */
+  public static function sessionCanSeeCamera($camera)
+  {
+    if (!self::isSafeCameraName($camera)) {
+      return false;
+    }
+    $eqCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $camera, 'frigate');
+    return is_object($eqCamera) && $eqCamera->getConfiguration('name') === $camera && $eqCamera->hasRight('r');
+  }
+
+  /**
+   * Retourne la caméra d'un fichier du dossier data : son dossier, ou pour une capture manuelle
+   * (snapshots/<event_id>_snapshot.jpg), la caméra de son évènement.
+   *
+   * @param string $file Fichier relatif au dossier data
+   * @return string|null Nom de la caméra, null si elle est introuvable
+   */
+  public static function mediaCamera($file)
+  {
+    $parts = explode('/', (string) $file, 2);
+    if (count($parts) !== 2) {
+      return null;
+    }
+    if ($parts[0] !== 'snapshots') {
+      return $parts[0];
+    }
+    if (preg_match('/^(.+)_snapshot\.[A-Za-z0-9]+$/', $parts[1], $matches) !== 1 || !self::isSafeEventId($matches[1])) {
+      return null;
+    }
+    $event = frigate_events::byEventId($matches[1]);
+    return is_object($event) ? $event->getCamera() : null;
   }
 
   /**
@@ -1143,6 +1205,9 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    // Délais larges : un Frigate lent ou chargé répond encore, un Frigate injoignable ne bloque pas le cron
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
       if ($method !== 'DELETE') {
@@ -1236,6 +1301,8 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
     $data = curl_exec($ch);
 
@@ -1410,6 +1477,11 @@ class frigate extends eqLogic
    */
   public static function getLogs($service)
   {
+    // Seuls les services affichés par la fenêtre des logs : le nom entre dans l'URL de l'API
+    if (!in_array($service, ['frigate', 'go2rtc', 'nginx'], true)) {
+      log::add(__CLASS__, 'warning', "║ Logs demandés pour un service inconnu : " . json_encode(self::plainText((string) $service)));
+      return null;
+    }
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/logs/" . $service;
     $logs = self::getcURL("Logs", $resultURL, null, false);
@@ -3740,7 +3812,11 @@ class frigate extends eqLogic
    */
   public static function editHTTP($cmdId, $link)
   {
-    $cmd = cmd::byid($cmdId);
+    // Seulement une commande HTTP du plugin : l'identifiant vient de la requête
+    $cmd = cmd::byId($cmdId);
+    if (!is_object($cmd) || $cmd->getEqType() !== __CLASS__ || strpos((string) $cmd->getLogicalId(), 'action_http') !== 0) {
+      throw new Exception(__("Commande HTTP introuvable : ", __FILE__) . (int) $cmdId);
+    }
     $cmd->setConfiguration("request", $link);
     $cmd->save();
     log::add("frigate", 'debug', '║ commande mise à jour');
@@ -4221,6 +4297,56 @@ class frigate extends eqLogic
   }
 
   /**
+   * Neutralise la valeur d'un tag avant de l'écrire dans les options d'une action.
+   *
+   * Le core passe chaque option dans scenarioExpression::setTags() : un texte « nom(arguments) » y appelle la
+   * fonction PHP de ce nom (system(), shell_exec()…), et « #[Objet][Équipement][Commande]# » ou « #12# » y est
+   * remplacé par la valeur de la commande. Or le label, le sous-label et la description d'un évènement peuvent
+   * être écrits par quiconque joint l'API de Frigate, qui n'exige aucune authentification. Les « # » sont donc
+   * retirés, et un espace sépare toute parenthèse ouvrante du mot qui la précède : « nom (arguments) » n'est plus
+   * un appel. Une valeur qui commence par une parenthèse en reçoit un aussi, pour ne pas former d'appel avec le
+   * texte de l'option qui la précède.
+   *
+   * @param mixed $value Valeur du tag
+   * @return string
+   */
+  public static function actionTagValue($value)
+  {
+    $value = str_replace('#', '', (string) $value);
+    $value = preg_replace('/([A-Za-z0-9_])\(/', '$1 (', $value);
+    if (strpos($value, '(') === 0) {
+      $value = ' ' . $value;
+    }
+    return $value;
+  }
+
+  /**
+   * Sépare d'un espace les tags du plugin suivis d'une parenthèse, dans les options d'une action.
+   *
+   * Sans cela, « #label#(… » donnerait « system(… » pour un label « system » : la valeur du tag nommerait la
+   * fonction appelée par le core (voir actionTagValue()).
+   *
+   * @param mixed    $options Options de l'action
+   * @param string[] $tags    Tags du plugin, par exemple #label#
+   * @return mixed Options, chaînes modifiées, le reste tel quel
+   */
+  private static function protectActionOptions($options, array $tags)
+  {
+    if (!is_array($options)) {
+      return $options;
+    }
+    $pattern = '/(' . implode('|', array_map(function ($tag) {
+      return preg_quote($tag, '/');
+    }, $tags)) . ')\(/';
+    foreach ($options as $key => $option) {
+      if (is_string($option)) {
+        $options[$key] = preg_replace($pattern, '$1 (', $option);
+      }
+    }
+    return $options;
+  }
+
+  /**
    * Exécute les actions configurées sur un équipement pour un évènement.
    *
    * La condition principale de l'équipement (conditionIf), quand elle est vraie, bloque les actions, sauf
@@ -4300,7 +4426,7 @@ class frigate extends eqLogic
     if (is_string($conditionIf) && $conditionIf !== '') {
       $conditionIf = str_replace(
         ['#camera#', '#score#', '#top_score#'],
-        [$camera, $score, $topScore],
+        [self::actionTagValue($camera), (string) (float) $score, (string) (float) $topScore],
         $conditionIf
       );
       if (jeedom::evaluateExpression($conditionIf)) {
@@ -4354,7 +4480,7 @@ class frigate extends eqLogic
         $actionCondition = $action['actionCondition'];
         $actionCondition = str_replace(
           ['#camera#', '#score#', '#top_score#'],
-          [$camera, $score, $topScore],
+          [self::actionTagValue($camera), (string) (float) $score, (string) (float) $topScore],
           $actionCondition
         );
         if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
@@ -4429,10 +4555,12 @@ class frigate extends eqLogic
         $tags = ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#', '#attributes#', '#sublabel#'];
         $values = [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath, $attributes, $sublabel];
 
+        // Les options passent ensuite par le moteur d'expressions de Jeedom : les valeurs, en partie écrites par
+        // quiconque joint l'API de Frigate, y sont neutralisées (voir actionTagValue() et protectActionOptions())
         $options = str_replace(
           $tags,
-          array_map('strval', $values),
-          $options
+          array_map([__CLASS__, 'actionTagValue'], $values),
+          self::protectActionOptions($options, $tags)
         );
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
@@ -5399,6 +5527,8 @@ class frigate extends eqLogic
     $ch = curl_init($resultURL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     $curlResponse = curl_exec($ch);
 
@@ -5463,6 +5593,8 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-yaml'));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $frigateConfiguration);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     log::add(__CLASS__, 'debug', '║ sendFrigateConfiguration :: envoi de ' . strlen((string) $frigateConfiguration) . ' octets');
     $curlResponse = curl_exec($ch);
@@ -6118,6 +6250,13 @@ class frigateCmd extends cmd
     curl_setopt($ch, CURLOPT_URL, $link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    // Une caméra qui ne répond pas ne bloque pas l'exécution au-delà de 30 s ; HTTP et HTTPS seulement, y
+    // compris après une redirection
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
     curl_setopt($ch, CURLOPT_VERBOSE, true);
     curl_setopt($ch, CURLOPT_STDERR, $verbose); // Rediriger verbose vers ce flux temporaire
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST); // Utiliser l'authentification Digest

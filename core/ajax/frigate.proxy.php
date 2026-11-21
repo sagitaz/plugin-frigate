@@ -13,7 +13,15 @@ if (!isConnect()) {
         header('HTTP/1.1 403 Forbidden');
         exit;
     }
+} elseif (!frigate::sessionSeesAllCameras()) {
+    # Profil restreint : seulement l'image en direct des caméras sur lesquelles l'utilisateur a des droits
+    $camera = $url === null ? null : frigate::proxyKeyCamera($url);
+    if ($camera === null || !frigate::sessionCanSeeCamera($camera)) {
+        header('HTTP/1.1 403 Forbidden');
+        exit;
+    }
 }
+@session_write_close();
 
 if ($url === null) {
     error_log('URL non valide ou non fournie');
@@ -33,6 +41,7 @@ curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
 curl_setopt($ch, CURLOPT_HEADER, true);
 curl_setopt($ch, CURLOPT_FOLLOWLOCATION, false);
 curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 4);
+curl_setopt($ch, CURLOPT_TIMEOUT, 15); # une image ; le proxy est joignable avec la seule clé d'une caméra
 curl_setopt($ch, CURLOPT_BUFFERSIZE, 12800);
 curl_setopt($ch, CURLOPT_NOPROGRESS, false);
 curl_setopt($ch, CURLOPT_PROGRESSFUNCTION, function ($DownloadSize, $Downloaded, $UploadSize, $Uploaded) {
