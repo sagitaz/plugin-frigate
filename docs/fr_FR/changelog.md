@@ -11,6 +11,7 @@
 - Correctif de sécurité : les valeurs et les noms de commandes reçus par MQTT (disponibilité, profil, statut des flux, classification, statistiques) ne peuvent plus contenir de HTML, et seule une version de Frigate valide est enregistrée
 - Correctif de sécurité : chaque caméra a sa propre clé dans son lien « SNAPSHOT LIVE », qui n'ouvre plus l'image des autres caméras
 - Correctif de sécurité : les liens des médias envoyés dans les notifications expirent, après la durée de suppression des évènements par défaut (réglage « Validité des liens des médias »)
+- Correctif de sécurité : un label ou une zone reçus de Frigate ne peuvent plus ajouter de faux champ (lien de snapshot…) dans le tag #jeemate#
 - Configuration : boutons pour régénérer la clé des liens « SNAPSHOT LIVE » et pour révoquer les liens des médias déjà envoyés
 - JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
 

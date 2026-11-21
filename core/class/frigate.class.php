@@ -4201,6 +4201,26 @@ class frigate extends eqLogic
   }
 
   /**
+   * Construit le tag #jeemate# : l'identifiant de l'évènement, puis des champs clé=valeur, séparés par « ;; ».
+   *
+   * JeeMate découpe le tag sur « ;; ». Une valeur reçue de Frigate en contenant (label d'un évènement créé par
+   * l'API, qui n'exige aucune authentification) ajouterait un faux champ, par exemple un snapshot vers un autre
+   * site : toute suite de « ; » y est réduite à un seul.
+   *
+   * @param array<string, mixed> $fields Champs dans l'ordre du tag ; la clé vide désigne l'identifiant, écrit sans « clé= »
+   * @return string
+   */
+  public static function jeemateTag(array $fields)
+  {
+    $parts = [];
+    foreach ($fields as $key => $value) {
+      $value = preg_replace('/;{2,}/', ';', (string) $value);
+      $parts[] = $key === '' ? $value : $key . '=' . $value;
+    }
+    return implode(';;', $parts);
+  }
+
+  /**
    * Exécute les actions configurées sur un équipement pour un évènement.
    *
    * La condition principale de l'équipement (conditionIf), quand elle est vraie, bloque les actions, sauf
@@ -4255,7 +4275,19 @@ class frigate extends eqLogic
     $end = $event->getEndTime() ? date("d-m-Y H:i:s", $event->getEndTime()) : $start;
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
-    $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
+    $jeemate = self::jeemateTag([
+      ''          => $eventId,
+      'start'     => $start,
+      'end'       => $end,
+      'camera'    => $camera,
+      'label'     => $label,
+      'zones'     => $zones,
+      'topScore'  => $topScore,
+      'type'      => $type,
+      'snapshot'  => $snapshot,
+      'thumbnail' => $thumbnail,
+      'clip'      => $clip,
+    ]);
     $conditionIsActived = false;
     $eqLogic = eqLogic::byId($eqLogicId);
     if (!is_object($eqLogic)) {
