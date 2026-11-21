@@ -20,7 +20,10 @@
  *
  * Paramètres :
  *   f        fichier, relatif à data/ : <caméra>/<fichier> ou snapshots/<fichier>
- *   t        signature du fichier (frigate::mediaSignature()), pour un accès sans session Jeedom
+ *   t        signature du fichier et de la date d'expiration (frigate::mediaSignature()), pour un accès sans
+ *            session Jeedom
+ *   e        date d'expiration du lien signé (timestamp). Sans elle, lien des versions 1.6.1 et 1.6.2 : accepté
+ *            pendant la durée de validité des liens (frigate::mediaLinkDays()), comptée depuis la date du fichier
  *   v        date de modification du fichier : quand elle correspond, la réponse est mise en cache longtemps
  *   download 1 pour proposer le fichier au téléchargement
  *
@@ -65,9 +68,25 @@ if (
 }
 $mimeType = $mimeTypes[strtolower($matches[1])];
 
-// Accès : session Jeedom, ou signature valide pour ce fichier (liens des notifications et de JeeMate)
-if (!isConnect() && !hash_equals(frigate::mediaSignature($file), (string) ($_GET['t'] ?? ''))) {
-  frigateMediaFail(403);
+// Accès : session Jeedom, ou signature valide et non expirée pour ce fichier (liens des notifications et de JeeMate)
+$signature = (string) ($_GET['t'] ?? '');
+$legacyLink = false;
+if (!isConnect()) {
+  if (isset($_GET['e'])) {
+    $expires = (string) $_GET['e'];
+    if (
+      preg_match('#^\d{1,12}$#', $expires) !== 1
+      || (int) $expires < time()
+      || !hash_equals(frigate::mediaSignature($file, (int) $expires), $signature)
+    ) {
+      frigateMediaFail(403);
+    }
+  } elseif (hash_equals(frigate::mediaSignature($file), $signature)) {
+    // Lien sans date : son âge est contrôlé sur la date du fichier, plus bas
+    $legacyLink = true;
+  } else {
+    frigateMediaFail(403);
+  }
 }
 @session_write_close();
 
@@ -86,6 +105,9 @@ $size = filesize($path);
 $mtime = filemtime($path);
 if ($size === false || $mtime === false) {
   frigateMediaFail(404);
+}
+if ($legacyLink && $mtime + frigate::mediaLinkDays() * 86400 < time()) {
+  frigateMediaFail(403);
 }
 $etag = '"' . dechex($mtime) . '-' . dechex($size) . '"';
 $lastModified = gmdate('D, d M Y H:i:s', $mtime) . ' GMT';

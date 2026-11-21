@@ -79,6 +79,7 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur Jeedom 4.4.19,
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
+- **Validité des liens des médias** : Nombre de jours pendant lesquels les liens des snapshots, clips, miniatures et aperçus envoyés dans les notifications (tags #snapshot#, #clip#, #jeemate#…) s'ouvrent sans connexion à Jeedom. Vide, c'est la durée de suppression des évènements, qui est aussi le maximum : un lien ne survit pas à son fichier. Les pages du plugin et l'historique de JeeMate créent un nouveau lien à chaque affichage et ne sont pas concernés.
 - **Taille des dossiers** : Taille maximum du dossier data, en Mo (500 Mo par défaut). Au-delà, les évènements les plus anciens sont supprimés jusqu'à repasser sous la limite.
 
 Les évènements mis en favori ne sont jamais supprimés, ni par l'ancienneté ni par la taille. Les captures manuelles suivent les mêmes règles que les évènements : mettez-les en favori pour les garder.
@@ -96,6 +97,10 @@ Un évènement dont la fin n'a jamais été reçue (coupure MQTT, redémarrage d
 - **Enregistrer une vidéo** : oui par défaut.
 - **Durée de la vidéo** : 40 secondes par défaut.
 - **Score** : 0 par défaut.
+
+#### Sécurité des liens
+- **Liens « SNAPSHOT LIVE »** : le bouton **Régénérer la clé** change la clé des liens vers l'image en direct. Les anciens liens ne s'ouvrent plus sans connexion à Jeedom ; les commandes SNAPSHOT LIVE reçoivent les nouveaux. Une application qui a enregistré le lien (JeeMate…) doit relire la commande.
+- **Liens des médias déjà envoyés** : le bouton **Révoquer les liens** rend inutilisables tous les liens des médias déjà envoyés dans les notifications, avant leur expiration. À utiliser si un lien a été transféré à quelqu'un qui ne devait pas le voir.
 
 #### Fonctionnalités
 - **Cron** : sélectionner le cron voulu.
@@ -188,7 +193,7 @@ Les commandes **URL snapshot**, **URL clip** et **URL thumbnail** contiennent le
 L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 - **RTSP** : le lien du flux vidéo de la caméra (voir la section Flux vidéo).
-- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra. Il contient une clé qui permet d'afficher l'image sans être connecté à Jeedom : ne le partagez pas.
+- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra. Il contient une clé propre à la caméra, qui permet d'afficher son image en direct, et rien d'autre, sans être connecté à Jeedom : ne le partagez pas. En cas de fuite, régénérez la clé dans la configuration du plugin (Sécurité des liens).
 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
@@ -338,7 +343,7 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **#duree#** : durée de l'évènement
 - **#jeemate#** : voir explications plus bas
 
-Les liens **#snapshot#**, **#clip#**, **#thumbnail#** et **#preview#** s'ouvrent sans connexion à Jeedom : chacun porte une signature qui n'ouvre que son fichier. Les tags **_path** donnent le chemin du fichier sur le disque, pour les plugins qui l'envoient en pièce jointe. Pour révoquer tous les liens déjà envoyés, supprimez la clé **mediaKey** de la configuration du plugin : une nouvelle clé est créée au lien suivant.
+Les liens **#snapshot#**, **#clip#**, **#thumbnail#** et **#preview#** s'ouvrent sans connexion à Jeedom : chacun porte une signature qui n'ouvre que son fichier, et expire après la durée **Validité des liens des médias** de la configuration du plugin. Les tags **_path** donnent le chemin du fichier sur le disque, pour les plugins qui l'envoient en pièce jointe. Pour révoquer tous les liens déjà envoyés avant leur expiration, utilisez le bouton **Révoquer les liens** de la configuration du plugin (Sécurité des liens).
 
 
 

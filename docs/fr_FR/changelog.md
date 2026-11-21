@@ -9,6 +9,9 @@
 - Correctif de sécurité : les noms de caméras, les labels et la version de Frigate sont échappés dans les pages du plugin
 - Correctif de sécurité : les logs de Frigate (Frigate, go2rtc, nginx) sont échappés à l'affichage
 - Correctif de sécurité : les valeurs et les noms de commandes reçus par MQTT (disponibilité, profil, statut des flux, classification, statistiques) ne peuvent plus contenir de HTML, et seule une version de Frigate valide est enregistrée
+- Correctif de sécurité : chaque caméra a sa propre clé dans son lien « SNAPSHOT LIVE », qui n'ouvre plus l'image des autres caméras
+- Correctif de sécurité : les liens des médias envoyés dans les notifications expirent, après la durée de suppression des évènements par défaut (réglage « Validité des liens des médias »)
+- Configuration : boutons pour régénérer la clé des liens « SNAPSHOT LIVE » et pour révoquer les liens des médias déjà envoyés
 - JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
 
 # 18/11/2026 Beta 1.6.1

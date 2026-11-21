@@ -101,6 +101,18 @@ try {
         ajax::success($result);
     }
 
+    if (init('action') == 'regenerateProxyKey') {
+        // Nouvelle clé du proxy : les liens « SNAPSHOT LIVE » sont réécrits, les anciens ne s'ouvrent plus
+        frigate::regenerateProxyKey();
+        ajax::success();
+    }
+
+    if (init('action') == 'revokeMediaLinks') {
+        // Nouvelle clé des médias : les liens signés déjà envoyés ne s'ouvrent plus
+        frigate::revokeMediaLinks();
+        ajax::success();
+    }
+
     if (init('action') == 'frigateDebug') {
         $data = frigate::showEvents(false, true, true);
 

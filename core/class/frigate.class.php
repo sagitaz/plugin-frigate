@@ -497,8 +497,8 @@ class frigate extends eqLogic
 
   /**
    * Retourne le lien « SNAPSHOT LIVE » de la caméra : le proxy d'images sur l'URL de la dernière image, avec la
-   * clé du proxy, pour les applications qui l'appellent sans session Jeedom. Adresse externe de Jeedom, à
-   * défaut l'interne.
+   * clé de la caméra (proxyCameraKey()), pour les applications qui l'appellent sans session Jeedom. Adresse
+   * externe de Jeedom, à défaut l'interne.
    *
    * @return string
    */
@@ -508,7 +508,7 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-    return $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $this->getConfiguration('img') . "&key=" . self::getProxyKey();
+    return $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $this->getConfiguration('img') . "&key=" . self::proxyCameraKey($this->getConfiguration('name'));
   }
 
   /**
@@ -964,10 +964,10 @@ class frigate extends eqLogic
   }
 
   /**
-   * Retourne la clé qui ouvre le proxy d'images sans session Jeedom, et la crée au premier appel.
+   * Retourne la clé du proxy d'images, et la crée au premier appel.
    *
-   * Elle figure dans le lien « SNAPSHOT LIVE », que les applications appellent sans session ; elle ne donne
-   * accès qu'au proxy, donc qu'aux images de l'API du serveur Frigate configuré.
+   * Elle ne figure dans aucun lien : elle sert à tirer la clé de chaque caméra (proxyCameraKey()), qui ouvre
+   * sans session Jeedom l'image en direct de cette seule caméra.
    *
    * @return string
    */
@@ -1009,22 +1009,55 @@ class frigate extends eqLogic
   }
 
   /**
-   * Indique si une URL de proxy peut être ouverte avec la clé du proxy, sans session Jeedom.
+   * Retourne la caméra dont une URL de proxy désigne l'image en direct, seule cible ouverte sans session Jeedom.
    *
-   * La clé figure dans les liens « SNAPSHOT LIVE », visibles des applications et des utilisateurs non admin.
-   * Elle n'ouvre que l'image en direct d'une caméra du plugin (/api/<caméra>/latest.jpg ou .webp) : ni les
+   * La clé d'une caméra figure dans son lien « SNAPSHOT LIVE », visible des applications et des utilisateurs non
+   * admin. Elle n'ouvre que l'image en direct de cette caméra (/api/<caméra>/latest.jpg ou .webp) : ni les
    * captures des évènements, ni les images des enregistrements, que l'API Frigate sert aussi.
    *
    * @param string $url URL retournée par proxyTarget()
-   * @return bool
+   * @return string|null Nom de la caméra dans Frigate, null si l'URL ne désigne pas l'image en direct d'une
+   *                     caméra du plugin
    */
-  public static function isProxyKeyTarget($url)
+  public static function proxyKeyCamera($url)
   {
     $path = (string) parse_url((string) $url, PHP_URL_PATH);
     if (preg_match('#^/api/([A-Za-z0-9_-]+)/latest\.(jpg|webp)$#', $path, $matches) !== 1) {
-      return false;
+      return null;
     }
-    return is_object(eqLogic::byLogicalId('eqFrigateCamera_' . $matches[1], 'frigate'));
+    $eqCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $matches[1], 'frigate');
+    // Comparaison stricte : la recherche en base ignore la casse, la clé de la caméra non
+    if (!is_object($eqCamera) || $eqCamera->getConfiguration('name') !== $matches[1]) {
+      return null;
+    }
+    return $matches[1];
+  }
+
+  /**
+   * Retourne la clé du lien « SNAPSHOT LIVE » d'une caméra, tirée de la clé du proxy.
+   *
+   * Chaque caméra a sa propre clé : le lien d'une caméra n'ouvre pas l'image des autres. Régénérer la clé du
+   * proxy change celles de toutes les caméras (voir regenerateProxyKey()).
+   *
+   * @param string $camera Nom de la caméra dans Frigate
+   * @return string
+   */
+  public static function proxyCameraKey($camera)
+  {
+    return substr(hash_hmac('sha256', 'proxy|' . (string) $camera, self::getProxyKey()), 0, 32);
+  }
+
+  /**
+   * Remplace la clé du proxy et réécrit les liens « SNAPSHOT LIVE » : les anciens liens ne s'ouvrent plus sans
+   * session Jeedom.
+   *
+   * @return void
+   */
+  public static function regenerateProxyKey()
+  {
+    config::save('proxyKey', config::genKey(32), 'frigate');
+    self::refreshSnapshotLinks();
+    log::add(__CLASS__, 'info', "║ Clé du proxy régénérée, liens « SNAPSHOT LIVE » mis à jour.");
   }
 
   /**
@@ -2261,12 +2294,68 @@ class frigate extends eqLogic
   /**
    * Retourne la signature d'un fichier du dossier data, qui ouvre ce seul fichier sans session Jeedom.
    *
-   * @param string $file Fichier relatif au dossier data, par exemple camera/1718992955.613576-zulr2q_clip.mp4
+   * La date d'expiration entre dans la signature : elle ne peut pas être modifiée dans le lien. Sans date,
+   * c'est la signature des liens des versions 1.6.1 et 1.6.2, que frigate.media.php n'accepte que pendant la
+   * durée de validité des liens comptée depuis la date du fichier.
+   *
+   * @param string   $file    Fichier relatif au dossier data, par exemple camera/1718992955.613576-zulr2q_clip.mp4
+   * @param int|null $expires Timestamp d'expiration du lien, null pour la signature sans date
    * @return string
    */
-  public static function mediaSignature($file)
+  public static function mediaSignature($file, $expires = null)
   {
-    return substr(hash_hmac('sha256', (string) $file, self::getMediaKey()), 0, 32);
+    $data = $expires === null ? (string) $file : (string) $file . '|' . (int) $expires;
+    return substr(hash_hmac('sha256', $data, self::getMediaKey()), 0, 32);
+  }
+
+  /**
+   * Retourne la durée de validité des liens signés des médias, en jours.
+   *
+   * Par défaut, la durée de conservation des évènements : un lien n'a pas à survivre à son fichier. Le réglage
+   * mediaLinkDays ne peut que la raccourcir. La conservation suit la règle de la purge (cleanAllOldestFiles()) :
+   * remove_days, porté à recovery_days s'il est plus petit, 7 jours si elle est invalide.
+   *
+   * @return int
+   */
+  public static function mediaLinkDays()
+  {
+    $retention = (int) config::byKey('remove_days', 'frigate', 7);
+    if ($retention <= 0) {
+      $retention = 7;
+    }
+    $retention = max($retention, (int) config::byKey('recovery_days', 'frigate', 7));
+
+    $days = config::byKey('mediaLinkDays', 'frigate', '');
+    if (!is_numeric($days) || (int) $days <= 0) {
+      return $retention;
+    }
+    return min((int) $days, $retention);
+  }
+
+  /**
+   * Retourne la date d'expiration d'un lien signé créé maintenant.
+   *
+   * Arrondie au jour suivant : un même média garde le même lien toute la journée, et le navigateur ou JeeMate le
+   * gardent en cache. La validité réelle est donc comprise entre mediaLinkDays() jours et un jour de plus.
+   *
+   * @return int Timestamp
+   */
+  public static function mediaLinkExpiry()
+  {
+    return (intdiv(time() + self::mediaLinkDays() * 86400, 86400) + 1) * 86400;
+  }
+
+  /**
+   * Remplace la clé qui signe les liens des médias : tous les liens déjà envoyés (notifications…) cessent de
+   * s'ouvrir sans session Jeedom. Les liens de showEvents() et de l'évènement frigate::event, recalculés à
+   * chaque appel, ne sont pas concernés.
+   *
+   * @return void
+   */
+  public static function revokeMediaLinks()
+  {
+    config::save('mediaKey', config::genKey(32), 'frigate');
+    log::add(__CLASS__, 'info', "║ Clé des médias régénérée, liens signés déjà envoyés révoqués.");
   }
 
   /**
@@ -2290,7 +2379,9 @@ class frigate extends eqLogic
     $file = substr($url, strlen('/plugins/frigate/data/'));
     $params = [];
     if ($signed) {
-      $params[] = 't=' . self::mediaSignature($file);
+      $expires = self::mediaLinkExpiry();
+      $params[] = 'e=' . $expires;
+      $params[] = 't=' . self::mediaSignature($file, $expires);
     }
     $mtime = @filemtime($path);
     if ($mtime !== false) {
