@@ -5187,7 +5187,8 @@ class frigate extends eqLogic
   /**
    * Traite les données MQTT d'une caméra et met à jour les commandes associées.
    *
-   * Un message d'objet qui ne porte pas de nombre d'objets, comme le snapshot, est ignoré (voir detectionCount()).
+   * Seuls les compteurs /active alimentent les détections ; les compteurs de présence et les snapshots sont
+   * ignorés (voir detectionCount()).
    *
    * @param eqLogic              $eqCamera Équipement caméra
    * @param string               $key      Nom de la caméra
@@ -5324,20 +5325,21 @@ class frigate extends eqLogic
   }
 
   /**
-   * Retourne le nombre d'objets porté par un message MQTT de détection.
+   * Retourne le nombre d'objets actifs porté par un message MQTT de détection.
    *
-   * Frigate publie ce nombre sur <caméra>/<objet> et sur <caméra>/<objet>/active ; le second arrive sous la
-   * forme d'un tableau à clé active. Le message <caméra>/<objet>/snapshot, un tableau à clé snapshot, ne porte
-   * pas de nombre : Frigate le republie aussi quand l'objet n'est plus détecté.
+   * MQTT Manager transmet <caméra>/<objet>/active sous la forme d'un tableau à clé active. Le compteur
+   * scalaire <caméra>/<objet> inclut les objets immobiles : l'utiliser écraserait l'état d'activité avec la
+   * présence. Il est donc ignoré, comme <caméra>/<objet>/snapshot. Cela vaut aussi pour l'objet all.
    *
    * @param mixed $innerValue Valeur reçue pour l'objet
-   * @return int|null Nombre d'objets, null si le message n'en porte pas
+   * @return int|null Nombre d'objets actifs, null si le message n'en porte pas
    */
   private static function detectionCount($innerValue)
   {
-    if (is_array($innerValue)) {
-      $innerValue = $innerValue['active'] ?? null;
+    if (!is_array($innerValue)) {
+      return null;
     }
+    $innerValue = $innerValue['active'] ?? null;
     return is_numeric($innerValue) ? (int) $innerValue : null;
   }
 
