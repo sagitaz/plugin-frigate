@@ -163,7 +163,8 @@ class frigate extends eqLogic
    * évènements restés en type new ou update. Récupère ensuite les évènements et les statistiques de Frigate si
    * la fréquence est activée dans la configuration et que les commandes info_Cron et info_enabled de
    * l'équipement Events, quand elles existent, sont à 1. Avec MQTT Manager opérationnel, les crons 1, 5, 10 et
-   * 15 minutes ne font rien. Un cron qui trouve le drapeau cron::run levé ne s'exécute pas et le rabaisse.
+   * 15 minutes ne font rien. Un cron ne s'exécute pas tant qu'un autre tourne (drapeau cron::run, périmé après
+   * 15 minutes).
    *
    * @param string $frequence Clé de configuration de la fréquence, par exemple functionality::cron5::enable
    * @return void
@@ -172,63 +173,67 @@ class frigate extends eqLogic
   {
     log::add(__CLASS__, 'debug', "╔════════════════════════ :fg-success:START CRON:/fg: ════════════════════════");
     log::add(__CLASS__, 'debug', "║ Exécution du cron : {$frequence}");
-    if (config::byKey("cron::run", 'frigate')) {
-      log::add(__CLASS__, 'debug', "║ Un cron est deja en cours d'exécution, on n'exécute pas de nouveau.");
-      config::save('cron::run', 0, 'frigate');
+    $shortCron = in_array($frequence, [
+      'functionality::cron::enable',
+      'functionality::cron5::enable',
+      'functionality::cron10::enable',
+      'functionality::cron15::enable',
+    ], true);
+
+    // Si on utilise MQTT2, les crons 1, 5, 10 et 15 ne sont pas utilisés. Testé avant le drapeau cron::run,
+    // que ces crons ne doivent ni lever ni baisser pendant qu'un cron plus long tourne.
+    if ($shortCron && class_exists('mqtt2') && self::deamon_info()['launchable'] === 'ok') {
+      log::add(__CLASS__, 'debug', "║ Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
+      log::add(__CLASS__, 'debug', "╚════════════════════════ END CRON ═══════════════════");
+      return;
+    }
+
+    // cron::run porte l'heure de démarrage du cron en cours. Un cron qui le trouvait levé le baissait : le
+    // suivant démarrait alors pendant que le premier tournait encore. Il est périmé après 15 minutes, pour un
+    // cron arrêté en route ; l'ancienne valeur 1 l'est d'emblée.
+    $running = (int) config::byKey('cron::run', 'frigate', 0);
+    if ($running > time() - 900) {
+      log::add(__CLASS__, 'debug', "║ Un cron est en cours d'exécution depuis " . (time() - $running) . " s, on n'exécute pas de nouveau.");
       log::add(__CLASS__, 'debug', "╚════════════════════════ END CRON ════════════════════════");
       return;
     }
-    config::save('cron::run', 1, 'frigate');
-    // Si on utilise MQTT2, les crons 1, 5, 10 et 15 ne sont pas utilisés
-    if (class_exists('mqtt2')) {
-      $deamon_info = self::deamon_info();
-      if ($deamon_info['launchable'] === 'ok' && (
-        $frequence === "functionality::cron::enable" ||
-        $frequence === "functionality::cron5::enable" ||
-        $frequence === "functionality::cron10::enable" ||
-        $frequence === "functionality::cron15::enable")) {
-        log::add(__CLASS__, 'debug', "║ Les crons 1, 5, 10 et 15 sont désactivés avec MQTT et ne sont pas utilisés.");
-        config::save('cron::run', 0, 'frigate');
-        log::add(__CLASS__, 'debug', "╚════════════════════════ END CRON ═══════════════════");
-        return;
+    config::save('cron::run', time(), 'frigate');
+
+    // Le drapeau est baissé même si une exception interrompt le cron : il bloquerait sinon les suivants
+    try {
+      // Exécution des autres fréquences et nettoyage
+      self::cleanFolderData();
+      self::cleanAllOldestFiles();
+      self::cleanFolderDataIfFull();
+
+      // Évènements incomplets et verrous, aux crons de 30 minutes et plus
+      if (!$shortCron) {
+        self::reconcileEvents();
+        self::cleanEventLocks();
       }
+
+      // Exécution des actions si Frigate est disponible
+      $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
+      if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
+        $cmd = $frigate->getCmd(null, 'info_Cron');
+        $cmdEnabled = $frigate->getCmd(null, 'info_enabled');
+        $execute = "1";
+        $enabled = "1";
+        if (is_object($cmd)) {
+          $execute = $cmd->execCmd();
+        }
+        if (is_object($cmdEnabled)) {
+          $enabled = $cmdEnabled->execCmd();
+        }
+
+        if ($execute == "1" && $enabled == "1") {
+          self::getEvents();
+          self::getStats();
+        }
+      }
+    } finally {
+      config::save('cron::run', 0, 'frigate');
     }
-
-    // Exécution des autres fréquences et nettoyage
-    self::cleanFolderData();
-    self::cleanAllOldestFiles();
-    self::cleanFolderDataIfFull();
-
-    // Évènements incomplets et verrous, aux crons de 30 minutes et plus
-    if (!($frequence === "functionality::cron::enable" ||
-      $frequence === "functionality::cron5::enable" ||
-      $frequence === "functionality::cron10::enable" ||
-      $frequence === "functionality::cron15::enable")) {
-      self::reconcileEvents();
-      self::cleanEventLocks();
-    }
-
-    // Exécution des actions si Frigate est disponible
-    $frigate = frigate::byLogicalId('eqFrigateEvents', 'frigate');
-    if (!empty($frigate) && config::byKey($frequence, 'frigate', 0) == 1) {
-      $cmd = $frigate->getCmd(null, 'info_Cron');
-      $cmdEnabled = $frigate->getCmd(null, 'info_enabled');
-      $execute = "1";
-      $enabled = "1";
-      if (is_object($cmd)) {
-        $execute = $cmd->execCmd();
-      }
-      if (is_object($cmdEnabled)) {
-        $enabled = $cmdEnabled->execCmd();
-      }
-
-      if ($execute == "1" && $enabled == "1") {
-        self::getEvents();
-        self::getStats();
-      }
-    }
-
-    config::save('cron::run', 0, 'frigate');
     log::add(__CLASS__, 'debug', "╚════════════════════════ END CRON ═══════════════════");
   }
 
@@ -1689,6 +1694,12 @@ class frigate extends eqLogic
 
     $filteredRecoveryEvents = array_values($filteredRecoveryEvents);
 
+    // Une seule attente pour tout le lot, avant le premier téléchargement : attendre pour chaque évènement
+    // allongeait un cron de plusieurs minutes, au point de chevaucher le suivant
+    if ($wait && !empty($filteredRecoveryEvents)) {
+      sleep(self::mediaDelay());
+    }
+
     foreach ($filteredRecoveryEvents as $event) {
       $lock = self::lockEvent($event['id']);
       try {
@@ -1707,7 +1718,7 @@ class frigate extends eqLogic
         // Un changement de type (new, update, end) retélécharge les médias : Frigate améliore le snapshot
         // au fil de l'évènement, celui du premier message n'est pas le définitif.
         $force = is_object($frigate) && $previousType != $eventType;
-        $infos = self::getEventinfos($mqtt, $event, $force, $eventType, $wait);
+        $infos = self::getEventinfos($mqtt, $event, $force, $eventType, false);
 
         if (!$frigate) {
           log::add(__CLASS__, 'debug', "║ Events (type=" . $eventType . ") => " . json_encode($event));
@@ -1965,11 +1976,26 @@ class frigate extends eqLogic
   }
 
   /**
+   * Retourne le délai à laisser à Frigate pour écrire les médias d'un évènement, en secondes : le réglage
+   * « Pause création fichiers », de 0 à 10, 5 par défaut ou s'il est invalide.
+   *
+   * @return int
+   */
+  private static function mediaDelay()
+  {
+    $sleep = config::byKey('sleep', 'frigate', 5);
+    if (!is_numeric($sleep) || $sleep < 0 || $sleep > 10) {
+      return 5;
+    }
+    return (int) $sleep;
+  }
+
+  /**
    * Télécharge les médias d'un évènement et prépare ses valeurs à enregistrer.
    *
-   * Attend d'abord le délai configuré (sleep, de 0 à 10 s ; 5 s si la valeur sort de cette plage) pour laisser
-   * à Frigate le temps de produire les médias, sauf avec $wait à faux. Télécharge ensuite la miniature, le
-   * snapshot, le clip (évènement de type end seulement) et l'aperçu GIF.
+   * Attend d'abord le délai configuré (voir mediaDelay()) pour laisser à Frigate le temps de produire les
+   * médias, sauf avec $wait à faux : getEvents() attend une seule fois pour tout un lot. Télécharge ensuite la
+   * miniature, le snapshot, le clip (évènement de type end seulement) et l'aperçu GIF.
    *
    * @param bool                 $mqtt  Évènement reçu par MQTT (scores à la racine) ou par l'API (scores dans data)
    * @param array<string, mixed> $event Évènement Frigate
@@ -1981,15 +2007,9 @@ class frigate extends eqLogic
   public static function getEventInfos($mqtt, $event, $force = false, $type = "end", $wait = true)
   {
     $dir = dirname(__FILE__, 3) . "/data/" . $event['camera'];
-    $sleep = config::byKey('sleep', 'frigate');
-    if ($sleep < 0 || $sleep > 10) {
-      $sleep = 5;
-    } else {
-      $sleep = intval($sleep);
-    }
     // Fonction de vérification et téléchargement
     if ($wait) {
-      sleep($sleep);
+      sleep(self::mediaDelay());
     }
     $img = self::processImage($dir, $event, true, $force);
     log::add(__CLASS__, "debug", "║ Thumbnail: " . json_encode($img));
@@ -2122,9 +2142,12 @@ class frigate extends eqLogic
         $clip = self::saveURL($event['id'], "clip", $event['camera']);
         if ($clip == "error") return ['url' => "null", 'has' => 0];
 
-        $duration = self::getVideoDuration($dir . '/' . $event['id'] . '_clip.mp4');
-        if ($duration !== false) {
-          log::add(__CLASS__, 'debug', "║ La durée de la video est de " . gmdate("H:i:s", $duration));
+        // ffmpeg ne sert qu'à cette ligne de log : lancé seulement en debug (il n'est pas toujours installé)
+        if (log::getLogLevel(__CLASS__) <= 100) {
+          $duration = self::getVideoDuration($dir . '/' . $event['id'] . '_clip.mp4');
+          if ($duration !== false) {
+            log::add(__CLASS__, 'debug', "║ La durée de la video est de " . gmdate("H:i:s", $duration));
+          }
         }
         return ['url' => $clip, 'has' => 1];
       } else {
@@ -2265,9 +2288,9 @@ class frigate extends eqLogic
   public static function getVideoDuration($filePath)
   {
     $cmd = "ffmpeg -i " . escapeshellarg($filePath) . " 2>&1";
-    $output = shell_exec($cmd);
+    $output = function_exists('shell_exec') ? shell_exec($cmd) : null;
 
-    if (preg_match('/Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})/', $output, $matches)) {
+    if (is_string($output) && preg_match('/Duration: (\d{2}):(\d{2}):(\d{2})\.(\d{2})/', $output, $matches)) {
       $hours = $matches[1];
       $minutes = $matches[2];
       $seconds = $matches[3];
@@ -2561,8 +2584,9 @@ class frigate extends eqLogic
   /**
    * Nettoie le dossier data, et le recrée s'il manque.
    *
-   * Supprime les fichiers des caméras dont l'évènement n'existe plus en base, et les captures manuelles
-   * qu'aucun évènement ne référence depuis plus d'une heure. Appelée par chaque cron (voir execCron()).
+   * Supprime les fichiers des caméras dont l'évènement n'existe pas en base, les captures manuelles qu'aucun
+   * évènement ne référence, et les téléchargements abandonnés (.part), tous après une heure : un évènement
+   * en cours d'enregistrement a déjà ses premiers médias sur le disque. Appelée par chaque cron (voir execCron()).
    *
    * @return void
    */
@@ -2574,6 +2598,9 @@ class frigate extends eqLogic
     if (file_exists($folder)) {
       $snapshotsDir = $folder . DIRECTORY_SEPARATOR . 'snapshots' . DIRECTORY_SEPARATOR;
       $referencedUrls = null;
+      // Identifiants des évènements en base, lus une fois : une requête par fichier pesait des milliers de
+      // requêtes à chaque cron, chaque minute sans MQTT
+      $knownEventIds = null;
       // Parcourt récursivement tous les fichiers et dossiers
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
@@ -2608,8 +2635,12 @@ class frigate extends eqLogic
           if (strpos($path, $folder . DIRECTORY_SEPARATOR) === 0 && $path !== $folder . DIRECTORY_SEPARATOR . basename($path)) {
             $id = self::extractID($file->getFilename());
             // Vérifier si l'id existe dans la base de données
-            $frigate = frigate_events::byEventId($id);
-            if (!$frigate) {
+            if ($knownEventIds === null) {
+              $knownEventIds = frigate_events::allEventIds();
+            }
+            // L'heure de marge couvre un évènement en cours d'enregistrement : ses médias sont téléchargés avant
+            // qu'il soit écrit en base, et ses premiers fichiers étaient supprimés pendant le téléchargement du clip
+            if (($id === null || !isset($knownEventIds[$id])) && $file->getMTime() < time() - 3600) {
               log::add(__CLASS__, 'debug', "║ Fichier " . $path . " non trouvé en database.");
               if (unlink($path)) {
                 log::add(__CLASS__, 'debug', "║ Suppresion reussie: " . $path);
@@ -4142,14 +4173,23 @@ class frigate extends eqLogic
    */
   public static function majStatsCmds($stats, $mqtt = false)
   {
+    // Les stats viennent aussi de MQTT : une partie absente ne doit pas interrompre le traitement (en PHP 8,
+    // array_filter() ou foreach sur une valeur absente lève une erreur ou un avertissement)
+    if (!is_array($stats)) {
+      log::add(__CLASS__, 'debug', "║ Stats de Frigate illisibles, ignorées.");
+      return;
+    }
     // Statistiques pour chaque eqLogic caméras
     // Mise à jour des statistiques des caméras
-    foreach ($stats['cameras'] as $cameraName => $cameraStats) {
+    foreach ((array) ($stats['cameras'] ?? []) as $cameraName => $cameraStats) {
       // Recherche equipement caméra
       $eqCamera = eqLogic::byLogicalId("eqFrigateCamera_" . $cameraName, "frigate");
-      if (is_object($eqCamera)) {
+      if (is_object($eqCamera) && is_array($cameraStats)) {
         $eqlogicCameraId = $eqCamera->getId();
         foreach ($cameraStats as $key => $value) {
+          if (!is_scalar($value)) {
+            continue;
+          }
           // Créer ou récupérer la commande
           $cmd = self::createCmd($eqlogicCameraId, $key, "numeric", "", "cameras_" . $key, "GENERIC_INFO");
           // Enregistrer la valeur de l'événement
@@ -4180,7 +4220,7 @@ class frigate extends eqLogic
     // Mise à jour des statistiques des détecteurs
     if (isset($stats['detectors']) && is_array($stats['detectors'])) {
       foreach ($stats['detectors'] as $detectorName => $detectorStats) {
-        foreach ($detectorStats as $key => $value) {
+        foreach ((array) $detectorStats as $key => $value) {
           // Créer un nom de commande en combinant le nom du détecteur et la clé
           $cmdName = $detectorName . '_' . $key;
           // Créer ou récupérer la commande
@@ -4191,10 +4231,10 @@ class frigate extends eqLogic
 
           if ($detectorName === "pid") {
             $cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "", "detectors_cpu", "GENERIC_INFO");
-            $cmdCpu->event($stats['cpu_usages'][$value]['cpu']);
+            $cmdCpu->event($stats['cpu_usages'][$value]['cpu'] ?? null);
             $cmdCpu->save();
             $cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "", "detectors_memory", "GENERIC_INFO");
-            $cmdMem->event($stats['cpu_usages'][$value]['mem']);
+            $cmdMem->event($stats['cpu_usages'][$value]['mem'] ?? null);
             $cmdMem->save();
           }
         }
@@ -4204,7 +4244,7 @@ class frigate extends eqLogic
     // Mise à jour des usages GPU
     if (isset($stats['gpu_usages']) && is_array($stats['gpu_usages'])) {
       foreach ($stats['gpu_usages'] as $gpuName => $gpuStats) {
-        foreach ($gpuStats as $key => $value) {
+        foreach ((array) $gpuStats as $key => $value) {
           // Créer un nom de commande en combinant le nom du GPU et la clé
           $cmdName = $gpuName . '_' . $key;
           // Créer ou récupérer la commande
@@ -4228,8 +4268,8 @@ class frigate extends eqLogic
 
     // Mise a jour storage
     // Filtrer les clés qui se terminent par "recordings"
-    $recordingsPaths = array_filter($stats['service']['storage'], function ($key) {
-      return preg_match('/recordings$/', $key);
+    $recordingsPaths = array_filter((array) ($stats['service']['storage'] ?? []), function ($key) {
+      return preg_match('/recordings$/', (string) $key);
     }, ARRAY_FILTER_USE_KEY);
     foreach ($recordingsPaths as $key => $value) {
       // Liste des valeurs à enregistrer
@@ -5741,6 +5781,9 @@ class frigate extends eqLogic
 
     $ch = curl_init($urlFrigate);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
+    // Sans délai, un Frigate qui accepte la connexion sans répondre bloquait le cron indéfiniment
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 10);
     curl_exec($ch);
 
     // Obtenir le code de statut HTTP
@@ -5774,9 +5817,10 @@ class frigate extends eqLogic
       log::add(__CLASS__, 'debug', "╚════════════════════════ :fg-warning:ERREURS:/fg: ═══════════════════");
       return;
     }
-    $version = strstr($stats['service']['version'], '-', true);
-    $latestVersion = $stats['service']['latest_version'];
-    if (version_compare($version, $latestVersion, "<")) {
+    $version = strstr((string) ($stats['service']['version'] ?? ''), '-', true);
+    $latestVersion = (string) ($stats['service']['latest_version'] ?? '');
+    // latest_version vaut « disabled » ou « unknown » quand Frigate ne vérifie pas les mises à jour
+    if ($version !== false && preg_match('/^\d+(\.\d+)*$/', $latestVersion) === 1 && version_compare($version, $latestVersion, "<")) {
       config::save('frigate_maj', 1, 'frigate');
       message::add('frigate', str_replace('#version#', $latestVersion, __("Une nouvelle version de Frigate (#version#) est disponible.", __FILE__)));
     } else {
