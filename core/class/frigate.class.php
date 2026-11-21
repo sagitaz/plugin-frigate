@@ -31,6 +31,16 @@ class frigate extends eqLogic
   /** Capture manuelle depuis une URL externe. */
   public const SAVE_MODE_SNAPSHOT = 3;
 
+  /** Délai de connexion au serveur Frigate, en secondes. */
+  private const FRIGATE_CONNECT_TIMEOUT = 5;
+  /** Durée maximum d'une requête à l'API de Frigate, en secondes : large, pour un serveur lent ou chargé. */
+  private const FRIGATE_TIMEOUT = 60;
+
+  /** Fichier témoin du dossier data, interrogé par checkDataFolderProtection(). */
+  private const DATA_WITNESS_FILE = 'controle.txt';
+  /** Texte du fichier témoin, qui distingue le fichier servi d'une page renvoyée pour toute URL. */
+  private const DATA_WITNESS_MARK = 'frigate-data-witness';
+
   /**
    * Bascules MQTT d'une caméra : clé Frigate => suffixe du type générique JeeMate.
    *
@@ -344,13 +354,15 @@ class frigate extends eqLogic
   /**
    * Cron exécuté par Jeedom chaque jour.
    *
-   * Si le serveur Frigate répond, met à jour la commande « status serveur », signale une nouvelle version de
+   * Vérifie que le dossier data est fermé à Apache (voir checkDataFolderProtection()). Si le serveur Frigate répond, met à jour la commande « status serveur », signale une nouvelle version de
    * Frigate puis exécute le traitement de cette fréquence.
    *
    * @return void
    */
   public static function cronDaily()
   {
+    // Indépendant du serveur Frigate : les médias déjà téléchargés restent à protéger
+    self::checkDataFolderProtection();
     if (!self::isFrigateServerAvailable()) {
       log::add(__CLASS__, "warning", "Le serveur Frigate n'est pas disponible. CronDaily non exécuté.");
       return;
@@ -490,8 +502,8 @@ class frigate extends eqLogic
 
   /**
    * Retourne le lien « SNAPSHOT LIVE » de la caméra : le proxy d'images sur l'URL de la dernière image, avec la
-   * clé du proxy, pour les applications qui l'appellent sans session Jeedom. Adresse externe de Jeedom, à
-   * défaut l'interne.
+   * clé de la caméra (proxyCameraKey()), pour les applications qui l'appellent sans session Jeedom. Adresse
+   * externe de Jeedom, à défaut l'interne.
    *
    * @return string
    */
@@ -501,7 +513,7 @@ class frigate extends eqLogic
     if ($urlJeedom == "") {
       $urlJeedom = network::getNetworkAccess('internal');
     }
-    return $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $this->getConfiguration('img') . "&key=" . self::getProxyKey();
+    return $urlJeedom . "/plugins/frigate/core/ajax/frigate.proxy.php?url=" . $this->getConfiguration('img') . "&key=" . self::proxyCameraKey($this->getConfiguration('name'));
   }
 
   /**
@@ -957,10 +969,10 @@ class frigate extends eqLogic
   }
 
   /**
-   * Retourne la clé qui ouvre le proxy d'images sans session Jeedom, et la crée au premier appel.
+   * Retourne la clé du proxy d'images, et la crée au premier appel.
    *
-   * Elle figure dans le lien « SNAPSHOT LIVE », que les applications appellent sans session ; elle ne donne
-   * accès qu'au proxy, donc qu'aux images de l'API du serveur Frigate configuré.
+   * Elle ne figure dans aucun lien : elle sert à tirer la clé de chaque caméra (proxyCameraKey()), qui ouvre
+   * sans session Jeedom l'image en direct de cette seule caméra.
    *
    * @return string
    */
@@ -998,7 +1010,116 @@ class frigate extends eqLogic
       || (string) ($parts['port'] ?? '') !== $port || strpos($path, '/api/') !== 0) {
       return null;
     }
+    // Sans remontée : curl et le nginx de Frigate ramènent /api/../ (même encodé en %2e ou avec « \ ») à la
+    // racine du serveur, hors de l'API
+    if (preg_match('#\.\.|%2e|%2f|%5c|\\\\#i', $path) === 1) {
+      return null;
+    }
     return $scheme . '://' . $host . ':' . $port . $path . (isset($parts['query']) ? '?' . $parts['query'] : '');
+  }
+
+  /**
+   * Retourne la caméra dont une URL de proxy désigne l'image en direct, seule cible ouverte sans session Jeedom.
+   *
+   * La clé d'une caméra figure dans son lien « SNAPSHOT LIVE », visible des applications et des utilisateurs non
+   * admin. Elle n'ouvre que l'image en direct de cette caméra (/api/<caméra>/latest.jpg ou .webp) : ni les
+   * captures des évènements, ni les images des enregistrements, que l'API Frigate sert aussi.
+   *
+   * @param string $url URL retournée par proxyTarget()
+   * @return string|null Nom de la caméra dans Frigate, null si l'URL ne désigne pas l'image en direct d'une
+   *                     caméra du plugin
+   */
+  public static function proxyKeyCamera($url)
+  {
+    $path = (string) parse_url((string) $url, PHP_URL_PATH);
+    if (preg_match('#^/api/([A-Za-z0-9_-]+)/latest\.(jpg|webp)$#', $path, $matches) !== 1) {
+      return null;
+    }
+    $eqCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $matches[1], 'frigate');
+    // Comparaison stricte : la recherche en base ignore la casse, la clé de la caméra non
+    if (!is_object($eqCamera) || $eqCamera->getConfiguration('name') !== $matches[1]) {
+      return null;
+    }
+    return $matches[1];
+  }
+
+  /**
+   * Indique si l'utilisateur connecté voit toutes les caméras : profils admin et utilisateur.
+   *
+   * Un utilisateur au profil restreint ne voit que les caméras sur lesquelles il a des droits (voir
+   * sessionCanSeeCamera()).
+   *
+   * @return bool
+   */
+  public static function sessionSeesAllCameras()
+  {
+    return isConnect('admin') || isConnect('user');
+  }
+
+  /**
+   * Indique si l'utilisateur connecté peut voir une caméra : tous les droits pour les profils admin et
+   * utilisateur, le droit de lecture sur l'équipement pour un profil restreint (eqLogic::hasRight()).
+   *
+   * @param string|null $camera Nom de la caméra dans Frigate
+   * @return bool
+   */
+  public static function sessionCanSeeCamera($camera)
+  {
+    if (!self::isSafeCameraName($camera)) {
+      return false;
+    }
+    $eqCamera = eqLogic::byLogicalId('eqFrigateCamera_' . $camera, 'frigate');
+    return is_object($eqCamera) && $eqCamera->getConfiguration('name') === $camera && $eqCamera->hasRight('r');
+  }
+
+  /**
+   * Retourne la caméra d'un fichier du dossier data : son dossier, ou pour une capture manuelle
+   * (snapshots/<event_id>_snapshot.jpg), la caméra de son évènement.
+   *
+   * @param string $file Fichier relatif au dossier data
+   * @return string|null Nom de la caméra, null si elle est introuvable
+   */
+  public static function mediaCamera($file)
+  {
+    $parts = explode('/', (string) $file, 2);
+    if (count($parts) !== 2) {
+      return null;
+    }
+    if ($parts[0] !== 'snapshots') {
+      return $parts[0];
+    }
+    if (preg_match('/^(.+)_snapshot\.[A-Za-z0-9]+$/', $parts[1], $matches) !== 1 || !self::isSafeEventId($matches[1])) {
+      return null;
+    }
+    $event = frigate_events::byEventId($matches[1]);
+    return is_object($event) ? $event->getCamera() : null;
+  }
+
+  /**
+   * Retourne la clé du lien « SNAPSHOT LIVE » d'une caméra, tirée de la clé du proxy.
+   *
+   * Chaque caméra a sa propre clé : le lien d'une caméra n'ouvre pas l'image des autres. Régénérer la clé du
+   * proxy change celles de toutes les caméras (voir regenerateProxyKey()).
+   *
+   * @param string $camera Nom de la caméra dans Frigate
+   * @return string
+   */
+  public static function proxyCameraKey($camera)
+  {
+    return substr(hash_hmac('sha256', 'proxy|' . (string) $camera, self::getProxyKey()), 0, 32);
+  }
+
+  /**
+   * Remplace la clé du proxy et réécrit les liens « SNAPSHOT LIVE » : les anciens liens ne s'ouvrent plus sans
+   * session Jeedom.
+   *
+   * @return void
+   */
+  public static function regenerateProxyKey()
+  {
+    config::save('proxyKey', config::genKey(32), 'frigate');
+    self::refreshSnapshotLinks();
+    log::add(__CLASS__, 'info', "║ Clé du proxy régénérée, liens « SNAPSHOT LIVE » mis à jour.");
   }
 
   /**
@@ -1030,13 +1151,13 @@ class frigate extends eqLogic
   public static function addMessages()
   {
     message::add('frigate', __("Merci d'avoir installé le plugin. Pour toutes les demandes d'aide, veuillez contacter le support sur Discord ou sur Community.", __FILE__));
-    $system = system::getOsVersion();
-    if (version_compare($system, "11", "<")) {
-      message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 11 de Debian est recommandée.", __FILE__)));
+    $system = (string) system::getOsVersion();
+    if ((float) $system > 0 && (float) $system < 12) {
+      message::add('frigate', str_replace('#version#', $system, __("Attention, vous utilisez la version #version# de Debian, aucun support n'est disponible. La version 12 de Debian est recommandée.", __FILE__)));
     }
     $jeedom = jeedom::version();
-    if (version_compare($jeedom, "4.4", "<")) {
-      message::add('frigate', str_replace('#version#', $jeedom, __("Attention, vous utilisez la version #version# de Jeedom. La version 4.4.x de Jeedom est recommandée.", __FILE__)));
+    if (version_compare($jeedom, "4.6", "<")) {
+      message::add('frigate', str_replace('#version#', $jeedom, __("Attention, vous utilisez la version #version# de Jeedom. La version 4.6.x de Jeedom est recommandée.", __FILE__)));
     }
   }
 
@@ -1084,6 +1205,9 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    // Délais larges : un Frigate lent ou chargé répond encore, un Frigate injoignable ne bloque pas le cron
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     if (in_array($method, ['POST', 'PUT', 'DELETE'])) {
       if ($method !== 'DELETE') {
@@ -1177,6 +1301,8 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_URL, $url);
     curl_setopt($ch, CURLOPT_SSL_VERIFYPEER, FALSE);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, TRUE);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
     curl_setopt($ch, CURLOPT_CUSTOMREQUEST, 'DELETE');
     $data = curl_exec($ch);
 
@@ -1351,6 +1477,11 @@ class frigate extends eqLogic
    */
   public static function getLogs($service)
   {
+    // Seuls les services affichés par la fenêtre des logs : le nom entre dans l'URL de l'API
+    if (!in_array($service, ['frigate', 'go2rtc', 'nginx'], true)) {
+      log::add(__CLASS__, 'warning', "║ Logs demandés pour un service inconnu : " . json_encode(self::plainText((string) $service)));
+      return null;
+    }
     $urlfrigate = self::getUrlFrigate();
     $resultURL = $urlfrigate . "/api/logs/" . $service;
     $logs = self::getcURL("Logs", $resultURL, null, false);
@@ -1797,7 +1928,7 @@ class frigate extends eqLogic
 
     $result = array(
       "id" => $event->getId(),
-      "img" => $event->getLasted(),
+      "img" => self::mediaUrl($event->getLasted(), true),
       "camera" => $event->getCamera(),
       "label" => $event->getLabel(),
       "box" => $boxArray,
@@ -1805,9 +1936,9 @@ class frigate extends eqLogic
       "duree" => $duree,
       "startTime" => $event->getStartTime(),
       "endTime" => $event->getEndTime(),
-      "snapshot" => $event->getSnapshot(),
-      "clip" => $event->getClip(),
-      "thumbnail" => $event->getThumbnail(),
+      "snapshot" => self::mediaUrl($event->getSnapshot(), true),
+      "clip" => self::mediaUrl($event->getClip(), true),
+      "thumbnail" => self::mediaUrl($event->getThumbnail(), true),
       "hasSnapshot" => $event->getHasSnapshot(),
       "hasClip" => $event->getHasClip(),
       "eventId" => $event->getEventId(),
@@ -2215,6 +2346,200 @@ class frigate extends eqLogic
   }
 
   /**
+   * Retourne la clé qui signe les liens des médias, et la crée au premier appel.
+   *
+   * Distincte de la clé du proxy et de la clé API du plugin : elle ne sert qu'à signer les liens de
+   * frigate.media.php. La supprimer de la configuration révoque tous les liens signés.
+   *
+   * @return string
+   */
+  public static function getMediaKey()
+  {
+    $key = config::byKey('mediaKey', 'frigate');
+    if ($key == '') {
+      $key = config::genKey(32);
+      config::save('mediaKey', $key, 'frigate');
+    }
+    return $key;
+  }
+
+  /**
+   * Retourne la signature d'un fichier du dossier data, qui ouvre ce seul fichier sans session Jeedom.
+   *
+   * La date d'expiration entre dans la signature : elle ne peut pas être modifiée dans le lien. Sans date,
+   * c'est la signature des liens des versions 1.6.1 et 1.6.2, que frigate.media.php n'accepte que pendant la
+   * durée de validité des liens comptée depuis la date du fichier.
+   *
+   * @param string   $file    Fichier relatif au dossier data, par exemple camera/1718992955.613576-zulr2q_clip.mp4
+   * @param int|null $expires Timestamp d'expiration du lien, null pour la signature sans date
+   * @return string
+   */
+  public static function mediaSignature($file, $expires = null)
+  {
+    $data = $expires === null ? (string) $file : (string) $file . '|' . (int) $expires;
+    return substr(hash_hmac('sha256', $data, self::getMediaKey()), 0, 32);
+  }
+
+  /**
+   * Retourne la durée de validité des liens signés des médias, en jours.
+   *
+   * Par défaut, la durée de conservation des évènements : un lien n'a pas à survivre à son fichier. Le réglage
+   * mediaLinkDays ne peut que la raccourcir. La conservation suit la règle de la purge (cleanAllOldestFiles()) :
+   * remove_days, porté à recovery_days s'il est plus petit, 7 jours si elle est invalide.
+   *
+   * @return int
+   */
+  public static function mediaLinkDays()
+  {
+    $retention = (int) config::byKey('remove_days', 'frigate', 7);
+    if ($retention <= 0) {
+      $retention = 7;
+    }
+    $retention = max($retention, (int) config::byKey('recovery_days', 'frigate', 7));
+
+    $days = config::byKey('mediaLinkDays', 'frigate', '');
+    if (!is_numeric($days) || (int) $days <= 0) {
+      return $retention;
+    }
+    return min((int) $days, $retention);
+  }
+
+  /**
+   * Retourne la date d'expiration d'un lien signé créé maintenant.
+   *
+   * Arrondie au jour suivant : un même média garde le même lien toute la journée, et le navigateur ou JeeMate le
+   * gardent en cache. La validité réelle est donc comprise entre mediaLinkDays() jours et un jour de plus.
+   *
+   * @return int Timestamp
+   */
+  public static function mediaLinkExpiry()
+  {
+    return (intdiv(time() + self::mediaLinkDays() * 86400, 86400) + 1) * 86400;
+  }
+
+  /**
+   * Remplace la clé qui signe les liens des médias : tous les liens déjà envoyés (notifications…) cessent de
+   * s'ouvrir sans session Jeedom. Les liens de showEvents() et de l'évènement frigate::event, recalculés à
+   * chaque appel, ne sont pas concernés.
+   *
+   * @return void
+   */
+  public static function revokeMediaLinks()
+  {
+    config::save('mediaKey', config::genKey(32), 'frigate');
+    log::add(__CLASS__, 'info', "║ Clé des médias régénérée, liens signés déjà envoyés révoqués.");
+  }
+
+  /**
+   * Convertit l'URL enregistrée d'un média (/plugins/frigate/data/...) en URL de frigate.media.php.
+   *
+   * Le dossier data étant fermé à Apache, c'est la seule URL qui sert le fichier. Toute autre valeur (« null »,
+   * image par défaut, tableau…) est retournée telle quelle. Le fichier est placé en dernier paramètre, pour que
+   * l'URL se termine par son extension ; la date de modification du fichier permet au navigateur de le garder
+   * en cache.
+   *
+   * @param mixed $url    URL enregistrée en base
+   * @param bool  $signed Ajouter la signature, pour un lien ouvert sans session Jeedom (notifications, JeeMate)
+   * @return mixed URL relative du script, ou la valeur reçue
+   */
+  public static function mediaUrl($url, $signed = false)
+  {
+    $path = self::mediaFilePath($url);
+    if ($path === null) {
+      return $url;
+    }
+    $file = substr($url, strlen('/plugins/frigate/data/'));
+    $params = [];
+    if ($signed) {
+      $expires = self::mediaLinkExpiry();
+      $params[] = 'e=' . $expires;
+      $params[] = 't=' . self::mediaSignature($file, $expires);
+    }
+    $mtime = @filemtime($path);
+    if ($mtime !== false) {
+      $params[] = 'v=' . $mtime;
+    }
+    $params[] = 'f=' . str_replace('%2F', '/', rawurlencode($file));
+
+    return '/plugins/frigate/core/ajax/frigate.media.php?' . implode('&', $params);
+  }
+
+  /**
+   * Ferme le dossier data à Apache : crée le dossier s'il manque, et y écrit le .htaccess et le fichier témoin.
+   *
+   * Les médias ne sont alors servis que par frigate.media.php, qui vérifie l'accès. Le fichier témoin, non
+   * caché, sert au contrôle de checkDataFolderProtection(). Appelée à l'installation, à la mise à jour et par
+   * cleanFolderData(), donc à chaque cron : le dossier peut disparaître à la restauration d'une sauvegarde.
+   *
+   * @return void
+   */
+  public static function protectDataFolder()
+  {
+    $folder = dirname(__FILE__, 3) . '/data';
+    if (!is_dir($folder) && !mkdir($folder, 0755, true)) {
+      log::add(__CLASS__, 'error', "║ Dossier inexistant, création impossible : " . $folder);
+      return;
+    }
+    $htaccess = "<IfModule mod_authz_core.c>\n    Require all denied\n</IfModule>\n<IfModule !mod_authz_core.c>\n    Order allow,deny\n    Deny from all\n</IfModule>\n";
+    $htaccessPath = $folder . '/.htaccess';
+    $current = is_file($htaccessPath) ? (string) file_get_contents($htaccessPath) : '';
+    if (strpos($current, 'Require all denied') === false || strpos($current, 'Deny from all') === false) {
+      if (file_put_contents($htaccessPath, $htaccess) === false) {
+        log::add(__CLASS__, 'error', "║ Écriture impossible : " . $htaccessPath . ". Les médias restent accessibles sans connexion.");
+      } else {
+        log::add(__CLASS__, 'info', "║ Dossier data fermé : " . $htaccessPath . " écrit.");
+      }
+    }
+    $witnessPath = $folder . '/' . self::DATA_WITNESS_FILE;
+    if (!is_file($witnessPath)) {
+      file_put_contents($witnessPath, self::DATA_WITNESS_MARK . "\nSi ce fichier s'affiche sans connexion à Jeedom, le dossier data du plugin Frigate n'est pas protégé.\n");
+    }
+  }
+
+  /**
+   * Vérifie qu'Apache refuse l'accès au dossier data, et prévient l'utilisateur sinon.
+   *
+   * Interroge en interne le fichier témoin : un .htaccess ignoré (AllowOverride None, nginx…) le laisse servir.
+   * Le .htaccess lui-même ne peut pas servir de témoin : la configuration Apache de Debian refuse tous les
+   * fichiers .ht*. Le message Jeedom est retiré quand le dossier est de nouveau fermé.
+   *
+   * @return void
+   */
+  public static function checkDataFolderProtection()
+  {
+    self::protectDataFolder();
+    $base = network::getNetworkAccess('internal');
+    if ($base == '') {
+      log::add(__CLASS__, 'debug', "║ Contrôle du dossier data impossible : pas d'accès interne configuré.");
+      return;
+    }
+    $url = rtrim($base, '/') . '/plugins/frigate/data/' . self::DATA_WITNESS_FILE;
+    $ch = curl_init($url);
+    curl_setopt_array($ch, [
+      CURLOPT_RETURNTRANSFER => true,
+      CURLOPT_FOLLOWLOCATION => false,
+      CURLOPT_CONNECTTIMEOUT => 3,
+      CURLOPT_TIMEOUT        => 5,
+      CURLOPT_SSL_VERIFYPEER => false,
+      CURLOPT_SSL_VERIFYHOST => 0,
+    ]);
+    $body = curl_exec($ch);
+    $code = (int) curl_getinfo($ch, CURLINFO_HTTP_CODE);
+    curl_close($ch);
+    if ($body === false || $code === 0) {
+      log::add(__CLASS__, 'debug', "║ Contrôle du dossier data impossible : " . $url . " ne répond pas.");
+      return;
+    }
+    if ($code === 200 && strpos((string) $body, self::DATA_WITNESS_MARK) !== false) {
+      log::add(__CLASS__, 'warning', "║ Le dossier data est accessible sans connexion : " . $url);
+      message::add('frigate', __("Les snapshots et les clips du plugin Frigate sont accessibles sans connexion à Jeedom : le serveur web ignore le fichier plugins/frigate/data/.htaccess (AllowOverride None, nginx…). Autorisez les fichiers .htaccess ou interdisez l'accès à ce dossier dans la configuration du serveur web.", __FILE__), '', 'dataFolderExposed');
+    } else {
+      log::add(__CLASS__, 'debug', "║ Dossier data fermé (HTTP " . $code . ").");
+      message::removeAll('frigate', 'dataFolderExposed');
+    }
+  }
+
+  /**
    * Retourne les URL de médias enregistrées sur les évènements, en clés d'un tableau.
    *
    * @return array<string, true>
@@ -2253,6 +2578,14 @@ class frigate extends eqLogic
       foreach (new RecursiveIteratorIterator(new RecursiveDirectoryIterator($folder, FilesystemIterator::SKIP_DOTS)) as $file) {
         if ($file->isFile()) {
           $path = $file->getPathname();
+          // Téléchargement en cours (downloadToFile()) : laissé une heure, le temps d'un long clip, puis
+          // supprimé s'il a été abandonné (processus arrêté en cours de route)
+          if (substr($path, -5) === '.part') {
+            if ($file->getMTime() < time() - 3600 && @unlink($path)) {
+              log::add(__CLASS__, 'debug', "║ Téléchargement abandonné supprimé : " . $path);
+            }
+            continue;
+          }
           // Capture manuelle : son nom ne porte pas toujours l'event_id, elle se rattache à son
           // évènement par l'URL enregistrée. L'heure de marge laisse createSnapshot() enregistrer
           // l'évènement après avoir écrit le fichier.
@@ -2296,6 +2629,8 @@ class frigate extends eqLogic
         log::add(__CLASS__, "error", "║ Dossier inexistant, création impossible : " . $folder);
       }
     }
+    // Le .htaccess manque aussi après une telle restauration : sans lui, les médias sont servis sans connexion
+    self::protectDataFolder();
   }
 
 
@@ -2696,13 +3031,22 @@ class frigate extends eqLogic
   /**
    * Retourne les évènements enregistrés, prêts à afficher, du plus récent au plus ancien.
    *
+   * Par défaut, les médias (img, snapshot, clip, thumbnail) sont des liens signés de frigate.media.php :
+   * JeeMate appelle cette fonction sans paramètre et ouvre ces liens sans session Jeedom, le dossier data
+   * étant fermé. Les pages du plugin demandent les URL enregistrées ($_rawMedia), dont elles vérifient la
+   * présence du fichier (mediaFileExists()) avant de les convertir (event.template.php).
+   *
    * @param bool $_onlyEnable Limiter aux évènements actifs
    * @param bool $_allType    Inclure les évènements sans type
+   * @param bool $_rawMedia   Retourner les URL enregistrées (/plugins/frigate/data/...) au lieu des liens signés
    * @return array<int, array<string, mixed>>
    */
-  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
+  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE, bool $_rawMedia = FALSE)
   {
     $result = [];
+    $media = function ($url) use ($_rawMedia) {
+      return $_rawMedia ? $url : self::mediaUrl($url, true);
+    };
 
     $events = frigate_events::all($_onlyEnable, $_allType);
 
@@ -2713,7 +3057,7 @@ class frigate extends eqLogic
       $result[] = array(
         "id"           => $event->getId(),
         "eventId"      => $event->getEventId(),
-        "img"          => $event->getLasted(),
+        "img"          => $media($event->getLasted()),
         "camera"       => $event->getCamera(),
         "label"        => $event->getLabel(),
         "subLabel"     => $event->getSubLabel(),
@@ -2723,9 +3067,9 @@ class frigate extends eqLogic
         "startTime"    => $event->getStartTime(),
         "endTime"      => $event->getEndTime(),
         "falsePositive" => $event->getFalsePositive(),
-        "snapshot"     => $event->getSnapshot(),
-        "clip"         => $event->getClip(),
-        "thumbnail"    => $event->getThumbnail(),
+        "snapshot"     => $media($event->getSnapshot()),
+        "clip"         => $media($event->getClip()),
+        "thumbnail"    => $media($event->getThumbnail()),
         "hasSnapshot"  => $event->getHasSnapshot(),
         "hasClip"      => $event->getHasClip(),
         "score"        => $event->getScore(),
@@ -3250,8 +3594,9 @@ class frigate extends eqLogic
    */
   private static function createCmd($eqLogicId, $name, $subType, $unite, $logicalId, $genericType, $isVisible = 1, $infoCmd = null, $historized = 0, $type = "info")
   {
-    // Nettoyer le nom exactement comme Jeedom le fera en base
-    $cleanName = substr(cleanComponanteName($name), 0, 127);
+    // Nettoyer le nom exactement comme Jeedom le fera en base. Certains noms viennent de MQTT (clés des stats,
+    // modèles de classification) : sans chevron, aucune balise ne peut s'y former (voir plainText()).
+    $cleanName = substr(cleanComponanteName(self::plainText((string) $name)), 0, 127);
     $cleanName = trim($cleanName);
 
     $cmd = cmd::byEqLogicIdCmdName($eqLogicId, $cleanName);
@@ -3475,7 +3820,11 @@ class frigate extends eqLogic
    */
   public static function editHTTP($cmdId, $link)
   {
-    $cmd = cmd::byid($cmdId);
+    // Seulement une commande HTTP du plugin : l'identifiant vient de la requête
+    $cmd = cmd::byId($cmdId);
+    if (!is_object($cmd) || $cmd->getEqType() !== __CLASS__ || strpos((string) $cmd->getLogicalId(), 'action_http') !== 0) {
+      throw new Exception(__("Commande HTTP introuvable : ", __FILE__) . (int) $cmdId);
+    }
     $cmd->setConfiguration("request", $link);
     $cmd->save();
     log::add("frigate", 'debug', '║ commande mise à jour');
@@ -3899,14 +4248,24 @@ class frigate extends eqLogic
     }
 
     // Créer ou récupérer la commande version Frigate
-    $version = strstr($stats['service']['version'], '-', true);
+    $rawVersion = (string) ($stats['service']['version'] ?? '');
+    $version = strstr($rawVersion, '-', true);
+    if ($version === false) {
+      $version = $rawVersion;
+    }
 
-    $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-    // Enregistrer la valeur de l'événement
-    $cmd->event($version);
-    $cmd->save();
-    if ($version != config::byKey('frigate_version', 'frigate')) {
-      config::save('frigate_version', $version, 'frigate');
+    // Les stats arrivent aussi par MQTT : seule une version de forme 0.16.0 est enregistrée, elle s'affiche
+    // dans les pages du plugin et dans les messages Jeedom
+    if (preg_match('/^\d+(\.\d+)*$/', $version) === 1) {
+      $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
+      // Enregistrer la valeur de l'événement
+      $cmd->event($version);
+      $cmd->save();
+      if ($version != config::byKey('frigate_version', 'frigate')) {
+        config::save('frigate_version', $version, 'frigate');
+      }
+    } else {
+      log::add(__CLASS__, 'debug', "║ Version de Frigate non reconnue, ignorée : " . json_encode(self::plainText($rawVersion)));
     }
 
     // Créer ou récupérer la valeur de uptime en secondes
@@ -3923,6 +4282,76 @@ class frigate extends eqLogic
     // Enregistrer la valeur de l'événement
     $cmd->event($uptimeDate);
     $cmd->save();
+  }
+
+  /**
+   * Construit le tag #jeemate# : l'identifiant de l'évènement, puis des champs clé=valeur, séparés par « ;; ».
+   *
+   * JeeMate découpe le tag sur « ;; ». Une valeur reçue de Frigate en contenant (label d'un évènement créé par
+   * l'API, qui n'exige aucune authentification) ajouterait un faux champ, par exemple un snapshot vers un autre
+   * site : toute suite de « ; » y est réduite à un seul.
+   *
+   * @param array<string, mixed> $fields Champs dans l'ordre du tag ; la clé vide désigne l'identifiant, écrit sans « clé= »
+   * @return string
+   */
+  public static function jeemateTag(array $fields)
+  {
+    $parts = [];
+    foreach ($fields as $key => $value) {
+      $value = preg_replace('/;{2,}/', ';', (string) $value);
+      $parts[] = $key === '' ? $value : $key . '=' . $value;
+    }
+    return implode(';;', $parts);
+  }
+
+  /**
+   * Neutralise la valeur d'un tag avant de l'écrire dans les options d'une action.
+   *
+   * Le core passe chaque option dans scenarioExpression::setTags() : un texte « nom(arguments) » y appelle la
+   * fonction PHP de ce nom (system(), shell_exec()…), et « #[Objet][Équipement][Commande]# » ou « #12# » y est
+   * remplacé par la valeur de la commande. Or le label, le sous-label et la description d'un évènement peuvent
+   * être écrits par quiconque joint l'API de Frigate, qui n'exige aucune authentification. Les « # » sont donc
+   * retirés, et un espace sépare toute parenthèse ouvrante du mot qui la précède : « nom (arguments) » n'est plus
+   * un appel. Une valeur qui commence par une parenthèse en reçoit un aussi, pour ne pas former d'appel avec le
+   * texte de l'option qui la précède.
+   *
+   * @param mixed $value Valeur du tag
+   * @return string
+   */
+  public static function actionTagValue($value)
+  {
+    $value = str_replace('#', '', (string) $value);
+    $value = preg_replace('/([A-Za-z0-9_])\(/', '$1 (', $value);
+    if (strpos($value, '(') === 0) {
+      $value = ' ' . $value;
+    }
+    return $value;
+  }
+
+  /**
+   * Sépare d'un espace les tags du plugin suivis d'une parenthèse, dans les options d'une action.
+   *
+   * Sans cela, « #label#(… » donnerait « system(… » pour un label « system » : la valeur du tag nommerait la
+   * fonction appelée par le core (voir actionTagValue()).
+   *
+   * @param mixed    $options Options de l'action
+   * @param string[] $tags    Tags du plugin, par exemple #label#
+   * @return mixed Options, chaînes modifiées, le reste tel quel
+   */
+  private static function protectActionOptions($options, array $tags)
+  {
+    if (!is_array($options)) {
+      return $options;
+    }
+    $pattern = '/(' . implode('|', array_map(function ($tag) {
+      return preg_quote($tag, '/');
+    }, $tags)) . ')\(/';
+    foreach ($options as $key => $option) {
+      if (is_string($option)) {
+        $options[$key] = preg_replace($pattern, '$1 (', $option);
+      }
+    }
+    return $options;
   }
 
   /**
@@ -3951,15 +4380,17 @@ class frigate extends eqLogic
     $hasClip = $event->getHasClip();
     $hasSnapshot = $event->getHasSnapshot();
     $topScore = $event->getTopScore();
-    $clip = $urlJeedom . $event->getClip();
-    $snapshot = $urlJeedom . $event->getSnapshot();
     if (is_array($event->getThumbnail())) {
       $valueThumbnail = json_encode($event->getThumbnail());
     } else {
       $valueThumbnail = $event->getThumbnail();
     }
-    $thumbnail = $urlJeedom . $valueThumbnail;
-    $preview = $urlJeedom . $getPreview;
+    // Liens signés : ils s'ouvrent sans session Jeedom (notifications, JeeMate), et le dossier data est fermé.
+    // L'aperçu est signé après le remplacement de texte qui le tire du snapshot, pour signer le bon fichier.
+    $clip = $urlJeedom . self::mediaUrl($event->getClip(), true);
+    $snapshot = $urlJeedom . self::mediaUrl($event->getSnapshot(), true);
+    $thumbnail = $urlJeedom . self::mediaUrl($valueThumbnail, true);
+    $preview = $urlJeedom . self::mediaUrl($getPreview, true);
     $clipPath = "/var/www/html" . $event->getClip();
     $snapshotPath = "/var/www/html" . $event->getSnapshot();
     $thumbnailPath = "/var/www/html" . $valueThumbnail;
@@ -3978,7 +4409,19 @@ class frigate extends eqLogic
     $end = $event->getEndTime() ? date("d-m-Y H:i:s", $event->getEndTime()) : $start;
     $duree = $event->getEndTime() ? round($event->getEndTime() - $event->getStartTime(), 0) : 0;
     $time = date("H:i");
-    $jeemate = $eventId . ";;start=" . $start . ";;end=" . $end . ";;camera=" . $camera . ";;label=" . $label . ";;zones=" . $zones . ";;topScore=" . $topScore . ";;type=" . $type . ";;snapshot=" . $snapshot . ";;thumbnail=" . $thumbnail . ";;clip=" . $clip;
+    $jeemate = self::jeemateTag([
+      ''          => $eventId,
+      'start'     => $start,
+      'end'       => $end,
+      'camera'    => $camera,
+      'label'     => $label,
+      'zones'     => $zones,
+      'topScore'  => $topScore,
+      'type'      => $type,
+      'snapshot'  => $snapshot,
+      'thumbnail' => $thumbnail,
+      'clip'      => $clip,
+    ]);
     $conditionIsActived = false;
     $eqLogic = eqLogic::byId($eqLogicId);
     if (!is_object($eqLogic)) {
@@ -3991,7 +4434,7 @@ class frigate extends eqLogic
     if (is_string($conditionIf) && $conditionIf !== '') {
       $conditionIf = str_replace(
         ['#camera#', '#score#', '#top_score#'],
-        [$camera, $score, $topScore],
+        [self::actionTagValue($camera), (string) (float) $score, (string) (float) $topScore],
         $conditionIf
       );
       if (jeedom::evaluateExpression($conditionIf)) {
@@ -4045,7 +4488,7 @@ class frigate extends eqLogic
         $actionCondition = $action['actionCondition'];
         $actionCondition = str_replace(
           ['#camera#', '#score#', '#top_score#'],
-          [$camera, $score, $topScore],
+          [self::actionTagValue($camera), (string) (float) $score, (string) (float) $topScore],
           $actionCondition
         );
         if ($actionCondition != "" && !jeedom::evaluateExpression($actionCondition)) {
@@ -4120,10 +4563,12 @@ class frigate extends eqLogic
         $tags = ['#time#', '#event_id#', '#camera#', '#cameraId#', '#score#', '#has_clip#', '#has_snapshot#', '#top_score#', '#zones#', '#snapshot#', '#snapshot_path#', '#clip#', '#clip_path#', '#thumbnail#', '#thumbnail_path#', '#label#', '#description#', '#start#', '#end#', '#duree#', '#type#', '#jeemate#', '#preview#', '#preview_path#', '#attributes#', '#sublabel#'];
         $values = [$time, $eventId, $camera, $cameraId, $score, $hasClip, $hasSnapshot, $topScore, $zones, $snapshot, $snapshotPath, $clip, $clipPath, $thumbnail, $thumbnailPath, $label, $description, $start, $end, $duree, $type, $jeemate, $preview, $previewPath, $attributes, $sublabel];
 
+        // Les options passent ensuite par le moteur d'expressions de Jeedom : les valeurs, en partie écrites par
+        // quiconque joint l'API de Frigate, y sont neutralisées (voir actionTagValue() et protectActionOptions())
         $options = str_replace(
           $tags,
-          array_map('strval', $values),
-          $options
+          array_map([__CLASS__, 'actionTagValue'], $values),
+          self::protectActionOptions($options, $tags)
         );
 
         // Vérifie si le temps de début de l'événement est inférieur ou égal à trois heures avant le temps actuel
@@ -4226,19 +4671,8 @@ class frigate extends eqLogic
       return "error";
     }
 
-    // --- Téléchargement ---
-    $headers = @get_headers($lien);
-    $content = ($headers && strpos($headers[0], '200') !== false) ? file_get_contents($lien) : false;
-
-    if ($content === false) {
-      log::add(__CLASS__, 'debug', "║ Le fichier n'existe pas ou une erreur s'est produite : " . $lien);
-      return "error";
-    }
-
-    // --- Sauvegarde initiale ---
-    $fileSaved = file_put_contents($fullPath, $content);
-    if ($fileSaved === false) {
-      log::add(__CLASS__, 'debug', "║ Échec de l'enregistrement du fichier : " . $lien);
+    // --- Téléchargement, en flux direct vers le fichier ---
+    if (!self::downloadToFile($lien, $fullPath)) {
       return "error";
     }
 
@@ -4274,6 +4708,59 @@ class frigate extends eqLogic
     return $result;
   }
 
+
+  /**
+   * Télécharge une URL dans un fichier, en flux direct, sans charger le média en mémoire.
+   *
+   * Un clip en haute définition dépasse plusieurs centaines de Mo : chargé en mémoire, il épuisait memory_limit
+   * et le processus PHP s'arrêtait, sans média ni actions. Le flux est écrit dans un fichier temporaire, renommé
+   * à la fin : un téléchargement interrompu ne laisse pas de fichier partiel, que saveURL() prendrait ensuite pour
+   * un fichier complet. Une réponse HTTP d'erreur (404…) fait échouer l'ouverture du flux.
+   *
+   * @param string $url  URL du média
+   * @param string $path Chemin du fichier de destination
+   * @return bool
+   */
+  private static function downloadToFile($url, $path)
+  {
+    // timeout : durée maximum sans recevoir de données, pas la durée totale du téléchargement
+    $context = stream_context_create(['http' => ['timeout' => self::FRIGATE_TIMEOUT]]);
+    $in = @fopen($url, 'rb', false, $context);
+    if ($in === false) {
+      log::add(__CLASS__, 'debug', "║ Le fichier n'existe pas ou une erreur s'est produite : " . $url);
+      return false;
+    }
+
+    $tmpPath = $path . '.part';
+    $out = @fopen($tmpPath, 'wb');
+    if ($out === false) {
+      fclose($in);
+      log::add(__CLASS__, 'debug', "║ Échec de l'enregistrement du fichier : " . $url);
+      return false;
+    }
+
+    $bytes = stream_copy_to_stream($in, $out);
+    $meta = stream_get_meta_data($in);
+    fclose($in);
+    $closed = fclose($out);
+
+    // Connexion coupée en route : moins d'octets que n'en annonce le serveur. Le dernier Content-Length est
+    // celui de la réponse finale, après une éventuelle redirection.
+    $expected = null;
+    foreach ((array) ($meta['wrapper_data'] ?? []) as $header) {
+      if (preg_match('/^Content-Length:\s*(\d+)/i', (string) $header, $matches) === 1) {
+        $expected = (int) $matches[1];
+      }
+    }
+    $truncated = $expected !== null && $bytes !== $expected;
+
+    if ($bytes === false || $bytes === 0 || $truncated || !empty($meta['timed_out']) || !$closed || !rename($tmpPath, $path)) {
+      @unlink($tmpPath);
+      log::add(__CLASS__, 'debug', "║ Échec du téléchargement du fichier : " . $url);
+      return false;
+    }
+    return true;
+  }
 
   /**
    * Retire les accents et met en minuscules, pour comparer labels et zones.
@@ -4560,7 +5047,8 @@ class frigate extends eqLogic
     } else {
       $eqlogicId = $frigate->getId();
       $cmd = self::createCmd($eqlogicId, "version", "string", "", "info_version", "", 0, null, 0);
-      $version = $cmd->execCmd();
+      // Une valeur enregistrée avant la validation de majStatsCmds() peut contenir du HTML
+      $version = self::plainText((string) $cmd->execCmd());
       if ($version != config::byKey('frigate_version', 'frigate')) {
         config::save('frigate_version', $version, 'frigate');
       }
@@ -4608,7 +5096,7 @@ class frigate extends eqLogic
 
         case 'available':
           $cmd = self::createCmd($eqlogicId, "Disponibilité", "string", "", "info_available", "", 0, null, 0, "info");
-          $cmd->event($value);
+          $cmd->event(self::plainText($value));
           $cmd->save();
           break;
 
@@ -4763,7 +5251,7 @@ class frigate extends eqLogic
           log::add("frigate_Detect", 'info', '║ Equipement : :b:' . $eqCamera->getHumanName() . ":/b:");
           log::add("frigate_Detect", 'info', '║ Objet : ' . $innerKey . ', Etat : ' . json_encode([$model => $state]));
           $infoCmd = self::createCmd($eqCamera->getId(), "Reconnaissance - Etat " . $model, "string", "", "info_classification_state", "", 0);
-          $infoCmd->event($state);
+          $infoCmd->event(self::plainText($state));
           $infoCmd->save();
           $eqCamera->refreshWidget();
           log::add("frigate_Detect", 'info', "╚═════════════════════════════ :fg-info:END CLASSIFICATION:/fg: ═══════════════════════════════════╝");
@@ -4983,6 +5471,7 @@ class frigate extends eqLogic
     }
 
     $infoCmd = self::createCmd($eqCamera->getId(), "Statut flux " . $names[$role], "string", "", "info_stream_status_" . $role, "", 0);
+    $status = self::plainText($status);
     if ($infoCmd->execCmd() !== $status) {
       $infoCmd->event($status);
       log::add("frigate_MQTT", 'info', $eqCamera->getHumanName() . ' => statut du flux ' . $role . ' : ' . $status);
@@ -5001,7 +5490,7 @@ class frigate extends eqLogic
   private static function updateProfileCmds($eqlogicId, $profile)
   {
     $infoCmd = self::createCmd($eqlogicId, "Profil actif", "string", "", "info_profile", "", 0);
-    $infoCmd->event((string)$profile);
+    $infoCmd->event(self::plainText((string)$profile));
 
     $cmd = self::createCmd($eqlogicId, "Changer de profil", "message", "", "action_set_profile", "", 0, null, 0, "action");
     if ($cmd->getDisplay('title_disable') != 1) {
@@ -5088,6 +5577,8 @@ class frigate extends eqLogic
     $ch = curl_init($resultURL);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_HTTPGET, true);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     $curlResponse = curl_exec($ch);
 
@@ -5152,6 +5643,8 @@ class frigate extends eqLogic
     curl_setopt($ch, CURLOPT_POST, true);
     curl_setopt($ch, CURLOPT_HTTPHEADER, array('Content-Type: application/x-yaml'));
     curl_setopt($ch, CURLOPT_POSTFIELDS, $frigateConfiguration);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, self::FRIGATE_CONNECT_TIMEOUT);
+    curl_setopt($ch, CURLOPT_TIMEOUT, self::FRIGATE_TIMEOUT);
 
     log::add(__CLASS__, 'debug', '║ sendFrigateConfiguration :: envoi de ' . strlen((string) $frigateConfiguration) . ' octets');
     $curlResponse = curl_exec($ch);
@@ -5807,6 +6300,13 @@ class frigateCmd extends cmd
     curl_setopt($ch, CURLOPT_URL, $link);
     curl_setopt($ch, CURLOPT_RETURNTRANSFER, true);
     curl_setopt($ch, CURLOPT_FOLLOWLOCATION, true);
+    // Une caméra qui ne répond pas ne bloque pas l'exécution au-delà de 30 s ; HTTP et HTTPS seulement, y
+    // compris après une redirection
+    curl_setopt($ch, CURLOPT_MAXREDIRS, 5);
+    curl_setopt($ch, CURLOPT_CONNECTTIMEOUT, 5);
+    curl_setopt($ch, CURLOPT_TIMEOUT, 30);
+    curl_setopt($ch, CURLOPT_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
+    curl_setopt($ch, CURLOPT_REDIR_PROTOCOLS, CURLPROTO_HTTP | CURLPROTO_HTTPS);
     curl_setopt($ch, CURLOPT_VERBOSE, true);
     curl_setopt($ch, CURLOPT_STDERR, $verbose); // Rediriger verbose vers ce flux temporaire
     curl_setopt($ch, CURLOPT_HTTPAUTH, CURLAUTH_DIGEST); // Utiliser l'authentification Digest

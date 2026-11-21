@@ -23,8 +23,13 @@ Merci
 
 
 # <u>Pré-requis</u>
+### Stable
 - Jeedom 4.4.0 minimum
 - Debian 11 (Bullseye) minimum
+- Frigate 0.16.0 minimum
+### Beta
+- Jeedom 4.6.0 minimum
+- Debian 12 (Bookworm) minimum
 - Frigate 0.16.0 minimum
 
 Le plugin n'installe pas et ne configure pas le serveur Frigate, il vous faut donc l'installer et le configurer vous-même. Voir la documentation officielle de Frigate pour plus d'informations.
@@ -74,6 +79,7 @@ Le plugin comporte des sous-logs, pour qu'ils soient visibles sur Jeedom 4.4.19,
 
 Le nombre de jours de suppression ne peut pas être plus petit que le nombre de jours de récupération. Dans le cas contraire, ce sera alors le nombre de jours de récupération qui sera utilisé.
 
+- **Validité des liens des médias** : Nombre de jours pendant lesquels les liens des snapshots, clips, miniatures et aperçus envoyés dans les notifications (tags #snapshot#, #clip#, #jeemate#…) s'ouvrent sans connexion à Jeedom. Vide, c'est la durée de suppression des évènements, qui est aussi le maximum : un lien ne survit pas à son fichier. Les pages du plugin et l'historique de JeeMate créent un nouveau lien à chaque affichage et ne sont pas concernés.
 - **Taille des dossiers** : Taille maximum du dossier data, en Mo (500 Mo par défaut). Au-delà, les évènements les plus anciens sont supprimés jusqu'à repasser sous la limite.
 
 Les évènements mis en favori ne sont jamais supprimés, ni par l'ancienneté ni par la taille. Les captures manuelles suivent les mêmes règles que les évènements : mettez-les en favori pour les garder.
@@ -91,6 +97,10 @@ Un évènement dont la fin n'a jamais été reçue (coupure MQTT, redémarrage d
 - **Enregistrer une vidéo** : oui par défaut.
 - **Durée de la vidéo** : 40 secondes par défaut.
 - **Score** : 0 par défaut.
+
+#### Sécurité des liens
+- **Liens « SNAPSHOT LIVE »** : le bouton **Régénérer la clé** change la clé des liens vers l'image en direct. Les anciens liens ne s'ouvrent plus sans connexion à Jeedom ; les commandes SNAPSHOT LIVE reçoivent les nouveaux. Une application qui a enregistré le lien (JeeMate…) doit relire la commande.
+- **Liens des médias déjà envoyés** : le bouton **Révoquer les liens** rend inutilisables tous les liens des médias déjà envoyés dans les notifications, avant leur expiration. À utiliser si un lien a été transféré à quelqu'un qui ne devait pas le voir.
 
 #### Fonctionnalités
 - **Cron** : sélectionner le cron voulu.
@@ -178,10 +188,12 @@ Refresh de l'image suivant votre configuration.
 ##### Toutes les caméras
 Les informations sur le dernier évènement de la caméra : caméra, label, score, top score, zones, id, type, timestamp, durée, clip disponible, snapshot disponible, URL snapshot, URL clip et URL thumbnail. Et les statistiques de la caméra.
 
+Les commandes **URL snapshot**, **URL clip** et **URL thumbnail** contiennent le chemin du fichier, de la forme **``/plugins/frigate/data/...``**. Le dossier data est fermé : ce chemin ne s'ouvre pas dans un navigateur. Il sert à retrouver le fichier sur le disque, en ajoutant **``/var/www/html``** devant. Pour un lien à envoyer, utilisez les tags des actions (**#snapshot#**, **#clip#**…).
+
 L'info **LABEL** correspond à l'objet qui a déclenché la détection (person, vehicle, cat, dog, etc...)
 
 - **RTSP** : le lien du flux vidéo de la caméra (voir la section Flux vidéo).
-- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra. Il contient une clé qui permet d'afficher l'image sans être connecté à Jeedom : ne le partagez pas.
+- **SNAPSHOT LIVE** : le lien vers l'image en direct de la caméra, pour les plugins qui affichent une image de caméra. Il contient une clé propre à la caméra, qui permet d'afficher son image en direct, et rien d'autre, sans être connecté à Jeedom : ne le partagez pas. En cas de fuite, régénérez la clé dans la configuration du plugin (Sécurité des liens).
 
 ##### MQTT
 - **Détection en cours** : dès que Frigate voit un changement, il passe à 1 (nuages, luminosité, personne, etc...)
@@ -310,19 +322,19 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **#sublabel#** : le label attribué par un modèle de classification d'objets de Frigate
 - **#attributes#** : les attributs attribués par un modèle de classification d'objets de Frigate
 - **#snapshot#** : lien vers fichier image
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#snapshot_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_snapshot.jpg`
 - **#clip#** : lien vers fichier mp4
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_clip.mp4`
 - **#clip_path#** : path vers fichier mp4
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_clip.mp4`
 - **#thumbnail#** : lien vers fichier image
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#thumbnail_path#** : path vers fichier image
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_thumbnail.jpg`
 - **#preview#** : lien vers le fichier preview
-`https://URL/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
+`https://URL/plugins/frigate/core/ajax/frigate.media.php?t=signature&v=1718992960&f=frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#preview_path#** : path vers fichier preview
 `/var/www/html/plugins/frigate/data/frigate1/1718992955.613576-zulr2q_preview.gif`
 - **#label#** : texte
@@ -330,6 +342,10 @@ Une liste de variables est disponible afin de personnaliser les actions, ces var
 - **#end#** : heure de fin
 - **#duree#** : durée de l'évènement
 - **#jeemate#** : voir explications plus bas
+
+Les liens **#snapshot#**, **#clip#**, **#thumbnail#** et **#preview#** s'ouvrent sans connexion à Jeedom : chacun porte une signature qui n'ouvre que son fichier, et expire après la durée **Validité des liens des médias** de la configuration du plugin. Les tags **_path** donnent le chemin du fichier sur le disque, pour les plugins qui l'envoient en pièce jointe. Pour révoquer tous les liens déjà envoyés avant leur expiration, utilisez le bouton **Révoquer les liens** de la configuration du plugin (Sécurité des liens).
+
+Les valeurs des tags sont nettoyées avant d'être écrites dans l'action : les **#** sont retirés et une parenthèse ouvrante est séparée du mot qui la précède par un espace (« personne(adulte) » devient « personne (adulte) »). Vos propres fonctions restent utilisables, par exemple **round(#score#)**.
 
 
 
@@ -411,12 +427,9 @@ Dans les actions des caméras se trouvent deux commandes :
 
 Chaque capture est aussi enregistrée comme un évènement avec le label **capture**, visible sur la page Events. Les captures sont supprimées selon les mêmes règles que les évènements (ancienneté et taille du dossier data) : mettez en favori celles que vous voulez garder.
 
-L'URL est de la forme **``/plugins/frigate/data/snapshots/id_snapshot.jpg``** afin de s'adapter au maximum de plugins de communication.
+L'URL est de la forme **``/plugins/frigate/data/snapshots/id_snapshot.jpg``**. Le dossier data est fermé : cette URL ne s'ouvre pas dans un navigateur, même avec l'adresse de Jeedom devant. Elle sert à retrouver le fichier sur le disque.
 
-Par exemple si vous souhaitez une URL complète, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
-**``str_replace('"','',"https://monjeedom.eu.jeedom.link"#value#)``**
-
-Ou bien pour ceux ayant besoin du path :
+Pour ceux ayant besoin du path, vous pouvez mettre ceci dans configuration, calcul et arrondi de la commande info :
 
 **``str_replace('"','',"/var/www/html"#value#)``**
 

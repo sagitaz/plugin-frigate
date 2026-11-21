@@ -152,6 +152,14 @@ if (!isConnect()) {
                 </div>
             </div>
             <div class="form-group">
+                <label class="col-lg-7 control-label">{{Validité des liens des médias}}
+                    <sup><i class="fas fa-question-circle tooltips" title="{{Nombre de jours pendant lesquels les liens des snapshots et des clips envoyés dans les notifications s'ouvrent sans connexion à Jeedom. Vide : la durée de suppression des évènements, qui est aussi le maximum.}}"></i></sup>
+                </label>
+                <div class="col-xs-5">
+                    <input class="configKey form-control input-xs" data-l1key="mediaLinkDays" type="number" min="1" placeholder="{{Durée de suppression par défaut}}" />
+                </div>
+            </div>
+            <div class="form-group">
                 <label class="col-lg-7 control-label">{{Taille des dossiers}}
                     <sup><i class="fas fa-question-circle tooltips" title="{{Taille maximum des données (en Mo)}}"></i></sup>
                 </label>
@@ -238,6 +246,89 @@ if (!isConnect()) {
         </fieldset>
     </div>
 </div>
+
+
+<div class="col-md-6 frigate-info">
+    <div class="frigate-heading">
+        <h3 class="frigate-title"> {{Sécurité des liens}}
+        </h3>
+    </div>
+    <div class="frigate-body">
+        <fieldset>
+            <div class="form-group">
+                <label class="col-lg-7 control-label">{{Liens « SNAPSHOT LIVE »}}
+                    <sup><i class="fas fa-question-circle tooltips" title="{{Change la clé des liens vers l'image en direct des caméras. Les anciens liens ne s'ouvrent plus sans connexion à Jeedom : les applications qui les ont enregistrés (JeeMate…) doivent relire la commande SNAPSHOT LIVE.}}"></i></sup>
+                </label>
+                <div class="col-xs-5">
+                    <a class="btn btn-warning btn-xs" id="bt_frigateRegenerateProxyKey"><i class="fas fa-key"></i> {{Régénérer la clé}}</a>
+                </div>
+            </div>
+            <div class="form-group">
+                <label class="col-lg-7 control-label">{{Liens des médias déjà envoyés}}
+                    <sup><i class="fas fa-question-circle tooltips" title="{{Révoque tous les liens des snapshots et des clips déjà envoyés dans les notifications. Les pages du plugin et l'historique de JeeMate ne sont pas concernés.}}"></i></sup>
+                </label>
+                <div class="col-xs-5">
+                    <a class="btn btn-danger btn-xs" id="bt_frigateRevokeMediaLinks"><i class="fas fa-ban"></i> {{Révoquer les liens}}</a>
+                </div>
+            </div>
+        </fieldset>
+    </div>
+</div>
+
+<script>
+    (function() {
+        // Appelle une action du plugin après confirmation, puis affiche le résultat
+        function frigateKeyAction(action, question, success) {
+            jeeDialog.confirm(question, function(result) {
+                if (!result) {
+                    return;
+                }
+                domUtils.ajax({
+                    type: 'POST',
+                    url: 'plugins/frigate/core/ajax/frigate.ajax.php',
+                    data: {
+                        action: action
+                    },
+                    dataType: 'json',
+                    error: function(error) {
+                        jeedomUtils.showAlert({
+                            message: error.message,
+                            level: 'danger'
+                        });
+                    },
+                    success: function(data) {
+                        if (data.state != 'ok') {
+                            jeedomUtils.showAlert({
+                                message: data.result,
+                                level: 'danger'
+                            });
+                            return;
+                        }
+                        jeedomUtils.showAlert({
+                            message: success,
+                            level: 'success'
+                        });
+                    }
+                });
+            });
+        }
+
+        document.getElementById('bt_frigateRegenerateProxyKey')?.addEventListener('click', function() {
+            frigateKeyAction(
+                'regenerateProxyKey',
+                "{{Régénérer la clé des liens SNAPSHOT LIVE ? Les anciens liens ne s'ouvriront plus sans connexion à Jeedom.}}",
+                "{{Clé régénérée, commandes SNAPSHOT LIVE mises à jour.}}"
+            );
+        });
+        document.getElementById('bt_frigateRevokeMediaLinks')?.addEventListener('click', function() {
+            frigateKeyAction(
+                'revokeMediaLinks',
+                "{{Révoquer tous les liens des médias déjà envoyés ? Ils ne s'ouvriront plus sans connexion à Jeedom.}}",
+                "{{Liens des médias révoqués.}}"
+            );
+        });
+    })();
+</script>
 
 <style>
     .frigate-info {

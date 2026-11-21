@@ -47,6 +47,12 @@ $snapshotAvailable = $hasSnapshot == 1 && frigate::mediaFileExists($snapshot);
 $clipAvailable = $hasClip == 1 && frigate::mediaFileExists($clip);
 // Le bouton de description ouvre la vidéo, à défaut la capture ; sans média, il se limite à son infobulle.
 $descriptionBtnClass = $clipAvailable ? 'video-btn' : ($snapshotAvailable ? 'snapshot-btn' : '');
+// Le dossier data est fermé à Apache : les médias passent par frigate.media.php, qui vérifie la session.
+// La vérification de présence ci-dessus se fait sur l'URL enregistrée, la conversion vient après.
+$thumbnailSrc = frigate::mediaUrl($thumbnailSrc);
+$snapshot = frigate::mediaUrl($snapshot);
+$clip = frigate::mediaUrl($clip);
+$preview = frigate::mediaUrl($preview);
 // Titre de la fenêtre du média : du HTML rangé dans un attribut, puis relu par innerHTML (events.js).
 // Les valeurs y sont échappées une fois pour le HTML, le tout une seconde fois pour l'attribut.
 $titleHtml = "<i class='fas fa-minus-square'>&nbsp;</i>&nbsp;" . frigate::escapeHtml($label)

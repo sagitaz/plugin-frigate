@@ -1,0 +1,2 @@
+frigate-data-witness
+Si ce fichier s'affiche sans connexion à Jeedom, le dossier data du plugin Frigate n'est pas protégé.

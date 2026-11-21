@@ -270,9 +270,9 @@ if (gotoHomeButton) {
   })
 }
 
+// Le média est servi par frigate.media.php : download=1 le propose au téléchargement au lieu de l'afficher
 function downloadMedia (mediaSrc) {
-  const relativePath = mediaSrc.replace(/^.*plugins\//, 'plugins/');
-  window.open('/core/php/downloadFile.php?pathfile=' + encodeURIComponent(relativePath), '_blank');
+  window.open(mediaSrc + (mediaSrc.indexOf('?') === -1 ? '?' : '&') + 'download=1', '_blank');
 }
 
 function deleteEvent(eventId) {
