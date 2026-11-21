@@ -1804,7 +1804,7 @@ class frigate extends eqLogic
 
     $result = array(
       "id" => $event->getId(),
-      "img" => $event->getLasted(),
+      "img" => self::mediaUrl($event->getLasted(), true),
       "camera" => $event->getCamera(),
       "label" => $event->getLabel(),
       "box" => $boxArray,
@@ -2841,13 +2841,22 @@ class frigate extends eqLogic
   /**
    * Retourne les évènements enregistrés, prêts à afficher, du plus récent au plus ancien.
    *
+   * Par défaut, les médias (img, snapshot, clip, thumbnail) sont des liens signés de frigate.media.php :
+   * JeeMate appelle cette fonction sans paramètre et ouvre ces liens sans session Jeedom, le dossier data
+   * étant fermé. Les pages du plugin demandent les URL enregistrées ($_rawMedia), dont elles vérifient la
+   * présence du fichier (mediaFileExists()) avant de les convertir (event.template.php).
+   *
    * @param bool $_onlyEnable Limiter aux évènements actifs
    * @param bool $_allType    Inclure les évènements sans type
+   * @param bool $_rawMedia   Retourner les URL enregistrées (/plugins/frigate/data/...) au lieu des liens signés
    * @return array<int, array<string, mixed>>
    */
-  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE)
+  public static function showEvents(bool $_onlyEnable = FALSE, bool $_allType = FALSE, bool $_rawMedia = FALSE)
   {
     $result = [];
+    $media = function ($url) use ($_rawMedia) {
+      return $_rawMedia ? $url : self::mediaUrl($url, true);
+    };
 
     $events = frigate_events::all($_onlyEnable, $_allType);
 
@@ -2858,7 +2867,7 @@ class frigate extends eqLogic
       $result[] = array(
         "id"           => $event->getId(),
         "eventId"      => $event->getEventId(),
-        "img"          => $event->getLasted(),
+        "img"          => $media($event->getLasted()),
         "camera"       => $event->getCamera(),
         "label"        => $event->getLabel(),
         "subLabel"     => $event->getSubLabel(),
@@ -2868,9 +2877,9 @@ class frigate extends eqLogic
         "startTime"    => $event->getStartTime(),
         "endTime"      => $event->getEndTime(),
         "falsePositive" => $event->getFalsePositive(),
-        "snapshot"     => $event->getSnapshot(),
-        "clip"         => $event->getClip(),
-        "thumbnail"    => $event->getThumbnail(),
+        "snapshot"     => $media($event->getSnapshot()),
+        "clip"         => $media($event->getClip()),
+        "thumbnail"    => $media($event->getThumbnail()),
         "hasSnapshot"  => $event->getHasSnapshot(),
         "hasClip"      => $event->getHasClip(),
         "score"        => $event->getScore(),

@@ -102,7 +102,7 @@ try {
     }
 
     if (init('action') == 'frigateDebug') {
-        $data = frigate::showEvents(false, true);
+        $data = frigate::showEvents(false, true, true);
 
         ajax::success(array(
             "object" => $data,

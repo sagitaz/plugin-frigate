@@ -7,6 +7,7 @@
 # 18/11/2026 Beta 1.6.1
 - Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
 - Les tags #snapshot#, #clip#, #thumbnail# et #preview# des actions donnent un lien signé, qui n'ouvre que son fichier
+- JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau (liens signés)
 - Les commandes URL snapshot, URL clip, URL thumbnail et URL image gardent le chemin du fichier, qui ne s'ouvre plus dans un navigateur
 - Les clips se lisent dans Safari et l'app iOS, et les miniatures de la page Évènements restent en cache
 - Un message Jeedom prévient si le serveur web ignore la protection du dossier des médias
