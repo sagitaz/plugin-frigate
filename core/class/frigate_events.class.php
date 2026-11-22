@@ -158,6 +158,27 @@ class frigate_events
 	}
 
 	/**
+	 * Retourne les identifiants Frigate de tous les évènements enregistrés, en clés d'un tableau.
+	 *
+	 * Une seule requête, qui ne lit que la colonne event_id : de quoi tester la présence d'un évènement pour
+	 * chaque fichier du dossier data sans une requête par fichier.
+	 *
+	 * @return array<string, true>
+	 * @throws Exception
+	 */
+	public static function allEventIds()
+	{
+		$ids = array();
+		$rows = DB::Prepare('SELECT event_id FROM frigate_events', array(), DB::FETCH_TYPE_ALL);
+		foreach (is_array($rows) ? $rows : array() as $row) {
+			if (isset($row['event_id']) && $row['event_id'] !== '') {
+				$ids[(string) $row['event_id']] = true;
+			}
+		}
+		return $ids;
+	}
+
+	/**
 	 * Retourne les évènements non favoris restés incomplets (new, update ou sans type) commencés avant une date.
 	 *
 	 * Un évènement sans date de début est retourné aussi.
