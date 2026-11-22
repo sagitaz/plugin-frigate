@@ -4224,26 +4224,28 @@ class frigate extends eqLogic
     // Mise à jour des statistiques des détecteurs
     if (isset($stats['detectors']) && is_array($stats['detectors'])) {
       foreach ($stats['detectors'] as $detectorName => $detectorStats) {
-        foreach ((array) $detectorStats as $key => $value) {
+        $detectorStats = (array) $detectorStats;
+        // Frigate 0.18 donne cpu et mem pour chaque détecteur, tirés de cpu_usages par son pid. Les versions
+        // précédentes ne donnent que le pid : le même calcul les complète, sous les mêmes noms de commande.
+        $pid = $detectorStats['pid'] ?? null;
+        if (is_scalar($pid) && isset($stats['cpu_usages'][$pid]) && is_array($stats['cpu_usages'][$pid])) {
+          foreach (['cpu', 'mem'] as $usageKey) {
+            if (!isset($detectorStats[$usageKey]) && isset($stats['cpu_usages'][$pid][$usageKey])) {
+              $detectorStats[$usageKey] = $stats['cpu_usages'][$pid][$usageKey];
+            }
+          }
+        }
+        foreach ($detectorStats as $key => $value) {
+          // Valeur absente (cpu et mem à null quand Frigate ne trouve pas le pid) : commande inchangée
+          if (!is_scalar($value)) {
+            continue;
+          }
           // Créer un nom de commande en combinant le nom du détecteur et la clé
           $cmdName = $detectorName . '_' . $key;
           // Créer ou récupérer la commande
           $cmd = self::createCmd($eqlogicId, $cmdName, "numeric", "", "detectors_" . $key, "GENERIC_INFO");
           // Enregistrer la valeur de l'évènement
           $cmd->event($value);
-
-          // CPU et mémoire du processus du détecteur, retrouvés par son pid dans cpu_usages
-          if ($key === "pid" && is_scalar($value) && isset($stats['cpu_usages'][$value]) && is_array($stats['cpu_usages'][$value])) {
-            $usage = $stats['cpu_usages'][$value];
-            if (isset($usage['cpu'])) {
-              $cmdCpu = self::createCmd($eqlogicId, $detectorName . '_cpu', "numeric", "%", "detectors_cpu", "GENERIC_INFO");
-              $cmdCpu->event($usage['cpu']);
-            }
-            if (isset($usage['mem'])) {
-              $cmdMem = self::createCmd($eqlogicId, $detectorName . '_memory', "numeric", "%", "detectors_memory", "GENERIC_INFO");
-              $cmdMem->event($usage['mem']);
-            }
-          }
         }
       }
     }
