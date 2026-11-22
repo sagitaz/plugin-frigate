@@ -12,7 +12,11 @@
 - Les appels à Frigate et les commandes HTTP ont un délai maximum : un serveur ou une caméra qui ne répond pas ne bloque plus Jeedom
 - JeeMate : les captures et les clips de l'historique des évènements s'affichent de nouveau
 - Les commandes « Détection <objet> » et « Détection tout » ne repassent plus à 1 pour un objet immobile (voiture garée…) (merci aztazt)
-- Les clips volumineux (caméras 2K/4K, longues détections) sont téléchargés sans saturer la mémoire de PHP : le média est enregistré et les actions s'exécutent
+- Moins de charge sur Jeedom : le nettoyage du dossier des médias ne fait plus une requête par fichier, et la récupération de plusieurs évènements n'attend plus pour chacun
+- Les premiers médias d'un évènement ne sont plus supprimés par le nettoyage pendant le téléchargement de son clip
+- Un cron du plugin ne démarre plus pendant qu'un autre est en cours
+- Statistiques : les commandes d'utilisation CPU et mémoire des détecteurs (<détecteur>_cpu, <détecteur>_mem) existent aussi avec Frigate 0.16 et 0.17
+- Les clips volumineux (caméras 2K/4K, longues détections) sont téléchargés sans saturer la mémoire de PHP : le média est enregistré et les actions s'exécutent (merci Retnuh78)
 
 # 18/11/2026 Beta 1.6.1
 - Correctif de sécurité : les snapshots, clips et aperçus des évènements ne sont plus accessibles sans connexion à Jeedom
